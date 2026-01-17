@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - VAIRL</title>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="preview.html">VAIRL</a></h1>
+            </div>
+            <div class="language-switcher">
+                <button class="lang-switch active" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+            </div>
+        </header>
+        
+        <main>
+            <!-- English blog list -->
+            <div class="blog-list" id="blog-list-en">
+                <article class="blog-post">
+                    <h2 class="blog-post-title">
+                        <a href="#">The Future of AI Research Labs</a>
+                    </h2>
+                    <p class="blog-post-date">January 17, 2026</p>
+                    <p class="blog-post-excerpt">As AI continues to advance at a rapid pace, the nature of AI research labs is evolving. What will the AI research lab of the future look like?</p>
+                    <a href="#" class="read-more" data-i18n="read_more">read more</a>
+                </article>
+                
+                <article class="blog-post">
+                    <h2 class="blog-post-title">
+                        <a href="#">Evolutionary Algorithms in AI Research</a>
+                    </h2>
+                    <p class="blog-post-date">January 16, 2026</p>
+                    <p class="blog-post-excerpt">Evolutionary algorithms draw inspiration from biological evolution to solve complex optimization problems. These techniques are proving invaluable in modern AI research.</p>
+                    <a href="#" class="read-more" data-i18n="read_more">read more</a>
+                </article>
+                
+                <article class="blog-post">
+                    <h2 class="blog-post-title">
+                        <a href="#">Introduction to Neural Architecture Search</a>
+                    </h2>
+                    <p class="blog-post-date">January 15, 2026</p>
+                    <p class="blog-post-excerpt">Neural Architecture Search (NAS) is revolutionizing how we design deep learning models. Instead of manually crafting architectures, we can now automate the process.</p>
+                    <a href="#" class="read-more" data-i18n="read_more">read more</a>
+                </article>
+            </div>
+            
+            <!-- Russian blog list -->
+            <div class="blog-list" id="blog-list-ru" style="display: none;">
+                <article class="blog-post">
+                    <h2 class="blog-post-title">
+                        <a href="#">Будущее лабораторий исследований ИИ</a>
+                    </h2>
+                    <p class="blog-post-date">17 января 2026</p>
+                    <p class="blog-post-excerpt">Поскольку ИИ продолжает стремительно развиваться, природа исследовательских лабораторий ИИ эволюционирует. Как будет выглядеть лаборатория исследований ИИ будущего?</p>
+                    <a href="#" class="read-more" data-i18n="read_more">читать далее</a>
+                </article>
+                
+                <article class="blog-post">
+                    <h2 class="blog-post-title">
+                        <a href="#">Эволюционные алгоритмы в исследованиях ИИ</a>
+                    </h2>
+                    <p class="blog-post-date">16 января 2026</p>
+                    <p class="blog-post-excerpt">Эволюционные алгоритмы черпают вдохновение из биологической эволюции для решения сложных задач оптимизации. Эти методы оказываются бесценными в современных исследованиях ИИ.</p>
+                    <a href="#" class="read-more" data-i18n="read_more">читать далее</a>
+                </article>
+                
+                <article class="blog-post">
+                    <h2 class="blog-post-title">
+                        <a href="#">Введение в поиск нейронных архитектур</a>
+                    </h2>
+                    <p class="blog-post-date">15 января 2026</p>
+                    <p class="blog-post-excerpt">Поиск нейронных архитектур (NAS) революционизирует способ проектирования моделей глубокого обучения. Вместо ручного создания архитектур мы можем автоматизировать процесс.</p>
+                    <a href="#" class="read-more" data-i18n="read_more">читать далее</a>
+                </article>
+            </div>
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="preview.html" data-i18n="home">home</a>
+                <a href="preview-blog.html" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="assets/js/fish-animation.js"></script>
+    
+    <!-- Language switcher script -->
+    <script src="assets/js/language-switcher.js"></script>
+</body>
+</html>

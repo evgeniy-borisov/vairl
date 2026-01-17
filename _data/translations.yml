@@ -1,0 +1,24 @@
+# English
+en:
+  site_title: "VAIRL"
+  tagline: "Virtual AI Research Lab"
+  description_1: "We are building a world class AI research lab."
+  description_2: "We want to develop AI solutions and democratize AI research."
+  more_info: "For more information, please visit our"
+  blog: "blog"
+  home: "home"
+  read_more: "read more"
+  back_to_blog: "back to blog"
+  
+# Russian
+ru:
+  site_title: "VAIRL"
+  tagline: "Виртуальная лаборатория исследований ИИ"
+  description_1: "Мы создаём исследовательскую лабораторию искусственного интеллекта мирового класса."
+  description_2: "Мы хотим разрабатывать решения в области ИИ и демократизировать исследования искусственного интеллекта."
+  more_info: "Для получения дополнительной информации посетите наш"
+  blog: "блог"
+  home: "главная"
+  read_more: "читать далее"
+  back_to_blog: "вернуться к блогу"
+

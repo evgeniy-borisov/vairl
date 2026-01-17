@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAIRL - Virtual AI Research Lab</title>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="preview.html">VAIRL</a></h1>
+            </div>
+            <div class="language-switcher">
+                <button class="lang-switch active" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+            </div>
+        </header>
+        
+        <main>
+            <div class="home-content">
+                <p class="subtitle" data-i18n="tagline">Virtual AI Research Lab</p>
+                
+                <p data-i18n="description_1">We are building a world class AI research lab.</p>
+                
+                <p data-i18n="description_2">We want to develop AI solutions and democratize AI research.</p>
+                
+                <p><span data-i18n="more_info">For more information, please visit our</span> <a href="preview-blog.html" data-i18n="blog">blog</a>.</p>
+            </div>
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="preview.html" data-i18n="home">home</a>
+                <a href="preview-blog.html" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="assets/js/fish-animation.js"></script>
+    
+    <!-- Language switcher script -->
+    <script src="assets/js/language-switcher.js"></script>
+</body>
+</html>

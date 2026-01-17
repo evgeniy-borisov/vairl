@@ -1,0 +1,40 @@
+---
+layout: default
+title: Blog
+---
+
+<div class="blog-list" id="blog-list-en">
+    {% assign posts_en = site.posts | where_exp: "post", "post.lang == nil or post.lang == 'en'" %}
+    {% for post in posts_en %}
+    <article class="blog-post">
+        <h2 class="blog-post-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        </h2>
+        <p class="blog-post-date">{{ post.date | date: "%B %d, %Y" }}</p>
+        
+        {% if post.excerpt %}
+        <p class="blog-post-excerpt">{{ post.excerpt | strip_html | truncatewords: 50 }}</p>
+        {% endif %}
+        
+        <a href="{{ post.url | relative_url }}" class="read-more" data-i18n="read_more">read more</a>
+    </article>
+    {% endfor %}
+</div>
+
+<div class="blog-list" id="blog-list-ru" style="display: none;">
+    {% assign posts_ru = site.posts | where: "lang", "ru" %}
+    {% for post in posts_ru %}
+    <article class="blog-post">
+        <h2 class="blog-post-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        </h2>
+        <p class="blog-post-date">{{ post.date | date: "%d %B %Y" }}</p>
+        
+        {% if post.excerpt %}
+        <p class="blog-post-excerpt">{{ post.excerpt | strip_html | truncatewords: 50 }}</p>
+        {% endif %}
+        
+        <a href="{{ post.url | relative_url }}" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+    {% endfor %}
+</div>
