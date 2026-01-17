@@ -13,9 +13,6 @@
     </filter>
   </defs>
   
-  <!-- Background -->
-  <rect width="1200" height="630" fill="#ffffff"/>
-  
   <!-- Neural Network Nodes -->
   <g transform="translate(200, 150)">
     <!-- Input Layer -->
@@ -70,7 +67,5 @@
     <path d="M 40 40 L 80 80" stroke="url(#nasGradient)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
   </g>
   
-  <!-- Title Text Area (for overlay) -->
-  <rect x="50" y="450" width="1100" height="120" fill="rgba(255,255,255,0.85)" rx="10"/>
 </svg>
 

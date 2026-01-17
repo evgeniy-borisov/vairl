@@ -17,9 +17,6 @@
     </filter>
   </defs>
   
-  <!-- Background -->
-  <rect width="1200" height="630" fill="#ffffff"/>
-  
   <!-- Futuristic Lab Building -->
   <g transform="translate(200, 100)">
     <!-- Main structure -->
@@ -83,7 +80,5 @@
           stroke="url(#futureGradient)" stroke-width="2" fill="none" opacity="0.8"/>
   </g>
   
-  <!-- Title Text Area -->
-  <rect x="50" y="450" width="1100" height="120" fill="rgba(255,255,255,0.85)" rx="10"/>
 </svg>
 

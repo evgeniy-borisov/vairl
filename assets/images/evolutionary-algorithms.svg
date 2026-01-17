@@ -10,9 +10,6 @@
     </radialGradient>
   </defs>
   
-  <!-- Background -->
-  <rect width="1200" height="630" fill="#ffffff"/>
-  
   <!-- Evolutionary Tree -->
   <g transform="translate(150, 50)">
     <!-- Generation 1 -->
@@ -87,7 +84,5 @@
     <circle cx="800" cy="10" r="8" fill="url(#evoGradient)" opacity="1"/>
   </g>
   
-  <!-- Title Text Area -->
-  <rect x="50" y="450" width="1100" height="120" fill="rgba(255,255,255,0.85)" rx="10"/>
 </svg>
 
