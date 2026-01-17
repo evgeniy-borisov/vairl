@@ -1,11 +1,12 @@
 ---
 layout: default
 title: Blog
+permalink: /blog.html
 ---
 
 <div class="blog-list" id="blog-list-en">
-    {% assign posts_en = site.posts | where_exp: "post", "post.lang == nil or post.lang == 'en'" %}
-    {% for post in posts_en %}
+    {% for post in site.posts %}
+        {% if post.lang == "en" or post.lang == nil %}
     <article class="blog-post">
         <h2 class="blog-post-title">
             <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
@@ -18,12 +19,13 @@ title: Blog
         
         <a href="{{ post.url | relative_url }}" class="read-more" data-i18n="read_more">read more</a>
     </article>
+        {% endif %}
     {% endfor %}
 </div>
 
 <div class="blog-list" id="blog-list-ru" style="display: none;">
-    {% assign posts_ru = site.posts | where: "lang", "ru" %}
-    {% for post in posts_ru %}
+    {% for post in site.posts %}
+        {% if post.lang == "ru" %}
     <article class="blog-post">
         <h2 class="blog-post-title">
             <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
@@ -36,5 +38,6 @@ title: Blog
         
         <a href="{{ post.url | relative_url }}" class="read-more" data-i18n="read_more">читать далее</a>
     </article>
+        {% endif %}
     {% endfor %}
 </div>
