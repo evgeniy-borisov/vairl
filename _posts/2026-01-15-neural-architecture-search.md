@@ -4,6 +4,7 @@ title: "Introduction to Neural Architecture Search"
 date: 2026-01-15
 excerpt: "Neural Architecture Search (NAS) is revolutionizing how we design deep learning models. Instead of manually crafting architectures, we can now automate the process."
 lang: en
+image: /assets/images/nas-architecture.svg
 ---
 
 Neural Architecture Search (NAS) is revolutionizing how we design deep learning models. Instead of manually crafting architectures, we can now automate the process.

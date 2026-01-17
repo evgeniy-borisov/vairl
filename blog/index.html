@@ -8,6 +8,13 @@ permalink: /blog/
     {% for post in site.posts %}
         {% if post.lang == "en" or post.lang == nil %}
     <article class="blog-post">
+        {% if post.image %}
+        <div class="blog-post-image">
+            <a href="{{ post.url | relative_url }}">
+                <img src="{{ post.image | relative_url }}" alt="{{ post.title }}" />
+            </a>
+        </div>
+        {% endif %}
         <h2 class="blog-post-title">
             <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
         </h2>
@@ -27,6 +34,13 @@ permalink: /blog/
     {% for post in site.posts %}
         {% if post.lang == "ru" %}
     <article class="blog-post">
+        {% if post.image %}
+        <div class="blog-post-image">
+            <a href="{{ post.url | relative_url }}">
+                <img src="{{ post.image | relative_url }}" alt="{{ post.title }}" />
+            </a>
+        </div>
+        {% endif %}
         <h2 class="blog-post-title">
             <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
         </h2>

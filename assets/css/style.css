@@ -189,6 +189,29 @@ nav a {
     color: #333;
 }
 
+.blog-post-image {
+    margin-bottom: 30px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8f8f8;
+}
+
+.blog-post-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.blog-post-image:hover img {
+    transform: scale(1.02);
+}
+
+.blog-post-image a {
+    display: block;
+    text-decoration: none;
+}
+
 .read-more {
     display: inline-block;
     margin-top: 10px;
@@ -203,6 +226,19 @@ nav a {
 
 .post-header {
     margin-bottom: 40px;
+}
+
+.post-image {
+    margin-bottom: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8f8f8;
+}
+
+.post-image img {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
 .post-title {

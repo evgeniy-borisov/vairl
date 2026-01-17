@@ -4,6 +4,7 @@ title: "Evolutionary Algorithms in AI Research"
 date: 2026-01-16
 excerpt: "Evolutionary algorithms draw inspiration from biological evolution to solve complex optimization problems. These techniques are proving invaluable in modern AI research."
 lang: en
+image: /assets/images/evolutionary-algorithms.svg
 ---
 
 Evolutionary algorithms draw inspiration from biological evolution to solve complex optimization problems. These techniques are proving invaluable in modern AI research.

@@ -1,0 +1,93 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="evoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5576c;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="evoRadial" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#4facfe;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:0.3" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#ffffff"/>
+  
+  <!-- Evolutionary Tree -->
+  <g transform="translate(150, 50)">
+    <!-- Generation 1 -->
+    <circle cx="0" cy="0" r="35" fill="url(#evoGradient)" opacity="0.7"/>
+    
+    <!-- Generation 2 -->
+    <circle cx="-150" cy="120" r="30" fill="url(#evoGradient)" opacity="0.75"/>
+    <circle cx="0" cy="120" r="30" fill="url(#evoGradient)" opacity="0.75"/>
+    <circle cx="150" cy="120" r="30" fill="url(#evoGradient)" opacity="0.75"/>
+    
+    <!-- Generation 3 -->
+    <circle cx="-225" cy="240" r="25" fill="url(#evoGradient)" opacity="0.8"/>
+    <circle cx="-150" cy="240" r="25" fill="url(#evoGradient)" opacity="0.8"/>
+    <circle cx="-75" cy="240" r="25" fill="url(#evoGradient)" opacity="0.8"/>
+    <circle cx="75" cy="240" r="25" fill="url(#evoGradient)" opacity="0.8"/>
+    <circle cx="150" cy="240" r="25" fill="url(#evoGradient)" opacity="0.8"/>
+    <circle cx="225" cy="240" r="25" fill="url(#evoGradient)" opacity="0.8"/>
+    
+    <!-- Generation 4 (Best Solutions) -->
+    <circle cx="-150" cy="360" r="40" fill="url(#evoGradient)" opacity="1"/>
+    <circle cx="0" cy="360" r="40" fill="url(#evoGradient)" opacity="1"/>
+    <circle cx="150" cy="360" r="40" fill="url(#evoGradient)" opacity="1"/>
+    
+    <!-- Connections -->
+    <g stroke="url(#evoGradient)" stroke-width="3" opacity="0.4">
+      <!-- Gen 1 to Gen 2 -->
+      <line x1="0" y1="35" x2="-150" y2="85"/>
+      <line x1="0" y1="35" x2="0" y2="85"/>
+      <line x1="0" y1="35" x2="150" y2="85"/>
+      
+      <!-- Gen 2 to Gen 3 -->
+      <line x1="-150" y1="150" x2="-225" y2="215"/>
+      <line x1="-150" y1="150" x2="-150" y2="215"/>
+      <line x1="-150" y1="150" x2="-75" y2="215"/>
+      <line x1="0" y1="150" x2="-75" y2="215"/>
+      <line x1="0" y1="150" x2="75" y2="215"/>
+      <line x1="150" y1="150" x2="75" y2="215"/>
+      <line x1="150" y1="150" x2="150" y2="215"/>
+      <line x1="150" y1="150" x2="225" y2="215"/>
+      
+      <!-- Gen 3 to Gen 4 (Selection) -->
+      <line x1="-150" y1="265" x2="-150" y2="320"/>
+      <line x1="0" y1="265" x2="0" y2="320"/>
+      <line x1="150" y1="265" x2="150" y2="320"/>
+    </g>
+    
+    <!-- Mutation indicators -->
+    <g opacity="0.6">
+      <circle cx="-75" cy="240" r="8" fill="#4facfe"/>
+      <circle cx="225" cy="240" r="8" fill="#4facfe"/>
+    </g>
+  </g>
+  
+  <!-- DNA Helix -->
+  <g transform="translate(850, 150)">
+    <path d="M 0 0 Q 30 -20 0 -40 Q -30 -60 0 -80 Q 30 -100 0 -120 Q -30 -140 0 -160" 
+          stroke="url(#evoGradient)" stroke-width="4" fill="none" opacity="0.5"/>
+    <path d="M 0 0 Q -30 -20 0 -40 Q 30 -60 0 -80 Q -30 -100 0 -120 Q 30 -140 0 -160" 
+          stroke="url(#evoGradient)" stroke-width="4" fill="none" opacity="0.5"/>
+    
+    <!-- Base pairs -->
+    <line x1="0" y1="0" x2="0" y2="0" stroke="url(#evoGradient)" stroke-width="2" opacity="0.6"/>
+    <line x1="0" y1="-40" x2="0" y2="-40" stroke="url(#evoGradient)" stroke-width="2" opacity="0.6"/>
+    <line x1="0" y1="-80" x2="0" y2="-80" stroke="url(#evoGradient)" stroke-width="2" opacity="0.6"/>
+    <line x1="0" y1="-120" x2="0" y2="-120" stroke="url(#evoGradient)" stroke-width="2" opacity="0.6"/>
+  </g>
+  
+  <!-- Fitness Curve -->
+  <g transform="translate(200, 450)">
+    <path d="M 0 100 Q 100 80 200 60 T 400 40 T 600 20 T 800 10" 
+          stroke="url(#evoGradient)" stroke-width="5" fill="none" opacity="0.8"/>
+    <circle cx="800" cy="10" r="8" fill="url(#evoGradient)" opacity="1"/>
+  </g>
+  
+  <!-- Title Text Area -->
+  <rect x="50" y="450" width="1100" height="120" fill="rgba(255,255,255,0.85)" rx="10"/>
+</svg>
+
