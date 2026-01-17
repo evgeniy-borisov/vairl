@@ -193,7 +193,7 @@ nav a {
     margin-bottom: 30px;
     border-radius: 8px;
     overflow: hidden;
-    background: #f8f8f8;
+    background: transparent;
     max-width: 50%;
     margin-left: auto;
     margin-right: auto;
@@ -235,7 +235,7 @@ nav a {
     margin-bottom: 40px;
     border-radius: 8px;
     overflow: hidden;
-    background: #f8f8f8;
+    background: transparent;
     max-width: 50%;
     margin-left: auto;
     margin-right: auto;
