@@ -1,0 +1,44 @@
+---
+layout: default
+title: Blog
+permalink: /blog/
+---
+
+<div class="blog-list" id="blog-list-en">
+    {% for post in site.posts %}
+        {% if post.lang == "en" or post.lang == nil %}
+    <article class="blog-post">
+        <h2 class="blog-post-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        </h2>
+        <p class="blog-post-date">{{ post.date | date: "%B %d, %Y" }}</p>
+        
+        {% if post.excerpt %}
+        <p class="blog-post-excerpt">{{ post.excerpt | strip_html | truncatewords: 50 }}</p>
+        {% endif %}
+        
+        <a href="{{ post.url | relative_url }}" class="read-more" data-i18n="read_more">read more</a>
+    </article>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div class="blog-list" id="blog-list-ru" style="display: none;">
+    {% for post in site.posts %}
+        {% if post.lang == "ru" %}
+    <article class="blog-post">
+        <h2 class="blog-post-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        </h2>
+        <p class="blog-post-date">{{ post.date | date: "%d %B %Y" }}</p>
+        
+        {% if post.excerpt %}
+        <p class="blog-post-excerpt">{{ post.excerpt | strip_html | truncatewords: 50 }}</p>
+        {% endif %}
+        
+        <a href="{{ post.url | relative_url }}" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        {% endif %}
+    {% endfor %}
+</div>
+
