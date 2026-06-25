@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Локальный агент на Gemma 3 (G3)"
-date: 2026-06-26
+date: 2026-06-25
 excerpt: "Почему Gemma 3 — практичный фундамент для локального мультимодального агента: архитектура, дообучение QLoRA, компромиссы инференса и связь с реестром моделей."
 lang: ru
 pa_nudge: explore-google-gemma-line-performance

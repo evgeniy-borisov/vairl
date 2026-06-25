@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Building a Local Agent on Gemma 3 (G3)"
-date: 2026-06-26
+date: 2026-06-25
 excerpt: "Why Gemma 3 is a practical backbone for a local multimodal agent: architecture, QLoRA fine-tuning, inference trade-offs, and integration with a model registry."
 lang: en
 pa_nudge: explore-google-gemma-line-performance
