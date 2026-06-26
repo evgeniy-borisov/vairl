@@ -18,6 +18,7 @@ plugins:
 exclude:
   - Gemfile
   - Gemfile.lock
+  - notebooks/
   - node_modules
   - vendor/bundle/
   - vendor/cache/

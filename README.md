@@ -27,6 +27,7 @@
 │   ├── default.html         # Базовый layout
 │   └── post.html           # Layout для статей
 ├── _posts/                  # Статьи блога (Markdown)
+├── notebooks/               # Jupyter-ноутбуки для Google Colab
 ├── assets/
 │   ├── css/style.css       # Стили
 │   └── js/fish-animation.js # Анимация рыбок
