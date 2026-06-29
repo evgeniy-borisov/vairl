@@ -304,7 +304,7 @@ POST /telemetry/similar-tasks
 ## Связанные публикации VAIRL
 
 - [Генерация бенчмарков для AI-агентов](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/) — от телеметрии к eval-наборам
-- [Что должен знать лучший специалист по AI-агентам](/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/) — observability в компетенциях
+- [Как готовить ведущего специалиста по AI-агентам](/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/) — observability в компетенциях
 - [Устойчивость control loops](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/) — метрики на каждом шаге
 - [Пространство гипотез и PaCMAP](/vairl/blog/2026/06/24/hypothesis-space-pacmap/) — визуализация кластеров задач
 - [Синтез гипотез локальной LLM](/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/) — гипотезы из накопленных трасс

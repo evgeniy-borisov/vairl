@@ -318,7 +318,7 @@ Judge-модель favours «своих». **Лечение:** state-first; judg
 
 ## Связанные публикации VAIRL
 
-- [Что должен знать лучший специалист по AI-агентам](/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/) — eval-культура в карте компетенций
+- [Как готовить ведущего специалиста по AI-агентам](/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/) — eval-культура в карте компетенций
 - [Устойчивость agent control loops](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/) — метрики надёжности траекторий
 - [Синтез гипотез локальной LLM](/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/) — генерация проверяемых гипотез об улучшении агентов
 - [Пространство гипотез и PaCMAP](/vairl/blog/2026/06/24/hypothesis-space-pacmap/) — diversity в пространстве задач
