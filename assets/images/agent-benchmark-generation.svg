@@ -1,0 +1,73 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="benchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="benchGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:0.9" />
+    </linearGradient>
+    <filter id="benchGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Task grid -->
+  <g transform="translate(140, 120)">
+    <g opacity="0.85">
+      <rect x="0" y="0" width="52" height="52" fill="url(#benchGrad)" opacity="0.35" rx="8"/>
+      <rect x="64" y="0" width="52" height="52" fill="url(#benchGrad)" opacity="0.45" rx="8"/>
+      <rect x="128" y="0" width="52" height="52" fill="url(#benchGrad)" opacity="0.55" rx="8"/>
+      <rect x="192" y="0" width="52" height="52" fill="url(#benchGrad2)" opacity="0.75" rx="8" filter="url(#benchGlow)"/>
+      <rect x="0" y="64" width="52" height="52" fill="url(#benchGrad)" opacity="0.4" rx="8"/>
+      <rect x="64" y="64" width="52" height="52" fill="url(#benchGrad2)" opacity="0.6" rx="8"/>
+      <rect x="128" y="64" width="52" height="52" fill="url(#benchGrad)" opacity="0.5" rx="8"/>
+      <rect x="192" y="64" width="52" height="52" fill="url(#benchGrad)" opacity="0.35" rx="8"/>
+      <rect x="0" y="128" width="52" height="52" fill="url(#benchGrad)" opacity="0.3" rx="8"/>
+      <rect x="64" y="128" width="52" height="52" fill="url(#benchGrad)" opacity="0.45" rx="8"/>
+      <rect x="128" y="128" width="52" height="52" fill="url(#benchGrad2)" opacity="0.55" rx="8"/>
+      <rect x="192" y="128" width="52" height="52" fill="url(#benchGrad)" opacity="0.4" rx="8"/>
+    </g>
+    <!-- checkmarks on passed cells -->
+    <path d="M 210 22 L 222 34 L 248 8" stroke="url(#benchGrad2)" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M 82 86 L 94 98 L 120 72" stroke="url(#benchGrad2)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Agent loop -->
+  <g transform="translate(480, 150)">
+    <circle cx="180" cy="100" r="38" fill="url(#benchGrad)" opacity="0.9" filter="url(#benchGlow)"/>
+    <circle cx="60" cy="40" r="24" fill="url(#benchGrad)" opacity="0.7"/>
+    <circle cx="300" cy="40" r="24" fill="url(#benchGrad2)" opacity="0.75"/>
+    <circle cx="60" cy="160" r="24" fill="url(#benchGrad2)" opacity="0.7"/>
+    <circle cx="300" cy="160" r="24" fill="url(#benchGrad)" opacity="0.75"/>
+    <g stroke="url(#benchGrad)" stroke-width="2" opacity="0.35">
+      <line x1="84" y1="52" x2="148" y2="78"/>
+      <line x1="276" y1="52" x2="212" y2="78"/>
+      <line x1="84" y1="148" x2="148" y2="122"/>
+      <line x1="276" y1="148" x2="212" y2="122"/>
+    </g>
+  </g>
+
+  <!-- pass^k curve -->
+  <g transform="translate(820, 200)">
+    <path d="M 20 160 L 80 140 L 140 100 L 200 70 L 260 45"
+          stroke="url(#benchGrad)" stroke-width="4" fill="none" opacity="0.85"/>
+    <circle cx="260" cy="45" r="8" fill="url(#benchGrad2)" filter="url(#benchGlow)"/>
+    <path d="M 20 160 L 80 155 L 140 148 L 200 142 L 260 138"
+          stroke="url(#benchGrad2)" stroke-width="2.5" fill="none" opacity="0.5" stroke-dasharray="6,4"/>
+  </g>
+
+  <!-- LLM generator icon -->
+  <g transform="translate(900, 380)">
+    <rect x="0" y="0" width="200" height="100" fill="url(#benchGrad)" opacity="0.12" rx="12"/>
+    <rect x="16" y="20" width="120" height="12" fill="url(#benchGrad)" opacity="0.5" rx="4"/>
+    <rect x="16" y="42" width="168" height="12" fill="url(#benchGrad)" opacity="0.35" rx="4"/>
+    <rect x="16" y="64" width="90" height="12" fill="url(#benchGrad2)" opacity="0.65" rx="4"/>
+    <circle cx="175" cy="78" r="14" fill="url(#benchGrad2)" opacity="0.9"/>
+  </g>
+</svg>
