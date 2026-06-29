@@ -8,10 +8,6 @@
       <stop offset="0%" style="stop-color:#fa709a;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#fee140;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="stabGrad3" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:0.9" />
-    </linearGradient>
     <filter id="stabGlow">
       <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
       <feMerge>
@@ -22,109 +18,46 @@
   </defs>
 
   <!-- Control loop -->
-  <g transform="translate(130, 180)">
-    <circle cx="200" cy="120" r="130" fill="none" stroke="url(#stabGrad)" stroke-width="3" opacity="0.2"/>
-    <circle cx="200" cy="120" r="28" fill="url(#stabGrad)" opacity="0.85"/>
-    <circle cx="200" cy="-10" r="24" fill="url(#stabGrad)" opacity="0.75"/>
-    <circle cx="330" cy="120" r="24" fill="url(#stabGrad2)" opacity="0.75"/>
-    <circle cx="200" cy="250" r="24" fill="url(#stabGrad2)" opacity="0.75"/>
-    <circle cx="70" cy="120" r="24" fill="url(#stabGrad3)" opacity="0.75"/>
-    <circle cx="330" cy="50" r="22" fill="url(#stabGrad3)" opacity="0.7"/>
-    <g stroke="url(#stabGrad)" stroke-width="2.5" opacity="0.55" fill="none">
-      <path d="M 200 92 L 200 14"/>
-      <path d="M 224 108 L 306 108"/>
-      <path d="M 200 148 L 200 226"/>
-      <path d="M 176 120 L 94 120"/>
-      <path d="M 318 72 L 318 62 Q 280 30 224 0"/>
+  <g transform="translate(200, 165)">
+    <circle cx="200" cy="150" r="120" fill="none" stroke="url(#stabGrad)" stroke-width="2.5" opacity="0.2"/>
+    <circle cx="200" cy="30" r="26" fill="url(#stabGrad)" opacity="0.8"/>
+    <circle cx="370" cy="150" r="26" fill="url(#stabGrad)" opacity="0.8"/>
+    <circle cx="200" cy="270" r="26" fill="url(#stabGrad2)" opacity="0.75"/>
+    <circle cx="30" cy="150" r="26" fill="url(#stabGrad2)" opacity="0.75"/>
+    <circle cx="200" cy="150" r="20" fill="url(#stabGrad)" opacity="1" filter="url(#stabGlow)"/>
+    <g stroke="url(#stabGrad)" stroke-width="2.5" opacity="0.5" fill="none">
+      <path d="M 200 56 L 200 130"/>
+      <path d="M 270 150 L 344 150"/>
+      <path d="M 200 170 L 200 244"/>
+      <path d="M 130 150 L 56 150"/>
     </g>
-    <!-- Feedback arc (negative) -->
-    <path d="M 94 140 Q 40 200 94 260 Q 200 310 306 260"
-          stroke="url(#stabGrad2)" stroke-width="3" fill="none" opacity="0.5" stroke-dasharray="8,6"/>
+    <path d="M 56 175 Q 30 220 56 265 Q 120 310 200 310 Q 280 310 344 265"
+          stroke="url(#stabGrad2)" stroke-width="2" fill="none" opacity="0.45" stroke-dasharray="8,6"/>
   </g>
 
-  <!-- Phase portrait + attractor -->
-  <g transform="translate(480, 100)">
-    <line x1="40" y1="400" x2="40" y2="40" stroke="url(#stabGrad3)" stroke-width="2" opacity="0.3"/>
-    <line x1="40" y1="400" x2="400" y2="400" stroke="url(#stabGrad3)" stroke-width="2" opacity="0.3"/>
-    <!-- Stable attractor -->
-    <circle cx="220" cy="220" r="18" fill="url(#stabGrad)" opacity="1" filter="url(#stabGlow)"/>
-    <circle cx="220" cy="220" r="45" fill="none" stroke="url(#stabGrad)" stroke-width="2" opacity="0.35"/>
-    <!-- Converging trajectories -->
-    <path d="M 80 80 Q 140 160 200 210 T 220 220"
-          stroke="url(#stabGrad)" stroke-width="2.5" fill="none" opacity="0.7"/>
-    <path d="M 360 100 Q 300 180 250 215 T 220 220"
-          stroke="url(#stabGrad)" stroke-width="2.5" fill="none" opacity="0.7"/>
-    <path d="M 100 360 Q 160 300 200 240 T 220 220"
-          stroke="url(#stabGrad)" stroke-width="2.5" fill="none" opacity="0.7"/>
-    <!-- Limit cycle -->
-    <ellipse cx="320" cy="300" rx="55" ry="40" fill="none" stroke="url(#stabGrad2)" stroke-width="2.5" opacity="0.65"/>
-    <path d="M 365 300 Q 320 260 275 300 T 365 300"
-          stroke="url(#stabGrad2)" stroke-width="2" fill="none" opacity="0.5"/>
-    <!-- Diverging (supercritical) -->
-    <path d="M 60 200 L 20 160" stroke="url(#stabGrad2)" stroke-width="2" opacity="0.5"/>
-    <path d="M 60 200 L 15 200" stroke="url(#stabGrad2)" stroke-width="2" opacity="0.5"/>
-    <path d="M 60 200 L 20 240" stroke="url(#stabGrad2)" stroke-width="2" opacity="0.5"/>
-    <circle cx="60" cy="200" r="8" fill="url(#stabGrad2)" opacity="0.6"/>
-    <!-- Embedding trajectory dots -->
-    <circle cx="120" cy="130" r="6" fill="url(#stabGrad3)" opacity="0.6"/>
-    <circle cx="165" cy="175" r="6" fill="url(#stabGrad3)" opacity="0.7"/>
-    <circle cx="195" cy="205" r="6" fill="url(#stabGrad3)" opacity="0.85"/>
+  <!-- Phase portrait -->
+  <g transform="translate(560, 130)">
+    <line x1="60" y1="360" x2="60" y2="60" stroke="url(#stabGrad)" stroke-width="2" opacity="0.2"/>
+    <line x1="60" y1="360" x2="360" y2="360" stroke="url(#stabGrad)" stroke-width="2" opacity="0.2"/>
+    <circle cx="210" cy="210" r="16" fill="url(#stabGrad)" filter="url(#stabGlow)"/>
+    <path d="M 90 90 Q 150 170 195 205 T 210 210"
+          stroke="url(#stabGrad)" stroke-width="3" fill="none" opacity="0.75"/>
+    <path d="M 330 110 Q 270 180 225 205 T 210 210"
+          stroke="url(#stabGrad)" stroke-width="3" fill="none" opacity="0.75"/>
+    <ellipse cx="300" cy="290" rx="48" ry="34" fill="none" stroke="url(#stabGrad2)" stroke-width="2.5" opacity="0.6"/>
+    <g stroke="url(#stabGrad2)" stroke-width="2" opacity="0.45">
+      <line x1="80" y1="200" x2="40" y2="170"/>
+      <line x1="80" y1="200" x2="35" y2="200"/>
+      <line x1="80" y1="200" x2="40" y2="230"/>
+    </g>
   </g>
 
-  <!-- C(d) correlation decay curve -->
-  <g transform="translate(920, 120)">
-    <line x1="0" y1="200" x2="220" y2="200" stroke="url(#stabGrad3)" stroke-width="2" opacity="0.25"/>
-    <line x1="0" y1="200" x2="0" y2="20" stroke="url(#stabGrad3)" stroke-width="2" opacity="0.25"/>
-    <!-- Subcritical: fast decay -->
-    <path d="M 10 40 Q 60 120 200 185"
-          stroke="url(#stabGrad2)" stroke-width="3" fill="none" opacity="0.55" stroke-dasharray="6,4"/>
-    <!-- Critical: slow decay -->
-    <path d="M 10 40 L 50 90 L 100 120 L 160 145 L 210 160"
+  <!-- C(d) decay -->
+  <g transform="translate(920, 200)">
+    <path d="M 20 40 L 80 100 L 140 130 L 200 150 L 260 162"
           stroke="url(#stabGrad)" stroke-width="4" fill="none" opacity="0.9"/>
-    <!-- Supercritical: rise -->
-    <path d="M 10 180 Q 80 100 200 30"
-          stroke="url(#stabGrad2)" stroke-width="2.5" fill="none" opacity="0.45"/>
-    <circle cx="210" cy="160" r="7" fill="url(#stabGrad)" filter="url(#stabGlow)"/>
-  </g>
-
-  <!-- DAG signal propagation -->
-  <g transform="translate(900, 380)">
-    <circle cx="0" cy="60" r="20" fill="url(#stabGrad)" opacity="0.9"/>
-    <circle cx="90" cy="30" r="18" fill="url(#stabGrad)" opacity="0.8"/>
-    <circle cx="90" cy="90" r="18" fill="url(#stabGrad2)" opacity="0.75"/>
-    <circle cx="180" cy="60" r="18" fill="url(#stabGrad)" opacity="0.85"/>
-    <circle cx="270" cy="60" r="22" fill="url(#stabGrad)" opacity="1" filter="url(#stabGlow)"/>
-    <g stroke="url(#stabGrad)" stroke-width="2.5" opacity="0.5">
-      <line x1="20" y1="50" x2="72" y2="35"/>
-      <line x1="20" y1="70" x2="72" y2="85"/>
-      <line x1="108" y1="40" x2="162" y2="55"/>
-      <line x1="108" y1="80" x2="162" y2="65"/>
-      <line x1="198" y1="60" x2="248" y2="60"/>
-    </g>
-    <!-- Distance markers -->
-    <g opacity="0.4">
-      <line x1="0" y1="130" x2="270" y2="130" stroke="url(#stabGrad3)" stroke-width="1.5" stroke-dasharray="4,4"/>
-      <line x1="0" y1="125" x2="0" y2="135" stroke="url(#stabGrad3)" stroke-width="2"/>
-      <line x1="90" y1="125" x2="90" y2="135" stroke="url(#stabGrad3)" stroke-width="2"/>
-      <line x1="180" y1="125" x2="180" y2="135" stroke="url(#stabGrad3)" stroke-width="2"/>
-      <line x1="270" y1="125" x2="270" y2="135" stroke="url(#stabGrad3)" stroke-width="2"/>
-    </g>
-  </g>
-
-  <!-- Avalanche branching (supercritical hint) -->
-  <g transform="translate(150, 480)">
-    <circle cx="0" cy="0" r="12" fill="url(#stabGrad2)" opacity="0.8"/>
-    <circle cx="50" cy="-25" r="9" fill="url(#stabGrad2)" opacity="0.65"/>
-    <circle cx="50" cy="25" r="9" fill="url(#stabGrad2)" opacity="0.65"/>
-    <circle cx="100" cy="-45" r="7" fill="url(#stabGrad2)" opacity="0.5"/>
-    <circle cx="100" cy="0" r="7" fill="url(#stabGrad2)" opacity="0.5"/>
-    <circle cx="100" cy="45" r="7" fill="url(#stabGrad2)" opacity="0.5"/>
-    <g stroke="url(#stabGrad2)" stroke-width="2" opacity="0.4">
-      <line x1="12" y1="-4" x2="41" y2="-20"/>
-      <line x1="12" y1="4" x2="41" y2="20"/>
-      <line x1="59" y1="-28" x2="93" y2="-42"/>
-      <line x1="59" y1="-18" x2="93" y2="0"/>
-      <line x1="59" y1="28" x2="93" y2="42"/>
-    </g>
+    <path d="M 20 40 Q 100 150 260 190"
+          stroke="url(#stabGrad2)" stroke-width="2.5" fill="none" opacity="0.45" stroke-dasharray="6,4"/>
+    <circle cx="260" cy="162" r="7" fill="url(#stabGrad)" filter="url(#stabGlow)"/>
   </g>
 </svg>
