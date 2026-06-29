@@ -5,58 +5,102 @@
 (function () {
   const CONTAINER_ID = 'embedding-phase-portrait';
 
+  const CYCLE_ITEMS = [
+    { label: 'План', prompt: '«Составь план из 5 шагов для задачи пользователя»' },
+    { label: 'Act', prompt: '«Вызови search(query=…) и проанализируй результат»' },
+    { label: 'Ошибка', prompt: '«Tool вернул 404 — что делать дальше?»' },
+    { label: 'Replan', prompt: '«Перепланируй с учётом ошибки, не повторяй тот же вызов»' },
+    { label: 'Reflect', prompt: '«Почему предыдущий шаг не приблизил к цели?»' },
+    { label: 'Retry', prompt: '«Попробуй ещё раз с уточнённым промптом»' },
+  ];
+
+  const CONVERGE_ITEMS = [
+    { label: 'Цель', prompt: '«Ответь на вопрос пользователя по документам»' },
+    { label: 'RAG', prompt: '«Извлеки top-3 чанка из vector DB»' },
+    { label: 'План', prompt: '«Разбей задачу на проверяемые шаги»' },
+    { label: 'Tool', prompt: '«execute_sql(…); верни только JSON»' },
+    { label: 'Критик', prompt: '«Сверь ответ с цитатами из RAG»' },
+    { label: 'Ответ', prompt: '«Финальный ответ со ссылками на источники»' },
+  ];
+
   const MODES = {
-    converge: {
-      title: 'Сходимость к аттрактору',
-      subtitle: 'Chain of thought → заземлённый ответ',
-      attractor: { x: 0.78, y: 0.22 },
-      limitCycle: null,
-      thoughts: [
-        { label: 'Цель', x: 0.12, y: 0.82 },
-        { label: 'RAG', x: 0.22, y: 0.68 },
-        { label: 'План', x: 0.36, y: 0.56 },
-        { label: 'Tool', x: 0.5, y: 0.44 },
-        { label: 'Критик', x: 0.64, y: 0.34 },
-        { label: 'Ответ', x: 0.76, y: 0.26 },
-      ],
-    },
     cycle: {
       title: 'Предельный цикл',
-      subtitle: 'ReAct-loop без прогресса',
+      subtitle: 'Циклическая траектория в embedding space — ReAct без прогресса',
+      circular: true,
+      circle: { cx: 0.54, cy: 0.5, r: 0.3 },
+      startAngle: -Math.PI / 2,
       attractor: null,
-      limitCycle: { cx: 0.52, cy: 0.48, a: 0.28, b: 0.2 },
-      thoughts: [
-        { label: 'План', x: 0.38, y: 0.38 },
-        { label: 'Act', x: 0.62, y: 0.36 },
-        { label: 'Ошибка', x: 0.7, y: 0.52 },
-        { label: 'Replan', x: 0.58, y: 0.66 },
-        { label: 'Reflect', x: 0.4, y: 0.62 },
-      ],
+      items: CYCLE_ITEMS,
+    },
+    converge: {
+      title: 'Сходимость к аттрактору',
+      subtitle: 'Спираль по окружностям → заземлённый ответ',
+      circular: false,
+      spiral: { cx: 0.54, cy: 0.52, rStart: 0.34, rEnd: 0.05, startAngle: (3 * Math.PI) / 4 },
+      attractor: { x: 0.54, y: 0.52 },
+      items: CONVERGE_ITEMS,
     },
   };
 
-  function fieldAt(x, y, mode) {
-    const m = MODES[mode];
-    if (mode === 'converge' && m.attractor) {
+  function buildCircleThoughts(circle, items, startAngle) {
+    const n = items.length;
+    return items.map((item, i) => {
+      const angle = startAngle + (i / n) * Math.PI * 2;
+      return {
+        ...item,
+        angle,
+        x: circle.cx + circle.r * Math.cos(angle),
+        y: circle.cy + circle.r * Math.sin(angle),
+      };
+    });
+  }
+
+  function buildSpiralThoughts(spiral, items) {
+    const n = items.length;
+    return items.map((item, i) => {
+      const t = n === 1 ? 0 : i / (n - 1);
+      const r = spiral.rStart + (spiral.rEnd - spiral.rStart) * t;
+      const angle = spiral.startAngle - t * 0.85;
+      return {
+        ...item,
+        angle,
+        r,
+        x: spiral.cx + r * Math.cos(angle),
+        y: spiral.cy + r * Math.sin(angle),
+      };
+    });
+  }
+
+  function resolveThoughts(modeKey) {
+    const m = MODES[modeKey];
+    if (m.circular) {
+      return buildCircleThoughts(m.circle, m.items, m.startAngle);
+    }
+    return buildSpiralThoughts(m.spiral, m.items);
+  }
+
+  function fieldAt(x, y, modeKey) {
+    const m = MODES[modeKey];
+    if (modeKey === 'cycle' && m.circle) {
+      const { cx, cy, r } = m.circle;
+      const nx = (x - cx) / r;
+      const ny = (y - cy) / r;
+      const dist = Math.hypot(nx, ny) || 1e-6;
+      const tx = -ny / dist;
+      const ty = nx / dist;
+      const radial = (1 - dist) * 0.35;
+      const fx = tx + (nx / dist) * radial;
+      const fy = ty + (ny / dist) * radial;
+      const mag = Math.hypot(fx, fy) || 1e-6;
+      return { dx: fx / mag, dy: fy / mag };
+    }
+    if (modeKey === 'converge' && m.attractor) {
       const dx = m.attractor.x - x;
       const dy = m.attractor.y - y;
       const mag = Math.hypot(dx, dy) || 1e-6;
-      const pull = 0.85 + 0.15 * (1 - Math.min(mag * 2, 1));
+      const pull = 0.8 + 0.2 * (1 - Math.min(mag * 2.5, 1));
       return { dx: (dx / mag) * pull, dy: (dy / mag) * pull };
-    }
-    if (mode === 'cycle' && m.limitCycle) {
-      const { cx, cy, a, b } = m.limitCycle;
-      const nx = (x - cx) / a;
-      const ny = (y - cy) / b;
-      const r = Math.hypot(nx, ny) || 1e-6;
-      const tx = -ny / r;
-      const ty = nx / r;
-      const rx = (1 - r) * (nx / r);
-      const ry = (1 - r) * (ny / r);
-      const fx = tx * 0.72 + rx * 0.28;
-      const fy = ty * 0.72 + ry * 0.28;
-      const mag = Math.hypot(fx, fy) || 1e-6;
-      return { dx: fx / mag, dy: fy / mag };
     }
     return { dx: 0, dy: 0 };
   }
@@ -67,13 +111,15 @@
     if (typeof p5 === 'undefined') return;
 
     container.dataset.initialized = 'true';
+    const promptEl = document.getElementById('phase-prompt-display');
 
     const sketch = (p) => {
-      let mode = 'converge';
+      let mode = 'cycle';
+      let thoughts = resolveThoughts(mode);
       let stepIndex = 0;
       let stepProgress = 0;
       let trail = [];
-      const padding = { left: 56, right: 24, top: 52, bottom: 44 };
+      const padding = { left: 56, right: 24, top: 52, bottom: 72 };
 
       const colors = {
         field: [67, 233, 123, 55],
@@ -83,15 +129,17 @@
         thought: [102, 126, 234],
         thoughtActive: [118, 75, 162],
         trail: [102, 126, 234, 140],
-        trailCycle: [250, 112, 154, 130],
+        trailCycle: [250, 112, 154, 150],
         axis: [180, 180, 180],
         text: [60, 60, 60],
         muted: [120, 120, 120],
+        promptBg: [245, 245, 248],
+        promptActive: [102, 126, 234, 18],
       };
 
       p.setup = function () {
         const w = Math.min(container.clientWidth || 680, 680);
-        const canvas = p.createCanvas(w, 400);
+        const canvas = p.createCanvas(w, 430);
         canvas.parent(CONTAINER_ID);
         p.textFont('system-ui, -apple-system, sans-serif');
         resetAnimation();
@@ -123,31 +171,62 @@
         stepIndex = 0;
         stepProgress = 0;
         trail = [];
+        updatePromptPanel();
       }
 
       function setMode(next) {
         mode = next;
+        thoughts = resolveThoughts(mode);
         resetAnimation();
         document.querySelectorAll('[data-phase-mode]').forEach((btn) => {
           btn.classList.toggle('active', btn.dataset.phaseMode === mode);
         });
       }
 
+      function updatePromptPanel() {
+        if (!promptEl) return;
+        const lines = thoughts
+          .map((t, i) => {
+            const active = i === stepIndex;
+            const mark = active ? '▸ ' : '  ';
+            return `<span class="phase-prompt-line${active ? ' active' : ''}">${mark}<strong>${t.label}:</strong> ${t.prompt}</span>`;
+          })
+          .join('');
+        promptEl.innerHTML = lines;
+      }
+
       p.windowResized = function () {
         const w = Math.min(container.clientWidth || 680, 680);
-        p.resizeCanvas(w, 400);
+        p.resizeCanvas(w, 430);
       };
+
+      function agentNormPosition() {
+        const m = MODES[mode];
+        if (m.circular) {
+          const { cx, cy, r } = m.circle;
+          const n = thoughts.length;
+          const sweep = (stepIndex + stepProgress) * ((Math.PI * 2) / n);
+          const ang = m.startAngle + sweep;
+          return { x: cx + r * Math.cos(ang), y: cy + r * Math.sin(ang) };
+        }
+        const a = thoughts[stepIndex];
+        const isLast = stepIndex === thoughts.length - 1;
+        const b = thoughts[Math.min(stepIndex + 1, thoughts.length - 1)];
+        const t = isLast ? 1 : stepProgress;
+        return { x: p.lerp(a.x, b.x, t), y: p.lerp(a.y, b.y, t) };
+      }
 
       p.draw = function () {
         p.background(252, 252, 253);
         drawHeader();
         drawAxes();
         drawVectorField();
-        drawLimitCycle();
+        drawOrbitGuide();
         drawAttractor();
         drawThoughtGraph();
         drawTrail();
         drawAgent();
+        drawPromptStrip();
         advanceStep();
       };
 
@@ -175,7 +254,7 @@
         p.noStroke();
         p.fill(...colors.muted);
         p.textSize(11);
-        p.text('e₁ · intent / grounding', padding.left, p.height - 14);
+        p.text('e₁ · intent / grounding', padding.left, p.height - 52);
         p.textAlign(p.RIGHT, p.BOTTOM);
         p.text('e₂ · confidence', p.width - 12, padding.top - 8);
         p.textAlign(p.LEFT, p.BASELINE);
@@ -183,10 +262,10 @@
 
       function drawVectorField() {
         const cols = 14;
-        const rows = 9;
+        const rows = 8;
         const isCycle = mode === 'cycle';
         const c = isCycle ? colors.fieldCycle : colors.field;
-        const arrowLen = Math.min(plotW(), plotH()) / cols * 0.38;
+        const arrowLen = (Math.min(plotW(), plotH()) / cols) * 0.38;
 
         for (let i = 0; i <= cols; i++) {
           for (let j = 0; j <= rows; j++) {
@@ -215,16 +294,30 @@
         }
       }
 
-      function drawLimitCycle() {
-        const lc = MODES[mode].limitCycle;
-        if (!lc) return;
-        const c = toScreen(lc.cx, lc.cy);
-        p.noFill();
-        p.stroke(...colors.cycle);
-        p.strokeWeight(2);
-        p.drawingContext.setLineDash([6, 5]);
-        p.ellipse(c.x, c.y, lc.a * 2 * plotW(), lc.b * 2 * plotH());
-        p.drawingContext.setLineDash([]);
+      function drawOrbitGuide() {
+        const m = MODES[mode];
+        if (m.circular && m.circle) {
+          const { cx, cy, r } = m.circle;
+          const c = toScreen(cx, cy);
+          p.noFill();
+          p.stroke(...colors.cycle);
+          p.strokeWeight(2);
+          p.drawingContext.setLineDash([7, 5]);
+          p.circle(c.x, c.y, r * 2 * plotW());
+          p.drawingContext.setLineDash([]);
+          return;
+        }
+        if (m.spiral) {
+          const { cx, cy, rStart, rEnd } = m.spiral;
+          p.noFill();
+          p.stroke(...colors.attractor, 80);
+          p.strokeWeight(1.5);
+          p.drawingContext.setLineDash([5, 6]);
+          const c1 = toScreen(cx, cy);
+          p.circle(c1.x, c1.y, rStart * 2 * plotW());
+          p.circle(c1.x, c1.y, rEnd * 2 * plotW() * 0.5);
+          p.drawingContext.setLineDash([]);
+        }
       }
 
       function drawAttractor() {
@@ -232,8 +325,8 @@
         if (!att) return;
         const c = toScreen(att.x, att.y);
         p.noStroke();
-        p.fill(...colors.attractor, 40);
-        p.circle(c.x, c.y, 36);
+        p.fill(...colors.attractor, 45);
+        p.circle(c.x, c.y, 40);
         p.fill(...colors.attractor);
         p.circle(c.x, c.y, 10);
         p.fill(...colors.muted);
@@ -242,44 +335,57 @@
       }
 
       function drawThoughtGraph() {
-        const thoughts = MODES[mode].thoughts;
-        p.stroke(...colors.thought, 90);
-        p.strokeWeight(1.5);
-        for (let i = 0; i < thoughts.length; i++) {
-          const a = toScreen(thoughts[i].x, thoughts[i].y);
-          const b = toScreen(
-            thoughts[(i + 1) % thoughts.length].x,
-            thoughts[(i + 1) % thoughts.length].y
-          );
-          if (mode === 'converge' && i === thoughts.length - 1) continue;
-          p.line(a.x, a.y, b.x, b.y);
+        const isCycle = mode === 'cycle';
+        if (!isCycle) {
+          p.stroke(...colors.thought, 100);
+          p.strokeWeight(2);
+          for (let i = 0; i < thoughts.length - 1; i++) {
+            const a = toScreen(thoughts[i].x, thoughts[i].y);
+            const b = toScreen(thoughts[i + 1].x, thoughts[i + 1].y);
+            p.line(a.x, a.y, b.x, b.y);
+          }
         }
 
         thoughts.forEach((t, i) => {
           const s = toScreen(t.x, t.y);
           const active = i === stepIndex;
           p.noStroke();
-          p.fill(...(active ? colors.thoughtActive : colors.thought), active ? 255 : 200);
-          p.circle(s.x, s.y, active ? 22 : 16);
-          p.fill(active ? 255 : 240);
+          p.fill(...(active ? colors.thoughtActive : colors.thought), active ? 255 : 185);
+          p.circle(s.x, s.y, active ? 24 : 17);
+          if (active) {
+            p.stroke(...colors.thoughtActive, 90);
+            p.strokeWeight(2);
+            p.noFill();
+            p.circle(s.x, s.y, 32);
+          }
+          p.noStroke();
+          p.fill(active ? 255 : 245);
           p.textSize(10);
           p.textAlign(p.CENTER, p.CENTER);
           p.text(i + 1, s.x, s.y);
           p.textAlign(p.LEFT, p.BASELINE);
-          p.fill(...colors.text);
+          p.fill(...(active ? colors.text : colors.muted));
           p.textSize(11);
-          p.text(t.label, s.x + 14, s.y + 4);
+          p.textStyle(active ? p.BOLD : p.NORMAL);
+          const labelOffset = labelOffsetFor(s, i);
+          p.text(t.label, labelOffset.x, labelOffset.y);
+          p.textStyle(p.NORMAL);
         });
       }
 
-      function agentPosition() {
-        const thoughts = MODES[mode].thoughts;
-        const a = thoughts[stepIndex];
-        const b = thoughts[(stepIndex + 1) % thoughts.length];
-        const t = mode === 'converge' && stepIndex === thoughts.length - 1 ? 1 : stepProgress;
-        const nx = p.lerp(a.x, b.x, t);
-        const ny = p.lerp(a.y, b.y, t);
-        return toScreen(nx, ny);
+      function labelOffsetFor(screenPos, index) {
+        const m = MODES[mode];
+        if (m.circular) {
+          const center = toScreen(m.circle.cx, m.circle.cy);
+          const dx = screenPos.x - center.x;
+          const dy = screenPos.y - center.y;
+          const mag = Math.hypot(dx, dy) || 1;
+          return {
+            x: screenPos.x + (dx / mag) * 24,
+            y: screenPos.y + (dy / mag) * 24 + 4,
+          };
+        }
+        return { x: screenPos.x + 16, y: screenPos.y + 4 };
       }
 
       function drawTrail() {
@@ -293,34 +399,53 @@
       }
 
       function drawAgent() {
-        const pos = agentPosition();
+        const pos = toScreen(agentNormPosition().x, agentNormPosition().y);
         p.noStroke();
         p.fill(...(mode === 'cycle' ? colors.cycle : colors.attractor));
-        p.circle(pos.x, pos.y, 12);
+        p.circle(pos.x, pos.y, 13);
         p.fill(255, 220);
         p.circle(pos.x - 2, pos.y - 2, 3);
       }
 
+      function drawPromptStrip() {
+        const active = thoughts[stepIndex];
+        const y0 = p.height - 44;
+        p.noStroke();
+        p.fill(...colors.promptBg);
+        p.rect(0, y0, p.width, 44);
+        p.fill(...colors.promptActive);
+        p.rect(padding.left - 8, y0 + 6, p.width - padding.left - 16, 32, 6);
+        p.fill(...colors.text);
+        p.textSize(11);
+        p.textStyle(p.BOLD);
+        p.text(`${active.label}:`, padding.left, y0 + 24);
+        p.textStyle(p.NORMAL);
+        p.fill(...colors.muted);
+        const promptX = padding.left + p.textWidth(`${active.label}: `) + 4;
+        p.text(active.prompt, promptX, y0 + 24, p.width - promptX - 12);
+      }
+
       function advanceStep() {
-        const thoughts = MODES[mode].thoughts;
-        const pos = agentPosition();
-        if (p.frameCount % 4 === 0) {
+        const pos = toScreen(agentNormPosition().x, agentNormPosition().y);
+        if (p.frameCount % 3 === 0) {
           trail.push({ x: pos.x, y: pos.y });
-          if (trail.length > 80) trail.shift();
+          const maxTrail = mode === 'cycle' ? 140 : 90;
+          if (trail.length > maxTrail) trail.shift();
         }
 
-        stepProgress += 0.018;
+        stepProgress += mode === 'cycle' ? 0.014 : 0.018;
         if (stepProgress >= 1) {
           stepProgress = 0;
-          if (mode === 'converge') {
-            if (stepIndex < thoughts.length - 1) stepIndex++;
-            else {
-              stepIndex = 0;
-              trail = [];
-            }
-          } else {
+          const prev = stepIndex;
+          if (mode === 'cycle') {
             stepIndex = (stepIndex + 1) % thoughts.length;
+          } else if (stepIndex < thoughts.length - 1) {
+            stepIndex++;
+          } else {
+            stepIndex = 0;
+            trail = [];
           }
+          if (prev !== stepIndex) updatePromptPanel();
         }
       }
 
@@ -328,14 +453,14 @@
         if (p.mouseY < padding.top || p.mouseX < padding.left) return;
         const pos = fromScreen(p.mouseX, p.mouseY);
         if (pos.x < 0 || pos.x > 1 || pos.y < 0 || pos.y > 1) return;
-        trail.push(agentPosition());
+        trail.push(toScreen(agentNormPosition().x, agentNormPosition().y));
       };
 
       container.querySelectorAll('[data-phase-mode]').forEach((btn) => {
         btn.addEventListener('click', () => setMode(btn.dataset.phaseMode));
       });
 
-      setMode('converge');
+      setMode('cycle');
     };
 
     new p5(sketch);

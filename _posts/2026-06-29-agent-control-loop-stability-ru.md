@@ -183,11 +183,12 @@ flowchart LR
 
 <div class="phase-portrait-widget">
   <div class="phase-portrait-controls">
-    <button type="button" data-phase-mode="converge" class="active">Сходимость к аттрактору</button>
-    <button type="button" data-phase-mode="cycle">Предельный цикл</button>
+    <button type="button" data-phase-mode="cycle" class="active">Предельный цикл</button>
+    <button type="button" data-phase-mode="converge">Сходимость к аттрактору</button>
   </div>
   <div id="embedding-phase-portrait" class="phase-portrait-canvas"></div>
-  <p class="phase-portrait-caption">Оси — условные компоненты проекции эмбеддингов (intent / grounding и confidence). Клик внутри графика оставляет след траектории. Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a> (Processing Foundation).</p>
+  <div id="phase-prompt-display" class="phase-portrait-prompts" aria-live="polite"></div>
+  <p class="phase-portrait-caption">Оси — условные компоненты проекции эмбеддингов. В режиме <em>Предельный цикл</em> точки лежат на окружности; движущаяся точка идёт по замкнутой траектории, на каждом шаге подсвечивается короткий промпт. Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a>.</p>
 </div>
 
 <script src="{{ '/assets/js/embedding-phase-portrait.js' | relative_url }}"></script>
