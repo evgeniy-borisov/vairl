@@ -376,6 +376,196 @@ nav a {
     color: #444;
 }
 
+/* Criticality avalanche grid */
+.criticality-widget {
+    margin: 32px 0 28px;
+    border: 1px solid #e8e8ec;
+    border-radius: 10px;
+    background: #fcfcfd;
+    overflow: hidden;
+}
+
+.criticality-widget .criticality-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.criticality-widget .criticality-header p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #666;
+}
+
+.criticality-widget .criticality-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #ececf0;
+    background: #fafafb;
+}
+
+.criticality-widget .crit-ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.criticality-widget .crit-ctrl-label {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+}
+
+.criticality-widget .crit-state-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.criticality-widget .crit-state-btn {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border: 1px solid #d8d8e0;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #fff;
+    color: #555;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.criticality-widget .crit-state-btn:hover {
+    border-color: #43e97b;
+    color: #2a9d6a;
+}
+
+.criticality-widget .crit-state-btn.active {
+    border-color: transparent;
+    font-weight: 600;
+    color: #fff;
+}
+
+.criticality-widget .crit-state-btn[data-crit-mode="subcritical"].active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.criticality-widget .crit-state-btn[data-crit-mode="critical"].active {
+    background: linear-gradient(135deg, #43e97b, #38d9c8);
+    color: #1a4d3a;
+}
+
+.criticality-widget .crit-state-btn[data-crit-mode="supercritical"].active {
+    background: linear-gradient(135deg, #fa709a, #fee140);
+    color: #5c2a35;
+}
+
+.criticality-widget input[type="range"] {
+    width: 72px;
+    accent-color: #667eea;
+}
+
+.criticality-widget #crit-bias {
+    width: 80px;
+}
+
+.criticality-widget .crit-bias-out {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    min-width: 36px;
+}
+
+.criticality-widget .criticality-metrics {
+    display: flex;
+    gap: 18px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #666;
+    border-bottom: 1px solid #ececf0;
+}
+
+.criticality-widget .criticality-metrics span {
+    font-weight: 600;
+    color: #333;
+}
+
+.criticality-widget .criticality-wave-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px 10px;
+    font-size: 11px;
+    color: #888;
+}
+
+.criticality-widget .crit-wave-bar {
+    flex: 1;
+    height: 4px;
+    background: #e8e8ec;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.criticality-widget .crit-wave-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #43e97b);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.12s ease-out;
+}
+
+.criticality-widget .criticality-canvas-wrap {
+    padding: 12px 14px;
+    display: flex;
+    justify-content: center;
+    background: #fafbfd;
+}
+
+.criticality-widget #criticality-grid-canvas {
+    display: block;
+    border-radius: 6px;
+    border: 1px solid #e4e6ec;
+    box-shadow: 0 1px 3px rgba(102, 126, 234, 0.06);
+}
+
+.criticality-widget .criticality-legend {
+    display: flex;
+    gap: 16px;
+    padding: 10px 14px 14px;
+    flex-wrap: wrap;
+    border-top: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.criticality-widget .crit-leg-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666;
+}
+
+.criticality-widget .crit-leg-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.criticality-widget .criticality-caption {
+    margin: 0;
+    padding: 0 14px 14px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #777;
+}
+
 .post-footer {
     margin-top: 60px;
     padding-top: 30px;

@@ -254,6 +254,59 @@ flowchart LR
 
 С точки зрения **устойчивости систем** (см. gain и обратную связь выше): субкритический режим — **передемпфирование** (сигнал ошибки не доходит до нужного узла); суперкритический — **положительная обратная связь с gain > 1**; критический — работа **на границе устойчивости**, где пропускная способность канала максимальна.
 
+### Интерактив: лавина сигнала на квадратной сетке
+
+Упрощённая модель **нейронной лавины** (Beggs): квадратная решётка — дискретное embedding-/agent-space; возбуждение входит слева и распространяется в соседние **квадратные клетки**. Параметр **σ** (branching ratio) задаёт режим; **направленность** — доля передачи вправо (по DAG / chain of thought). Субкритическое — вспышки гаснут; критическое — лавины умеренного размера доходят до выхода; суперкритическое — лавина разрастается по всей сети.
+
+<div id="criticality-grid-widget" class="criticality-widget">
+  <div class="criticality-header">
+    <p>Клеточный автомат: покой → возбуждение → активность → рефрактерность. Каждый тик — один шаг передачи сигнала по сети агента.</p>
+  </div>
+  <div class="criticality-controls">
+    <div class="crit-ctrl-group">
+      <span class="crit-ctrl-label">σ, режим:</span>
+      <div class="crit-state-btns">
+        <button type="button" class="crit-state-btn" data-crit-mode="subcritical">Субкритическое</button>
+        <button type="button" class="crit-state-btn active" data-crit-mode="critical">Критическое</button>
+        <button type="button" class="crit-state-btn" data-crit-mode="supercritical">Суперкритическое</button>
+      </div>
+    </div>
+    <div class="crit-ctrl-group">
+      <span class="crit-ctrl-label">Скорость</span>
+      <input type="range" id="crit-speed" min="1" max="5" value="3" step="1">
+    </div>
+    <div class="crit-ctrl-group">
+      <span class="crit-ctrl-label">Направленность →</span>
+      <input type="range" id="crit-bias" min="0" max="100" value="70" step="1">
+      <span id="crit-bias-out" class="crit-bias-out">70%</span>
+    </div>
+  </div>
+  <div class="criticality-metrics">
+    <div>σ: <span id="crit-sigma-val">1.00</span></div>
+    <div>Активных клеток: <span id="crit-active-count">0</span></div>
+    <div>Лавин: <span id="crit-ava-count">0</span></div>
+    <div>Размер последней: <span id="crit-ava-size">—</span></div>
+    <div>Фронт сигнала: <span id="crit-wave-speed">—</span></div>
+  </div>
+  <div class="criticality-wave-row">
+    <span>вход</span>
+    <div class="crit-wave-bar"><div class="crit-wave-fill" id="crit-wave-bar"></div></div>
+    <span>выход →</span>
+  </div>
+  <div class="criticality-canvas-wrap">
+    <canvas id="criticality-grid-canvas"></canvas>
+  </div>
+  <div class="criticality-legend">
+    <div class="crit-leg-item"><span class="crit-leg-swatch" style="background:#eef0f4;border:1px solid #dde1e8"></span>покой</div>
+    <div class="crit-leg-item"><span class="crit-leg-swatch" style="background:#b8f0d8"></span>возбуждение</div>
+    <div class="crit-leg-item"><span class="crit-leg-swatch" style="background:#667eea"></span>активен</div>
+    <div class="crit-leg-item"><span class="crit-leg-swatch" style="background:#3a3a48"></span>рефрактерный</div>
+  </div>
+  <p class="criticality-caption">Квадратные клетки — узлы дискретного пространства; стрелки — предпочтительное направление передачи (аналог directed graph). При σ ≈ 1 и умеренной направленности сигнал доходит далеко без взрывного роста — критический режим для CoT.</p>
+</div>
+
+<script src="{{ '/assets/js/criticality-grid.js' | relative_url }}"></script>
+
 ### Шеннон и канал передачи
 
 В теории информации Шеннона **пропускная способность канала** зависит от отношения сигнал/шум. Слишком слабый сигнал — декодер не восстанавливает сообщение (субкритичность). Слишком агрессивное усиление шума вместе с сигналом — хаос на выходе (суперкритичность).
