@@ -291,6 +291,60 @@ nav a {
     padding: 0;
 }
 
+/* Embedding phase portrait (p5.js) */
+.phase-portrait-widget {
+    margin: 32px 0 28px;
+    border: 1px solid #e8e8ec;
+    border-radius: 10px;
+    background: #fcfcfd;
+    overflow: hidden;
+}
+
+.phase-portrait-widget .phase-portrait-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.phase-portrait-widget .phase-portrait-controls button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 14px;
+    border: 1px solid #d8d8e0;
+    border-radius: 6px;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.phase-portrait-widget .phase-portrait-controls button:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.phase-portrait-widget .phase-portrait-controls button.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.1));
+    color: #5a4d9e;
+    font-weight: 600;
+}
+
+.phase-portrait-widget .phase-portrait-canvas {
+    min-height: 400px;
+}
+
+.phase-portrait-widget .phase-portrait-caption {
+    margin: 0;
+    padding: 10px 14px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #666;
+}
+
 .post-footer {
     margin-top: 60px;
     padding-top: 30px;

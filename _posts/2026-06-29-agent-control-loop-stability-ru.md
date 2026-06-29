@@ -177,6 +177,21 @@ flowchart LR
 
 Изменить поведение агента — значит **изменить поле**, а не только «написать более вежливый промпт».
 
+### Интерактив: дискретное embedding space
+
+Ниже — упрощённая **2D-проекция** дискретного embedding space (как после PCA / UMAP). Фоновые стрелки — **векторное поле политики**; узлы с подписями — шаги **chain of thought**; движущаяся точка — текущая «мысль» LLM. Переключите режим: **сходимость к аттрактору** (успешный CoT) или **предельный цикл** (бесполезный ReAct-loop).
+
+<div class="phase-portrait-widget">
+  <div class="phase-portrait-controls">
+    <button type="button" data-phase-mode="converge" class="active">Сходимость к аттрактору</button>
+    <button type="button" data-phase-mode="cycle">Предельный цикл</button>
+  </div>
+  <div id="embedding-phase-portrait" class="phase-portrait-canvas"></div>
+  <p class="phase-portrait-caption">Оси — условные компоненты проекции эмбеддингов (intent / grounding и confidence). Клик внутри графика оставляет след траектории. Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a> (Processing Foundation).</p>
+</div>
+
+<script src="{{ '/assets/js/embedding-phase-portrait.js' | relative_url }}"></script>
+
 ### Сепаратрисы — границы между исходами
 
 **Сепаратриса** — траектория, разделяющая бассейны притяжения. В embedding space это граница между «агент понял задачу как SQL-запрос» и «агент понял как chat». Малые изменения начального промпта или порядка документов в RAG могут **перебросить через сепаратрису** — отсюда нестабильность без злого умысла.
