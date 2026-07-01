@@ -84,7 +84,7 @@ torch.onnx.export(
 
 Имена тензоров **`input`** и **`logits`** должны совпадать с JavaScript-стороной. Форма входа: `[1, 1, 28, 28]` (NCHW, один канал).
 
-Готовые артефакты лежат в репозитории: `assets/models/mnist-digit-cnn.onnx` и `mnist-digit-cnn.onnx.data` (внешние веса ONNX). Оба файла нужно отдавать с одного URL-префикса — Runtime подтянет `.data` автоматически.
+Готовый артефакт лежит в репозитории: `assets/models/mnist-digit-cnn.onnx` (~225 KB, веса внутри файла — ONNX Runtime Web не поддерживает внешний `.onnx.data` по HTTP).
 
 ## Шаг 2. ONNX Runtime Web в браузере
 

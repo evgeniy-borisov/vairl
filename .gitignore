@@ -7,4 +7,6 @@ vendor/
 Gemfile.lock
 .DS_Store
 .venv-nn/
+.venv-onnx/
+.cursor/
 
