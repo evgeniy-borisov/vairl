@@ -125,7 +125,7 @@ const { logits } = await session.run({ input: tensor });
 
 Покажите рукописную цифру в центре рамки (как в MNIST: контрастный символ на светлом фоне). Слева — поток с камеры, справа — увеличенный превью 28×28, который реально подаётся в сеть.
 
-<div id="edge-nn-demo" class="edge-nn-widget" data-model-url="{{ '/assets/models/mnist-digit-cnn.onnx' | relative_url }}">
+<div id="edge-nn-demo" class="edge-nn-widget" data-model-url="{{ '/assets/models/mnist-digit-cnn.onnx' | relative_url }}?v=2">
   <div class="edge-nn-header">
     <p>Локальный инференс: ONNX Runtime Web (WASM) + p5.js. Модель не отправляет кадры на сервер — всё выполняется в вашем браузере.</p>
   </div>
