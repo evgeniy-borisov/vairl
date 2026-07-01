@@ -8,6 +8,10 @@
       <stop offset="0%" style="stop-color:#fa709a;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#fee140;stop-opacity:1" />
     </linearGradient>
+    <linearGradient id="cpGrad3" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:1" />
+    </linearGradient>
     <filter id="cpGlow">
       <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
       <feMerge>
@@ -17,39 +21,105 @@
     </filter>
   </defs>
 
-  <!-- Central hub (operations room) -->
-  <rect x="520" y="250" width="160" height="100" fill="url(#cpGrad)" opacity="0.85" rx="12" filter="url(#cpGlow)"/>
-  <rect x="540" y="275" width="120" height="8" fill="#fff" opacity="0.4" rx="2"/>
-  <rect x="540" y="295" width="90" height="8" fill="#fff" opacity="0.3" rx="2"/>
-  <rect x="540" y="315" width="100" height="8" fill="#fff" opacity="0.35" rx="2"/>
-
-  <!-- Network nodes -->
-  <circle cx="200" cy="180" r="28" fill="url(#cpGrad)" opacity="0.75"/>
-  <circle cx="180" cy="420" r="24" fill="url(#cpGrad)" opacity="0.65"/>
-  <circle cx="1020" cy="200" r="26" fill="url(#cpGrad2)" opacity="0.8"/>
-  <circle cx="1000" cy="430" r="22" fill="url(#cpGrad2)" opacity="0.7"/>
-  <circle cx="600" cy="80" r="20" fill="url(#cpGrad)" opacity="0.6"/>
-  <circle cx="600" cy="530" r="20" fill="url(#cpGrad)" opacity="0.6"/>
-
-  <!-- Links -->
-  <g stroke="url(#cpGrad)" stroke-width="2" opacity="0.35">
-    <line x1="228" y1="195" x2="520" y2="290"/>
-    <line x1="204" y1="405" x2="520" y2="320"/>
-    <line x1="994" y1="215" x2="680" y2="290"/>
-    <line x1="990" y1="415" x2="680" y2="310"/>
-    <line x1="600" y1="100" x2="600" y2="250"/>
-    <line x1="600" y1="350" x2="600" y2="510"/>
-    <line x1="228" y1="180" x2="994" y2="200" stroke-dasharray="6 4"/>
+  <!-- OGAS hierarchy (left) -->
+  <g transform="translate(80, 100)" opacity="0.75">
+    <circle cx="100" cy="0" r="22" fill="url(#cpGrad)" opacity="0.9" filter="url(#cpGlow)"/>
+    <circle cx="40" cy="70" r="16" fill="url(#cpGrad)" opacity="0.65"/>
+    <circle cx="100" cy="70" r="16" fill="url(#cpGrad)" opacity="0.7"/>
+    <circle cx="160" cy="70" r="16" fill="url(#cpGrad)" opacity="0.65"/>
+    <circle cx="20" cy="130" r="10" fill="url(#cpGrad)" opacity="0.45"/>
+    <circle cx="60" cy="130" r="10" fill="url(#cpGrad)" opacity="0.5"/>
+    <circle cx="100" cy="130" r="10" fill="url(#cpGrad)" opacity="0.5"/>
+    <circle cx="140" cy="130" r="10" fill="url(#cpGrad)" opacity="0.45"/>
+    <circle cx="180" cy="130" r="10" fill="url(#cpGrad)" opacity="0.45"/>
+    <g stroke="url(#cpGrad)" stroke-width="2" opacity="0.3">
+      <line x1="100" y1="22" x2="40" y2="54"/>
+      <line x1="100" y1="22" x2="100" y2="54"/>
+      <line x1="100" y1="22" x2="160" y2="54"/>
+      <line x1="40" y1="86" x2="20" y2="120"/>
+      <line x1="40" y1="86" x2="60" y2="120"/>
+      <line x1="100" y1="86" x2="100" y2="120"/>
+      <line x1="160" y1="86" x2="140" y2="120"/>
+      <line x1="160" y1="86" x2="180" y2="120"/>
+    </g>
   </g>
 
-  <!-- Telex / flow arrows -->
-  <polygon points="380,300 400,290 400,310" fill="#fa709a" opacity="0.7"/>
-  <polygon points="820,300 800,290 800,310" fill="#fa709a" opacity="0.7"/>
+  <!-- Operations room (center) -->
+  <g transform="translate(460, 210)">
+    <rect x="0" y="0" width="280" height="140" fill="url(#cpGrad)" opacity="0.88" rx="14" filter="url(#cpGlow)"/>
+    <rect x="20" y="20" width="240" height="100" fill="#1a1a2e" opacity="0.25" rx="8"/>
+    <rect x="36" y="36" width="80" height="12" fill="url(#cpGrad3)" opacity="0.7" rx="3"/>
+    <rect x="36" y="56" width="120" height="12" fill="#fff" opacity="0.35" rx="3"/>
+    <rect x="36" y="76" width="96" height="12" fill="#fff" opacity="0.28" rx="3"/>
+    <rect x="36" y="96" width="140" height="12" fill="url(#cpGrad2)" opacity="0.55" rx="3"/>
+    <!-- telex row -->
+    <g transform="translate(180, 32)">
+      <rect x="0" y="0" width="56" height="36" fill="url(#cpGrad2)" opacity="0.5" rx="4"/>
+      <rect x="8" y="8" width="40" height="6" fill="#fff" opacity="0.4" rx="2"/>
+      <rect x="8" y="18" width="28" height="6" fill="#fff" opacity="0.3" rx="2"/>
+      <rect x="8" y="28" width="34" height="4" fill="#fff" opacity="0.25" rx="2"/>
+    </g>
+  </g>
 
-  <!-- Labels -->
-  <text x="200" y="185" text-anchor="middle" fill="white" font-size="9" font-family="monospace">A!#</text>
-  <text x="1020" y="205" text-anchor="middle" fill="white" font-size="9" font-family="monospace">VSM</text>
-  <text x="600" y="305" text-anchor="middle" fill="white" font-size="10" font-family="system-ui" font-weight="600">OPS</text>
+  <!-- Cybersyn network nodes -->
+  <circle cx="280" cy="200" r="24" fill="url(#cpGrad)" opacity="0.7"/>
+  <circle cx="220" cy="420" r="20" fill="url(#cpGrad)" opacity="0.6"/>
+  <circle cx="920" cy="180" r="26" fill="url(#cpGrad2)" opacity="0.82"/>
+  <circle cx="980" cy="400" r="22" fill="url(#cpGrad2)" opacity="0.7"/>
+  <circle cx="600" cy="90" r="18" fill="url(#cpGrad)" opacity="0.55"/>
+  <circle cx="600" cy="520" r="18" fill="url(#cpGrad)" opacity="0.55"/>
 
-  <text x="600" y="580" text-anchor="middle" fill="#667eea" font-size="14" font-family="system-ui, sans-serif" opacity="0.55">OGAS · Cybersyn · OR · agent swarms</text>
+  <g stroke="url(#cpGrad)" stroke-width="2" opacity="0.32">
+    <line x1="304" y1="210" x2="460" y2="270"/>
+    <line x1="240" y1="405" x2="480" y2="320"/>
+    <line x1="894" y1="195" x2="740" y2="265"/>
+    <line x1="958" y1="390" x2="720" y2="310"/>
+    <line x1="600" y1="108" x2="600" y2="210"/>
+    <line x1="600" y1="350" x2="600" y2="502"/>
+    <line x1="304" y1="195" x2="894" y2="190" stroke-dasharray="8 6"/>
+  </g>
+
+  <!-- Truck convoy + telex route (1972 strike case) -->
+  <g transform="translate(120, 480)">
+    <path d="M 0 40 L 320 40 L 420 20 L 520 40 L 720 40" stroke="url(#cpGrad2)" stroke-width="3" fill="none" opacity="0.5" stroke-dasharray="12 8"/>
+    <!-- truck 1 -->
+    <g transform="translate(80, 18)">
+      <rect x="0" y="8" width="48" height="22" fill="url(#cpGrad3)" opacity="0.85" rx="4"/>
+      <rect x="36" y="4" width="18" height="18" fill="url(#cpGrad3)" opacity="0.7" rx="3"/>
+      <circle cx="12" cy="32" r="7" fill="url(#cpGrad)" opacity="0.8"/>
+      <circle cx="42" cy="32" r="7" fill="url(#cpGrad)" opacity="0.8"/>
+    </g>
+    <!-- truck 2 -->
+    <g transform="translate(280, 18)">
+      <rect x="0" y="8" width="48" height="22" fill="url(#cpGrad3)" opacity="0.75" rx="4"/>
+      <rect x="36" y="4" width="18" height="18" fill="url(#cpGrad3)" opacity="0.6" rx="3"/>
+      <circle cx="12" cy="32" r="7" fill="url(#cpGrad)" opacity="0.75"/>
+      <circle cx="42" cy="32" r="7" fill="url(#cpGrad)" opacity="0.75"/>
+    </g>
+    <!-- truck 3 (highlight) -->
+    <g transform="translate(480, 8)" filter="url(#cpGlow)">
+      <rect x="0" y="8" width="48" height="22" fill="url(#cpGrad2)" opacity="0.9" rx="4"/>
+      <rect x="36" y="4" width="18" height="18" fill="url(#cpGrad2)" opacity="0.75" rx="3"/>
+      <circle cx="12" cy="32" r="7" fill="url(#cpGrad)" opacity="0.85"/>
+      <circle cx="42" cy="32" r="7" fill="url(#cpGrad)" opacity="0.85"/>
+    </g>
+    <!-- blocked trucks (strike) -->
+    <g transform="translate(600, 24)" opacity="0.35">
+      <rect x="0" y="8" width="40" height="18" fill="url(#cpGrad)" opacity="0.4" rx="3"/>
+      <line x1="0" y1="8" x2="40" y2="26" stroke="#fa709a" stroke-width="2"/>
+      <rect x="52" y="8" width="40" height="18" fill="url(#cpGrad)" opacity="0.4" rx="3"/>
+      <line x1="52" y1="8" x2="92" y2="26" stroke="#fa709a" stroke-width="2"/>
+    </g>
+  </g>
+
+  <!-- Telex pulses along route -->
+  <polygon points="400,300 420,290 420,310" fill="#fa709a" opacity="0.75"/>
+  <polygon points="800,300 780,290 780,310" fill="#fa709a" opacity="0.75"/>
+
+  <!-- VSM recursion rings (right) -->
+  <g transform="translate(900, 260)" opacity="0.5">
+    <ellipse cx="80" cy="80" rx="70" ry="50" fill="none" stroke="url(#cpGrad2)" stroke-width="2"/>
+    <ellipse cx="80" cy="80" rx="42" ry="30" fill="none" stroke="url(#cpGrad2)" stroke-width="1.5" opacity="0.7"/>
+    <circle cx="80" cy="80" r="14" fill="url(#cpGrad2)" opacity="0.65"/>
+  </g>
 </svg>
