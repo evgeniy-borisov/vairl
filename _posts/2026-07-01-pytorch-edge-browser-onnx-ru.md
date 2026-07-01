@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Деплой нейросети на конечное устройство: PyTorch → ONNX → браузер"
-date: 2026-07-02 11:30:00 +0300
+date: 2026-07-01 16:00:00 +0300
 excerpt: "Как обучить лёгкую CNN в PyTorch, экспортировать в ONNX и запустить инференс в браузере через ONNX Runtime Web и p5.js с веб-камерой."
 lang: ru
 image: /assets/images/pytorch-edge-browser-onnx.svg
