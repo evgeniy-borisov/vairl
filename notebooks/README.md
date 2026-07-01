@@ -17,6 +17,7 @@ https://colab.research.google.com/github/<owner>/<repo>/blob/main/notebooks/<и�
 | [example.ipynb](example.ipynb) | Шаблон с бейджем Colab |
 | [hypothesis-synthesis-agents.ipynb](hypothesis-synthesis-agents.ipynb) | Локальная LLM + ChromaDB: синтез гипотез для повышения качества агентов |
 | [hybrid-agent-dag-fsm-bt.ipynb](hybrid-agent-dag-fsm-bt.ipynb) | DAG, FSM и Behavior Tree: минимальные исполнители, визуализация и конвертация |
+| [semantic-torrent.ipynb](semantic-torrent.ipynb) | Semantic Torrent: чанки, хэши, TF-IDF embeddings, семантический DHT и поиск по смыслу |
 
 ## Добавление нового ноутбука
 

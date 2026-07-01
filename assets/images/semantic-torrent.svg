@@ -1,0 +1,59 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="stGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="stGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:1" />
+    </linearGradient>
+    <filter id="stGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Peers -->
+  <rect x="120" y="200" width="28" height="28" fill="url(#stGrad)" opacity="0.7" rx="4"/>
+  <rect x="180" y="380" width="28" height="28" fill="url(#stGrad)" opacity="0.5" rx="4"/>
+  <rect x="920" y="180" width="28" height="28" fill="url(#stGrad)" opacity="0.7" rx="4"/>
+  <rect x="860" y="400" width="28" height="28" fill="url(#stGrad)" opacity="0.5" rx="4"/>
+
+  <!-- DHT ring -->
+  <ellipse cx="600" cy="315" rx="280" ry="180" fill="none" stroke="url(#stGrad)" stroke-width="2" opacity="0.25" stroke-dasharray="8 6"/>
+
+  <!-- Chunks as nodes -->
+  <g filter="url(#stGlow)">
+    <circle cx="380" cy="220" r="22" fill="url(#stGrad)" opacity="0.85"/>
+    <circle cx="480" cy="300" r="18" fill="url(#stGrad)" opacity="0.7"/>
+    <circle cx="420" cy="400" r="20" fill="url(#stGrad)" opacity="0.75"/>
+    <circle cx="720" cy="240" r="22" fill="url(#stGrad2)" opacity="0.9"/>
+    <circle cx="780" cy="340" r="18" fill="url(#stGrad2)" opacity="0.8"/>
+    <circle cx="660" cy="420" r="20" fill="url(#stGrad2)" opacity="0.85"/>
+    <circle cx="560" cy="180" r="16" fill="url(#stGrad)" opacity="0.6"/>
+  </g>
+
+  <!-- Hash labels -->
+  <text x="380" y="225" text-anchor="middle" fill="white" font-size="9" font-family="monospace" opacity="0.9">#0</text>
+  <text x="720" y="245" text-anchor="middle" fill="white" font-size="9" font-family="monospace" opacity="0.9">#3</text>
+
+  <!-- Query star -->
+  <polygon points="600,120 608,140 630,140 612,152 620,172 600,158 580,172 588,152 570,140 592,140" fill="#fa709a" opacity="0.9"/>
+
+  <!-- Search rays -->
+  <line x1="600" y1="145" x2="720" y2="240" stroke="#fa709a" stroke-width="2" opacity="0.5" stroke-dasharray="6 4"/>
+  <line x1="600" y1="145" x2="780" y2="340" stroke="#fa709a" stroke-width="2" opacity="0.4" stroke-dasharray="6 4"/>
+
+  <!-- Piece hash block -->
+  <rect x="240" y="480" width="120" height="36" fill="url(#stGrad)" opacity="0.4" rx="6"/>
+  <rect x="380" y="480" width="120" height="36" fill="url(#stGrad)" opacity="0.55" rx="6"/>
+  <rect x="520" y="480" width="120" height="36" fill="url(#stGrad2)" opacity="0.5" rx="6"/>
+  <rect x="660" y="480" width="120" height="36" fill="url(#stGrad2)" opacity="0.65" rx="6"/>
+  <rect x="800" y="480" width="120" height="36" fill="url(#stGrad2)" opacity="0.45" rx="6"/>
+
+  <text x="600" y="560" text-anchor="middle" fill="#667eea" font-size="14" font-family="system-ui, sans-serif" opacity="0.6">hash + embedding ’ semantic DHT</text>
+</svg>
