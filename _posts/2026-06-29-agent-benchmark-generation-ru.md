@@ -9,7 +9,31 @@ image: /assets/images/agent-benchmark-generation.svg
 
 Статические бенчмарки вроде MMLU измеряют **ответ в один ход**. Современные AI-агенты — другое: они **вызывают tools**, меняют состояние БД, кликают по GUI, ведут многоходовый диалог с пользователем и восстанавливаются после ошибок. Нужны бенчмарки, где успех — это **верифицируемый исход действий**, а не совпадение текста с эталоном.
 
-Ниже — обзор **текущего положения дел**, семейств eval-наборов для action-агентов и **подходов к генерации** новых бенчмарков — включая использование других LLM, симуляторов и гибридные пайплайны. Связанные темы в блоге VAIRL: [карта компетенций агент-разработчика](/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/), [устойчивость control loops](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/), [синтез гипотез для улучшения агентов](/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/).
+Генерация и проведение таких eval-наборов — одно из самых динамичных направлений индустрии: оценка смещается от статичных текстов к **поведению в динамической среде** — планированию, tool use, самокоррекции и памяти на длинных горизонтах.
+
+Ниже — обзор **текущего положения дел**, семейств eval-наборов для action-агентов и **подходов к генерации** новых бенчмарков — включая использование других LLM, симуляторов и гибридные пайплайны. В конце — **таблицы** с обзорной литературой, исследователями, компаниями и книгами. Связанные темы в блоге VAIRL: [карта компетенций агент-разработчика](/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/), [устойчивость control loops](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/), [синтез гипотез для улучшения агентов](/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/).
+
+## Уровни оценки и методы валидации
+
+Помимо осей «генерация → среда → верификатор» (см. ниже), в обзорах 2025–2026 выделяют **три уровня** измерения и **три класса** проверки результата.
+
+### Уровни измерения
+
+| Уровень | Что измеряется | Примеры метрик |
+|---------|----------------|----------------|
+| **End-to-End (E2E)** | Только финальный успех задачи | Task Success Rate; закрыт ли issue; достигнуто ли целевое состояние БД |
+| **Trajectory-level** | Пошаговый лог рассуждений и tool calls | Избыточность шагов, зацикливание, оптимальность пути, pass^k |
+| **Component-level** | Изолированные модули агента | Качество tool calling, RAG recall, точность декомпозиции плана |
+
+### Методы валидации результата
+
+| Метод | Суть | Надёжность | Когда применять |
+|-------|------|------------|-----------------|
+| **Deterministic evals** | Unit-тесты, diff состояния, program checker | Высокая | Код, API, DB-oracle (SWE-bench, τ-bench, WebArena-Verified) |
+| **LLM-as-a-Judge** | Сильная модель + рубрика в промпте | Средняя; риск bias | Открытые ответы, prefilter синтетики; не единственный scorer |
+| **Динамическая генерация** | Процедурные / эволюционные задачи на лету | Зависит от verifier | Борьба с contamination; поток задач 2025–2026 |
+
+---
 
 ## Почему бенчмарк агента — не «набор вопросов»
 
@@ -326,13 +350,114 @@ Judge-модель favours «своих». **Лечение:** state-first; judg
 
 ---
 
-## Библиография (выборочно)
+## Обзорные работы (Survey Papers)
 
-- Jimenez et al., SWE-bench; OpenAI SWE-bench Verified
-- Zhou et al., WebArena; ServiceNow WebArena-Verified
-- Yao et al., τ-bench; Barres et al., τ²-bench; Sierra τ³-bench
-- Liu et al., AgentBench
-- Xie et al., OSWorld
-- Mialon et al., GAIA
-- AgentSynth (agentsynth.tech) — generate–judge–pack pipeline
-- Survey of Emerging Trends in LLM Agent Benchmarking (ACM 2025)
+Фундаментальные академические обзоры для погружения в таксономию eval-агентов:
+
+| Работа | Год | Фокус | Ссылка |
+|--------|-----|-------|--------|
+| **Evaluation and Benchmarking of LLM Agents: A Survey** | 2025 | Двумерная таксономия: *что* оценивать (безопасность, capabilities, надёжность) и *как* (среды, бенчмарки, метрики) | [arXiv:2507.21504](https://arxiv.org/abs/2507.21504) · [GitHub-репозиторий](https://github.com/Asaf-Yehudai/LLM-Agent-Evaluation-Survey) |
+| **A Survey on Evaluation of LLM-based Agents** | 2026 | Эволюция агентских бенчмарков; память (эпизодическая / семантическая); мультиагентные среды | [arXiv:2503.16416](https://arxiv.org/html/2503.16416v2) |
+| **Survey of Emerging Trends in LLM Agent Benchmarking** (ACM) | 2026 | Хрупкость мультимодальных агентов; контейнеризированные модульные testbeds; динамическое усложнение | [ACM DL](https://dl.acm.org/doi/10.1145/3784013.3784018) |
+| **Establishing Best Practices for Building Rigorous Agentic Benchmarks** | 2025 | Практика построения надёжных бенчмарков; ложноположительные при auto-check кода и API | [arXiv:2507.02825](https://arxiv.org/html/2507.02825v2) |
+| **A Systematic Survey of AI Agent Evaluation Methods and Metrics** | 2026 | Систематизация методов и метрик оценки агентов | [ResearchGate](https://www.researchgate.net/publication/400639175_A_Systematic_Survey_of_AI_Agent_Evaluation_Methods_and_Metrics) |
+| **Evaluation and Benchmarking of Generative and Agentic AI Systems: A Comprehensive Survey** | 2026 | Комплексный обзор generative и agentic систем | [ResearchGate](https://www.researchgate.net/publication/398749814_Evaluation_and_Benchmarking_of_Generative_and_Agentic_AI_Systems_A_Comprehensive_Survey) |
+
+---
+
+## Ключевые исследователи
+
+| Исследователь | Аффилиация / контекст | Вклад в eval агентов | Ссылка |
+|---------------|----------------------|----------------------|--------|
+| **Shunyu Yao** | Princeton | ReAct; **τ-bench** / τ² / τ³; симулированный пользователь + DB-oracle | [ysymyth.github.io](https://ysymyth.github.io/) |
+| **Carlos E. Jimenez** | Princeton | Ведущий автор **SWE-bench**; строгая верификация coding-агентов на реальных GitHub issues | [carlos-e-jimenez.com](https://www.carlos-e-jimenez.com/) |
+| **Jianxiong Gao** et al. | THUDM / Tsinghua | **AgentBench** — многосредовая оценка (ОС, DB, KG, web, игры) | [AgentBench](https://github.com/THUDM/AgentBench) |
+| **Shuyan Zhou** | CMU / Stanford | **WebArena** — self-hosted web-среды и программные evaluators | [shuyanzhou.com](https://shuyanzhou.com/) |
+| **Asaf Yehudai** et al. | — | Кураторский survey + каталог фреймворков eval | [LLM-Agent-Evaluation-Survey](https://github.com/Asaf-Yehudai/LLM-Agent-Evaluation-Survey) |
+
+---
+
+## Компании и платформы
+
+Рынок делится на **создателей эталонных бенчмарков** и **Enterprise-платформы** для внутреннего LLM Ops / CI eval.
+
+### Индустриальные эталоны и лаборатории
+
+| Организация | Роль | Фокус eval |
+|-------------|------|------------|
+| **OpenAI** | Эталонные eval | OpenAI Evals; **SWE-bench Verified**; Computer-Using Agents |
+| **Anthropic** | Внутренние + публичные бенчмарки | Claude Code, tool use, безопасность, jailbreak-resistance |
+| **ServiceNow** | Курация | **WebArena-Verified** — детерминизм, offline HAR |
+| **Sierra** | Продукт + research | **τ³-bench** — customer service, policy, pass^k |
+| **IBM Research** | Обзоры и бенчмарки | Аналитика agent benchmarks для enterprise | [IBM Research blog](https://research.ibm.com/blog/AI-agent-benchmarks) |
+
+### Платформы генерации, прогона и observability
+
+| Платформа | Тип | Что даёт для бенчмарков |
+|-----------|-----|-------------------------|
+| **Confident AI (DeepEval)** | Open-source + commercial | Метрики траекторий, tool calls, детерминированные checks | [Complete guide](https://www.confident-ai.com/blog/llm-agent-evaluation-complete-guide) |
+| **Galileo** | Enterprise | Agent Leaderboard; галлюцинации, cost per task, надёжность | [galileo.ai](https://galileo.ai/) |
+| **Adaline** | CI/CD eval 2026 | Контролируемые выборки 200–5000 сценариев, непрерывное тестирование | [adaline.ai guide](https://www.adaline.ai/blog/complete-guide-llm-ai-agent-evaluation-2026) |
+| **Langfuse** | Tracing | Визуализация графа вызовов; отладка шага, где ломается логика | [langfuse.com](https://langfuse.com/) |
+| **Arize Phoenix** | Tracing + eval | Трейсы, датасеты, эксперименты на trajectories | [arize.com/phoenix](https://arize.com/docs/phoenix) |
+| **AgentSynth** | Generate–judge–pack | Синтетическая генерация задач + outcome checkers + leaderboard | [agentsynth.tech](https://agentsynth.tech/) |
+
+### Практические гайды и подборки (веб)
+
+| Материал | Тема | Ссылка |
+|----------|------|--------|
+| Phil Schmid — Benchmark Compendium | Сводка бенчмарков LLM/агентов | [philschmid.de](https://www.philschmid.de/benchmark-compedium) |
+| Simmering — Agent Benchmarks | Обзор agent benchmarks | [simmering.dev](https://simmering.dev/blog/agent-benchmarks/) |
+| Alopatenko — LLM Evaluation | Каталог ресурсов по оценке | [alopatenko.github.io](https://alopatenko.github.io/LLMEvaluation/) |
+| Zylos Research | LLM evaluation & benchmarking 2026 | [zylos.ai](https://zylos.ai/research/2026-01-16-llm-evaluation-benchmarking/) |
+| Habr — обзор agent benchmarks | Русскоязычный контекст | [habr.com](https://habr.com/ru/articles/1017082/) |
+
+---
+
+## Книги и фундаментальная литература
+
+Классические книги не успевают за индустрией agent eval, но задают **теоретическую базу** для таксономии тестов, траекторий и детерминированной верификации.
+
+### Фундаментальная теория AI-агентов и систем
+
+| Книга | Авторы | Зачем для бенчмарков |
+|-------|--------|----------------------|
+| *Artificial Intelligence: A Modern Approach* (4th ed.) | Stuart Russell, Peter Norvig | Рациональный агент, task environments, PEAS — основа таксономии «что тестировать» |
+| *An Introduction to MultiAgent Systems* (2nd ed.) | Michael Wooldridge | Кооперация, конкуренция, протоколы общения — eval мультиагентных систем (AutoGen, CrewAI, MAESTRO) |
+
+### Тестирование и оценка LLM / ML-систем
+
+| Книга | Авторы / издатель | Зачем для бенчмарков |
+|-------|-------------------|----------------------|
+| *Evaluating LLMs and LLM-Based Applications* | O'Reilly (сборник) | Практика метрик, LLM-as-a-Judge, eval chains и tool calling в продакшене |
+| *Building Intelligent Systems* | Geoff Hulten | Continuous evaluation, телеметрия, edge cases, построение test suites |
+
+### Смежные дисциплины: RL и автоматизация тестирования
+
+| Книга | Авторы | Зачем для бенчмарков |
+|-------|--------|----------------------|
+| *Reinforcement Learning: An Introduction* (2nd ed.) | Richard S. Sutton, Andrew G. Barto | MDP, reward, оценка траекторий — язык интерактивных сред (WebArena, OSWorld) |
+| *Software Test Automation* | Mark Fewster, Dorothy Graham | Детерминированные checks, изоляция sandbox/Docker, ложноположительные |
+
+---
+
+## Ключевые бенчмарки (статьи и проекты)
+
+| Бенчмарк | Авторы / организация | Домен | Ссылка |
+|----------|---------------------|-------|--------|
+| **SWE-bench** / Verified | Jimenez et al.; OpenAI Verified | Coding / GitHub issues | [swe-bench.com](https://www.swebench.com/) |
+| **WebArena** / Verified | Zhou et al.; ServiceNow Verified | Self-hosted web | [webarena.dev](https://webarena.dev/) |
+| **τ-bench** → **τ²** → **τ³** | Yao; Barres; Sierra | Customer service + API + policy | [τ²-bench](https://github.com/sierra-research/tau2-bench) |
+| **AgentBench** | Liu et al. / THUDM | Multi-env (OS, DB, web, …) | [GitHub](https://github.com/THUDM/AgentBench) |
+| **OSWorld** | Xie et al. | Desktop VM | [os-world.github.io](https://os-world.github.io/) |
+| **GAIA** | Mialon et al. | Multi-step QA + tools | [huggingface.co/gaia-benchmark](https://huggingface.co/gaia-benchmark) |
+| **Mind2Web** | — | Реальные веб-траектории | [mind2web.github.io](https://mind2web.github.io/) |
+| **Terminal-Bench** | — | Shell-агенты в контейнере | [tbench.ai](https://www.tbench.ai/) |
+
+---
+
+## Библиография (дополнительно)
+
+- Springer — обзор методов оценки агентов: [link.springer.com](https://link.springer.com/article/10.1007/s10462-026-11571-0)
+- Medium / Future AGI — frameworks & metrics 2026: [futureagi.com](https://futureagi.com/blog/llm-evaluation-2025/)
+- YouTube — обзорные лекции по agent eval: [LyNhRF4IflU](https://www.youtube.com/watch?v=LyNhRF4IflU), [96cfC7m10ks](https://www.youtube.com/watch?v=96cfC7m10ks)
