@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "MAESTRO от AIRI: стек, микросервисы и подходы к мультиагентным системам"
-date: 2026-07-02 12:00:00 +0300
+date: 2026-07-01 17:20:32 +0300
 excerpt: "Разбор платформы MAESTRO (Multi-Agent Ecosystem of Task Reasoning and Orchestration) и MAESTRO CARE от AIRI: библиотеки MMAR, gRPC-сервисы, CARL, GigaEvo, требования к модулям и ссылки на репозитории."
 lang: ru
 image: /assets/images/maestro-airi-stack.svg
