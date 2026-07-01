@@ -4,6 +4,7 @@ title: "Эволюция разума, метасистемные переход
 date: 2026-06-23
 excerpt: "От биологических предпосылок разума к формальным скачкам сложности (метасистемные переходы Турчина) и дальше к коллективам агентов — роям роботов и мультиагентным системам."
 lang: ru
+image: /assets/images/evolution-mind-mst-swarm.svg
 pa_nudge: pub-evolution-mind-mst-swarm
 status: draft
 ---

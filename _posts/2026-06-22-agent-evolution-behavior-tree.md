@@ -4,6 +4,7 @@ title: "Agent Evolution as a Tree — Mapping to Behavior Trees"
 date: 2026-06-22
 excerpt: "Visualizing the evolution of agent capabilities — from simple reactions to planning and multi-agent coordination — and mapping stages onto behavior tree node types."
 lang: en
+image: /assets/images/agent-evolution-behavior-tree.svg
 pa_nudge: agent-evolution-behavior-tree-patreon
 status: draft
 ---

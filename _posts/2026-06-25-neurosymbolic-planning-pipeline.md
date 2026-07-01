@@ -4,6 +4,7 @@ title: "Neurosymbolic Planning: LLM/VLM → PDDL/STRIPS → Critic"
 date: 2026-06-25
 excerpt: "A pipeline where neural modules translate observations into symbols, a classical planner builds verifiable plans, and a critic closes the loop with the real world."
 lang: en
+image: /assets/images/neurosymbolic-planning-pipeline.svg
 pa_nudge: pub-neurosymbolic-planning-pipeline
 status: draft
 ---

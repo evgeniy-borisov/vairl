@@ -4,6 +4,7 @@ title: "Синтез гипотез локальной LLM для повышен
 date: 2026-06-26 20:44:30 +0300
 excerpt: "Как генерировать проверяемые гипотезы об улучшении LLM-агентов с помощью локальной модели в Google Colab, хранить их в ChromaDB и исследовать пространство решений."
 lang: ru
+image: /assets/images/llm-hypothesis-synthesis-agents.svg
 ---
 
 Улучшение агентов — это не одна идея, а **пространство гипотез**: изменения в планировании, вызове инструментов, памяти, рефлексии и восстановлении после ошибок. В этой публикации — практический пайплайн, который можно запустить в [Google Colab](https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hypothesis-synthesis-agents.ipynb) без внешних API.

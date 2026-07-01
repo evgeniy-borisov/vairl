@@ -4,6 +4,7 @@ title: "Hybrid Agent: DAG, Finite State Machines, and Behavior Trees"
 date: 2026-06-26 20:46:08 +0300
 excerpt: "Three classic ways to describe agent logic — DAG, FSM, and Behavior Tree — and how to combine them, switch modes, and visualize them as graphs. When conversion between formats is possible."
 lang: en
+image: /assets/images/hybrid-agent-dag-fsm-behavior-tree.svg
 ---
 
 Agent logic can be described in several ways: as a **directed acyclic graph** (DAG) of steps, as a **finite state machine** (FSM) with explicit modes, or as a **behavior tree** (BT) with compositional nodes. In practice you rarely pick one forever — a **hybrid orchestrator** that keeps one representation active, switches between them, and renders structure as a graph for debugging is often the right shape.

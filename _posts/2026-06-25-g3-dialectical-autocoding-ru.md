@@ -4,6 +4,7 @@ title: "g3: диалектическое автокодирование и adver
 date: 2026-06-25
 excerpt: "g3 — референсная реализация Block AI Research для диалектического автокодирования: петля Coach/Player, которая выдаёт протестированный код с соблюдением требований, а не одноразовый vibe coding."
 lang: ru
+image: /assets/images/g3-dialectical-autocoding.svg
 pa_source: "https://github.com/dhanji/g3"
 status: draft
 ---

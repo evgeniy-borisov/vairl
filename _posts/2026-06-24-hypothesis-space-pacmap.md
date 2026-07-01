@@ -4,6 +4,7 @@ title: "Hypothesis Spaces and Dimensionality Reduction with PaCMAP"
 date: 2026-06-24
 excerpt: "How to represent a space of hypotheses — models, strategies, or solutions — and visualize it in 2D while preserving local and global structure using PaCMAP."
 lang: en
+image: /assets/images/hypothesis-space-pacmap.svg
 pa_nudge: pub-hypothesis-space-pacmap
 status: draft
 ---

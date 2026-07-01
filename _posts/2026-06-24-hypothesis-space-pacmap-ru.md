@@ -4,6 +4,7 @@ title: "Пространство гипотез и понижение разме
 date: 2026-06-24
 excerpt: "Как представить пространство гипотез — моделей, стратегий или решений — и визуализировать его в 2D с сохранением локальной и глобальной структуры методом PaCMAP."
 lang: ru
+image: /assets/images/hypothesis-space-pacmap.svg
 pa_nudge: pub-hypothesis-space-pacmap
 status: draft
 ---

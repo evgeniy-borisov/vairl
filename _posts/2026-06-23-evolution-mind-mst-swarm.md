@@ -4,6 +4,7 @@ title: "Evolution of Mind, Metasystem Transitions, and Robot Swarms"
 date: 2026-06-23
 excerpt: "From biological precursors of mind to formal complexity leaps (Turchin's metasystem transitions) and onward to collectives of agents — robot swarms and multi-agent systems."
 lang: en
+image: /assets/images/evolution-mind-mst-swarm.svg
 pa_nudge: pub-evolution-mind-mst-swarm
 status: draft
 ---

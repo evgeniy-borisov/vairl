@@ -4,6 +4,7 @@ title: "Local LLM Hypothesis Synthesis for Agent Quality"
 date: 2026-06-26 20:44:30 +0300
 excerpt: "A Colab pipeline to generate testable hypotheses for improving LLM agents with a local model, ChromaDB storage, and hypothesis-space visualization."
 lang: en
+image: /assets/images/llm-hypothesis-synthesis-agents.svg
 ---
 
 Improving agents is not a single trick — it is a **hypothesis space**: changes to planning, tool use, memory, reflection, and error recovery. This post describes a practical pipeline you can run in [Google Colab](https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hypothesis-synthesis-agents.ipynb) without external APIs.

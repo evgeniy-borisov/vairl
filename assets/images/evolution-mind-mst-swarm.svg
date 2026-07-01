@@ -1,0 +1,45 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="emsG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="emsG2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbff"/>
+  <!-- MST levels -->
+  <g transform="translate(120,100)">
+    <rect x="0" y="0" width="960" height="50" rx="8" fill="url(#emsG1)" opacity="0.15" stroke="#667eea" stroke-width="1.5"/>
+    <text x="20" y="32" fill="#667eea" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Level N · metasystem</text>
+    <rect x="0" y="70" width="960" height="50" rx="8" fill="url(#emsG1)" opacity="0.12" stroke="#764ba2" stroke-width="1.5"/>
+    <text x="20" y="102" fill="#764ba2" font-family="system-ui,sans-serif" font-size="14">Level N1</text>
+    <rect x="0" y="140" width="960" height="50" rx="8" fill="url(#emsG1)" opacity="0.09" stroke="#667eea" stroke-width="1.5"/>
+    <text x="20" y="172" fill="#667eea" font-family="system-ui,sans-serif" font-size="14">Level N2 · mind</text>
+    <path d="M480 50 L480 70 M480 120 L480 140" stroke="#667eea" stroke-width="2" opacity="0.4"/>
+    <text x="500" y="65" fill="#888" font-size="12">MST ‘</text>
+  </g>
+  <!-- robot swarm -->
+  <g transform="translate(200,320)">
+    <circle cx="0" cy="0" r="18" fill="url(#emsG2)" opacity="0.85"/>
+    <circle cx="80" cy="40" r="16" fill="url(#emsG2)" opacity="0.75"/>
+    <circle cx="160" cy="-10" r="18" fill="url(#emsG2)" opacity="0.85"/>
+    <circle cx="240" cy="50" r="15" fill="url(#emsG2)" opacity="0.7"/>
+    <circle cx="320" cy="10" r="17" fill="url(#emsG2)" opacity="0.8"/>
+    <circle cx="400" cy="45" r="16" fill="url(#emsG2)" opacity="0.75"/>
+    <circle cx="480" cy="0" r="18" fill="url(#emsG2)" opacity="0.85"/>
+    <circle cx="560" cy="35" r="15" fill="url(#emsG2)" opacity="0.7"/>
+    <circle cx="640" cy="5" r="17" fill="url(#emsG2)" opacity="0.8"/>
+    <circle cx="720" cy="48" r="16" fill="url(#emsG2)" opacity="0.75"/>
+    <g stroke="#38f9d7" stroke-width="1.5" opacity="0.35">
+      <line x1="0" y1="0" x2="80" y2="40"/><line x1="80" y1="40" x2="160" y2="-10"/>
+      <line x1="160" y1="-10" x2="240" y2="50"/><line x1="240" y1="50" x2="320" y2="10"/>
+      <line x1="320" y1="10" x2="400" y2="45"/><line x1="400" y1="45" x2="480" y2="0"/>
+      <line x1="480" y1="0" x2="560" y2="35"/><line x1="560" y1="35" x2="640" y2="5"/>
+      <line x1="640" y1="5" x2="720" y2="48"/>
+    </g>
+  </g>
+  <text x="600" y="520" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="20" opacity="0.65">Evolution of Mind · MST · Robot Swarm</text>
+</svg>

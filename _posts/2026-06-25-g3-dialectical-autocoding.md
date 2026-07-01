@@ -4,6 +4,7 @@ title: "g3: Dialectical Autocoding and Adversarial Cooperation"
 date: 2026-06-25
 excerpt: "g3 is Block AI Research's reference implementation of dialectical autocoding — a coach/player agent loop that produces tested, requirements-compliant code beyond single-turn vibe coding."
 lang: en
+image: /assets/images/g3-dialectical-autocoding.svg
 pa_source: "https://github.com/dhanji/g3"
 status: draft
 ---

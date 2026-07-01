@@ -4,6 +4,7 @@ title: "Эволюция агентов как дерево — наложени
 date: 2026-06-22
 excerpt: "Визуализация нарастания способностей агентов — от простых реакций к планированию и мультиагентной координации — и отображение этапов на типы узлов behavior tree."
 lang: ru
+image: /assets/images/agent-evolution-behavior-tree.svg
 pa_nudge: agent-evolution-behavior-tree-patreon
 status: draft
 ---
