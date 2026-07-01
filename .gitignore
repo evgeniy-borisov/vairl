@@ -6,4 +6,5 @@ vendor/
 .bundle/
 Gemfile.lock
 .DS_Store
+.venv-nn/
 

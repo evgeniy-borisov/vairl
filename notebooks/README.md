@@ -18,6 +18,7 @@ https://colab.research.google.com/github/<owner>/<repo>/blob/main/notebooks/<и�
 | [hypothesis-synthesis-agents.ipynb](hypothesis-synthesis-agents.ipynb) | Локальная LLM + ChromaDB: синтез гипотез для повышения качества агентов |
 | [hybrid-agent-dag-fsm-bt.ipynb](hybrid-agent-dag-fsm-bt.ipynb) | DAG, FSM и Behavior Tree: минимальные исполнители, визуализация и конвертация |
 | [semantic-torrent.ipynb](semantic-torrent.ipynb) | Semantic Torrent: чанки, хэши, TF-IDF embeddings, семантический DHT и поиск по смыслу |
+| [pytorch-to-browser-onnx.ipynb](pytorch-to-browser-onnx.ipynb) | PyTorch → ONNX: обучение TinyCNN на MNIST и экспорт для ONNX Runtime Web в браузере |
 
 ## Добавление нового ноутбука
 
