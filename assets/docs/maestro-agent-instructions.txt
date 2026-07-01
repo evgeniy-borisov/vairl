@@ -1,0 +1,445 @@
+================================================================================
+MAESTRO / MMAR — ИНСТРУКЦИИ ДЛЯ АГЕНТА-ПРОГРАММИСТА
+================================================================================
+Версия: 2026-07-02
+Контекст: экосистема MAESTRO (AIRI, группа «Мультимодальные архитектуры ИИ»)
+Сопутствующая статья: /vairl/blog/2026/07/02/maestro-airi-stack-ru/
+
+Этот файл — операционная спецификация для coding-агента, который пишет,
+расширяет или отлаживает модули MAESTRO runtime, CARE, CARL-цепочки и
+gRPC-сервисы. Следуй ей буквально, если задача не переопределяет правила.
+
+================================================================================
+0. РОЛЬ АГЕНТА
+================================================================================
+
+Ты — агент-разработчик в экосистеме MAESTRO. Твои задачи:
+
+  A) Новый gRPC-микросервис (capability) за mmar-ptag
+  B) Track / бизнес-логика в chat-manager
+  C) CARL ReasoningChain (DAG шагов Event→Action→Result)
+  D) Расширение MAESTRO CARE (TUI/CLI, фасады Memory/Platform)
+  E) Интеграция с llm-hub, moderators, extractors
+
+Перед любым изменением определи контур:
+  - RUNTIME (maestro-core, gateway, chat-manager) — продакшен-боты
+  - CARE (MAGE → CARL → Memory → Platform) — генерация/эволюция агентов
+  - GIGAEVO (gigaevo-platform) — эксперименты и GA
+
+Не смешивай контуры: эволюция агентов — через GigaEvo, не внутри gateway.
+
+================================================================================
+1. АРХИТЕКТУРНЫЕ ПРИНЦИПЫ (ОБЯЗАТЕЛЬНЫ)
+================================================================================
+
+1.1. Один агент / один сервис — одна бизнес-задача
+     Сложный сценарий = композиция специализированных узлов (DAG или track).
+
+1.2. Contract-first (контракт в mmar-mapi)
+     Интерфейс сервиса объявляется в mmar-mapi (ABC / typing.Protocol).
+     Реализация — в service--*. Клиенты видят только интерфейс + ptag_client.
+
+1.3. Два транспортных контура
+     ВНУТРИ кластера:  gRPC через mmar-ptag (НЕ REST между сервисами)
+     СНАРУЖИ:          HTTP REST (FastAPI gateway), JWT Bearer
+
+1.4. Разделение «диалог» vs «рассуждение»
+     FSM / tracks     → chat-manager-examples (UX, slot-filling, ветвление диалога)
+     DAG / CARL       → многошаговая экспертиза, параллельные ветки, контекст
+
+1.5. LLM — только через llm-hub
+     Прямые вызовы OpenAI/GigaChat из business-логики ЗАПРЕЩЕНЫ.
+     Используй ptag_client(LLMHubAPI, address).
+
+1.6. Модерация — отдельный сервис
+     Не вшивай политики безопасности в gateway. Вызов moderators / mmar-flame.
+
+1.7. Сквозная трассировка
+     Методы ptag-интерфейсов принимают trace_id: str = "".
+     Пробрасывай trace_id от gateway до всех downstream-вызовов.
+
+1.8. Lazy imports в CARE
+     Не импортируй MAGE/CARL/Platform на уровне модуля care/*.
+     Импорт — внутри функции; отсутствие dep → понятная подсказка установки.
+
+================================================================================
+2. ПАТТЕРНЫ ПРОЕКТИРОВАНИЯ
+================================================================================
+
+2.1. Interface + Dynamic Proxy (mmar-ptag)
+     ┌─────────────┐   ptag_client(IFace, host:port)   ┌─────────────┐
+     │   Client    │ ────────────────────────────────► │ gRPC Server │
+     │ (chat-mgr)  │ ◄──────────────────────────────── │ (реализация)│
+     └─────────────┘   Pydantic serialize/deserialize  └─────────────┘
+
+     Сервер:
+       from mmar_ptag import deploy_server
+       deploy_server(config_server=SimpleNamespace(port=50051, max_workers=10),
+                     service=MyServiceImpl())
+
+     Клиент:
+       from mmar_ptag import ptag_client
+       client = ptag_client(MyAPI, "llm-hub:40631")
+
+2.2. Facade (CARE)
+     CareMemory  → обёртка над gigaevo-client (Memory API)
+     CarePlatform → обёртка над GigaEvo Platform (evolution, SSE)
+     Не вызывай Memory/Platform SDK напрямую из UI-слоёв — только через фасады.
+
+2.3. Track = FSM (chat-manager)
+     Track — конечный автомат диалога: состояния, переходы, слоты.
+     Паттерн slot-filling: пошаговый сбор полей через разговор.
+     Пример: service--chat-manager-examples/.../tracks/filling_user_profile.py
+
+2.4. ReasoningChain = DAG (mmar-carl)
+     StepDescription: event, action, expected_result
+     ReasoningChain: упорядоченный граф шагов; параллельные ветки — независимо
+     ReasoningContext: накопление + RAG-подобный поиск релевантных фрагментов
+
+2.5. Strategy (режимы CARE)
+     Ad-Hoc:      generate → run → discard (ничего не сохранять)
+     Production:  generate → save chain_id → baseline run → dataset → evolve
+
+2.6. Dependency Injection (gateway)
+     dishka для FastAPI. Не создавай глобальные синглтоны клиентов вручную.
+
+2.7. Template Method (новый сервис)
+     Генерация скелета: Copier + maestro-service-template
+       copier copy https://github.com/AIRI-MAESTRO/maestro-grpc-service-template.git <path>
+       copier copy ... --data=service_name=my-service
+
+2.8. Adapter (интеграции)
+     LangChain / ReAct треки в учебном примере — адаптеры к тем же gRPC-сервисам,
+     не альтернативная архитектура.
+
+================================================================================
+3. ПРОГРАММНЫЙ СТЕК
+================================================================================
+
+3.1. Язык и рантайм
+     Python 3.12+ (документация платформы)
+     Python 3.13+ (maestro-core gateway, сверяй pyproject.toml сервиса)
+     Менеджер пакетов: uv (CARE, maestro-core), pip допустим
+
+3.2. Веб / API (внешний контур)
+     FastAPI 0.115.x
+     Starlette, Uvicorn[standard]
+     Pydantic 2.x, pydantic-settings
+     python-multipart
+     dishka (DI)
+     loguru (логирование)
+
+3.3. Библиотеки MMAR (PyPI)
+     mmar-mapi    — контракты API (LLMHubAPI, TextExtractorAPI, BinaryClassifiersAPI, …)
+     mmar-ptag    — gRPC framework
+     mmar-llm     — LLM accessors, TOML/JSON конфиг
+     mmar-carl    — ReasoningChain, StepDescription, ContextSearchConfig
+     mmar-flame   — модерация
+     mmar-mcli    — CLI к gateway
+     mmar-utils   — утилиты, трейсинг
+     mmar-mage    — генератор CARL-цепочек (CARE)
+
+3.4. Хранение данных
+     PostgreSQL 12+  — чаты, auth, JWT sessions (gateway, async SQLAlchemy 2)
+     asyncpg, Alembic
+     Файловая система — FileStorage в mmar-mapi, volume ./data:/mnt/data
+     GigaEvo Memory   — сущности chain/agent/agent_skill/memory_card (HTTP API)
+
+3.5. CARE / TUI
+     maestro-care (PyPI)
+     Textual — TUI
+     TOML: ~/.config/care/config.toml, ./care.toml
+     Env: CARE_* с вложенностью через __ (CARE_MAGE__MODE=fast)
+
+3.6. GigaEvo Platform (эволюция)
+     FastAPI Master API (:8000), Runner API (:8001)
+     Gradio WebUI (:7860)
+     Kafka (KRaft), Redis, MinIO
+     gigaevo-client SDK
+
+3.7. Качество кода (обязательно для сервисов maestro-core)
+     ruff (line-length 120, ANN + I + F)
+     mypy strict (disallow_untyped_defs, plugins pydantic.mypy)
+     pytest + pytest-asyncio
+     testcontainers[postgres] для интеграционных тестов gateway
+
+3.8. Контейнеризация
+     Docker, Docker Compose
+     Сеть: network-maestro-core (bridge)
+     Общий env: ENV_FILE=/mnt/data/.env, TZ=Europe/Moscow
+     restart: "no" в демо compose (prod — настраивать отдельно)
+
+3.9. OCR / документы (document-extractor)
+     Tesseract (tesseract-ocr-rus, tesseract-ocr-eng)
+     python-magic
+
+================================================================================
+4. СТЕК ПРОТОКОЛОВ
+================================================================================
+
+4.1. Схема уровней
+
+     [Клиент: Web / Mobile / Telegram / CARE TUI]
+              │
+              │ HTTP/1.1 REST, JSON
+              │ Authorization: Bearer <JWT>
+              ▼
+     [gateway :7731 — FastAPI]
+              │
+              │ gRPC + protobuf (PTAGRequest/PTAGResponse)
+              │ Pydantic JSON внутри protobuf-обёртки
+              │ trace_id в kwargs методов
+              ├──────────► chat-manager-examples :17231
+              │                 │
+              │                 ├──► llm-hub :40631
+              │                 ├──► question-detector :31611
+              │                 ├──► text-extractor :9681
+              │                 ├──► document-extractor
+              │                 └──► moderators (mmar-flame)
+              │
+              └──► PostgreSQL (asyncpg, SQLAlchemy)
+
+     [CARE TUI/CLI]
+              │
+              ├── HTTP → GigaEvo Memory API (gigaevo-client)
+              ├── HTTP → GigaEvo Platform Master/Runner API
+              ├── HTTP → LLM (OpenAI-compatible, через MAGE config)
+              └── локально: CARL runner, AgentSkill sandbox (Docker)
+
+4.2. Внешний API (gateway)
+     Протокол:     HTTP REST
+     Формат:       JSON
+     Auth:         JWT Bearer (pyjwt)
+                   Типы клиентов: user (email/password), app (client_id/secret)
+     Загрузка:     multipart/form-data для файлов
+     Ошибки:       HTTP 400, 401; исключения mmar → статусы автоматически
+
+4.3. Межсервисный RPC (ptag)
+     Протокол:     gRPC
+     Сериализация: protobuf envelope + Pydantic JSON payload
+     Именование:   keyword-only аргументы в интерфейсе
+     Реконнект:    reconnect_attempts=5 (по умолчанию)
+     Трейсинг:     trace_id → mmar_mimpl.TRACE_ID_VAR
+
+4.4. LLM-hub
+     Протокол:     gRPC (внутри) → OpenAI-compatible HTTP (наружу к провайдерам)
+     Конфиг:       llm-config.toml (с v0.2.0, не JSON)
+     Провайдеры:   OpenAI, Anthropic, GigaChat, DeepSeek, OpenRouter
+     Мониторинг:   Langfuse (нативная интеграция OpenAI API, не отдельный proxy)
+
+4.5. GigaEvo Platform
+     Master ↔ Runner:  Kafka topics
+       experiment-config, experiment-prepared, experiment-started,
+       experiment-stopped, runner-status
+     REST:             /api/v1/experiments/* (Master, Runner)
+     Storage:          MinIO (S3-compatible), PostgreSQL, Redis
+     CARE evolution:   SSE progress streams (Platform)
+
+4.6. GigaEvo Memory
+     REST API через gigaevo-client
+     SSE: watch_entities для live-обновлений библиотеки
+     Поиск: bm25 | vector | hybrid (maestro search)
+
+4.7. Telegram frontend
+     Протокол: Telegram Bot API (HTTP long polling / webhook)
+     Маршрутизация: → gateway
+
+4.8. Телеметрия (опционально)
+     CARE_TELEMETRY__* → Langfuse event stream
+     trace_id сквозной по ptag-цепочке
+
+================================================================================
+5. СТРУКТУРА РЕПОЗИТОРИЕВ И ИМЕНОВАНИЕ
+================================================================================
+
+5.1. Организации GitHub
+     AIRI-Institute  — maestro-core, maestro-cover, gigaevo-platform
+     AIRI-MAESTRO    — care, mage, carl, maestro-service-template, gigaevo-client
+
+     ВАЖНО: исходники CARE — github.com/AIRI-MAESTRO/care
+            (AIRI-Institute/care — не существует / 404)
+
+5.2. maestro-core — layout сервиса
+     service--<name>/          # микросервис
+       pyproject.toml
+       Dockerfile
+       src/
+     lib--mmar-<name>/         # vendored библиотека MMAR
+     compose.yaml              # оркестрация демо
+     data/                     # .env, persistent files
+
+5.3. Порты демо (compose.yaml)
+     gateway              7731
+     chat-manager-examples 17231
+     llm-hub              40631
+     question-detector    31611
+     text-extractor       9681
+
+5.4. CARE layout (care/)
+     care/app.py           # Textual entry
+     care/cli.py           # headless CLI
+     care/config.py        # CareConfig (Pydantic)
+     care/memory.py        # CareMemory facade
+     care/platform.py      # CarePlatform facade
+     care/runtime/         # адаптеры MAGE/CARL → Textual messages
+
+================================================================================
+6. ЧЕКЛИСТ: НОВЫЙ gRPC-СЕРВИС
+================================================================================
+
+[ ] 1. Определи интерфейс в mmar-mapi (или локальный ABC, если демо-only)
+[ ] 2. Сгенерируй скелет: copier copy maestro-grpc-service-template
+[ ] 3. Реализуй класс-сервис с keyword-only методами + trace_id
+[ ] 4. deploy_server() в entrypoint
+[ ] 5. Dockerfile + image maestro-core--<service-name>
+[ ] 6. Добавь в compose.yaml: ports, <<: *common, network
+[ ] 7. Зарегистрируй address в конфиге chat-manager / gateway
+[ ] 8. Клиент: ptag_client(YourAPI, config.addresses.your_service)
+[ ] 9. ruff + mypy + pytest
+[ ] 10. README: фичи, порты, env, ответственный
+
+АНТИПАТТЕРНЫ:
+  ✗ REST endpoint между внутренними сервисами вместо ptag
+  ✗ Прямой HTTP к OpenAI из chat-manager
+  ✗ Общая БД между сервисами (кроме gateway↔PostgreSQL для чатов)
+  ✗ Игнорирование trace_id
+
+================================================================================
+7. ЧЕКЛИСТ: TRACK В chat-manager
+================================================================================
+
+[ ] 1. Один track = один сценарий / одна бизнес-задача
+[ ] 2. Состояния явно именованы; переходы документированы
+[ ] 3. LLM только через ptag_client(LLMHubAPI, ...)
+[ ] 4. Модерация: ptag_client(BinaryClassifiersAPI, moderators_addr)
+[ ] 5. Извлечение текста: ptag_client(TextExtractorAPI, ...)
+[ ] 6. Slot-filling: отдельные состояния на каждый слот
+[ ] 7. Тесты на happy path + отмену / невалидный ввод
+
+================================================================================
+8. ЧЕКЛИСТ: CARL-ЦЕПОЧКА
+================================================================================
+
+[ ] 1. Каждый шаг: Event → Action → Result (StepDescription)
+[ ] 2. Граф ацикличен или явно обработаны циклы (ReAct — в CARL runner)
+[ ] 3. Параллельные ветки не делят mutable state без ReasoningContext
+[ ] 4. ContextSearchConfig для RAG-подобного извлечения контекста
+[ ] 5. Валидация: maestro validate chain.json
+[ ] 6. Tools: @carl_tool + регистрация в CARE_TOOLS__*
+[ ] 7. AgentSkill: sandbox backend из CARE_SANDBOX__* (Docker по умолчанию)
+[ ] 8. Production: сохранение в Memory (CARE_MEMORY__BASE_URL)
+
+Пример скелета:
+  from mmar_carl import StepDescription, ReasoningChain, ReasoningContext
+  from mmar_llm import EntrypointsAccessor, EntrypointsConfig
+
+================================================================================
+9. ЧЕКЛИСТ: РАСШИРЕНИЕ CARE
+================================================================================
+
+[ ] 1. Конфиг — только через CareConfig / CARE_* env
+[ ] 2. Новый upstream-вызов — lazy import + friendly error
+[ ] 3. UI-события — через runtime/* poster/streamer, не блокировать event loop
+[ ] 4. CLI-паритет: каждый экран TUI имеет headless twin (maestro <cmd>)
+[ ] 5. maestro doctor — новые зависимости должны проходить probe
+[ ] 6. Телеметрия — opt-in через CARE_TELEMETRY__*
+
+Команды быстрой проверки:
+  uv sync
+  uv run maestro init
+  uv run maestro doctor
+  uv run maestro validate <chain.json>
+  uv run maestro generate "задача" --mode fast
+  uv run maestro run <chain_id> --execute --task "..."
+
+================================================================================
+10. КОНФИГУРАЦИЯ (СПРАВОЧНИК)
+================================================================================
+
+10.1. maestro-core compose
+     ENV_FILE=/mnt/data/.env
+     Volume: ./data:/mnt/data
+     TZ=Europe/Moscow
+
+10.2. llm-hub (v0.2.0+)
+     Файл: llm-config.toml (см. llm-config.toml.example)
+     НЕ использовать устаревший entrypoints.json / llm_config.json
+
+10.3. CARE
+     Приоритет: defaults < ~/.config/care/config.toml < ./care.toml < CARE_* env
+     Секции: mage, memory, platform, sandbox, tools, telemetry, defaults
+     Секреты: maestro migrate-secrets → keystore:// URLs
+
+10.4. GigaEvo Platform
+     llm_models.yml (из .example)
+     COMPOSE_PROJECT_NAME, GIGAEVO_NETWORK_NAME обязательны
+     MEMORY_API_URL для runner-контейнеров (host.docker.internal:8002 локально)
+
+================================================================================
+11. ТИПИЧНЫЕ ЗАДАЧИ → КУДА ЛЕЗТЬ
+================================================================================
+
+Задача                              │ Репозиторий / путь
+────────────────────────────────────┼──────────────────────────────────────────
+Добавить LLM-провайдер              │ service--llm-hub, llm-config.toml
+Новый классификатор                 │ service--question-detector или moderators
+OCR / PDF                           │ service--document-extractor
+Диалоговый сценарий                 │ service--chat-manager-examples/tracks/
+JWT / auth                          │ gateway + maestro-cover §auth-service
+Сгенерировать цепочку из NL         │ AIRI-MAESTRO/mage, CARE MAGE facade
+Исполнить цепочку                   │ mmar-carl, care/runtime/executor.py
+Сохранить агента в библиотеку       │ gigaevo-client, care/memory.py
+Эволюция цепочки                    │ gigaevo-platform, maestro evolve
+Шаблон нового сервиса               │ AIRI-MAESTRO/maestro-service-template
+Документация API                    │ airi-institute.github.io/maestro-cover
+
+================================================================================
+12. ПОРЯДОК РАБОТЫ АГЕНТА (WORKFLOW)
+================================================================================
+
+1. READ    — прочитай pyproject.toml / compose.yaml / интерфейс в mmar-mapi
+2. SCOPE   — runtime vs CARE vs GigaEvo; не расширяй scope
+3. CONTRACT — сначала интерфейс (сигнатуры + trace_id), потом реализация
+4. WIRE    — ptag server/client, compose, config addresses
+5. TEST    — pytest; для gateway — testcontainers postgres
+6. LINT    — ruff check, mypy (как в сервисе-образце)
+7. DOC     — README сервиса: порт, env, пример вызова
+8. VALIDATE — docker compose up; maestro doctor (если CARE)
+
+При рефакторинге:
+  - Не ломай обратную совместимость mmar-mapi без bump версии
+  - Смотри NEWS.md maestro-core для BREAKING changes (0.2.0: llm-hub TOML, PostgreSQL)
+
+================================================================================
+13. ССЫЛКИ
+================================================================================
+
+Документация MAESTRO (RU):
+  https://airi-institute.github.io/maestro-cover/
+
+Пример создания ассистента:
+  https://airi-institute.github.io/maestro-cover/instruction.html
+
+CARE Architecture:
+  https://github.com/AIRI-MAESTRO/care/blob/main/docs/ARCHITECTURE.md
+
+maestro-core:
+  https://github.com/AIRI-Institute/maestro-core
+
+Шаблон gRPC-сервиса:
+  https://github.com/AIRI-MAESTRO/maestro-service-template
+
+GigaEvo Platform:
+  https://github.com/AIRI-Institute/gigaevo-platform
+
+PyPI:
+  https://pypi.org/project/maestro-care/
+  https://pypi.org/project/mmar-ptag/
+  https://pypi.org/project/mmar-carl/
+
+Хабр:
+  https://habr.com/ru/companies/airi/articles/967612/
+
+================================================================================
+КОНЕЦ ФАЙЛА
+================================================================================
