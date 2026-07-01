@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Устойчивость agent control loops и фазовый портрет в Embedding Space"
-date: 2026-06-29
+date: 2026-06-29 14:28:00 +0300
 excerpt: "Замкнутые контуры AI-агентов через призму теории управления: обратная связь, gain, критичность передачи смысла, фазовый портрет и траектории в embedding space."
 lang: ru
 image: /assets/images/agent-control-loop-stability.svg

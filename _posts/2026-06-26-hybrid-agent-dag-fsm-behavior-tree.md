@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Hybrid Agent: DAG, Finite State Machines, and Behavior Trees"
-date: 2026-06-26
+date: 2026-06-26 20:46:08 +0300
 excerpt: "Three classic ways to describe agent logic — DAG, FSM, and Behavior Tree — and how to combine them, switch modes, and visualize them as graphs. When conversion between formats is possible."
 lang: en
 ---

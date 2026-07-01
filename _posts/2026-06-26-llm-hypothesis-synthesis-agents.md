@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Local LLM Hypothesis Synthesis for Agent Quality"
-date: 2026-06-26
+date: 2026-06-26 20:44:30 +0300
 excerpt: "A Colab pipeline to generate testable hypotheses for improving LLM agents with a local model, ChromaDB storage, and hypothesis-space visualization."
 lang: en
 ---

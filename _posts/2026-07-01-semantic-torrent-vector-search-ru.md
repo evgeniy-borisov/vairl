@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Semantic Torrent: торрент-протокол и векторный поиск по смыслу"
-date: 2026-06-29
+date: 2026-07-01 14:11:38 +0300
 excerpt: "Как совместить content-addressed обмен кусками файла с семантическими embedding: децентрализованный поиск фрагментов по содержанию, расширение DHT и интерактивный пример."
 lang: ru
 image: /assets/images/semantic-torrent.svg

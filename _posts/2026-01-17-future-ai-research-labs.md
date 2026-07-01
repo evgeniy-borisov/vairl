@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "The Future of AI Research Labs"
-date: 2026-01-17
+date: 2026-01-17 17:54:00 +0300
 excerpt: "As AI continues to advance at a rapid pace, the nature of AI research labs is evolving. What will the AI research lab of the future look like?"
 lang: en
 image: /assets/images/future-ai-labs.svg

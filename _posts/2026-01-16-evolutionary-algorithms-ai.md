@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Evolutionary Algorithms in AI Research"
-date: 2026-01-16
+date: 2026-01-17 17:52:00 +0300
 excerpt: "Evolutionary algorithms draw inspiration from biological evolution to solve complex optimization problems. These techniques are proving invaluable in modern AI research."
 lang: en
 image: /assets/images/evolutionary-algorithms.svg
