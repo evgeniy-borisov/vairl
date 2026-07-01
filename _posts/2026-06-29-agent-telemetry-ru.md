@@ -2,14 +2,14 @@
 layout: post
 title: "Телеметрия AI-агентов: сбор запросов, хранение и поиск похожих задач"
 date: 2026-06-29 18:36:39 +0300
-excerpt: "Обзор практик логирования коммуникации пользователя с агентом: трассы, задачи, хранилища, PII, embedding-поиск похожих сессий и связь с eval и бенчмарками."
+excerpt: "Обзор практик логирования коммуникации пользователя с агентом: трассы, задачи, хранилища, PII, embedding-поиск похожих сессий, связь с eval и бенчмарками, фундаментальная литература."
 lang: ru
 image: /assets/images/agent-telemetry.svg
 ---
 
 Без телеметрии агент — чёрный ящик: вы не знаете, **какие задачи** приходят пользователям, где падает траектория и что превратить в тест для регрессии. Телеметрия — это не «логи ради логов», а **контур обратной связи продукта**: собрать запросы и диалоги, сохранить в базе, найти похожие кейсы, оценить качество и пополнить eval-набор.
 
-Ниже — обзор **подходов и практик**: что логировать, как хранить, как искать похожие задачи и связать телеметрию с [генерацией бенчмарков](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/) и [устойчивостью control loop](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/).
+Ниже — обзор **подходов и практик**: что логировать, как хранить, как искать похожие задачи и связать телеметрию с [генерацией бенчмарков](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/) и [устойчивостью control loop](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/). В конце — **фундаментальная литература** по теории агентов, eval LLM и смежным дисциплинам (RL, автоматизация тестирования).
 
 ## Зачем телеметрия агенту
 
@@ -311,9 +311,98 @@ POST /telemetry/similar-tasks
 
 ---
 
-## Литература и инструменты
+## Фундаментальная литература
 
-- OpenTelemetry — traces, semantic conventions
-- LangSmith, Langfuse, Arize Phoenix, Braintrust — LLM observability
-- W3C Trace Context — propagation `traceparent`
-- OpenAI / Anthropic logging best practices (retention, abuse monitoring)
+Поскольку направление AI-агентов (и тем более их **тестирования и observability**) развивается стремительно, классические бумажные книги часто не успевают за индустрией. Тем не менее существует фундаментальная академическая литература по архитектуре агентов, тестированию систем ИИ и методологиям оценки — она задаёт **теоретическую базу** для того, *что* логировать в телеметрии, *как* строить метрики и *как* превращать продакшен-трассы в eval-наборы.
+
+Ниже — три категории источников и их связь с практиками из этой статьи. Подробнее про eval и бенчмарки — в [обзоре генерации бенчмарков](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/).
+
+### 1. Фундаментальная теория AI-агентов и систем
+
+Эти книги объясняют, как агенты принимают решения, строят траектории и взаимодействуют со средой — то, что ложится в основу **схемы span'ов**, **task mining** и метрик надёжности.
+
+| Книга | Авторы | О чём | Связь с телеметрией |
+|-------|--------|-------|---------------------|
+| *Artificial Intelligence: A Modern Approach* (4th ed.) | Stuart Russell, Peter Norvig | Главный учебник по ИИ. Главы про **рационального агента** (Rational Agent), архитектуру интеллектуальных агентов и **среды** (Task Environments), PEAS-описание | Без PEAS нельзя спроектировать **таксономию событий**: Performance → метрики success/cost; Environment → sandbox id; Actuators → tool calls; Sensors → user input и tool results |
+| *An Introduction to MultiAgent Systems* (2nd ed.) | Michael Wooldridge | Многоагентные системы (MAS): кооперация, конкуренция, протоколы общения | Критично для телеметрии **мультиагентных** стеков (AutoGen, CrewAI, [MAESTRO](/vairl/blog/2026/07/01/maestro-airi-stack-ru/)): логировать `agent_id`, `message_protocol`, handoff между ролями, конфликты и дедлоки |
+
+**Практический вывод:** при проектировании схемы `sessions` / `steps` задайте вопрос из Norvig: «какие **перцепты** и **действия** у агента в нашей среде?» — ответ определяет обязательные поля трассы.
+
+### 2. Тестирование и оценка систем ИИ и LLM
+
+Практические руководства по методологиям оценки качества генерации, надёжности и работы с кодом — мост от **сырой телеметрии** к **continuous evaluation**.
+
+| Книга | Авторы / издатель | О чём | Связь с телеметрией |
+|-------|-------------------|-------|---------------------|
+| *Evaluating LLMs and LLM-Based Applications* | O'Reilly Media (сборник) | Практика оценки LLM в бизнес-сценариях: автоматические метрики, **LLM-as-a-Judge**, eval **chains** и **tool calling** | Телеметрия — источник данных для offline eval: replay trajectory → scorer; judge только на выборке из `outcome = fail` |
+| *Building Intelligent Systems: A Guide to Machine Learning Engineering* | Geoff Hulten | Инженерия ИИ-систем: **continuous evaluation**, сбор телеметрии, edge cases, **test suites** в продакшене | Прямое попадание в nightly job «extract tasks → flag clusters → eval backlog»; Hulten формализует то, что в статье названо **контуром обратной связи продукта** |
+
+**Практический вывод:** телеметрия без eval pipeline — дорогое хранилище логов. Книги этого блока описывают, как из потока трасс строить **регрессионные наборы** и не путать monitoring с validation.
+
+### 3. Смежные дисциплины: тестирование ПО и обучение с подкреплением
+
+Агентные бенчмарки (WebArena, SWE-bench) и продакшен-телеметрия работают на стыке **автоматизации тестирования** и **интерактивных сред RL**.
+
+| Книга | Авторы | О чём | Связь с телеметрией |
+|-------|--------|-------|---------------------|
+| *Reinforcement Learning: An Introduction* (2nd ed.) | Richard S. Sutton, Andrew G. Barto | MDP, **reward**, оценка **траекторий** | Язык для логирования **trajectory-level** метрик: state checkpoints, reward proxy (`task_success`, `user_feedback`), pass^k при replay; см. [устойчивость control loops](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/) |
+| *Software Test Automation* | Mark Fewster, Dorothy Graham | Детерминированные проверки, изоляция тестовых сред (песочницы, Docker), ложноположительные | Replay сессии из телеметрии в **sandbox** с тем же `initial_state`; deterministic oracle на tool I/O; защита от false pass при flaky среде |
+
+**Практический вывод:** каждая сохранённая trajectory — потенциальный **тест-кейс**; Sutton даёт метрики над траекторией, Fewster & Graham — инженерию воспроизводимого прогона.
+
+### Как литература стыкуется с пайплайном телеметрии
+
+```mermaid
+flowchart LR
+  subgraph theory [Теория]
+    N[Russell & Norvig: PEAS]
+    W[Wooldridge: MAS]
+  end
+  subgraph practice [Практика eval]
+    H[Hulten: continuous eval]
+    O[O'Reilly: LLM eval]
+  end
+  subgraph adjacent [Смежное]
+    S[Sutton & Barto: trajectories]
+    F[Fewster & Graham: test automation]
+  end
+  T[Телеметрия: spans + trajectories] --> E[Eval / regression]
+  theory --> T
+  practice --> E
+  adjacent --> E
+```
+
+| Этап пайплайна (см. выше) | Книга-ориентир |
+|---------------------------|----------------|
+| Схема полей `session` / `step` | Russell & Norvig — PEAS, task environment |
+| Логирование multi-agent handoff | Wooldridge — протоколы и роли |
+| Nightly task catalog + sampling | Hulten — continuous evaluation |
+| Scoring failed sessions | O'Reilly — LLM-as-a-Judge + детерминированные checks |
+| Trajectory metrics, pass^k | Sutton & Barto — оценка эпизодов |
+| Replay в sandbox | Fewster & Graham — изоляция и oracle |
+
+---
+
+## Обзорные работы (survey papers)
+
+Академические обзоры по eval агентов дополняют книги актуальными бенчмарками и метриками — полезны при проектировании **дашбордов** и **алертов** поверх телеметрии:
+
+| Работа | Год | Фокус | Ссылка |
+|--------|-----|-------|--------|
+| **Evaluation and Benchmarking of LLM Agents: A Survey** | 2025 | Таксономия: что оценивать и как; среды и метрики | [arXiv:2507.21504](https://arxiv.org/abs/2507.21504) |
+| **A Survey on Evaluation of LLM-based Agents** | 2026 | Эволюция бенчмарков; память; мультиагентные среды | [arXiv:2503.16416](https://arxiv.org/html/2503.16416v2) |
+| **Establishing Best Practices for Building Rigorous Agentic Benchmarks** | 2025 | Ложноположительные при auto-check; rigor eval | [arXiv:2507.02825](https://arxiv.org/html/2507.02825v2) |
+
+Полный каталог survey'ов, платформ и бенчмарков — в [статье про генерацию бенчмарков](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/#обзорные-работы-survey-papers).
+
+---
+
+## Инструменты и стандарты
+
+| Категория | Инструмент | Роль в телеметрии |
+|-----------|------------|-------------------|
+| Стандарт traces | **OpenTelemetry** | Spans, semantic conventions, экспорт в Jaeger / Tempo / Datadog |
+| Propagation | **W3C Trace Context** | `traceparent` сквозь gateway и микросервисы |
+| LLM observability | **LangSmith**, **Langfuse**, **Arize Phoenix**, **Braintrust** | Трассы, datasets, human review, regression |
+| Gateway | **Helicone**, **Portkey** | Логирование completion'ов на границе API |
+| Compliance | OpenAI / Anthropic logging policies | Retention, abuse monitoring, PII |
