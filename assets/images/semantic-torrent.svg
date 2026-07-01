@@ -55,5 +55,5 @@
   <rect x="660" y="480" width="120" height="36" fill="url(#stGrad2)" opacity="0.65" rx="6"/>
   <rect x="800" y="480" width="120" height="36" fill="url(#stGrad2)" opacity="0.45" rx="6"/>
 
-  <text x="600" y="560" text-anchor="middle" fill="#667eea" font-size="14" font-family="system-ui, sans-serif" opacity="0.6">hash + embedding ’ semantic DHT</text>
+  <text x="600" y="560" text-anchor="middle" fill="#667eea" font-size="14" font-family="system-ui, sans-serif" opacity="0.6">hash + embedding - semantic DHT</text>
 </svg>

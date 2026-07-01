@@ -23,5 +23,5 @@
   <path d="M800 320 C680 320 680 410 600 410 C520 410 520 320 400 320" fill="none" stroke="#fa709a" stroke-width="3" opacity="0.6"/>
   <text x="600" y="195" text-anchor="middle" fill="#fee140" font-family="system-ui,sans-serif" font-size="13">requirements</text>
   <text x="600" y="430" text-anchor="middle" fill="#43e97b" font-family="system-ui,sans-serif" font-size="13">tested code</text>
-  <text x="600" y="520" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="20">g3 · Dialectical Autocoding · Rust</text>
+  <text x="600" y="520" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="20">g3 - Dialectical Autocoding - Rust</text>
 </svg>

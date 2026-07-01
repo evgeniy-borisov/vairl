@@ -38,5 +38,5 @@
   <text x="970" y="245" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="16" font-weight="600">ChromaDB</text>
   <text x="970" y="272" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="13">store + retrieve</text>
   <path d="M820 250 L880 250" stroke="#667eea" stroke-width="2" opacity="0.4"/>
-  <text x="600" y="480" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="20" opacity="0.65">Hypothesis Space · Agent Quality Axes</text>
+  <text x="600" y="480" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="20" opacity="0.65">Hypothesis Space - Agent Quality Axes</text>
 </svg>

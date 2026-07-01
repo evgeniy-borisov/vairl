@@ -49,5 +49,5 @@
     <line x1="40" y1="92" x2="40" y2="108" stroke="#fa709a" stroke-width="2"/>
     <rect x="10" y="108" width="60" height="22" rx="4" fill="url(#hybG3)" opacity="0.55"/>
   </g>
-  <text x="600" y="520" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="22" opacity="0.7">Hybrid Orchestrator · DAG + FSM + Behavior Tree</text>
+  <text x="600" y="520" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="22" opacity="0.7">Hybrid Orchestrator - DAG + FSM + Behavior Tree</text>
 </svg>

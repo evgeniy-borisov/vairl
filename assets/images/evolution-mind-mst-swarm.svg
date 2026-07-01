@@ -13,13 +13,13 @@
   <!-- MST levels -->
   <g transform="translate(120,100)">
     <rect x="0" y="0" width="960" height="50" rx="8" fill="url(#emsG1)" opacity="0.15" stroke="#667eea" stroke-width="1.5"/>
-    <text x="20" y="32" fill="#667eea" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Level N · metasystem</text>
+    <text x="20" y="32" fill="#667eea" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Level N - metasystem</text>
     <rect x="0" y="70" width="960" height="50" rx="8" fill="url(#emsG1)" opacity="0.12" stroke="#764ba2" stroke-width="1.5"/>
-    <text x="20" y="102" fill="#764ba2" font-family="system-ui,sans-serif" font-size="14">Level N1</text>
+    <text x="20" y="102" fill="#764ba2" font-family="system-ui,sans-serif" font-size="14">Level N-1</text>
     <rect x="0" y="140" width="960" height="50" rx="8" fill="url(#emsG1)" opacity="0.09" stroke="#667eea" stroke-width="1.5"/>
-    <text x="20" y="172" fill="#667eea" font-family="system-ui,sans-serif" font-size="14">Level N2 · mind</text>
+    <text x="20" y="172" fill="#667eea" font-family="system-ui,sans-serif" font-size="14">Level N-2 - mind</text>
     <path d="M480 50 L480 70 M480 120 L480 140" stroke="#667eea" stroke-width="2" opacity="0.4"/>
-    <text x="500" y="65" fill="#888" font-size="12">MST ‘</text>
+    <text x="500" y="65" fill="#888" font-size="12">MST up</text>
   </g>
   <!-- robot swarm -->
   <g transform="translate(200,320)">
@@ -41,5 +41,5 @@
       <line x1="640" y1="5" x2="720" y2="48"/>
     </g>
   </g>
-  <text x="600" y="520" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="20" opacity="0.65">Evolution of Mind · MST · Robot Swarm</text>
+  <text x="600" y="520" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="20" opacity="0.65">Evolution of Mind - MST - Robot Swarm</text>
 </svg>
