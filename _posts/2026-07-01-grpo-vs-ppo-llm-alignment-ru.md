@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "GRPO vs PPO: сравнительный анализ для выравнивания LLM"
-date: 2026-07-01 16:00:00 +0300
+date: 2026-07-01 16:37:05 +0300
 excerpt: "Group Relative Policy Optimization и Proximal Policy Optimization в RLHF/RLVR: actor-critic против группового baseline, память, стабильность и связь с устойчивостью control loop агента."
 lang: ru
 image: /assets/images/grpo-vs-ppo.svg
