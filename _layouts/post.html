@@ -2,6 +2,44 @@
 layout: default
 ---
 
+{% assign page_base = page.path | remove: "_posts/" | remove: "-ru.md" | remove: ".md" %}
+{% assign url_en = nil %}
+{% assign url_ru = nil %}
+{% for p in site.posts %}
+  {% assign p_base = p.path | remove: "_posts/" | remove: "-ru.md" | remove: ".md" %}
+  {% if p_base == page_base %}
+    {% if p.lang == "ru" %}
+      {% assign url_ru = p.url %}
+    {% else %}
+      {% assign url_en = p.url %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% if url_en == nil %}
+  {% if page.lang == "ru" %}
+    {% assign url_en = '/blog/' %}
+  {% else %}
+    {% assign url_en = page.url %}
+  {% endif %}
+{% endif %}
+{% if url_ru == nil %}
+  {% if page.lang != "ru" %}
+    {% assign url_ru = '/blog/' %}
+  {% else %}
+    {% assign url_ru = page.url %}
+  {% endif %}
+{% endif %}
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "{{ page.lang | default: 'en' }}",
+  "urls": {
+    "en": "{{ url_en | relative_url }}",
+    "ru": "{{ url_ru | relative_url }}"
+  }
+}
+</script>
+
 <article class="post">
     <header class="post-header">
         {% if page.image %}
@@ -18,9 +56,8 @@ layout: default
     </div>
     
     <footer class="post-footer">
-        <a href="{{ '/blog/' | relative_url }}" class="back-link">← back to blog</a>
+        <a href="{{ '/blog/' | relative_url }}" class="back-link" data-i18n="back_to_blog">← back to blog</a>
     </footer>
 </article>
 
 {% include math-katex.html %}
-

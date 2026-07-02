@@ -32,6 +32,14 @@ function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
 }
 
+window.addEventListener('themechange', function () {
+    if (flock) {
+        flock.boids.forEach(function (b) {
+            b.refreshThemeColors();
+        });
+    }
+});
+
 // Flock object
 // Does very little, simply manages the array of all the boids
 class Flock {
@@ -62,13 +70,29 @@ class Boid {
         this.maxforce = 0.05; // Maximum steering force
         this.size = random(15, 30);
         this.opacity = random(60, 120);
-        
-        // Color: mostly gray, occasionally red
-        if (random(1) < 0.05) {
-            this.color = color(220, 100, 100, this.opacity);
+        this._isRed = random(1) < 0.05;
+        this.updateColor();
+    }
+
+    isDarkTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'dark';
+    }
+
+    updateColor() {
+        var dark = this.isDarkTheme();
+        if (this._isRed) {
+            this.color = dark
+                ? color(255, 120, 120, this.opacity)
+                : color(220, 100, 100, this.opacity);
         } else {
-            this.color = color(180, 180, 180, this.opacity);
+            this.color = dark
+                ? color(120, 130, 160, this.opacity)
+                : color(180, 180, 180, this.opacity);
         }
+    }
+
+    refreshThemeColors() {
+        this.updateColor();
     }
     
     run(boids) {
