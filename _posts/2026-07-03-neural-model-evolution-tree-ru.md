@@ -1,0 +1,203 @@
+---
+layout: post
+title: "Эволюция моделей ИИ: не линия времени, а дерево"
+date: 2026-07-03 10:00:00 +0300
+excerpt: "Развитие нейросетей — ветвящееся дерево, а не прямая ось. Три Python-визуализации: полукруглое phylogenetic tree, граф архитектурных заимствований и кластеры, упорядоченные по времени."
+lang: ru
+image: /assets/images/neural-model-evolution-tree.svg
+---
+
+Линейный рассказ «от Perceptron к GPT-4» удобен для слайдов, но **плохо отражает реальность**: идеи **ветвятся**, **сходятся** и **переиспользуются**. ResNet влияет на ViT, LSTM — на Transformer, diffusion — на Stable Diffusion. Это ближе к **филогенетическому дереву**, чем к одной временной оси.
+
+В статье — концептуальная рамка и **три визуализации на Python** (matplotlib + networkx + sklearn):
+
+1. **Полукруглое circular / semicircle tree** семейств моделей  
+2. **Граф заимствований** — кто у кого взял архитектурную идею  
+3. **Кластеризация** в пространстве признаков + **упорядочивание кластеров по времени**
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb)
+
+Связанные материалы: [NAS и поиск архитектур](/vairl/blog/2026/01/15/neural-architecture-search-ru/), [фундамент агентных систем](/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/), [PaCMAP и пространство гипотез](/vairl/blog/2026/06/24/hypothesis-space-pacmap-ru/).
+
+---
+
+## Почему не одна линия
+
+| Линейный нарратив | Древовидная модель |
+|-------------------|-------------------|
+| Одна «главная» ветка прогресса | Параллельные семейства (CNN, RNN, Transformer, Diffusion) |
+| Каждая модель «заменяет» предыдущую | Модели **сосуществуют** (LSTM в проде, CNN на edge) |
+| Время = единственная ось | Время + **родство идей** + **перенос компонентов** |
+
+```mermaid
+flowchart TB
+  R[Root: neural computation] --> F[Foundations]
+  R --> C[Convolutional]
+  R --> S[Sequence]
+  R --> A[Attention]
+  F --> MLP[MLP / backprop]
+  C --> CNN[LeNet → ResNet]
+  S --> LSTM[LSTM / GRU]
+  LSTM --> T[Transformer]
+  T --> BERT[BERT]
+  T --> GPT[GPT family]
+  T --> VIT[ViT → CLIP]
+  MLP --> D[Diffusion]
+```
+
+**Метафора:** эволюция биологических видов — не одна цепочка от амёбы к человеку, а **дерево** с отмиранием и параллельными ветками. То же с архитектурами.
+
+---
+
+## Данные для визуализаций
+
+Мы собрали компактный **кураторский датасет** (~27 моделей): имя, год ключевой публикации, семейство (`Foundations`, `Convolutional`, `Sequence`, `Attention`, …). Это учебный срез, не exhaustive leaderboard.
+
+Пример записи:
+
+```python
+@dataclass(frozen=True)
+class Model:
+    name: str
+    year: int
+    family: str
+
+Model("ResNet", 2015, "Convolutional")
+Model("Transformer", 2017, "Attention")
+```
+
+Полный список и код — в [ноутбуке](https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb) и файле `notebooks/nn_model_evolution_viz.py`.
+
+---
+
+## 1. Полукруглое дерево (semicircle phylogeny)
+
+**Идея:** корень внизу дуги; семейства — промежуточные узлы; листья — конкретные модели с годом. Углы распределяются по полуокружности (polar plot, θ ∈ [0°, 180°]).
+
+![Полукруглое дерево эволюции нейросетевых моделей](/assets/images/nn-evolution-semicircle-tree.png)
+
+**Алгоритм layout:**
+
+1. Листья равномерно по дуге: `θ_i = π · (0.08 + 0.84 · i/N)`
+2. Угол семейства = среднее углов листьев
+3. Радиус: корень → 0, семейство → 0.35, лист → 0.82
+4. Рёбра рисуем в `matplotlib` polar axes
+
+Фрагмент кода:
+
+```python
+fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+ax.set_thetamin(0)
+ax.set_thetamax(180)
+for family, names in TREE.items():
+    fa = np.mean([leaf_angles[n] for n in names])
+    ax.plot([root_angle, fa], [0.0, 0.35], lw=2)
+    for name in names:
+        la = leaf_angles[name]
+        ax.plot([fa, la], [0.35, 0.72], lw=1.2)
+        ax.scatter([la], [0.82], s=45)
+```
+
+Это **circular tree** в классическом phylogenetic стиле (как в icytree / FigTree), только на **полудуге** — удобнее для широких экранов и статей.
+
+---
+
+## 2. Граф архитектурных заимствований
+
+Второй взгляд — **направленный граф**: ребро `A → B` означает «B явно опирается на идею из A» (skip connections, attention, latent diffusion, MoE routing…).
+
+![Граф влияния между моделями](/assets/images/nn-evolution-influence-graph.png)
+
+Примеры рёбер:
+
+| От | К | Идея |
+|----|---|------|
+| Seq2Seq + attention | Transformer | убрать рекуррентность |
+| Transformer | BERT | bidirectional MLM |
+| Transformer | GPT-1 | decoder-only LM |
+| ResNet | ViT | residual + масштаб |
+| Diffusion (DDPM) | Stable Diffusion | latent space |
+
+Layout: **ось X ≈ год**, узлы одного года слегка разведены по Y. Цвет — семейство. Так видно и **время**, и **перекрёстные заимствования** (Transformer как хаб).
+
+```python
+G = nx.DiGraph()
+for src, dst, label in INFLUENCE:
+    G.add_edge(src, dst, label=label)
+```
+
+---
+
+## 3. Кластеризация + упорядочивание кластеров по времени
+
+Третий срез: каждая модель — вектор признаков (год, флаги CNN/seq/attention/generative/diffusion/MoE/ViT, позиция в ветке). Затем:
+
+1. **StandardScaler** + **PCA** → 2D проекция  
+2. **Agglomerative clustering** (Ward) → метки кластеров  
+3. Для каждого кластера: **μ(year)**  
+4. Сортировка кластеров по μ(year) → ось «время кластеров»
+
+![PCA-кластеры и временное упорядочивание](/assets/images/nn-evolution-time-clusters.png)
+
+**Левая панель:** геометрия похожести архитектур (кто близок в feature space).  
+**Правая панель:** те же кластеры, но **упорядочены слева направо по среднему году** — мост между **несупервизным clustering** и **хронологией**.
+
+```python
+cl = AgglomerativeClustering(n_clusters=5, linkage="ward")
+labels = cl.fit_predict(X_scaled)
+cluster_years = {c: np.mean([MODELS[i].year for i, lb in enumerate(labels) if lb == c])
+                  for c in range(5)}
+order = sorted(range(5), key=lambda c: cluster_years[c])
+```
+
+Это полезно, когда нужно показать: «кластеры не случайны — они **выстраиваются во времени**», хотя алгоритм кластеризации **не видел год напрямую** (год был лишь одним из признаков после scaling).
+
+---
+
+## Три картинки — три вопроса
+
+| Визуализация | Вопрос, на который отвечает |
+|--------------|----------------------------|
+| Semicircle tree | **Какие семейства** и как ветвятся от общего корня? |
+| Influence graph | **Кто у кого заимствует** идеи (не только «позже по дате»)? |
+| Time-ordered clusters | **Какие группы** похожи по архитектуре и **как они ложатся на время**? |
+
+---
+
+## Запуск кода
+
+**Colab** (рекомендуется):
+
+**[nn-model-evolution-tree.ipynb](https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb)**
+
+Локально:
+
+```bash
+pip install matplotlib networkx scikit-learn numpy
+python notebooks/nn_model_evolution_viz.py
+```
+
+PNG сохраняются в `assets/images/`.
+
+---
+
+## Ограничения модели
+
+- Датасет **кураторский**, не полный (нет всех LLM, региональных моделей, hardware-specific NAS).
+- Рёбра влияния — **экспертные**, не из citation graph.
+- Признаки для кластеризации **грубые** (бинарные флаги семейств); для research-grade картины нужны embeddings статей / git repo features.
+- Полукруглое дерево **не единственно возможное** layout; fan tree, sunburst, force-directed phylogeny — альтернативы.
+
+---
+
+## Резюме
+
+Развитие ИИ-моделей — **эволюционное дерево с перекрёстным опылением**, а не одна линия. Python позволяет за один ноутбук показать три дополняющих друг друга вида: **phylogeny**, **borrow graph**, **time-ordered clusters**.
+
+---
+
+## Источники
+
+- [Colab notebook](https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb)
+- [nn_model_evolution_viz.py](https://github.com/evgeniy-borisov/vairl/blob/main/notebooks/nn_model_evolution_viz.py) в репозитории VAIRL
+- Phylogenetic tree layout: icytree / FigTree (концептуальная аналогия)

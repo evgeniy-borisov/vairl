@@ -19,6 +19,7 @@ https://colab.research.google.com/github/<owner>/<repo>/blob/main/notebooks/<и�
 | [hybrid-agent-dag-fsm-bt.ipynb](hybrid-agent-dag-fsm-bt.ipynb) | DAG, FSM и Behavior Tree: минимальные исполнители, визуализация и конвертация |
 | [semantic-torrent.ipynb](semantic-torrent.ipynb) | Semantic Torrent: чанки, хэши, TF-IDF embeddings, семантический DHT и поиск по смыслу |
 | [pytorch-to-browser-onnx.ipynb](pytorch-to-browser-onnx.ipynb) | PyTorch → ONNX: обучение TinyCNN на MNIST и экспорт для ONNX Runtime Web в браузере |
+| [nn-model-evolution-tree.ipynb](nn-model-evolution-tree.ipynb) | Полукруглое дерево моделей, граф заимствований, кластеры по времени (matplotlib) |
 
 ## Добавление нового ноутбука
 
