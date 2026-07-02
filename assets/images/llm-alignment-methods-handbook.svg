@@ -1,0 +1,41 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="rl" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="dpo" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <linearGradient id="reason" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fa709a"/>
+      <stop offset="100%" style="stop-color:#fee140"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="600" y="90" text-anchor="middle" fill="#e8e8f0" font-family="system-ui,sans-serif" font-size="42" font-weight="700">LLM Alignment</text>
+  <text x="600" y="135" text-anchor="middle" fill="#a0a0c0" font-family="system-ui,sans-serif" font-size="22">!?@02>G=8: <5B>4>2 2K@02=820=8O</text>
+  <rect x="80" y="200" width="320" height="280" rx="16" fill="url(#rl)" opacity="0.25" stroke="url(#rl)" stroke-width="2"/>
+  <text x="240" y="250" text-anchor="middle" fill="#c8c8ff" font-family="system-ui,sans-serif" font-size="20" font-weight="600">RL / Online</text>
+  <text x="240" y="290" text-anchor="middle" fill="#e0e0f8" font-family="system-ui,sans-serif" font-size="16">PPO · GRPO · RLOO</text>
+  <text x="240" y="320" text-anchor="middle" fill="#e0e0f8" font-family="system-ui,sans-serif" font-size="16">TRPO · ReMax</text>
+  <text x="240" y="360" text-anchor="middle" fill="#9090b8" font-family="system-ui,sans-serif" font-size="14">2015 ’ 2025</text>
+  <rect x="440" y="200" width="320" height="280" rx="16" fill="url(#dpo)" opacity="0.2" stroke="url(#dpo)" stroke-width="2"/>
+  <text x="600" y="250" text-anchor="middle" fill="#c8ffe8" font-family="system-ui,sans-serif" font-size="20" font-weight="600">Direct xPO</text>
+  <text x="600" y="290" text-anchor="middle" fill="#e0fff0" font-family="system-ui,sans-serif" font-size="16">DPO · SimPO · IPO</text>
+  <text x="600" y="320" text-anchor="middle" fill="#e0fff0" font-family="system-ui,sans-serif" font-size="16">KTO · ORPO · SPIN</text>
+  <text x="600" y="360" text-anchor="middle" fill="#80b8a0" font-family="system-ui,sans-serif" font-size="14">2023 ’ 2024</text>
+  <rect x="800" y="200" width="320" height="280" rx="16" fill="url(#reason)" opacity="0.2" stroke="url(#reason)" stroke-width="2"/>
+  <text x="960" y="250" text-anchor="middle" fill="#ffe8c8" font-family="system-ui,sans-serif" font-size="20" font-weight="600">Reasoning</text>
+  <text x="960" y="290" text-anchor="middle" fill="#fff0e0" font-family="system-ui,sans-serif" font-size="16">PRM · STaR · MCTS</text>
+  <text x="960" y="320" text-anchor="middle" fill="#fff0e0" font-family="system-ui,sans-serif" font-size="16">RLVR · DeepSeek-R1</text>
+  <text x="960" y="360" text-anchor="middle" fill="#b8a080" font-family="system-ui,sans-serif" font-size="14">2022 ’ 2025</text>
+  <line x1="400" y1="340" x2="440" y2="340" stroke="#606080" stroke-width="2" stroke-dasharray="6 4"/>
+  <line x1="760" y1="340" x2="800" y2="340" stroke="#606080" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="600" y="560" text-anchor="middle" fill="#707090" font-family="system-ui,sans-serif" font-size="16">RLHF ’ DPO ’ GRPO / RLVR</text>
+</svg>
