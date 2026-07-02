@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Форматы траекторий AI-агентов: выгрузка, конвертация и сравнение фреймворков"
-date: 2026-07-02 17:30:00 +0300
+date: 2026-07-02 08:00:00 +0300
 excerpt: "Форматы траекторий агентов (ShareGPT, OpenAI, LangChain, CrewAI), конвертеры, а также индустриальные практики: телеметрия, кластеризация задач и решений, process mining и FSM из успешных трасс."
 lang: ru
 image: /assets/images/agent-trajectory-formats.svg
