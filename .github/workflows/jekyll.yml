@@ -1,5 +1,5 @@
-# Build and deploy Jekyll site to GitHub Pages (single job — avoids
-# intermittent cross-job artifact upload failures on GitHub Actions).
+# Build Jekyll and publish ./_site to the gh-pages branch.
+# GitHub Pages must use Source: Deploy from branch → gh-pages → /(root).
 name: Deploy Jekyll site to Pages
 
 on:
@@ -8,20 +8,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,18 +20,15 @@ jobs:
         uses: ruby/setup-ruby@4a9ddd6f338a97768b8006bf671dfbad383215f4
         with:
           ruby-version: '3.1'
-          bundler-cache: false
-      - name: Install gems
-        run: bundle install
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
+          bundler-cache: true
+          cache-version: 1
       - name: Build with Jekyll
-        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        run: bundle exec jekyll build --baseurl /vairl
         env:
           JEKYLL_ENV: production
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          force_orphan: true
