@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Sakana Fugu: TRINITY, Conductor и мультиагентная оркестрация через один API"
-date: 2026-07-03 20:00:00 +0300
+date: 2026-07-02 21:00:00 +0300
 excerpt: "Как Sakana Fugu объединяет исследования TRINITY и Conductor в коммерческий продукт: выбор моделей, бенчмарки, цена, интеграция через OpenAI-compatible API и практический гид для продакшена."
 lang: ru
 image: /assets/images/sakana-fugu-orchestration.svg
