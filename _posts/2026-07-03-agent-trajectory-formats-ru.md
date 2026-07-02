@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Форматы траекторий AI-агентов: выгрузка, конвертация и сравнение фреймворков"
-date: 2026-07-03 14:00:00 +0300
+date: 2026-07-02 17:30:00 +0300
 excerpt: "Форматы траекторий агентов (ShareGPT, OpenAI, LangChain, CrewAI), конвертеры, а также индустриальные практики: телеметрия, кластеризация задач и решений, process mining и FSM из успешных трасс."
 lang: ru
 image: /assets/images/agent-trajectory-formats.svg
@@ -187,7 +187,7 @@ Hermes — эталонный пример **осознанного экспор
 | assistant | `gpt` |
 | tool | `tool` |
 
-Дополнительно: reasoning оборачивается в ``, tool calls — в `<tool_call>`, ответы инструментов — в `<tool_response>`. Файлы: `trajectory_samples.jsonl` (успех) и `failed_trajectories.jsonl` (сбой) — сразу готовый корпус для SFT/RL с фильтром по `completed`.
+Дополнительно: reasoning нормализуется в XML-теги `redacted_thinking`, tool calls — в `<tool_call>`, ответы инструментов — в `<tool_response>`. Файлы: `trajectory_samples.jsonl` (успех) и `failed_trajectories.jsonl` (сбой) — сразу готовый корпус для SFT/RL с фильтром по `completed`.
 
 ---
 
