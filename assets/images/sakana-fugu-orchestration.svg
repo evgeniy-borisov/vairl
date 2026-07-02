@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b6b"/>
+      <stop offset="100%" style="stop-color:#feca57"/>
+    </linearGradient>
+    <linearGradient id="fg2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#48dbfb"/>
+      <stop offset="100%" style="stop-color:#0abde3"/>
+    </linearGradient>
+    <linearGradient id="fg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5f27cd"/>
+      <stop offset="100%" style="stop-color:#341f97"/>
+    </linearGradient>
+    <marker id="fgArrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#5f27cd"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbff"/>
+  <rect x="1" y="1" width="1198" height="628" rx="4" fill="none" stroke="#e4e6f0" stroke-width="2"/>
+  <text x="60" y="80" font-family="system-ui,sans-serif" font-size="42" font-weight="700" fill="#2d3436">Sakana Fugu</text>
+  <text x="60" y="125" font-family="system-ui,sans-serif" font-size="24" fill="#636e72">TRINITY + Conductor ’ >48= API</text>
+  <circle cx="600" cy="340" r="72" fill="url(#fg1)" opacity="0.9"/>
+  <text x="600" y="350" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="700" fill="#fff">Fugu</text>
+  <rect x="180" y="260" width="150" height="56" rx="12" fill="url(#fg2)"/>
+  <text x="255" y="295" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" fill="#fff">GPT-5.5</text>
+  <rect x="180" y="360" width="150" height="56" rx="12" fill="url(#fg2)"/>
+  <text x="255" y="395" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" fill="#fff">Opus 4.8</text>
+  <rect x="870" y="260" width="150" height="56" rx="12" fill="url(#fg2)"/>
+  <text x="945" y="295" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" fill="#fff">Gemini 3.1</text>
+  <rect x="870" y="360" width="150" height="56" rx="12" fill="url(#fg3)"/>
+  <text x="945" y="395" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" fill="#fff">fugu-ultra</text>
+  <line x1="330" y1="288" x2="528" y2="320" stroke="#5f27cd" stroke-width="3" marker-end="url(#fgArrow)"/>
+  <line x1="330" y1="388" x2="528" y2="360" stroke="#5f27cd" stroke-width="3" marker-end="url(#fgArrow)"/>
+  <line x1="672" y1="320" x2="870" y2="288" stroke="#5f27cd" stroke-width="3" marker-end="url(#fgArrow)"/>
+  <line x1="672" y1="360" x2="870" y2="388" stroke="#5f27cd" stroke-width="3" marker-end="url(#fgArrow)"/>
+  <text x="60" y="560" font-family="system-ui,sans-serif" font-size="18" fill="#636e72">C;LB8035=B=0O >@:5AB@0F8O :0: >4=0 <>45;L</text>
+</svg>
