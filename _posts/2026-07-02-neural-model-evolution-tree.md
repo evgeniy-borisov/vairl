@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "AI model evolution is a tree, not a timeline"
-date: 2026-07-02 18:00:00 +0300
+date: 2026-07-02 09:00:00 +0300
 excerpt: "Neural network history branches and cross-pollinates—not a single line. Three Python visualizations: semicircular phylogeny, architectural influence graph, and time-ordered clusters."
 lang: en
 image: /assets/images/neural-model-evolution-tree.svg
