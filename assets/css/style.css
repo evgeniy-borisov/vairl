@@ -909,6 +909,115 @@ nav a {
     background: #f7f7f9;
 }
 
+.rl-policy-credit-widget {
+    margin: 32px 0 28px;
+    border: 1px solid #e8e8ec;
+    border-radius: 10px;
+    background: #fcfcfd;
+    overflow: hidden;
+}
+
+.rl-policy-credit-widget .rl-credit-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.rl-policy-credit-widget .rl-credit-header p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #666;
+}
+
+.rl-policy-credit-widget .rl-credit-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #fafafb;
+    align-items: center;
+}
+
+.rl-policy-credit-widget .rl-credit-controls button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 14px;
+    border: 1px solid #d8d8e0;
+    border-radius: 6px;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.rl-policy-credit-widget .rl-credit-controls button:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.rl-policy-credit-widget .rl-credit-controls button.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.1));
+    color: #5a4d9e;
+    font-weight: 600;
+}
+
+.rl-policy-credit-widget .rl-credit-step-btn {
+    margin-left: auto;
+    border-color: #43e97b !important;
+    color: #2a9d6a !important;
+}
+
+.rl-policy-credit-widget .rl-credit-canvas-wrap {
+    padding: 12px 14px;
+    background: #fafbfd;
+}
+
+.rl-policy-credit-widget #rl-policy-credit-canvas {
+    display: block;
+    width: 100%;
+    height: 380px;
+    border-radius: 6px;
+    border: 1px solid #e4e6ec;
+    box-shadow: 0 1px 3px rgba(102, 126, 234, 0.06);
+}
+
+.rl-policy-credit-widget .rl-credit-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    padding: 8px 14px;
+    font-size: 11px;
+    color: #666;
+    border-top: 1px solid #ececf0;
+    background: #fff;
+}
+
+.rl-policy-credit-widget .rl-credit-legend .rl-leg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rl-policy-credit-widget .rl-credit-legend .rl-leg i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.rl-policy-credit-widget .rl-credit-caption {
+    margin: 0;
+    padding: 10px 14px 14px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #777;
+    border-top: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
 .edge-nn-widget {
     margin: 2rem 0;
     border: 1px solid #e4e6ec;
@@ -1104,6 +1213,7 @@ footer {
 [data-theme="dark"] .criticality-widget,
 [data-theme="dark"] .semantic-torrent-widget,
 [data-theme="dark"] .grpo-ppo-widget,
+[data-theme="dark"] .rl-policy-credit-widget,
 [data-theme="dark"] .edge-nn-widget {
     background: var(--widget-bg);
     border-color: var(--border-light);
@@ -1117,6 +1227,8 @@ footer {
 [data-theme="dark"] .semantic-torrent-widget .st-chunk-list,
 [data-theme="dark"] .grpo-ppo-widget .rl-header,
 [data-theme="dark"] .grpo-ppo-widget .rl-caption,
+[data-theme="dark"] .rl-policy-credit-widget .rl-credit-header,
+[data-theme="dark"] .rl-policy-credit-widget .rl-credit-caption,
 [data-theme="dark"] .edge-nn-widget .edge-nn-status {
     background: var(--widget-header);
     border-color: var(--border-light);
@@ -1131,6 +1243,7 @@ footer {
 [data-theme="dark"] .semantic-torrent-widget .st-header p,
 [data-theme="dark"] .semantic-torrent-widget .st-chunk-item,
 [data-theme="dark"] .grpo-ppo-widget .rl-header p,
+[data-theme="dark"] .rl-policy-credit-widget .rl-credit-header p,
 [data-theme="dark"] .edge-nn-widget .edge-nn-header p,
 [data-theme="dark"] .edge-nn-widget .edge-nn-side {
     color: var(--text-muted);
@@ -1139,7 +1252,8 @@ footer {
 [data-theme="dark"] .phase-portrait-prompts,
 [data-theme="dark"] .criticality-widget .criticality-controls,
 [data-theme="dark"] .semantic-torrent-widget .st-controls,
-[data-theme="dark"] .grpo-ppo-widget .rl-controls {
+[data-theme="dark"] .grpo-ppo-widget .rl-controls,
+[data-theme="dark"] .rl-policy-credit-widget .rl-credit-controls {
     background: var(--widget-controls);
 }
 
@@ -1147,6 +1261,7 @@ footer {
 [data-theme="dark"] .criticality-widget .crit-state-btn,
 [data-theme="dark"] .semantic-torrent-widget .st-controls button,
 [data-theme="dark"] .grpo-ppo-widget .rl-controls button,
+[data-theme="dark"] .rl-policy-credit-widget .rl-credit-controls button,
 [data-theme="dark"] .edge-nn-widget .edge-nn-controls button {
     background: var(--widget-btn-bg);
     border-color: var(--widget-btn-border);
@@ -1155,20 +1270,23 @@ footer {
 
 [data-theme="dark"] .phase-portrait-widget .phase-portrait-controls button.active,
 [data-theme="dark"] .semantic-torrent-widget .st-controls button.active,
-[data-theme="dark"] .grpo-ppo-widget .rl-controls button.active {
+[data-theme="dark"] .grpo-ppo-widget .rl-controls button.active,
+[data-theme="dark"] .rl-policy-credit-widget .rl-credit-controls button.active {
     background: var(--gradient-accent);
     color: #a0b0ff;
 }
 
 [data-theme="dark"] .criticality-widget .criticality-canvas-wrap,
 [data-theme="dark"] .semantic-torrent-widget .st-canvas-wrap,
-[data-theme="dark"] .grpo-ppo-widget .rl-canvas-wrap {
+[data-theme="dark"] .grpo-ppo-widget .rl-canvas-wrap,
+[data-theme="dark"] .rl-policy-credit-widget .rl-credit-canvas-wrap {
     background: var(--widget-canvas-bg);
 }
 
 [data-theme="dark"] .criticality-widget #criticality-grid-canvas,
 [data-theme="dark"] .semantic-torrent-widget #semantic-torrent-canvas,
 [data-theme="dark"] .grpo-ppo-widget #grpo-ppo-canvas,
+[data-theme="dark"] .rl-policy-credit-widget #rl-policy-credit-canvas,
 [data-theme="dark"] .edge-nn-widget .edge-nn-canvas-mount canvas,
 [data-theme="dark"] .edge-nn-widget .edge-nn-preview {
     border-color: var(--border-light);
