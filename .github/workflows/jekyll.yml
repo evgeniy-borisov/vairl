@@ -1,5 +1,5 @@
-# Build Jekyll and publish ./_site to the gh-pages branch.
-# GitHub Pages must use Source: Deploy from branch → gh-pages → /(root).
+# Build and deploy Jekyll to GitHub Pages (Actions-native deploy).
+# В Settings → Pages источник должен быть: GitHub Actions (не ветка main/gh-pages).
 name: Deploy Jekyll site to Pages
 
 on:
@@ -8,11 +8,20 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,13 +31,15 @@ jobs:
           ruby-version: '3.1'
           bundler-cache: true
           cache-version: 1
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
       - name: Build with Jekyll
-        run: bundle exec jekyll build --baseurl /vairl
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
-      - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site
-          force_orphan: true
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

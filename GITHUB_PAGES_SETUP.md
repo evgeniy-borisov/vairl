@@ -83,12 +83,18 @@ git push -u origin main
 ### 3.2. Включите GitHub Pages
 
 1. В левом меню найдите **"Pages"**
-2. В разделе **"Source"**:
-   - Выберите ветку: **main**
-   - Выберите папку: **/ (root)**
-3. Нажмите **"Save"**
+2. В разделе **"Build and deployment"** → **Source**:
+   - Выберите **GitHub Actions** (рекомендуется для этого репозитория)
+   - Workflow `Deploy Jekyll site to Pages` запускается при push в `main`
+3. **Не смешивайте** источники: если CI пушит в ветку `gh-pages`, а в Settings выбрана ветка `main` — сайт не обновится.
 
-### 3.3. Дождитесь публикации
+Альтернатива (legacy): Source = ветка **gh-pages** / **/(root)** — только если workflow именно публикует в `gh-pages` (peaceiris), а не через `deploy-pages`.
+
+### 3.3. Дата поста — только в прошлом
+
+Jekyll пропускает посты с `date` в будущем (`has a future date`). Поле `date` в frontmatter должно быть **уже прошедшим** на момент деплоя (CI в UTC). См. [ADD_NEW_POST.md](ADD_NEW_POST.md).
+
+### 3.4. Дождитесь публикации
 
 - GitHub начнёт сборку сайта (занимает 1-3 минуты)
 - Появится сообщение: **"Your site is published at https://YOUR_USERNAME.github.io/YOUR_REPO/"**
