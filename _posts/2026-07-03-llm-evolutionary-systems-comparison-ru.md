@@ -30,6 +30,7 @@ image: /assets/images/llm-evolutionary-systems-comparison.svg
 | [Общий цикл](#общий-эволюционный-цикл) | Что общего у всех трёх |
 | [Архитектура](#архитектура-трёх-систем) | ShinkaEvolve · AlphaEvolve · GigaEvo |
 | [Острова и отбор](#острова-отбор-и-разнообразие) | Island model, MAP-Elites, parent sampling |
+| [Интерактив](#интерактив-острова-и-дерево-эволюции) | p5.js: три острова, филогения, цикл шагов |
 | [Бенчмарки](#бенчмарки-эпохи-и-производительность) | Сколько поколений, какие метрики |
 | [Перечень задач](#перечень-задач-и-ограниченные-области) | Геометрия, математика, инфраструктура |
 | [Сводная таблица](#сводная-таблица) | Быстрое сравнение |
@@ -148,6 +149,45 @@ flowchart TB
     A2 --> M
     A3 --> M
 ```
+
+### Интерактив: острова и дерево эволюции
+
+Ниже — упрощённая **симуляция** island model на [p5.js](https://p5js.org/): три параллельных «потока открытий», филогенетическое дерево программ и пошаговый цикл **отбор → LLM-мутация → evaluator → архив → миграция**. Узлы окрашены по fitness (красный → жёлтый → зелёный); дуга — перенос элиты между островами.
+
+<div class="evolution-islands-widget phase-portrait-widget" id="evolution-islands-demo">
+  <div class="evo-toolbar">
+    <div class="phase-portrait-controls">
+      <button type="button" data-evo-mode="islands" class="active">Три острова</button>
+      <button type="button" data-evo-mode="tree">Дерево эволюции</button>
+      <button type="button" data-evo-mode="pipeline">Цикл поколения</button>
+    </div>
+    <div class="evo-meta">
+      <span id="evolution-islands-phase"><strong>① Отбор</strong></span>
+      <span id="evolution-islands-gen">Поколение 0</span>
+    </div>
+    <div class="evo-actions">
+      <button type="button" data-evo-play>⏸ Пауза</button>
+      <button type="button" data-evo-step>Шаг →</button>
+      <button type="button" data-evo-reset>Сброс</button>
+      <label>Остров дерева
+        <select data-evo-island>
+          <option value="0">A</option>
+          <option value="1">B</option>
+          <option value="2">C</option>
+        </select>
+      </label>
+      <label>Скорость
+        <input type="range" data-evo-speed min="0.4" max="2.5" step="0.1" value="1">
+      </label>
+    </div>
+  </div>
+  <div id="evolution-islands-canvas" class="evo-canvas phase-portrait-canvas"></div>
+  <p class="evo-hint" id="evolution-islands-hint">Параллельные подпопуляции из одного seed. Цвет узла — fitness.</p>
+  <div id="evolution-islands-log" class="evolution-islands-log" aria-live="polite"></div>
+  <p class="phase-portrait-caption">Демо иллюстрирует механизмы из ShinkaEvolve, AlphaEvolve и GigaEvo; числа сгенерированы стохастически, не из реального circle-packing run.</p>
+</div>
+
+<script src="{{ '/assets/js/evolution-islands-demo.js' | relative_url }}"></script>
 
 | Система | Острова | Миграция | Защита лучшего |
 |---------|---------|----------|----------------|

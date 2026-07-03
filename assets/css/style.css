@@ -483,6 +483,121 @@ nav a {
     color: #444;
 }
 
+/* Evolution islands demo (p5.js) — reuses phase-portrait chrome */
+.evolution-islands-widget {
+    margin: 32px 0 28px;
+    border: 1px solid #e8e8ec;
+    border-radius: 10px;
+    background: #fcfcfd;
+    overflow: hidden;
+}
+
+.evolution-islands-widget .evo-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.evolution-islands-widget .evo-toolbar .phase-portrait-controls {
+    flex: 1 1 auto;
+    padding: 0;
+    border: none;
+    background: transparent;
+    margin: 0;
+}
+
+.evolution-islands-widget .evo-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    font-size: 12px;
+    color: #666;
+}
+
+.evolution-islands-widget .evo-meta strong {
+    color: #444;
+    font-weight: 600;
+}
+
+.evolution-islands-widget .evo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.evolution-islands-widget .evo-actions button,
+.evolution-islands-widget .evo-actions select {
+    font-family: inherit;
+    font-size: 12px;
+    padding: 6px 12px;
+    border: 1px solid #d8d8e0;
+    border-radius: 6px;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+}
+
+.evolution-islands-widget .evo-actions button:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.evolution-islands-widget .evo-actions label {
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.evolution-islands-widget .evo-actions input[type="range"] {
+    width: 72px;
+}
+
+.evolution-islands-widget .evo-canvas {
+    min-height: 440px;
+}
+
+.evolution-islands-widget .evo-hint {
+    margin: 0;
+    padding: 8px 14px 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #666;
+}
+
+.evolution-islands-log {
+    margin: 0;
+    padding: 10px 14px 14px;
+    font-size: 12px;
+    line-height: 1.65;
+    color: #555;
+    border-top: 1px solid #ececf0;
+    background: #fafafb;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 4.5em;
+}
+
+.evolution-islands-log .evo-log-line {
+    display: block;
+    padding: 4px 8px;
+    border-radius: 5px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.evolution-islands-log .evo-log-line.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(108, 92, 231, 0.08));
+    color: #333;
+    font-weight: 500;
+}
+
 /* Criticality avalanche grid */
 .criticality-widget {
     margin: 32px 0 28px;
@@ -1429,6 +1544,7 @@ footer {
 
 /* Widget dark theme overrides */
 [data-theme="dark"] .phase-portrait-widget,
+[data-theme="dark"] .evolution-islands-widget,
 [data-theme="dark"] .criticality-widget,
 [data-theme="dark"] .semantic-torrent-widget,
 [data-theme="dark"] .grpo-ppo-widget,
@@ -1440,6 +1556,8 @@ footer {
 }
 
 [data-theme="dark"] .phase-portrait-widget .phase-portrait-controls,
+[data-theme="dark"] .evolution-islands-widget .evo-toolbar,
+[data-theme="dark"] .evolution-islands-log,
 [data-theme="dark"] .criticality-widget .criticality-header,
 [data-theme="dark"] .criticality-widget .criticality-controls,
 [data-theme="dark"] .criticality-widget .criticality-legend,
