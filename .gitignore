@@ -9,4 +9,5 @@ Gemfile.lock
 .venv-nn/
 .venv-onnx/
 .cursor/
-
+_drafts/
+exports/
