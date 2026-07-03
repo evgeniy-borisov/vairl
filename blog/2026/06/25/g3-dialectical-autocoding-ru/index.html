@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>g3: диалектическое автокодирование и adversarial cooperation - VAIRL</title>
+    <meta name="description" content="g3 — референсная реализация Block AI Research для диалектического автокодирования: петля Coach/Player, которая выдаёт протестированный код с соблюдением треб...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>g3: диалектическое автокодирование и adversarial cooperation | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="g3: диалектическое автокодирование и adversarial cooperation" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="g3 — референсная реализация Block AI Research для диалектического автокодирования: петля Coach/Player, которая выдаёт протестированный код с соблюдением требований, а не одноразовый vibe coding." />
+<meta name="twitter:description" property="og:description" content="g3 — референсная реализация Block AI Research для диалектического автокодирования: петля Coach/Player, которая выдаёт протестированный код с соблюдением требований, а не одноразовый vibe coding." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/g3-dialectical-autocoding.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-25T00:00:00+00:00" />
+<meta property="article:modified_time" content="2026-06-25T00:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/g3-dialectical-autocoding.svg" />
+<meta name="twitter:title" content="g3: диалектическое автокодирование и adversarial cooperation" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-25T00:00:00+00:00","datePublished":"2026-06-25T00:00:00+00:00","description":"g3 — референсная реализация Block AI Research для диалектического автокодирования: петля Coach/Player, которая выдаёт протестированный код с соблюдением требований, а не одноразовый vibe coding.","headline":"g3: диалектическое автокодирование и adversarial cooperation","image":"https://evgeniy-borisov.github.io/vairl/assets/images/g3-dialectical-autocoding.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/2026/06/25/g3-dialectical-autocoding/",
+    "ru": "/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/g3-dialectical-autocoding.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">g3: диалектическое автокодирование и adversarial cooperation</h1>
+        <p class="post-date">25 June 2026, 00:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p><em>Черновик — в работе. По материалам <a href="https://github.com/dhanji/g3">dhanji/g3</a> и статьи Block AI Research.</em></p>
+
+<p><strong>g3</strong> — это не модель, а <strong>агент для кодирования на Rust</strong> и референсная реализация <strong>диалектического автокодирования</strong> (<em>dialectical autocoding</em>): структурированное взаимодействие двух специализированных агентов (Player + Coach) в ограниченном числе ходов.</p>
+
+<h2 id="основная-публикация">Основная публикация</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Ресурс</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Статья (Block AI Research, дек. 2025)</strong></td>
+      <td><a href="https://block.xyz/documents/adversarial-cooperation-in-code-synthesis.pdf">Adversarial Cooperation in Code Synthesis (PDF)</a></td>
+    </tr>
+    <tr>
+      <td><strong>Референсная реализация</strong></td>
+      <td><a href="https://github.com/dhanji/g3">github.com/dhanji/g3</a></td>
+    </tr>
+    <tr>
+      <td><strong>Автор</strong></td>
+      <td><a href="https://github.com/dhanji">Dhananjay Nene (dhanji)</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>В статье вводится <strong>диалектическое автокодирование</strong>: vibe-coding как диалектика (требования → реализация → критика → доработка), но роль рецензента автоматизируется агентом <strong>Coach</strong>.</p>
+
+<h2 id="метод-дуэт-coach--player">Метод: дуэт Coach / Player</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────┐
+│  requirements.md  (общий, без деталей реализации) │
+└───────────────────────┬─────────────────────────┘
+                        │
+         ┌──────────────┴──────────────┐
+         ▼                             ▼
+   PLAYER (исполнитель)          COACH (рецензент)
+   • пишет код                    • сверяет с требованиями
+   • запускает тесты / shell       • находит пробелы и edge cases
+   • правит по фидбеку             • даёт конкретную критику
+         │                             │
+         └──────────► цикл ходов ◄─────┘
+                    (ограничен, ~10)
+                        │
+                        ▼
+              COACH APPROVED → готово
+</code></pre></div></div>
+
+<p><strong>Ограниченный adversarial-процесс:</strong></p>
+
+<ul>
+  <li><strong>Лимит ходов</strong> — конечное число обменов coach/player (обычно ~10)</li>
+  <li><strong>Свежий контекст на ход</strong> — новый инстанс агента на роль → меньше «загрязнения» контекста</li>
+  <li><strong>Общий контракт требований</strong> — оба агента стартуют с одного goal-документа</li>
+  <li><strong>Ворота одобрения</strong> — явный sign-off Coach завершает успешный прогон</li>
+  <li><strong>Игнор самоотчёта Player</strong> — Coach проверяет независимо (ловит «готово!» при отсутствии HTTPS)</li>
+</ul>
+
+<h2 id="чем-g3-отличается-от-vibe-coding-и-single-agent">Чем g3 отличается от vibe coding и single-agent</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аспект</th>
+      <th>Обычный vibe coding</th>
+      <th>g3 (диалектическое автокодирование)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ревью</td>
+      <td>Человек ловит пробелы</td>
+      <td>Coach на каждом ходу</td>
+    </tr>
+    <tr>
+      <td>Контекст</td>
+      <td>Один длинный тред</td>
+      <td>Свежие инстансы + фокусный фидбек</td>
+    </tr>
+    <tr>
+      <td>Критерий успеха</td>
+      <td>Размытый</td>
+      <td>Контракт требований + одобрение Coach</td>
+    </tr>
+    <tr>
+      <td>Автономность</td>
+      <td>~5 мин на ход, человек рядом</td>
+      <td>Задумано на 30–60 мин без надзора</td>
+    </tr>
+    <tr>
+      <td>Самоуверенность</td>
+      <td>Player рано говорит «сделано»</td>
+      <td>Coach находит HTTPS, auth, metrics</td>
+    </tr>
+    <tr>
+      <td>Модели</td>
+      <td>Одна модель на сессию</td>
+      <td>Естественная ротация моделей по ролям/ходам</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Кейс из статьи: <strong>Calculator API</strong> — goose частично; g3 закрыл требования за несколько ходов <strong>без более сильной базовой модели</strong>, за счёт adversarial-дизайна.</p>
+
+<h2 id="уникальные-инженерные-решения-в-g3">Уникальные инженерные решения в g3</h2>
+
+<p>Помимо парадигмы из статьи, в Rust-коде:</p>
+
+<h3 id="1-управление-контекстом">1. Управление контекстом</h3>
+<ul>
+  <li><strong>Context thinning</strong> на 50/60/70/80% — большие выводы tools → ссылки на файлы</li>
+  <li><strong>Auto-compaction</strong> при 80% ёмкости</li>
+  <li>CLI: <code class="language-plaintext highlighter-rouge">/compact</code>, <code class="language-plaintext highlighter-rouge">/thinnify</code>, <code class="language-plaintext highlighter-rouge">/skinnify</code>, <code class="language-plaintext highlighter-rouge">/stats</code></li>
+</ul>
+
+<h3 id="2-модульный-rust-workspace">2. Модульный Rust-workspace</h3>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">g3-core</code> — оркестрация, tools, streaming parser</li>
+  <li><code class="language-plaintext highlighter-rouge">g3-providers</code> — Anthropic, Databricks, llama.cpp (Metal на macOS)</li>
+  <li><code class="language-plaintext highlighter-rouge">g3-execution</code> — планирование, retry, прогресс</li>
+  <li><code class="language-plaintext highlighter-rouge">g3-computer-control</code> — мышь/клавиатура, скриншоты, OCR (для оценки Coach)</li>
+  <li><code class="language-plaintext highlighter-rouge">g3-cli</code> — интерактив + автономные режимы</li>
+</ul>
+
+<h3 id="3-agent-skills-agentskillsio">3. Agent Skills (<a href="https://agentskills.io">agentskills.io</a>)</h3>
+<p>Портативные пакеты <code class="language-plaintext highlighter-rouge">SKILL.md</code> — <code class="language-plaintext highlighter-rouge">.g3/skills/</code>, <code class="language-plaintext highlighter-rouge">~/.g3/skills/</code>, встроенные skills в бинарнике.</p>
+
+<h3 id="4-синтаксический-поиск-кода">4. Синтаксический поиск кода</h3>
+<p>tree-sitter: Rust, Python, JS/TS, Go, Java, C/C++.</p>
+
+<h3 id="5-режимы-работы">5. Режимы работы</h3>
+<ul>
+  <li><strong>По умолчанию: accumulative autonomous</strong> — каждое требование пользователя → цикл coach/player</li>
+  <li><code class="language-plaintext highlighter-rouge">--autonomous</code> — читает <code class="language-plaintext highlighter-rouge">requirements.md</code></li>
+  <li><code class="language-plaintext highlighter-rouge">--planning</code> — уточнение требований + git commit (<code class="language-plaintext highlighter-rouge">g3-plan/</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">--chat</code> — простой чат без автономного цикла</li>
+</ul>
+
+<h3 id="6-честные-бенчмарки-локальных-моделей">6. Честные бенчмарки локальных моделей</h3>
+<p>В README — agentic-задача (repack комиксов): dense vs MoE; облачные Opus/Gemini 3 Pro как baseline.</p>
+
+<h2 id="эмпирические-кейсы-из-статьи">Эмпирические кейсы (из статьи)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Кейс</th>
+      <th>Результат</th>
+      <th>Ссылки</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Calculator API</td>
+      <td>g3 завершил; goose — частично</td>
+      <td>Paper § Empirical Results</td>
+    </tr>
+    <tr>
+      <td>Diff viewer (SwiftUI)</td>
+      <td>4 хода coach/player</td>
+      <td><a href="https://github.com/michaelneale/swifty-diff">swifty-diff</a></td>
+    </tr>
+    <tr>
+      <td>iOS-клиент goose</td>
+      <td>По API-спеке; слабый контроль эмулятора</td>
+      <td><a href="https://github.com/dhanji/goose-ios">goose-ios</a></td>
+    </tr>
+    <tr>
+      <td>Git TUI explorer</td>
+      <td>5/5 completeness в таблице paper vs Cursor/Codex</td>
+      <td>Таблица в PDF</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="связанные-ссылки">Связанные ссылки</h2>
+
+<ul>
+  <li><a href="https://www.tbench.ai/leaderboard/terminal-bench/2.0">Terminal Bench 2.0</a></li>
+  <li><a href="https://dl.acm.org/doi/10.1145/1281700.1281702">ACM: стоимость переключения контекста</a></li>
+  <li><a href="https://github.com/kishb87/opencode-adversarial-cooperation">OpenCode: adversarial cooperation</a></li>
+  <li>В статье: паттерн планируется как улучшение <strong>goose</strong></li>
+</ul>
+
+<h2 id="связь-с-vairl--агентством">Связь с VAIRL / агентством</h2>
+
+<p>Дуэт Coach/Player перекликается с <strong>критиком</strong> в нейросимволическом пайплайне — реализация vs независимая валидация. Возможные связки:</p>
+
+<ul>
+  <li>Coach как <strong>PubLens / QA gate</strong> перед merge</li>
+  <li>Player как coder с tools; Coach как oracle требований и тестов</li>
+  <li>Параллельные кластеры экспериментов (проблема «ночей и выходных» из статьи)</li>
+</ul>
+
+<h2 id="ограничения">Ограничения</h2>
+
+<ul>
+  <li>Лимит ходов может не хватить на очень крупные задачи</li>
+  <li>Автоматизация iOS-эмулятора слабее desktop/web для Coach</li>
+  <li>Локальные модели всё ещё сильно отстают от облачных top-tier на сложных agentic-задачах</li>
+  <li>Паттерн воспроизводим на других агентах — g3 одна из реализаций</li>
+</ul>
+
+<h2 id="следующие-шаги">Следующие шаги</h2>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Минимальный coach/player на задаче VAIRL</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Сравнение g3 vs single-agent на одном <code class="language-plaintext highlighter-rouge">requirements.md</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Связка Coach с peer-review gate (PubLens) в агентстве</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

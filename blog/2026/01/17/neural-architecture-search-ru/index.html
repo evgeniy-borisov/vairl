@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Введение в поиск нейронных архитектур - VAIRL</title>
+    <meta name="description" content="Поиск нейронных архитектур (NAS) революционизирует способ проектирования моделей глубокого обучения. Вместо ручного создания архитектур мы можем автоматизиро...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Введение в поиск нейронных архитектур | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Введение в поиск нейронных архитектур" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Поиск нейронных архитектур (NAS) революционизирует способ проектирования моделей глубокого обучения. Вместо ручного создания архитектур мы можем автоматизировать процесс." />
+<meta name="twitter:description" property="og:description" content="Поиск нейронных архитектур (NAS) революционизирует способ проектирования моделей глубокого обучения. Вместо ручного создания архитектур мы можем автоматизировать процесс." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/01/17/neural-architecture-search-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/01/17/neural-architecture-search-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/nas-architecture.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-01-17T14:51:00+00:00" />
+<meta property="article:modified_time" content="2026-01-17T14:51:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/nas-architecture.svg" />
+<meta name="twitter:title" content="Введение в поиск нейронных архитектур" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-01-17T14:51:00+00:00","datePublished":"2026-01-17T14:51:00+00:00","description":"Поиск нейронных архитектур (NAS) революционизирует способ проектирования моделей глубокого обучения. Вместо ручного создания архитектур мы можем автоматизировать процесс.","headline":"Введение в поиск нейронных архитектур","image":"https://evgeniy-borisov.github.io/vairl/assets/images/nas-architecture.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/01/17/neural-architecture-search-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/01/17/neural-architecture-search-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/2026/01/17/neural-architecture-search/",
+    "ru": "/vairl/blog/2026/01/17/neural-architecture-search-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/nas-architecture.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Введение в поиск нейронных архитектур</h1>
+        <p class="post-date">17 January 2026, 14:51 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Поиск нейронных архитектур (NAS) революционизирует способ проектирования моделей глубокого обучения. Вместо ручного создания архитектур мы можем автоматизировать процесс.</p>
+
+<h2 id="что-такое-nas">Что такое NAS?</h2>
+
+<p>Поиск нейронных архитектур — это техника автоматизации проектирования искусственных нейронных сетей. Это подобласть AutoML, которая привлекла значительное внимание в последние годы.</p>
+
+<p>Основная идея проста: вместо того, чтобы эксперты вручную проектировали архитектуры нейронных сетей, мы используем алгоритмы для автоматического поиска в пространстве возможных архитектур.</p>
+
+<h2 id="почему-nas-важен">Почему NAS важен?</h2>
+
+<p>Традиционное проектирование нейронных сетей требует:</p>
+<ul>
+  <li>Глубокой экспертизы в машинном обучении</li>
+  <li>Обширных проб и ошибок</li>
+  <li>Значительных временных инвестиций</li>
+  <li>Специфических знаний предметной области</li>
+</ul>
+
+<p>NAS решает эти проблемы:</p>
+<ul>
+  <li>Автоматизируя процесс проектирования архитектуры</li>
+  <li>Исследуя гораздо большее пространство возможных решений</li>
+  <li>Находя архитектуры, оптимизированные для конкретных задач</li>
+  <li>Снижая потребность в человеческой экспертизе</li>
+</ul>
+
+<h2 id="ключевые-подходы">Ключевые подходы</h2>
+
+<p>Существует несколько основных подходов к NAS:</p>
+
+<h3 id="1-nas-на-основе-обучения-с-подкреплением">1. NAS на основе обучения с подкреплением</h3>
+<p>Использует агентов RL для генерации и оценки архитектур. Агент учится предлагать лучшие архитектуры со временем на основе их производительности.</p>
+
+<h3 id="2-эволюционные-алгоритмы">2. Эволюционные алгоритмы</h3>
+<p>Применяет принципы естественной эволюции для развития нейронных архитектур. Архитектуры с хорошей производительностью “скрещиваются” для создания новых кандидатов.</p>
+
+<h3 id="3-методы-на-основе-градиентов">3. Методы на основе градиентов</h3>
+<p>Делает пространство поиска непрерывным и дифференцируемым, позволяя использовать градиентный спуск для поиска оптимальных архитектур.</p>
+
+<h2 id="вызовы-и-будущие-направления">Вызовы и будущие направления</h2>
+
+<p>Хотя NAS показал впечатляющие результаты, остаются несколько вызовов:</p>
+<ul>
+  <li><strong>Вычислительные затраты</strong>: Поиск архитектур может требовать огромных вычислительных ресурсов</li>
+  <li><strong>Проектирование пространства поиска</strong>: Определение эффективного пространства поиска критично, но сложно</li>
+  <li><strong>Переносимость</strong>: Архитектуры, найденные для одной задачи, могут плохо переноситься на другие</li>
+</ul>
+
+<p>В VAIRL мы исследуем новые подходы для повышения эффективности и доступности NAS. Следите за обновлениями наших исследований!</p>
+
+<h2 id="заключение">Заключение</h2>
+
+<p>Поиск нейронных архитектур представляет собой парадигмальный сдвиг в подходе к проектированию нейронных сетей. По мере развития области мы ожидаем, что NAS станет важным инструментом в наборе каждого исследователя ИИ.</p>
+
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

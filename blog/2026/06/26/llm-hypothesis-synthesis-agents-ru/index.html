@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Синтез гипотез локальной LLM для повышения качества агентов - VAIRL</title>
+    <meta name="description" content="Как генерировать проверяемые гипотезы об улучшении LLM-агентов с помощью локальной модели в Google Colab, хранить их в ChromaDB и исследовать пространство ре...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Синтез гипотез локальной LLM для повышения качества агентов | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Синтез гипотез локальной LLM для повышения качества агентов" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Как генерировать проверяемые гипотезы об улучшении LLM-агентов с помощью локальной модели в Google Colab, хранить их в ChromaDB и исследовать пространство решений." />
+<meta name="twitter:description" property="og:description" content="Как генерировать проверяемые гипотезы об улучшении LLM-агентов с помощью локальной модели в Google Colab, хранить их в ChromaDB и исследовать пространство решений." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/llm-hypothesis-synthesis-agents.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-26T17:44:30+00:00" />
+<meta property="article:modified_time" content="2026-06-26T17:44:30+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/llm-hypothesis-synthesis-agents.svg" />
+<meta name="twitter:title" content="Синтез гипотез локальной LLM для повышения качества агентов" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-26T17:44:30+00:00","datePublished":"2026-06-26T17:44:30+00:00","description":"Как генерировать проверяемые гипотезы об улучшении LLM-агентов с помощью локальной модели в Google Colab, хранить их в ChromaDB и исследовать пространство решений.","headline":"Синтез гипотез локальной LLM для повышения качества агентов","image":"https://evgeniy-borisov.github.io/vairl/assets/images/llm-hypothesis-synthesis-agents.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/",
+    "ru": "/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/llm-hypothesis-synthesis-agents.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Синтез гипотез локальной LLM для повышения качества агентов</h1>
+        <p class="post-date">26 June 2026, 17:44 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Улучшение агентов — это не одна идея, а <strong>пространство гипотез</strong>: изменения в планировании, вызове инструментов, памяти, рефлексии и восстановлении после ошибок. В этой публикации — практический пайплайн, который можно запустить в <a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hypothesis-synthesis-agents.ipynb">Google Colab</a> без внешних API.</p>
+
+<p><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hypothesis-synthesis-agents.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" /></a></p>
+
+<h2 id="зачем-синтез-гипотез">Зачем синтез гипотез?</h2>
+
+<p>Когда мы настраиваем агента, обычно перебираем отдельные трюки: chain-of-thought, ReAct, критик, кэш инструментов. Без явной модели «гипотеза» легко:</p>
+
+<ul>
+  <li>повторять семантически одинаковые идеи;</li>
+  <li>не фиксировать, что именно проверяем;</li>
+  <li>терять связь между изменением конфигурации и метрикой.</li>
+</ul>
+
+<p><strong>Гипотеза</strong> в нашем пайплайне — структурированный объект: утверждение, механизм, ось качества, переменные для эксперимента, метрика, предсказание и критерий опровержения.</p>
+
+<h2 id="архитектура-пайплайна">Архитектура пайплайна</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Контекст задачи
+    → локальная LLM (Qwen2.5-7B GGUF на T4)
+    → JSON-гипотезы по осям качества агента
+    → ChromaDB (эмбеддинги + дедупликация)
+    → быстрая оценка (эвристика / бенчмарк)
+    → итеративный refine с лучшими кандидатами
+    → визуализация пространства (PCA / PaCMAP)
+</code></pre></div></div>
+
+<h3 id="оси-качества-агента">Оси качества агента</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Ось</th>
+      <th>Что меняем</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tool_use</code></td>
+      <td>Надёжность вызова инструментов и валидность аргументов</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">planning</code></td>
+      <td>Декомпозиция целей и многошаговые планы</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">memory</code></td>
+      <td>Удержание контекста в длинных сессиях</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">reflection</code></td>
+      <td>Самопроверка и критик перед ответом</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">error_recovery</code></td>
+      <td>Поведение после сбоев API и инструментов</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">latency_tradeoff</code></td>
+      <td>Баланс скорости и качества</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="локальная-llm-в-colab">Локальная LLM в Colab</h2>
+
+<p>Модель работает <strong>на GPU виртуальной машины Colab</strong> — данные не уходят во внешний API. На T4 (~16 GB VRAM) комфортно запускается квантизованная 7B-модель через <code class="language-plaintext highlighter-rouge">llama-cpp-python</code>.</p>
+
+<p>Если GPU недоступен, ноутбук переключается в <strong>демо-режим</strong> с шаблонными гипотезами — весь пайплайн (ChromaDB, оценка, визуализация) всё равно проходит от начала до конца.</p>
+
+<h2 id="chromadb-и-дедупликация">ChromaDB и дедупликация</h2>
+
+<p>Каждая гипотеза сохраняется как эмбеддинг (<code class="language-plaintext highlighter-rouge">multilingual-e5-small</code>). Перед добавлением проверяется косинусная близость к уже известным — это снижает повтор генерации «переформулированных» идей в следующих раундах.</p>
+
+<h2 id="итеративный-refine">Итеративный refine</h2>
+
+<p>После первого батча топ-гипотезы по score попадают в контекст следующего запроса к LLM. Модель видит, что уже предложено, и ищет <strong>новые</strong> направления в пространстве — аналог guided exploration в NAS или эволюционном поиске.</p>
+
+<h2 id="оценка-от-эвристики-к-бенчмарку">Оценка: от эвристики к бенчмарку</h2>
+
+<p>В ноутбуке <code class="language-plaintext highlighter-rouge">score_hypothesis</code> — заглушка с весами по осям и проверяемостью. В реальном эксперименте её заменяют на:</p>
+
+<ul>
+  <li>прогон агента с <code class="language-plaintext highlighter-rouge">variables</code> из гипотезы на фиксированном наборе эпизодов;</li>
+  <li>метрики: <code class="language-plaintext highlighter-rouge">task_success_rate</code>, <code class="language-plaintext highlighter-rouge">tool_call_success_rate</code>, <code class="language-plaintext highlighter-rouge">recovery_rate</code>, <code class="language-plaintext highlighter-rouge">hallucination_rate</code>;</li>
+  <li>статистический порог для принятия/отклонения гипотезы.</li>
+</ul>
+
+<h2 id="связь-с-пространством-гипотез">Связь с пространством гипотез</h2>
+
+<p>Этот пайплайн — практическое продолжение идеи <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">пространства гипотез и PaCMAP</a>: сначала накапливаем кандидатов, затем проецируем их в 2D для интерпретации кластеров и «белых пятен» поиска.</p>
+
+<h2 id="ограничения">Ограничения</h2>
+
+<ul>
+  <li>Локальная 7B слабее топовых облачных моделей — компенсируйте жёсткой JSON-схемой и критиком.</li>
+  <li>Эвристический score не заменяет реальный бенчмарк.</li>
+  <li>Сессия Colab ограничена по времени; для долгих экспериментов монтируйте Google Drive.</li>
+</ul>
+
+<h2 id="попробовать">Попробовать</h2>
+
+<p>Откройте ноутбук в Colab, включите <strong>Runtime → T4 GPU</strong> и пройдите ячейки сверху вниз:</p>
+
+<p><strong><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hypothesis-synthesis-agents.ipynb">hypothesis-synthesis-agents.ipynb</a></strong></p>
+
+<p>Исходники — в репозитории VAIRL, папка <code class="language-plaintext highlighter-rouge">notebooks/</code>.</p>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

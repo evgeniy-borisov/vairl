@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Справочник методов выравнивания LLM: PPO, DPO, GRPO и смежные подходы - VAIRL</title>
+    <meta name="description" content="Хронология и краткое описание ключевых алгоритмов выравнивания языковых моделей: RLHF, PPO, GRPO, DPO, SimPO, KTO, ORPO, PRM, STaR, MCTS и RLVR — со ссылками...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Справочник методов выравнивания LLM: PPO, DPO, GRPO и смежные подходы | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Справочник методов выравнивания LLM: PPO, DPO, GRPO и смежные подходы" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Хронология и краткое описание ключевых алгоритмов выравнивания языковых моделей: RLHF, PPO, GRPO, DPO, SimPO, KTO, ORPO, PRM, STaR, MCTS и RLVR — со ссылками на оригинальные статьи." />
+<meta name="twitter:description" property="og:description" content="Хронология и краткое описание ключевых алгоритмов выравнивания языковых моделей: RLHF, PPO, GRPO, DPO, SimPO, KTO, ORPO, PRM, STaR, MCTS и RLVR — со ссылками на оригинальные статьи." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/llm-alignment-methods-handbook-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/llm-alignment-methods-handbook-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/llm-alignment-methods-handbook.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-02T07:30:00+00:00" />
+<meta property="article:modified_time" content="2026-07-02T07:30:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/llm-alignment-methods-handbook.svg" />
+<meta name="twitter:title" content="Справочник методов выравнивания LLM: PPO, DPO, GRPO и смежные подходы" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-02T07:30:00+00:00","datePublished":"2026-07-02T07:30:00+00:00","description":"Хронология и краткое описание ключевых алгоритмов выравнивания языковых моделей: RLHF, PPO, GRPO, DPO, SimPO, KTO, ORPO, PRM, STaR, MCTS и RLVR — со ссылками на оригинальные статьи.","headline":"Справочник методов выравнивания LLM: PPO, DPO, GRPO и смежные подходы","image":"https://evgeniy-borisov.github.io/vairl/assets/images/llm-alignment-methods-handbook.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/llm-alignment-methods-handbook-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/llm-alignment-methods-handbook-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/02/llm-alignment-methods-handbook-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/llm-alignment-methods-handbook.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Справочник методов выравнивания LLM: PPO, DPO, GRPO и смежные подходы</h1>
+        <p class="post-date">02 July 2026, 07:30 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Выравнивание (alignment) больших языковых моделей — это этап постобучения, на котором модель учится следовать человеческим предпочтениям, быть полезной и безопасной. За последние восемь лет ландшафт прошёл путь от классического <strong>RLHF с PPO</strong> до <strong>прямой оптимизации предпочтений (DPO и xPO-семейство)</strong> и <strong>онлайн-RL без критика (GRPO, RLOO)</strong> для reasoning-моделей.</p>
+
+<p>Ниже — структурированный справочник: <strong>год появления</strong>, <strong>суть метода</strong>, <strong>ссылка на оригинальную статью</strong>. Для детального сравнения PPO и GRPO см. отдельную публикацию: <a href="/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/">GRPO vs PPO</a>.</p>
+
+<p>Связанные материалы VAIRL: <a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">жизненный цикл агента</a>, <a href="/vairl/blog/2026/07/02/agent-trajectory-formats-ru/">форматы траекторий</a>, <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивость control loops</a>.</p>
+
+<hr />
+
+<h2 id="хронология-кратко">Хронология (кратко)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Год</th>
+      <th>Метод</th>
+      <th>Категория</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2015</td>
+      <td>TRPO</td>
+      <td>RL</td>
+    </tr>
+    <tr>
+      <td>2017</td>
+      <td>PPO, RLHF (основа)</td>
+      <td>RL</td>
+    </tr>
+    <tr>
+      <td>2022</td>
+      <td>InstructGPT, STaR, Constitutional AI</td>
+      <td>Пайплайн / reasoning</td>
+    </tr>
+    <tr>
+      <td>2023</td>
+      <td>DPO, PRM, RAFT, ReMax, IPO</td>
+      <td>xPO / RL / reasoning</td>
+    </tr>
+    <tr>
+      <td>2024</td>
+      <td>GRPO, KTO, ORPO, RLOO, SimPO, SPIN, MCTS-<em>, ReST-MCTS</em></td>
+      <td>xPO / RL / reasoning</td>
+    </tr>
+    <tr>
+      <td>2025</td>
+      <td>DeepSeek-R1 (RLVR + GRPO)</td>
+      <td>Reasoning RL</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">timeline
+  title Эволюция выравнивания LLM
+  2015 : TRPO
+  2017 : PPO : RLHF
+  2022 : InstructGPT : STaR
+  2023 : DPO : PRM : ReMax
+  2024 : GRPO : KTO : SimPO : RLOO
+  2025 : DeepSeek-R1 : RLVR
+</code></pre>
+
+<hr />
+
+<h2 id="0-фундамент-откуда-взялся-rlhf">0. Фундамент: откуда взялся RLHF</h2>
+
+<p>Прежде чем перечислять варианты оптимизации, полезно понимать <strong>трёхэтапный пайплайн</strong>, который задал индустриальный стандарт:</p>
+
+<ol>
+  <li><strong>SFT</strong> — обучение на демонстрациях экспертов.</li>
+  <li><strong>Reward Model (RM)</strong> — обучение оценщика на парах «лучше / хуже».</li>
+  <li><strong>RL-этап</strong> — дообучение политики (обычно PPO) с KL-штрафом к референсной модели.</li>
+</ol>
+
+<table>
+  <thead>
+    <tr>
+      <th>Метод</th>
+      <th>Год</th>
+      <th>Суть</th>
+      <th>Статья</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>RLHF</strong> (основа)</td>
+      <td>2017</td>
+      <td>Обучение с подкреплением по скалярной награде от человека; предшественник современного RLHF для LLM</td>
+      <td><a href="https://arxiv.org/abs/1706.03741">Deep RL from Human Preferences</a></td>
+    </tr>
+    <tr>
+      <td><strong>InstructGPT / ChatGPT-пайплайн</strong></td>
+      <td>2022</td>
+      <td>SFT → RM → PPO; показал масштабируемость RLHF для диалоговых LLM</td>
+      <td><a href="https://arxiv.org/abs/2203.02155">Training LMs to Follow Instructions</a></td>
+    </tr>
+    <tr>
+      <td><strong>Constitutional AI (RLAIF)</strong></td>
+      <td>2022</td>
+      <td>Выравнивание по принципам (constitution) с AI-оценкой вместо чисто человеческой RM</td>
+      <td><a href="https://arxiv.org/abs/2212.08073">Constitutional AI</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="1-методы-классического-и-онлайн-обучения-с-подкреплением">1. Методы классического и онлайн-обучения с подкреплением</h2>
+
+<p>Эти алгоритмы работают в <strong>динамическом режиме</strong>: модель генерирует ответы, получает награду (от RM или верификатора) и обновляет веса на лету. Для reasoning-задач с <strong>верифицируемой наградой</strong> (правильный ответ в математике, прохождение unit-тестов) этот класс часто называют <strong>RLVR</strong> (Reinforcement Learning with Verifiable Rewards).</p>
+
+<h3 id="ppo-proximal-policy-optimization">PPO (Proximal Policy Optimization)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2017 (для LLM — с 2022, InstructGPT)</li>
+  <li><strong>Суть:</strong> Классический RLHF-алгоритм actor-critic. Две сети: <strong>актор</strong> (LLM) и <strong>критик</strong> (value function). Механизм <strong>clipping</strong> ограничивает шаг обновления — стабильность при длинных контекстах и агентских задачах. Минус: критик удваивает потребление VRAM.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/1707.06347">Proximal Policy Optimization Algorithms</a> (Schulman et al., 2017)</li>
+</ul>
+
+<h3 id="grpo-group-relative-policy-optimization">GRPO (Group Relative Policy Optimization)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2024</li>
+  <li><strong>Суть:</strong> Модификация PPO от команды DeepSeek. <strong>Убирает критика</strong>: на один промпт генерируется группа ответов, advantage считается <strong>относительно среднего</strong> внутри группы. Экономия ~50% VRAM; стал основным методом для олимпиадных и математических reasoning-моделей (DeepSeek-R1, Qwen-Math и др.).</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2402.03300">DeepSeekMath: Pushing the Limits of Open Language Models in Mathematical Reasoning</a> (Shao et al., 2024)</li>
+</ul>
+
+<h3 id="trpo-trust-region-policy-optimization">TRPO (Trust Region Policy Optimization)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2015</li>
+  <li><strong>Суть:</strong> Исторический предшественник PPO. Строгое ограничение на шаг через <strong>расстояние Кульбака–Лейблера</strong> (trust region). Очень стабилен, но вычислительно тяжёл для масштабирования на современные LLM.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/1502.05477">Trust Region Policy Optimization</a> (Schulman et al., 2015)</li>
+</ul>
+
+<h3 id="remax">ReMax</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2023 (ICML 2024)</li>
+  <li><strong>Суть:</strong> Облегчённая альтернатива PPO на базе <strong>REINFORCE</strong>. Критик заменён <strong>жадным baseline</strong>: из награды сэмпла вычитается награда greedy-декодирования. Проще PPO, ~46% экономии памяти на 7B; близок по духу к GRPO, но без группового батчинга.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2310.10505">ReMax: A Simple, Effective, and Efficient RL Method for Aligning LLMs</a> (Li et al., 2023)</li>
+</ul>
+
+<h3 id="rloo-reinforcement-learning-with-leave-one-out">RLOO (Reinforcement Learning with Leave-One-Out)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2024</li>
+  <li><strong>Суть:</strong> Онлайн-RL от Cohere/Google. Статистический <strong>leave-one-out baseline</strong>: награда каждого сэмпла сравнивается со средним по остальным ответам на тот же промпт. Логически близок к GRPO, но вписывается в PPO-подобную инфраструктуру (TRL <code class="language-plaintext highlighter-rouge">RLOOTrainer</code>); снижает дисперсию без отдельного критика.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2402.14740">Back to Basics: Revisiting REINFORCE Style Optimization for Learning from Human Feedback in LLMs</a> (Ahmadian et al., 2024)</li>
+</ul>
+
+<h3 id="raft-reward-ranked-finetuning">RAFT (Reward rAnked FineTuning)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2023</li>
+  <li><strong>Суть:</strong> Не классический RL, а <strong>фильтрация + SFT</strong>: модель генерирует много ответов, RM ранжирует их, дообучение только на топе. Простой и стабильный baseline; по эффективности часто сопоставим с PPO/GRPO на reasoning-задачах.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2304.06767">RAFT: Reward rAnked FineTuning for Generative Foundation Model Alignment</a> (Dong et al., 2023)</li>
+</ul>
+
+<hr />
+
+<h2 id="2-прямые-методы-оптимизации-предпочтений-без-традиционного-rl">2. Прямые методы оптимизации предпочтений (без традиционного RL)</h2>
+
+<p>Эти методы <strong>отказываются от цикла генерация → RM → PPO</strong>. Модель оптимизируется <strong>офлайн</strong> на готовых датасетах предпочтений через замкнутую функцию потерь — дешевле и проще в продакшене, но хуже подходит для сложных агентских задач «на лету».</p>
+
+<h3 id="dpo-direct-preference-optimization">DPO (Direct Preference Optimization)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2023</li>
+  <li><strong>Суть:</strong> Родоначальник прямого выравнивания. Вместо отдельной RM — <strong>бинарная кросс-энтропия</strong> на парах (chosen, rejected). Модель «тайно» является reward model. Быстро и дёшево; данные фиксированы (офлайн).</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2305.18290">Direct Preference Optimization: Your Language Model Is Secretly a Reward Model</a> (Rafailov et al., 2023)</li>
+</ul>
+
+<h3 id="simpo-simple-preference-optimization">SimPO (Simple Preference Optimization)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2024 (NeurIPS 2024)</li>
+  <li><strong>Суть:</strong> Развитие DPO <strong>без референсной модели</strong>. Неявная награда — <strong>средний log-prob</strong> ответа (нормализованный по длине), плюс target margin в Bradley–Terry. Борется с «раздуванием» текста ради высокой оценки.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2405.14734">SimPO: Simple Preference Optimization with a Reference-Free Reward</a> (Meng et al., 2024)</li>
+</ul>
+
+<h3 id="ipo-identity-policy-optimization">IPO (Identity Policy Optimization)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2023</li>
+  <li><strong>Суть:</strong> Теоретическое исправление DPO: регуляризация предотвращает <strong>переобучение</strong> и уход политики слишком далеко от базовой. Плавное выравнивание без «зацикливания» на простых шаблонах.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2310.12036">A General Theoretical Framework for Direct Preference Optimization</a> (Azar et al., 2023) — IPO как частный случай</li>
+</ul>
+
+<h3 id="kto-kahnemantversky-optimization">KTO (Kahneman–Tversky Optimization)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2024</li>
+  <li><strong>Суть:</strong> Выравнивание по <strong>теории перспектив</strong> Канемана–Тверски. Не нужны пары «лучше/хуже» — достаточно бинарной метки: ответ <strong>желателен</strong> или <strong>нет</strong>. Упрощает сбор данных из продакшен-логов (клики, рейтинги).</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2402.01306">KTO: Model Alignment as Prospect Theoretic Optimization</a> (Ethayarajh et al., 2024)</li>
+</ul>
+
+<h3 id="orpo-odds-ratio-preference-optimization">ORPO (Odds Ratio Preference Optimization)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2024</li>
+  <li><strong>Суть:</strong> <strong>SFT + alignment в одном шаге</strong>. Штраф за плохие ответы через <strong>odds ratio</strong> прямо во время базового обучения; референсная модель не нужна. Сокращает пайплайн с двух этапов до одного.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2403.07691">ORPO: Monolithic Preference Optimization without Reference Model</a> (Hong et al., 2024)</li>
+</ul>
+
+<h3 id="spin-self-play-fine-tuning">SPIN (Self-Play fIne-tuNing)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2024 (ICML 2024)</li>
+  <li><strong>Суть:</strong> Итеративное <strong>самообучение</strong>: модель отличает свои генерации от человеческих демонстраций (DPO-подобный loss), без дополнительных preference-данных. Онлайн-вариант для улучшения после SFT.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2401.01335">Self-Play Fine-Tuning Converts Weak Language Models to Strong Language Models</a> (Chen et al., 2024)</li>
+</ul>
+
+<hr />
+
+<h2 id="3-процессные-и-гибридные-методы-для-рассуждающих-моделей">3. Процессные и гибридные методы для рассуждающих моделей</h2>
+
+<p>Специализированные подходы для <strong>длинных цепочек рассуждений</strong> (chain-of-thought) перед финальным ответом — критичны для math, code и formal reasoning.</p>
+
+<h3 id="prm-process-supervised-reward-models">PRM (Process-Supervised Reward Models)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2023</li>
+  <li><strong>Суть:</strong> В отличие от <strong>ORM</strong> (оценка только финала), PRM оценивает <strong>каждый шаг</strong> рассуждения. Позволяет PPO/GRPO бороться с логическими галлюцинациями на промежуточных шагах. Датасет PRM800K — 800K step-level меток.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2305.20050">Let’s Verify Step by Step</a> (Lightman et al., 2023, OpenAI)</li>
+</ul>
+
+<h3 id="star-self-taught-reasoner">STaR (Self-Taught Reasoner)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2022 (NeurIPS 2022)</li>
+  <li><strong>Суть:</strong> Цикл <strong>самообучения</strong>: модель генерирует CoT; при неверном ответе — rationalization (подсказка с правильным ответом); успешные цепочки идут в SFT-датасет. Итеративное улучшение без массивной ручной разметки.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2203.14465">STaR: Bootstrapping Reasoning With Reasoning</a> (Zelikman et al., 2022)</li>
+</ul>
+
+<h3 id="mcts--rl-семейство-tree-search-методов">MCTS + RL (семейство tree-search методов)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2024–2025</li>
+  <li><strong>Суть:</strong> Интеграция <strong>поиска по дереву Монте-Карло</strong> (как в AlphaGo): модель строит дерево вариантов рассуждения, оценивает ветки на несколько шагов вперёд, делает <strong>backtracking</strong> при тупике. Execution feedback (запуск кода, проверка шага) служит reward signal.</li>
+  <li><strong>Ключевые статьи:</strong>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2405.00451">MCTS-DPO: Monte Carlo Tree Search Boosts Reasoning via Iterative Preference Learning</a> (Xie et al., 2024)</li>
+      <li><a href="https://arxiv.org/abs/2406.03816">ReST-MCTS*: LLM Self-Training via Process Reward Guided Tree Search</a> (Zhang et al., 2024, NeurIPS 2024)</li>
+      <li><a href="https://arxiv.org/abs/2405.16337">CoGEX: Learning to Reason via Program Generation, Emulation, and Search</a> (Weir et al., 2024)</li>
+      <li><a href="https://arxiv.org/abs/2411.11053">SRA-MCTS: Self-driven Reasoning Augmentation with MCTS for Code Generation</a> (2024)</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="deepseek-r1--rlvr-верифицируемые-награды">DeepSeek-R1 / RLVR (верифицируемые награды)</h3>
+
+<ul>
+  <li><strong>Год:</strong> 2025</li>
+  <li><strong>Суть:</strong> Многостадийный пайплайн: cold-start SFT → <strong>GRPO с rule-based reward</strong> (правильность ответа, формат) → rejection sampling → повторный RL. Показал, что длинные reasoning-цепочки можно <strong>вынудить</strong> чистым RL без массивной human CoT-разметки.</li>
+  <li><strong>Статья:</strong> <a href="https://arxiv.org/abs/2501.12948">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning</a> (Guo et al., 2025)</li>
+</ul>
+
+<hr />
+
+<h2 id="сводная-таблица-выбора">Сводная таблица выбора</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Критерий</th>
+      <th>RL (PPO / GRPO / RLOO)</th>
+      <th>Прямой xPO (DPO / SimPO / KTO)</th>
+      <th>Reasoning (PRM / MCTS / RLVR)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Данные</strong></td>
+      <td>Онлайн-генерация + reward</td>
+      <td>Офлайн-пары или бинарные метки</td>
+      <td>CoT-трассы, верификатор, step-labels</td>
+    </tr>
+    <tr>
+      <td><strong>Память</strong></td>
+      <td>Высокая (PPO) → средняя (GRPO/RLOO)</td>
+      <td>Низкая–средняя</td>
+      <td>Зависит от search budget</td>
+    </tr>
+    <tr>
+      <td><strong>Агентские задачи</strong></td>
+      <td>✅ Хорошо</td>
+      <td>⚠️ Ограниченно</td>
+      <td>✅ Для math/code</td>
+    </tr>
+    <tr>
+      <td><strong>Стабильность</strong></td>
+      <td>Нужен тюнинг (clip, KL)</td>
+      <td>Обычно проще</td>
+      <td>Сложнее (search + reward design)</td>
+    </tr>
+    <tr>
+      <td><strong>Типичный use case</strong></td>
+      <td>Chat alignment, RLHF</td>
+      <td>Продуктовый fine-tune на логах</td>
+      <td>Олимпиадная математика, coding agents</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph prep [Подготовка]
+    PT[Pretrain]
+    SFT[SFT]
+  end
+  subgraph align [Выравнивание]
+  direction TB
+    RL[PPO / GRPO / RLOO]
+    XPO[DPO / SimPO / KTO / ORPO]
+    RS[PRM / STaR / MCTS / RLVR]
+  end
+  PT --&gt; SFT
+  SFT --&gt; RL
+  SFT --&gt; XPO
+  SFT --&gt; RS
+  RL --&gt; Deploy[Деплой]
+  XPO --&gt; Deploy
+  RS --&gt; Deploy
+</code></pre>
+
+<hr />
+
+<h2 id="как-читать-этот-справочник">Как читать этот справочник</h2>
+
+<ol>
+  <li><strong>Начинаете с нуля</strong> — смотрите раздел 0 (RLHF-пайплайн), затем DPO как самый простой вход в xPO.</li>
+  <li><strong>Ограничена VRAM</strong> — GRPO, RLOO, ReMax, SimPO, ORPO (без референса).</li>
+  <li><strong>Math / code reasoning</strong> — GRPO + RLVR, PRM, STaR, MCTS-семейство; см. <a href="/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/">GRPO vs PPO</a>.</li>
+  <li><strong>Только логи «хорошо/плохо»</strong> — KTO.</li>
+  <li><strong>Хотите один этап вместо SFT+alignment</strong> — ORPO.</li>
+</ol>
+
+<blockquote>
+  <p><strong>Замечание по ссылкам.</strong> В ряде обзоров PPO ошибочно ссылают на arXiv:2402.03300 — это <strong>DeepSeekMath (GRPO)</strong>, а не оригинальный PPO. Корректная ссылка на PPO: <a href="https://arxiv.org/abs/1707.06347">1707.06347</a>.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="сравнительная-таблица-методов">Сравнительная таблица методов</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Категория</th>
+      <th>Алгоритм</th>
+      <th>Главная суть / отличие</th>
+      <th>Плюсы</th>
+      <th>Минусы</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Динамический RL</strong></td>
+      <td><strong>PPO</strong></td>
+      <td>Actor-critic: критик оценивает ценность на каждом токене; clipping стабилизирует шаг</td>
+      <td>Зрелая экосистема (TRL, OpenRLHF); хорош для длинного контекста и агентов</td>
+      <td>Требует ~2× VRAM на критик; тяжёлый тюнинг гиперпараметров</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>GRPO</strong></td>
+      <td>PPO без критика: advantage = отклонение награды от среднего в группе ответов на один промпт (<a href="https://arxiv.org/abs/2402.03300">DeepSeekMath</a>)</td>
+      <td>Экономия ~50% GPU; стандарт для math/code reasoning (DeepSeek-R1, Qwen-Math)</td>
+      <td>Нужно G ≥ 8 сэмплов на промпт; слабый сигнал, если все ответы в группе одинаковы</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>ReMax</strong></td>
+      <td>REINFORCE + baseline через <strong>жадное</strong> декодирование на том же промпте</td>
+      <td>Проще PPO (~46% меньше памяти); мало гиперпараметров</td>
+      <td>Один baseline на промпт — выше дисперсия, чем у GRPO/RLOO</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>RLOO</strong></td>
+      <td>REINFORCE + <strong>leave-one-out</strong> baseline по группе сэмплов</td>
+      <td>Стабильнее ReMax; вписывается в TRL без отдельного критика</td>
+      <td>Как у GRPO — нужна группа ответов; онлайн-генерация дороже офлайн-xPO</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>RAFT</strong></td>
+      <td>Фильтрация: много сэмплов → RM ранжирует → SFT только на топе</td>
+      <td>Простой baseline; часто сопоставим с PPO/GRPO на reasoning</td>
+      <td>Не обновляет политику «вживую»; качество зависит от RM</td>
+    </tr>
+    <tr>
+      <td><strong>Прямой alignment</strong></td>
+      <td><strong>DPO</strong></td>
+      <td>Офлайн-оптимизация на парах «лучший / худший» ответ без отдельной RM</td>
+      <td>Дёшево, стабильно, без RL-цикла</td>
+      <td>Фиксированный датасет; слаб для задач с онлайн-обратной связью</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>IPO</strong></td>
+      <td>Регуляризованный DPO: штраф за слишком сильный отрыв от референса</td>
+      <td>Меньше переобучения и «схлопывания» на шаблоны, чем у DPO</td>
+      <td>Всё ещё нужны пары; медленнее сходится при агрессивном β</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>SimPO</strong></td>
+      <td>DPO <strong>без референсной модели</strong>; награда = средний log-prob (норма по длине)</td>
+      <td>Максимальная экономия VRAM среди xPO; меньше «воды» в ответах</td>
+      <td>Нужны пары предпочтений; чувствителен к дисбалансу длины ответов</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>KTO</strong></td>
+      <td>Бинарные метки «хорошо / плохо» на <strong>одиночных</strong> ответах (теория перспектив)</td>
+      <td>Дешёвый сбор данных из логов (клики, рейтинги)</td>
+      <td>Чуть уступает DPO на тонкой настройке по парам</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>ORPO</strong></td>
+      <td>SFT + preference alignment <strong>в одном</strong> шаге через odds ratio</td>
+      <td>Сокращает пайплайн; не нужна замороженная референсная модель</td>
+      <td>Сложнее балансировать SFT vs alignment; меньше контроля, чем в двухэтапном пайплайне</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>SPIN</strong></td>
+      <td>Итеративное самообучение: модель отличает свои ответы от human SFT</td>
+      <td>Не нужны дополнительные preference-данные поверх SFT</td>
+      <td>Несколько итераций; риск дрейфа от human-распределения</td>
+    </tr>
+    <tr>
+      <td><strong>Reasoning / агенты</strong></td>
+      <td><strong>PRM</strong></td>
+      <td>Process reward: оценка <strong>каждого шага</strong> CoT, не только финала</td>
+      <td>Борется с логическими галлюцинациями в цепочке</td>
+      <td>Дорогая пошаговая разметка (PRM800K и аналоги)</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>STaR</strong></td>
+      <td>Bootstrapping: генерация CoT → фильтр по правильности → SFT; rationalization при ошибках</td>
+      <td>Автономный цикл улучшения без массивной ручной CoT-разметки</td>
+      <td>Риск накопления собственных ошибок; нужен oracle ответа</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>MCTS</strong></td>
+      <td>Поиск по дереву рассуждений с backtracking (MCTS-DPO, ReST-MCTS*, CoGEX)</td>
+      <td>Решает сложные задачи, недоступные жадной генерации</td>
+      <td>Медленный инференс; высокий compute budget на поиск</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>RLVR</strong></td>
+      <td>Награда от <strong>верификатора</strong> (правильный ответ, unit-тесты) + онлайн-RL (часто GRPO)</td>
+      <td>Эмерджентные длинные CoT без ручной разметки рассуждений (<a href="https://arxiv.org/abs/2501.12948">DeepSeek-R1</a>)</td>
+      <td>Нужен надёжный верификатор; плохо переносится на «мягкие» задачи без oracle</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="further-reading">Further reading</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/">GRPO vs PPO: сравнительный анализ</a> — формулы, VRAM, RLVR</li>
+  <li><a href="https://arxiv.org/abs/2407.16216">A Comprehensive Survey of LLM Alignment Techniques</a> — обзор xPO-семейства (2024)</li>
+  <li><a href="https://rlhfbook.com/">RLHF Book (Nathan Lambert)</a> — учебник по policy gradients, DPO, GRPO</li>
+  <li><a href="https://huggingface.co/blog/putting_rl_back_in_rlhf_with_rloo">Hugging Face TRL: RLOO</a> — практика онлайн-RL</li>
+  <li><a href="/vairl/blog/2026/07/02/agent-trajectory-formats-ru/">Форматы траекторий для SFT/RL</a> — как сериализовать эпизоды для дообучения</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

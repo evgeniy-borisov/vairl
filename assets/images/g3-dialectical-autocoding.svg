@@ -1,0 +1,27 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g3G1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="g3G2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a"/>
+      <stop offset="100%" style="stop-color:#fee140"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0f0f18"/>
+  <!-- Player -->
+  <rect x="120" y="200" width="280" height="180" rx="16" fill="url(#g3G1)" opacity="0.25" stroke="url(#g3G1)" stroke-width="2"/>
+  <text x="260" y="270" text-anchor="middle" fill="#a0b4ff" font-family="monospace" font-size="22" font-weight="600">Player</text>
+  <text x="260" y="310" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="14">writes code</text>
+  <!-- Coach -->
+  <rect x="800" y="200" width="280" height="180" rx="16" fill="url(#g3G2)" opacity="0.2" stroke="url(#g3G2)" stroke-width="2"/>
+  <text x="940" y="270" text-anchor="middle" fill="#ffb4c8" font-family="monospace" font-size="22" font-weight="600">Coach</text>
+  <text x="940" y="310" text-anchor="middle" fill="#fa709a" font-family="system-ui,sans-serif" font-size="14">tests + critiques</text>
+  <!-- dialectical loop -->
+  <path d="M400 290 C520 290 520 200 600 200 C680 200 680 290 800 290" fill="none" stroke="#667eea" stroke-width="3" opacity="0.6"/>
+  <path d="M800 320 C680 320 680 410 600 410 C520 410 520 320 400 320" fill="none" stroke="#fa709a" stroke-width="3" opacity="0.6"/>
+  <text x="600" y="195" text-anchor="middle" fill="#fee140" font-family="system-ui,sans-serif" font-size="13">requirements</text>
+  <text x="600" y="430" text-anchor="middle" fill="#43e97b" font-family="system-ui,sans-serif" font-size="13">tested code</text>
+  <text x="600" y="520" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="20">g3 - Dialectical Autocoding - Rust</text>
+</svg>

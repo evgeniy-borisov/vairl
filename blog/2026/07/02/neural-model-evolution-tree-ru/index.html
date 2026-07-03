@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эволюция моделей ИИ: не линия времени, а дерево - VAIRL</title>
+    <meta name="description" content="Развитие нейросетей — ветвящееся дерево, а не прямая ось. Три Python-визуализации: полукруглое phylogenetic tree, граф архитектурных заимствований и кластеры...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Эволюция моделей ИИ: не линия времени, а дерево | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Эволюция моделей ИИ: не линия времени, а дерево" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Развитие нейросетей — ветвящееся дерево, а не прямая ось. Три Python-визуализации: полукруглое phylogenetic tree, граф архитектурных заимствований и кластеры, упорядоченные по времени." />
+<meta name="twitter:description" property="og:description" content="Развитие нейросетей — ветвящееся дерево, а не прямая ось. Три Python-визуализации: полукруглое phylogenetic tree, граф архитектурных заимствований и кластеры, упорядоченные по времени." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/neural-model-evolution-tree-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/neural-model-evolution-tree-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/neural-model-evolution-tree.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-02T06:00:00+00:00" />
+<meta property="article:modified_time" content="2026-07-02T06:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/neural-model-evolution-tree.svg" />
+<meta name="twitter:title" content="Эволюция моделей ИИ: не линия времени, а дерево" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-02T06:00:00+00:00","datePublished":"2026-07-02T06:00:00+00:00","description":"Развитие нейросетей — ветвящееся дерево, а не прямая ось. Три Python-визуализации: полукруглое phylogenetic tree, граф архитектурных заимствований и кластеры, упорядоченные по времени.","headline":"Эволюция моделей ИИ: не линия времени, а дерево","image":"https://evgeniy-borisov.github.io/vairl/assets/images/neural-model-evolution-tree.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/neural-model-evolution-tree-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/neural-model-evolution-tree-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/2026/07/02/neural-model-evolution-tree/",
+    "ru": "/vairl/blog/2026/07/02/neural-model-evolution-tree-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/neural-model-evolution-tree.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Эволюция моделей ИИ: не линия времени, а дерево</h1>
+        <p class="post-date">02 July 2026, 06:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Линейный рассказ «от Perceptron к GPT-4» удобен для слайдов, но <strong>плохо отражает реальность</strong>: идеи <strong>ветвятся</strong>, <strong>сходятся</strong> и <strong>переиспользуются</strong>. ResNet влияет на ViT, LSTM — на Transformer, diffusion — на Stable Diffusion. Это ближе к <strong>филогенетическому дереву</strong>, чем к одной временной оси.</p>
+
+<p>В статье — концептуальная рамка и <strong>три визуализации на Python</strong> (matplotlib + networkx + sklearn):</p>
+
+<ol>
+  <li><strong>Полукруглое circular / semicircle tree</strong> семейств моделей</li>
+  <li><strong>Граф заимствований</strong> — кто у кого взял архитектурную идею</li>
+  <li><strong>Кластеризация</strong> в пространстве признаков + <strong>упорядочивание кластеров по времени</strong></li>
+</ol>
+
+<p><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" /></a></p>
+
+<p>Связанные материалы: <a href="/vairl/blog/2026/01/15/neural-architecture-search-ru/">NAS и поиск архитектур</a>, <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/">фундамент агентных систем</a>, <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap-ru/">PaCMAP и пространство гипотез</a>.</p>
+
+<hr />
+
+<h2 id="почему-не-одна-линия">Почему не одна линия</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Линейный нарратив</th>
+      <th>Древовидная модель</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Одна «главная» ветка прогресса</td>
+      <td>Параллельные семейства (CNN, RNN, Transformer, Diffusion)</td>
+    </tr>
+    <tr>
+      <td>Каждая модель «заменяет» предыдущую</td>
+      <td>Модели <strong>сосуществуют</strong> (LSTM в проде, CNN на edge)</td>
+    </tr>
+    <tr>
+      <td>Время = единственная ось</td>
+      <td>Время + <strong>родство идей</strong> + <strong>перенос компонентов</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart TB
+  R[Root: neural computation] --&gt; F[Foundations]
+  R --&gt; C[Convolutional]
+  R --&gt; S[Sequence]
+  R --&gt; A[Attention]
+  F --&gt; MLP[MLP / backprop]
+  C --&gt; CNN[LeNet → ResNet]
+  S --&gt; LSTM[LSTM / GRU]
+  LSTM --&gt; T[Transformer]
+  T --&gt; BERT[BERT]
+  T --&gt; GPT[GPT family]
+  T --&gt; VIT[ViT → CLIP]
+  MLP --&gt; D[Diffusion]
+</code></pre>
+
+<p><strong>Метафора:</strong> эволюция биологических видов — не одна цепочка от амёбы к человеку, а <strong>дерево</strong> с отмиранием и параллельными ветками. То же с архитектурами.</p>
+
+<hr />
+
+<h2 id="данные-для-визуализаций">Данные для визуализаций</h2>
+
+<p>Мы собрали компактный <strong>кураторский датасет</strong> (~27 моделей): имя, год ключевой публикации, семейство (<code class="language-plaintext highlighter-rouge">Foundations</code>, <code class="language-plaintext highlighter-rouge">Convolutional</code>, <code class="language-plaintext highlighter-rouge">Sequence</code>, <code class="language-plaintext highlighter-rouge">Attention</code>, …). Это учебный срез, не exhaustive leaderboard.</p>
+
+<p>Пример записи:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">year</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">family</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nc">Model</span><span class="p">(</span><span class="sh">"</span><span class="s">ResNet</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2015</span><span class="p">,</span> <span class="sh">"</span><span class="s">Convolutional</span><span class="sh">"</span><span class="p">)</span>
+<span class="nc">Model</span><span class="p">(</span><span class="sh">"</span><span class="s">Transformer</span><span class="sh">"</span><span class="p">,</span> <span class="mi">2017</span><span class="p">,</span> <span class="sh">"</span><span class="s">Attention</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Полный список и код — в <a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb">ноутбуке</a> и файле <code class="language-plaintext highlighter-rouge">notebooks/nn_model_evolution_viz.py</code>.</p>
+
+<hr />
+
+<h2 id="1-полукруглое-дерево-semicircle-phylogeny">1. Полукруглое дерево (semicircle phylogeny)</h2>
+
+<p><strong>Идея:</strong> корень внизу дуги; семейства — промежуточные узлы; листья — конкретные модели с годом. Углы распределяются по полуокружности (polar plot, θ ∈ [0°, 180°]).</p>
+
+<p><img src="/assets/images/nn-evolution-semicircle-tree.png" alt="Полукруглое дерево эволюции нейросетевых моделей" /></p>
+
+<p><strong>Алгоритм layout:</strong></p>
+
+<ol>
+  <li>Листья равномерно по дуге: <code class="language-plaintext highlighter-rouge">θ_i = π · (0.08 + 0.84 · i/N)</code></li>
+  <li>Угол семейства = среднее углов листьев</li>
+  <li>Радиус: корень → 0, семейство → 0.35, лист → 0.82</li>
+  <li>Рёбра рисуем в <code class="language-plaintext highlighter-rouge">matplotlib</code> polar axes</li>
+</ol>
+
+<p>Фрагмент кода:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="nf">subplots</span><span class="p">(</span><span class="n">subplot_kw</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">projection</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">polar</span><span class="sh">"</span><span class="p">})</span>
+<span class="n">ax</span><span class="p">.</span><span class="nf">set_thetamin</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">.</span><span class="nf">set_thetamax</span><span class="p">(</span><span class="mi">180</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">family</span><span class="p">,</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">TREE</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+    <span class="n">fa</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">mean</span><span class="p">([</span><span class="n">leaf_angles</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">.</span><span class="nf">plot</span><span class="p">([</span><span class="n">root_angle</span><span class="p">,</span> <span class="n">fa</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">la</span> <span class="o">=</span> <span class="n">leaf_angles</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">ax</span><span class="p">.</span><span class="nf">plot</span><span class="p">([</span><span class="n">fa</span><span class="p">,</span> <span class="n">la</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.72</span><span class="p">],</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">.</span><span class="nf">scatter</span><span class="p">([</span><span class="n">la</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.82</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Это <strong>circular tree</strong> в классическом phylogenetic стиле (как в icytree / FigTree), только на <strong>полудуге</strong> — удобнее для широких экранов и статей.</p>
+
+<hr />
+
+<h2 id="2-граф-архитектурных-заимствований">2. Граф архитектурных заимствований</h2>
+
+<p>Второй взгляд — <strong>направленный граф</strong>: ребро <code class="language-plaintext highlighter-rouge">A → B</code> означает «B явно опирается на идею из A» (skip connections, attention, latent diffusion, MoE routing…).</p>
+
+<p><img src="/assets/images/nn-evolution-influence-graph.png" alt="Граф влияния между моделями" /></p>
+
+<p>Примеры рёбер:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>От</th>
+      <th>К</th>
+      <th>Идея</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Seq2Seq + attention</td>
+      <td>Transformer</td>
+      <td>убрать рекуррентность</td>
+    </tr>
+    <tr>
+      <td>Transformer</td>
+      <td>BERT</td>
+      <td>bidirectional MLM</td>
+    </tr>
+    <tr>
+      <td>Transformer</td>
+      <td>GPT-1</td>
+      <td>decoder-only LM</td>
+    </tr>
+    <tr>
+      <td>ResNet</td>
+      <td>ViT</td>
+      <td>residual + масштаб</td>
+    </tr>
+    <tr>
+      <td>Diffusion (DDPM)</td>
+      <td>Stable Diffusion</td>
+      <td>latent space</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Layout: <strong>ось X ≈ год</strong>, узлы одного года слегка разведены по Y. Цвет — семейство. Так видно и <strong>время</strong>, и <strong>перекрёстные заимствования</strong> (Transformer как хаб).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="p">.</span><span class="nc">DiGraph</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">INFLUENCE</span><span class="p">:</span>
+    <span class="n">G</span><span class="p">.</span><span class="nf">add_edge</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="3-кластеризация--упорядочивание-кластеров-по-времени">3. Кластеризация + упорядочивание кластеров по времени</h2>
+
+<p>Третий срез: каждая модель — вектор признаков (год, флаги CNN/seq/attention/generative/diffusion/MoE/ViT, позиция в ветке). Затем:</p>
+
+<ol>
+  <li><strong>StandardScaler</strong> + <strong>PCA</strong> → 2D проекция</li>
+  <li><strong>Agglomerative clustering</strong> (Ward) → метки кластеров</li>
+  <li>Для каждого кластера: <strong>μ(year)</strong></li>
+  <li>Сортировка кластеров по μ(year) → ось «время кластеров»</li>
+</ol>
+
+<p><img src="/assets/images/nn-evolution-time-clusters.png" alt="PCA-кластеры и временное упорядочивание" /></p>
+
+<p><strong>Левая панель:</strong> геометрия похожести архитектур (кто близок в feature space).<br />
+<strong>Правая панель:</strong> те же кластеры, но <strong>упорядочены слева направо по среднему году</strong> — мост между <strong>несупервизным clustering</strong> и <strong>хронологией</strong>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cl</span> <span class="o">=</span> <span class="nc">AgglomerativeClustering</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">linkage</span><span class="o">=</span><span class="sh">"</span><span class="s">ward</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">cl</span><span class="p">.</span><span class="nf">fit_predict</span><span class="p">(</span><span class="n">X_scaled</span><span class="p">)</span>
+<span class="n">cluster_years</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="nf">mean</span><span class="p">([</span><span class="n">MODELS</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">year</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">lb</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="k">if</span> <span class="n">lb</span> <span class="o">==</span> <span class="n">c</span><span class="p">])</span>
+                  <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)}</span>
+<span class="n">order</span> <span class="o">=</span> <span class="nf">sorted</span><span class="p">(</span><span class="nf">range</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">cluster_years</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>Это полезно, когда нужно показать: «кластеры не случайны — они <strong>выстраиваются во времени</strong>», хотя алгоритм кластеризации <strong>не видел год напрямую</strong> (год был лишь одним из признаков после scaling).</p>
+
+<hr />
+
+<h2 id="три-картинки--три-вопроса">Три картинки — три вопроса</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Визуализация</th>
+      <th>Вопрос, на который отвечает</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Semicircle tree</td>
+      <td><strong>Какие семейства</strong> и как ветвятся от общего корня?</td>
+    </tr>
+    <tr>
+      <td>Influence graph</td>
+      <td><strong>Кто у кого заимствует</strong> идеи (не только «позже по дате»)?</td>
+    </tr>
+    <tr>
+      <td>Time-ordered clusters</td>
+      <td><strong>Какие группы</strong> похожи по архитектуре и <strong>как они ложатся на время</strong>?</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="запуск-кода">Запуск кода</h2>
+
+<p><strong>Colab</strong> (рекомендуется):</p>
+
+<p><strong><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb">nn-model-evolution-tree.ipynb</a></strong></p>
+
+<p>Локально:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>matplotlib networkx scikit-learn numpy
+python notebooks/nn_model_evolution_viz.py
+</code></pre></div></div>
+
+<p>PNG сохраняются в <code class="language-plaintext highlighter-rouge">assets/images/</code>.</p>
+
+<hr />
+
+<h2 id="ограничения-модели">Ограничения модели</h2>
+
+<ul>
+  <li>Датасет <strong>кураторский</strong>, не полный (нет всех LLM, региональных моделей, hardware-specific NAS).</li>
+  <li>Рёбра влияния — <strong>экспертные</strong>, не из citation graph.</li>
+  <li>Признаки для кластеризации <strong>грубые</strong> (бинарные флаги семейств); для research-grade картины нужны embeddings статей / git repo features.</li>
+  <li>Полукруглое дерево <strong>не единственно возможное</strong> layout; fan tree, sunburst, force-directed phylogeny — альтернативы.</li>
+</ul>
+
+<hr />
+
+<h2 id="резюме">Резюме</h2>
+
+<p>Развитие ИИ-моделей — <strong>эволюционное дерево с перекрёстным опылением</strong>, а не одна линия. Python позволяет за один ноутбук показать три дополняющих друг друга вида: <strong>phylogeny</strong>, <strong>borrow graph</strong>, <strong>time-ordered clusters</strong>.</p>
+
+<hr />
+
+<h2 id="источники">Источники</h2>
+
+<ul>
+  <li><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb">Colab notebook</a></li>
+  <li><a href="https://github.com/evgeniy-borisov/vairl/blob/main/notebooks/nn_model_evolution_viz.py">nn_model_evolution_viz.py</a> в репозитории VAIRL</li>
+  <li>Phylogenetic tree layout: icytree / FigTree (концептуальная аналогия)</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="agentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <filter id="agentGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Competency layers -->
+  <g transform="translate(180, 200)">
+    <rect x="0" y="120" width="200" height="28" fill="url(#agentGrad)" opacity="0.45" rx="6"/>
+    <rect x="20" y="80" width="160" height="28" fill="url(#agentGrad)" opacity="0.65" rx="6"/>
+    <rect x="40" y="40" width="120" height="28" fill="url(#agentGrad)" opacity="0.85" rx="6"/>
+    <rect x="60" y="0" width="80" height="28" fill="url(#agentGrad)" opacity="1" rx="6" filter="url(#agentGlow)"/>
+  </g>
+
+  <!-- Agent orchestrator graph -->
+  <g transform="translate(520, 180)">
+    <circle cx="200" cy="120" r="42" fill="url(#agentGrad)" opacity="0.95" filter="url(#agentGlow)"/>
+    <circle cx="60" cy="40" r="28" fill="url(#agentGrad)" opacity="0.75"/>
+    <circle cx="340" cy="40" r="28" fill="url(#agentGrad)" opacity="0.75"/>
+    <circle cx="60" cy="200" r="28" fill="url(#agentGrad)" opacity="0.75"/>
+    <circle cx="340" cy="200" r="28" fill="url(#agentGrad)" opacity="0.75"/>
+    <circle cx="200" cy="260" r="24" fill="url(#agentGrad)" opacity="0.8"/>
+    <g stroke="url(#agentGrad)" stroke-width="2" opacity="0.35">
+      <line x1="88" y1="58" x2="162" y2="92"/>
+      <line x1="312" y1="58" x2="238" y2="92"/>
+      <line x1="88" y1="182" x2="162" y2="148"/>
+      <line x1="312" y1="182" x2="238" y2="148"/>
+      <line x1="200" y1="162" x2="200" y2="236"/>
+    </g>
+  </g>
+
+  <!-- DAG spine -->
+  <g transform="translate(880, 220)">
+    <circle cx="0" cy="60" r="22" fill="url(#agentGrad)" opacity="0.7"/>
+    <circle cx="100" cy="60" r="22" fill="url(#agentGrad)" opacity="0.8"/>
+    <circle cx="200" cy="30" r="22" fill="url(#agentGrad)" opacity="0.85"/>
+    <circle cx="200" cy="90" r="22" fill="url(#agentGrad)" opacity="0.85"/>
+    <circle cx="300" cy="60" r="26" fill="url(#agentGrad)" opacity="1" filter="url(#agentGlow)"/>
+    <g stroke="url(#agentGrad)" stroke-width="2" opacity="0.4">
+      <line x1="22" y1="60" x2="78" y2="60"/>
+      <line x1="122" y1="60" x2="178" y2="35"/>
+      <line x1="122" y1="60" x2="178" y2="85"/>
+      <line x1="222" y1="40" x2="274" y2="55"/>
+      <line x1="222" y1="80" x2="274" y2="65"/>
+    </g>
+  </g>
+</svg>

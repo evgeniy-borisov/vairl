@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <linearGradient id="rg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a"/>
+      <stop offset="100%" style="stop-color:#fee140"/>
+    </linearGradient>
+    <marker id="rgArrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#667eea"/>
+    </marker>
+    <filter id="rgglow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="#fafbff"/>
+  <rect x="1" y="1" width="1198" height="628" rx="4" fill="none" stroke="#e4e6f0" stroke-width="2"/>
+
+  <circle cx="160" cy="150" r="90" fill="url(#rg1)" opacity="0.12"/>
+  <circle cx="1040" cy="480" r="100" fill="url(#rg2)" opacity="0.10"/>
+  <circle cx="920" cy="110" r="55" fill="url(#rg3)" opacity="0.10"/>
+
+  <text x="600" y="68" text-anchor="middle" fill="#333" font-family="system-ui, sans-serif" font-size="30" font-weight="700">RAG 4;O 035=B>2 2026</text>
+  <text x="600" y="102" text-anchor="middle" fill="#666" font-family="system-ui, sans-serif" font-size="15">Naive ’ Enhanced ’ Agentic | Hybrid + Rerank | Chunking</text>
+
+  <!-- Pipeline stages -->
+  <rect x="60" y="160" width="130" height="70" rx="12" fill="#fff" stroke="#ccc" stroke-width="2"/>
+  <text x="125" y="195" text-anchor="middle" fill="#555" font-family="system-ui, sans-serif" font-size="13" font-weight="600">Naive RAG</text>
+  <text x="125" y="215" text-anchor="middle" fill="#888" font-family="system-ui, sans-serif" font-size="10">retrieve once</text>
+
+  <line x1="190" y1="195" x2="230" y2="195" stroke="#667eea" stroke-width="2" marker-end="url(#rgArrow)"/>
+
+  <rect x="235" y="160" width="130" height="70" rx="12" fill="#fff" stroke="url(#rg2)" stroke-width="2"/>
+  <text x="300" y="195" text-anchor="middle" fill="#2a9d6a" font-family="system-ui, sans-serif" font-size="13" font-weight="600">Enhanced</text>
+  <text x="300" y="215" text-anchor="middle" fill="#888" font-family="system-ui, sans-serif" font-size="10">hybrid + rerank</text>
+
+  <line x1="365" y1="195" x2="405" y2="195" stroke="#667eea" stroke-width="2" marker-end="url(#rgArrow)"/>
+
+  <rect x="410" y="160" width="130" height="70" rx="12" fill="#fff" stroke="url(#rg1)" stroke-width="2.5"/>
+  <text x="475" y="195" text-anchor="middle" fill="#667eea" font-family="system-ui, sans-serif" font-size="13" font-weight="700">Agentic RAG</text>
+  <text x="475" y="215" text-anchor="middle" fill="#888" font-family="system-ui, sans-serif" font-size="10">plan + iterate</text>
+
+  <line x1="540" y1="195" x2="580" y2="195" stroke="#667eea" stroke-width="2" marker-end="url(#rgArrow)"/>
+
+  <rect x="585" y="160" width="130" height="70" rx="12" fill="#fff" stroke="url(#rg3)" stroke-width="2"/>
+  <text x="650" y="195" text-anchor="middle" fill="#c45a7a" font-family="system-ui, sans-serif" font-size="13" font-weight="600">GraphRAG</text>
+  <text x="650" y="215" text-anchor="middle" fill="#888" font-family="system-ui, sans-serif" font-size="10">multi-hop</text>
+
+  <line x1="715" y1="195" x2="755" y2="195" stroke="#667eea" stroke-width="2" marker-end="url(#rgArrow)"/>
+
+  <rect x="760" y="160" width="130" height="70" rx="12" fill="#fff" stroke="#764ba2" stroke-width="2"/>
+  <text x="825" y="195" text-anchor="middle" fill="#764ba2" font-family="system-ui, sans-serif" font-size="13" font-weight="600">RAC</text>
+  <text x="825" y="215" text-anchor="middle" fill="#888" font-family="system-ui, sans-serif" font-size="10">clarify / correct</text>
+
+  <!-- Center: retrieval stack -->
+  <rect x="180" y="290" width="840" height="200" rx="18" fill="#ffffff" stroke="url(#rg1)" stroke-width="2" filter="url(#rgglow)"/>
+  <text x="600" y="325" text-anchor="middle" fill="#667eea" font-family="system-ui, sans-serif" font-size="16" font-weight="700">Retrieval stack (production default)</text>
+
+  <rect x="220" y="350" width="150" height="55" rx="10" fill="#f0f4ff" stroke="#667eea" stroke-width="1.5"/>
+  <text x="295" y="382" text-anchor="middle" fill="#444" font-family="system-ui, sans-serif" font-size="12" font-weight="600">BM25 + Dense</text>
+
+  <text x="395" y="382" text-anchor="middle" fill="#667eea" font-family="system-ui, sans-serif" font-size="18">’</text>
+
+  <rect x="420" y="350" width="130" height="55" rx="10" fill="#f0fff8" stroke="#43e97b" stroke-width="1.5"/>
+  <text x="485" y="382" text-anchor="middle" fill="#444" font-family="system-ui, sans-serif" font-size="12" font-weight="600">RRF fusion</text>
+
+  <text x="575" y="382" text-anchor="middle" fill="#667eea" font-family="system-ui, sans-serif" font-size="18">’</text>
+
+  <rect x="600" y="350" width="150" height="55" rx="10" fill="#fff5f8" stroke="#fa709a" stroke-width="1.5"/>
+  <text x="675" y="382" text-anchor="middle" fill="#444" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Cross-encoder</text>
+
+  <text x="775" y="382" text-anchor="middle" fill="#667eea" font-family="system-ui, sans-serif" font-size="18">’</text>
+
+  <rect x="800" y="350" width="170" height="55" rx="10" fill="#f8f0ff" stroke="#764ba2" stroke-width="1.5"/>
+  <text x="885" y="382" text-anchor="middle" fill="#444" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Agent + LLM</text>
+
+  <text x="600" y="455" text-anchor="middle" fill="#888" font-family="system-ui, sans-serif" font-size="12">Vector DB: Qdrant · Weaviate · pgvector · Milvus · LanceDB</text>
+
+  <!-- Chunk sizes -->
+  <rect x="60" y="520" width="280" height="70" rx="12" fill="#fff" stroke="#e4e6f0" stroke-width="2"/>
+  <text x="200" y="548" text-anchor="middle" fill="#555" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Chunk: 256512 factoid</text>
+  <text x="200" y="568" text-anchor="middle" fill="#888" font-family="system-ui, sans-serif" font-size="11">5121024 analytical</text>
+
+  <rect x="460" y="520" width="280" height="70" rx="12" fill="#fff" stroke="#e4e6f0" stroke-width="2"/>
+  <text x="600" y="548" text-anchor="middle" fill="#555" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Multi-scale + RRF</text>
+  <text x="600" y="568" text-anchor="middle" fill="#888" font-family="system-ui, sans-serif" font-size="11">+137% recall vs single size</text>
+
+  <rect x="860" y="520" width="280" height="70" rx="12" fill="#fff" stroke="#e4e6f0" stroke-width="2"/>
+  <text x="1000" y="548" text-anchor="middle" fill="#555" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Eval: RAGAS · RAGSearch</text>
+  <text x="1000" y="568" text-anchor="middle" fill="#888" font-family="system-ui, sans-serif" font-size="11">faithfulness · context recall</text>
+</svg>

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRPO vs PPO: сравнительный анализ для выравнивания LLM - VAIRL</title>
+    <meta name="description" content="Group Relative Policy Optimization и Proximal Policy Optimization в RLHF/RLVR: actor-critic против группового baseline, память, стабильность и связь с устойч...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>GRPO vs PPO: сравнительный анализ для выравнивания LLM | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="GRPO vs PPO: сравнительный анализ для выравнивания LLM" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Group Relative Policy Optimization и Proximal Policy Optimization в RLHF/RLVR: actor-critic против группового baseline, память, стабильность и связь с устойчивостью control loop агента." />
+<meta name="twitter:description" property="og:description" content="Group Relative Policy Optimization и Proximal Policy Optimization в RLHF/RLVR: actor-critic против группового baseline, память, стабильность и связь с устойчивостью control loop агента." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/grpo-vs-ppo.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-01T13:37:05+00:00" />
+<meta property="article:modified_time" content="2026-07-01T13:37:05+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/grpo-vs-ppo.svg" />
+<meta name="twitter:title" content="GRPO vs PPO: сравнительный анализ для выравнивания LLM" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-01T13:37:05+00:00","datePublished":"2026-07-01T13:37:05+00:00","description":"Group Relative Policy Optimization и Proximal Policy Optimization в RLHF/RLVR: actor-critic против группового baseline, память, стабильность и связь с устойчивостью control loop агента.","headline":"GRPO vs PPO: сравнительный анализ для выравнивания LLM","image":"https://evgeniy-borisov.github.io/vairl/assets/images/grpo-vs-ppo.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/grpo-vs-ppo.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">GRPO vs PPO: сравнительный анализ для выравнивания LLM</h1>
+        <p class="post-date">01 July 2026, 13:37 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p><strong>PPO</strong> (Proximal Policy Optimization) — стандарт actor-critic RL, на котором годами строили <strong>RLHF</strong> для LLM. <strong>GRPO</strong> (Group Relative Policy Optimization), предложенный в <a href="https://arxiv.org/abs/2402.03300">DeepSeekMath</a>, убирает отдельную сеть-критик и оценивает <strong>относительное качество</strong> нескольких ответов на один промпт — с экономией памяти порядка <strong>~50%</strong> и масштабируемостью для reasoning-моделей (DeepSeek-R1 и др.).</p>
+
+<p>Ниже — сравнительный анализ: архитектура, формулы, плюсы/минусы, связь с <strong>RLVR</strong> (verifiable rewards) и <strong>устойчивостью</strong> обучающего контура. Связанные материалы VAIRL: <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивость control loops</a>, <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">генерация бенчмарков</a>, <a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">карта компетенций агент-разработчика</a>.</p>
+
+<h2 id="зачем-rl-после-sft">Зачем RL после SFT</h2>
+
+<p>После supervised fine-tuning (SFT) модель имитирует демонстрации, но не оптимизирует <strong>скалярную цель</strong> (правильность, безопасность, краткость). RL-этап максимизирует ожидаемую награду при ограничении отклонения от референсной политики $\pi_{\mathrm{ref}}$ (обычно SFT-чекпоинт):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Компонент</th>
+      <th>Роль</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Policy</strong> $\pi_\theta$</td>
+      <td>Обучаемая LLM</td>
+    </tr>
+    <tr>
+      <td><strong>Reward</strong></td>
+      <td>RM (RLHF) или верификатор (RLVR: математика, код, unit tests)</td>
+    </tr>
+    <tr>
+      <td><strong>Reference</strong> $\pi_{\mathrm{ref}}$</td>
+      <td>KL-якорь против «разгона» политики</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart LR
+  Q[Промпт q] --&gt; PI[π_θ]
+  PI --&gt; O[Ответ o]
+  O --&gt; R[Reward / verify]
+  R --&gt; L[Loss RL]
+  PI --&gt; KL[KL к π_ref]
+  KL --&gt; L
+  L --&gt; PI
+</code></pre>
+
+<hr />
+
+<h2 id="ppo-actor-critic-для-llm">PPO: actor-critic для LLM</h2>
+
+<p><a href="https://arxiv.org/abs/1707.06347">PPO</a> (Schulman et al., 2017) — on-policy алгоритм с <strong>ограниченным шагом</strong> обновления (clipped surrogate).</p>
+
+<h3 id="три-сети-в-классическом-rlhf">Три сети в классическом RLHF</h3>
+
+<ol>
+  <li><strong>$\pi_\theta$</strong> — policy (LLM), обучается.</li>
+  <li><strong>$V_\gamma$</strong> — <strong>critic</strong> (value function), оценивает ожидаемую награду от <strong>частичного</strong> ответа; обучается <strong>вместе</strong> с политикой.</li>
+  <li><strong>$R_\phi$</strong> — reward model, обычно <strong>заморожен</strong> после отдельного этапа обучения.</li>
+</ol>
+
+<p>Проблема в контексте LLM: награда часто приходит <strong>только на последнем токене</strong> (scalar от RM или verifier). Критик должен предсказывать «ценность» на <strong>каждом</strong> токене цепочки — шумно и дорого по VRAM (вторая сеть размера модели).</p>
+
+<h3 id="advantage-и-gae">Advantage и GAE</h3>
+
+<p><strong>Advantage</strong> $A_t$ показывает, насколько действие лучше среднего:</p>
+
+\[A_t = Q(s_t, a_t) - V(s_t)\]
+
+<p>На практике используют <strong>GAE</strong> (Generalized Advantage Estimation). Сначала TD-ошибка:</p>
+
+\[\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)\]
+
+<p>Затем экспоненциально взвешенная сумма:</p>
+
+\[\hat{A}_t^{\mathrm{GAE}} = \sum_{l=0}^{\infty} (\gamma \lambda)^l \, \delta_{t+l}\]
+
+<p><strong>Clipped objective</strong> (идея PPO):</p>
+
+\[L^{\mathrm{CLIP}}(\theta) = \mathbb{E}_t \left[ \min\left( r_t(\theta) A_t,\ \mathrm{clip}\bigl(r_t(\theta), 1-\epsilon, 1+\epsilon\bigr) A_t \right) \right]\]
+
+<p>где $r_t(\theta) = \dfrac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t \mid s_t)}$.</p>
+
+<p>Полная цель RLHF обычно включает KL-штраф к $\pi_{\mathrm{ref}}$:</p>
+
+\[L^{\mathrm{PPO}}(\theta) = L^{\mathrm{CLIP}}(\theta) - \beta \, D_{\mathrm{KL}}\!\left(\pi_\theta \,\|\, \pi_{\mathrm{ref}}\right)\]
+
+<table>
+  <thead>
+    <tr>
+      <th>Сильные стороны PPO</th>
+      <th>Слабые стороны для LLM</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Зрелая экосистема (TRL, OpenRLHF)</td>
+      <td><strong>2×</strong> память на critic</td>
+    </tr>
+    <tr>
+      <td>Токен-level credit assignment (GAE)</td>
+      <td>Критик устаревает при быстрой смене π</td>
+    </tr>
+    <tr>
+      <td>Clipping стабилизирует шаг</td>
+      <td>Сложнее при sparse terminal reward</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="grpo-групповой-baseline-без-критика">GRPO: групповой baseline без критика</h2>
+
+<p><a href="https://arxiv.org/abs/2402.03300">GRPO</a> (Shao et al., 2024, DeepSeekMath) сохраняет <strong>PPO-style clipping</strong> и KL к $\pi_{\mathrm{ref}}$, но заменяет критик на <strong>групповую статистику</strong>.</p>
+
+<h3 id="алгоритм">Алгоритм</h3>
+
+<ol>
+  <li>Для промпта $q$ сэмплировать <strong>$G$</strong> полных ответов ${o_1,\ldots,o_G}$ из $\pi_{\theta_{\mathrm{old}}}$.</li>
+  <li>Получить награды ${r_1,\ldots,r_G}$ (RM или verifiable).</li>
+  <li>Нормализовать внутри группы:</li>
+</ol>
+
+\[A_i = \frac{r_i - \mathrm{mean}(\mathbf{r})}{\mathrm{std}(\mathbf{r})}\]
+
+<ol>
+  <li>Один и тот же $A_i$ применяется ко <strong>всем токенам</strong> ответа $o_i$ (outcome supervision).</li>
+  <li>Оптимизировать clipped surrogate + KL-штраф:</li>
+</ol>
+
+\[J_{\mathrm{GRPO}}(\theta) = \mathbb{E}_{q,\,\{o_i\}} \left[ \frac{1}{G}\sum_{i=1}^{G} \min\!\left( \rho_i A_i,\ \mathrm{clip}(\rho_i,\, 1-\epsilon,\, 1+\epsilon)\, A_i \right) \right] - \beta \, D_{\mathrm{KL}}\!\left(\pi_\theta \,\|\, \pi_{\mathrm{ref}}\right)\]
+
+<p>где $\rho_i = \dfrac{\pi_\theta(o_i \mid q)}{\pi_{\theta_{\mathrm{old}}}(o_i \mid q)}$.</p>
+
+<pre><code class="language-mermaid">flowchart TB
+  Q[Промпт q] --&gt; S1[o₁ … o_G]
+  S1 --&gt; R1[r₁ … r_G]
+  R1 --&gt; N[μ, σ по группе]
+  N --&gt; A[A₁ … A_G]
+  A --&gt; U[Clipped update π_θ]
+</code></pre>
+
+<p><strong>Интуиция:</strong> критик заменён на вопрос «этот ответ лучше или хуже <strong>среднего по группе</strong> на том же промпте?» — Monte-Carlo baseline с <strong>нулевой дополнительной сетью</strong>.</p>
+
+<h3 id="почему-это-дешевле">Почему это дешевле</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>PPO</th>
+      <th>GRPO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Обучаемые сети</td>
+      <td>$\pi$ + <strong>$V$</strong></td>
+      <td>только <strong>$\pi$</strong></td>
+    </tr>
+    <tr>
+      <td>VRAM (типично)</td>
+      <td>~2× модель</td>
+      <td>~1× + batch из $G$ сэмплов</td>
+    </tr>
+    <tr>
+      <td>Inference на шаг</td>
+      <td>1 rollout</td>
+      <td><strong>$G$</strong> rollouts на промпт</td>
+    </tr>
+    <tr>
+      <td>Baseline</td>
+      <td>$V(s_t)$ learned</td>
+      <td>$\mathrm{mean}(r)$ по группе</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Экономия на <strong>памяти</strong>; <strong>вычисление</strong> смещается в сторону большего числа генераций — выгодно, когда verifiable reward дешёв, а critic дорог.</p>
+
+<hr />
+
+<h2 id="сравнительная-таблица">Сравнительная таблица</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Критерий</th>
+      <th>PPO</th>
+      <th>GRPO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Год / источник</strong></td>
+      <td>Schulman 2017</td>
+      <td>Shao et al. 2024 (DeepSeekMath)</td>
+    </tr>
+    <tr>
+      <td><strong>Credit assignment</strong></td>
+      <td>Потокенный (GAE)</td>
+      <td>На весь ответ (outcome)</td>
+    </tr>
+    <tr>
+      <td><strong>Baseline</strong></td>
+      <td>Critic $V_\gamma$</td>
+      <td>Среднее по группе</td>
+    </tr>
+    <tr>
+      <td><strong>Variance reduction</strong></td>
+      <td>GAE, value loss</td>
+      <td>Whitening r в группе</td>
+    </tr>
+    <tr>
+      <td><strong>Лучше при</strong></td>
+      <td>Dense/shaped rewards, RLHF-RM</td>
+      <td>RLVR, math/code, бинарные награды</td>
+    </tr>
+    <tr>
+      <td><strong>Риски</strong></td>
+      <td>Bias критика, drift V</td>
+      <td>Малый G → шумная σ; collapse группы</td>
+    </tr>
+    <tr>
+      <td><strong>Варианты</strong></td>
+      <td>PPO + RLHF стандарт</td>
+      <td>Dr. GRPO, DAPO, RLOO</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="rlvr-и-verifiable-rewards">RLVR и verifiable rewards</h2>
+
+<p>GRPO особенно силён в <strong>RL with Verifiable Rewards (RLVR)</strong>: награда 0/1 или частичная от <strong>проверки</strong> (ответ в GSM8K, компиляция кода, formal proof).</p>
+
+<ul>
+  <li>Не нужен отдельный RM на миллиарды параметров.</li>
+  <li>Группа ответов на <strong>один</strong> вопрос даёт естественный ранжир: часть верна, часть нет → сигнал для policy gradient.</li>
+  <li>Связь с <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">генерацией бенчмарков</a>: eval-набор = источник промптов и верификаторов.</li>
+</ul>
+
+<p>Теоретический разбор динамики GRPO при RLVR: <a href="https://arxiv.org/html/2503.06639v4">arXiv:2503.06639</a>.</p>
+
+<hr />
+
+<h2 id="устойчивость-как-control-loop">Устойчивость как control loop</h2>
+
+<p>Обучение RL — <strong>замкнутый контур</strong>: π → rollout → reward → update → π.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Элемент control theory</th>
+      <th>PPO</th>
+      <th>GRPO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Gain</strong></td>
+      <td>Шаг η, ε clip</td>
+      <td>То же + размер G</td>
+    </tr>
+    <tr>
+      <td><strong>Наблюдение</strong></td>
+      <td>V(s) на каждом токене</td>
+      <td>Только terminal r</td>
+    </tr>
+    <tr>
+      <td><strong>Положительная ОС</strong></td>
+      <td>Ошибка критика → неверный $A$</td>
+      <td>Все $r_i$ в группе одинаковы → $\sigma \to 0$</td>
+    </tr>
+    <tr>
+      <td><strong>Демпфирование</strong></td>
+      <td>Clipping, KL, GAE $\lambda$</td>
+      <td>Clipping, KL, whitening</td>
+    </tr>
+    <tr>
+      <td><strong>Задержка</strong></td>
+      <td>Критик отстаёт от $\pi$</td>
+      <td>Нет критика; lag только в $\pi_{\mathrm{old}}$</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>См. <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивость agent control loops</a>: GRPO убирает один источник положительной обратной связи (ошибочный critic), но добавляет чувствительность к <strong>дисперсии группы</strong>.</p>
+
+<p><strong>Практические стабилизаторы GRPO:</strong> достаточный $G$ (8–64), clip $\epsilon \approx 0.1\text{–}0.2$, KL penalty, dynamic sampling (отбрасывать группы с $\mathrm{std}(\mathbf{r})=0$), варианты без деления на $\sigma$ (Dr. GRPO).</p>
+
+<hr />
+
+<h2 id="варианты-и-эволюция">Варианты и эволюция</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Метод</th>
+      <th>Отличие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Dr. GRPO</strong></td>
+      <td>Убрать нормализацию на σ — только mean baseline</td>
+    </tr>
+    <tr>
+      <td><strong>DAPO</strong></td>
+      <td>Масштабные engineering-твики, иногда без KL к ref</td>
+    </tr>
+    <tr>
+      <td><strong>RLOO / REINFORCE leave-one-out</strong></td>
+      <td>Похожая идея leave-one-out baseline</td>
+    </tr>
+    <tr>
+      <td><strong>PPO + RLHF</strong></td>
+      <td>По-прежнему baseline в ChatGPT-классе пайплайнов с RM</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Теория: GRPO gradient как <a href="https://arxiv.org/html/2603.01162v1">U-statistic</a> — асимптотически близок к oracle с истинным критиком при росте G.</p>
+
+<h3 id="интерактив-архитектура-и-advantage">Интерактив: архитектура и advantage</h3>
+
+<p>Переключите <strong>PPO / GRPO</strong> и нажимайте <strong>«Следующий шаг»</strong>: слева — схема сетей и полоса VRAM; справа — группа ответов (GRPO) или кривая критика и GAE по токенам (PPO).</p>
+
+<div id="grpo-ppo-demo" class="grpo-ppo-widget">
+  <div class="rl-header">
+    <p>Сравнение циклов выравнивания: PPO держит критик <code>V<sub>γ</sub></code>; GRPO заменяет его групповым baseline по наградам <code>r<sub>i</sub></code> на одном промпте.</p>
+  </div>
+  <div class="rl-controls">
+    <button type="button" data-rl-mode="grpo" class="active">GRPO</button>
+    <button type="button" data-rl-mode="ppo">PPO</button>
+    <button type="button" class="rl-step-btn" data-rl-step="">Следующий шаг →</button>
+  </div>
+  <p class="rl-formula"></p>
+  <div class="rl-canvas-wrap">
+    <canvas id="grpo-ppo-canvas"></canvas>
+  </div>
+  <p class="rl-caption"></p>
+</div>
+
+<script src="/vairl/assets/js/grpo-ppo-demo.js"></script>
+
+<hr />
+
+<h2 id="когда-что-выбирать">Когда что выбирать</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сценарий</th>
+      <th>Рекомендация</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>RLHF с дорогим RM, нужен token-level shaping</td>
+      <td><strong>PPO</strong> + зрелый стек</td>
+    </tr>
+    <tr>
+      <td>Math / code / formal verify, бинарная награда</td>
+      <td><strong>GRPO</strong> / RLVR</td>
+    </tr>
+    <tr>
+      <td>Ограниченная VRAM на кластере</td>
+      <td><strong>GRPO</strong> (нет critic)</td>
+    </tr>
+    <tr>
+      <td>Много промптов, дешёвая генерация</td>
+      <td><strong>GRPO</strong> (G сэмплов параллельно)</td>
+    </tr>
+    <tr>
+      <td>Продукт с human preference без верификатора</td>
+      <td><strong>PPO</strong> + RM, возможно hybrid</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>В продакшен-агентах RL-этап — часть <a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">пайплайна ролей</a>: Builder внедряет, Maintainer следит за drift политики, eval из <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрии</a> ловит регрессии после обновления $\pi_\theta$.</p>
+
+<hr />
+
+<h2 id="практический-чеклист">Практический чеклист</h2>
+
+<ol>
+  <li><strong>$\pi_{\mathrm{ref}}$</strong> — зафиксировать SFT-чекпоинт для KL.</li>
+  <li><strong>Reward</strong> — явный контракт: RM vs verifier vs hybrid.</li>
+  <li><strong>PPO:</strong> инициализировать $V$ от RM; мониторить value loss и explained variance.</li>
+  <li><strong>GRPO:</strong> $G \geq 8$; фильтровать группы с $\mathrm{std}(\mathbf{r})=0$; логировать распределение $A_i$.</li>
+  <li><strong>Общее:</strong> clip $\epsilon$, KL budget, <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">бенчмарк</a> до/после RL.</li>
+</ol>
+
+<h2 id="further-reading">Further reading</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2402.03300">DeepSeekMath / GRPO</a> — оригинальная статья</li>
+  <li><a href="https://arxiv.org/abs/1707.06347">PPO</a> — Schulman et al.</li>
+  <li><a href="https://huggingface.co/learn/llm-course/en/chapter12/3a">Hugging Face LLM Course: GRPO</a></li>
+  <li><a href="https://yugeten.github.io/posts/2025/01/ppogrpo/">PPO &amp; GRPO guide</a> — Yuge Shi</li>
+  <li><a href="https://arxiv.org/html/2503.06639v4">GRPO dynamics under RLVR</a></li>
+  <li><a href="https://arxiv.org/html/2603.01162v1">Demystifying GRPO (U-statistic)</a></li>
+  <li><a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость control loops</a></li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

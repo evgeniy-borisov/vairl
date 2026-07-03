@@ -1,0 +1,63 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="stabGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="stabGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fee140;stop-opacity:1" />
+    </linearGradient>
+    <filter id="stabGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Control loop -->
+  <g transform="translate(200, 165)">
+    <circle cx="200" cy="150" r="120" fill="none" stroke="url(#stabGrad)" stroke-width="2.5" opacity="0.2"/>
+    <circle cx="200" cy="30" r="26" fill="url(#stabGrad)" opacity="0.8"/>
+    <circle cx="370" cy="150" r="26" fill="url(#stabGrad)" opacity="0.8"/>
+    <circle cx="200" cy="270" r="26" fill="url(#stabGrad2)" opacity="0.75"/>
+    <circle cx="30" cy="150" r="26" fill="url(#stabGrad2)" opacity="0.75"/>
+    <circle cx="200" cy="150" r="20" fill="url(#stabGrad)" opacity="1" filter="url(#stabGlow)"/>
+    <g stroke="url(#stabGrad)" stroke-width="2.5" opacity="0.5" fill="none">
+      <path d="M 200 56 L 200 130"/>
+      <path d="M 270 150 L 344 150"/>
+      <path d="M 200 170 L 200 244"/>
+      <path d="M 130 150 L 56 150"/>
+    </g>
+    <path d="M 56 175 Q 30 220 56 265 Q 120 310 200 310 Q 280 310 344 265"
+          stroke="url(#stabGrad2)" stroke-width="2" fill="none" opacity="0.45" stroke-dasharray="8,6"/>
+  </g>
+
+  <!-- Phase portrait -->
+  <g transform="translate(560, 130)">
+    <line x1="60" y1="360" x2="60" y2="60" stroke="url(#stabGrad)" stroke-width="2" opacity="0.2"/>
+    <line x1="60" y1="360" x2="360" y2="360" stroke="url(#stabGrad)" stroke-width="2" opacity="0.2"/>
+    <circle cx="210" cy="210" r="16" fill="url(#stabGrad)" filter="url(#stabGlow)"/>
+    <path d="M 90 90 Q 150 170 195 205 T 210 210"
+          stroke="url(#stabGrad)" stroke-width="3" fill="none" opacity="0.75"/>
+    <path d="M 330 110 Q 270 180 225 205 T 210 210"
+          stroke="url(#stabGrad)" stroke-width="3" fill="none" opacity="0.75"/>
+    <ellipse cx="300" cy="290" rx="48" ry="34" fill="none" stroke="url(#stabGrad2)" stroke-width="2.5" opacity="0.6"/>
+    <g stroke="url(#stabGrad2)" stroke-width="2" opacity="0.45">
+      <line x1="80" y1="200" x2="40" y2="170"/>
+      <line x1="80" y1="200" x2="35" y2="200"/>
+      <line x1="80" y1="200" x2="40" y2="230"/>
+    </g>
+  </g>
+
+  <!-- C(d) decay -->
+  <g transform="translate(920, 200)">
+    <path d="M 20 40 L 80 100 L 140 130 L 200 150 L 260 162"
+          stroke="url(#stabGrad)" stroke-width="4" fill="none" opacity="0.9"/>
+    <path d="M 20 40 Q 100 150 260 190"
+          stroke="url(#stabGrad2)" stroke-width="2.5" fill="none" opacity="0.45" stroke-dasharray="6,4"/>
+    <circle cx="260" cy="162" r="7" fill="url(#stabGrad)" filter="url(#stabGlow)"/>
+  </g>
+</svg>

@@ -1,0 +1,70 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="alpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="alpGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="alpGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fee140;stop-opacity:1" />
+    </linearGradient>
+    <filter id="alpGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Cycle ring -->
+  <ellipse cx="600" cy="315" rx="260" ry="200" fill="none" stroke="url(#alpGrad)" stroke-width="2" opacity="0.2" stroke-dasharray="10 8"/>
+
+  <!-- Center hub -->
+  <circle cx="600" cy="315" r="48" fill="url(#alpGrad)" opacity="0.9" filter="url(#alpGlow)"/>
+  <text x="600" y="320" text-anchor="middle" fill="white" font-size="11" font-family="system-ui, sans-serif" font-weight="600">LIFECYCLE</text>
+
+  <!-- Prototyper top -->
+  <circle cx="600" cy="95" r="36" fill="url(#alpGrad3)" opacity="0.9" filter="url(#alpGlow)"/>
+  <text x="600" y="100" text-anchor="middle" fill="white" font-size="10" font-family="system-ui, sans-serif">Proto</text>
+
+  <!-- Builder right -->
+  <circle cx="880" cy="220" r="32" fill="url(#alpGrad)" opacity="0.85"/>
+  <text x="880" y="225" text-anchor="middle" fill="white" font-size="10" font-family="system-ui, sans-serif">Build</text>
+
+  <!-- Sweeper bottom-right -->
+  <circle cx="780" cy="480" r="30" fill="url(#alpGrad2)" opacity="0.8"/>
+  <text x="780" y="485" text-anchor="middle" fill="white" font-size="10" font-family="system-ui, sans-serif">Sweep</text>
+
+  <!-- Grower bottom-left -->
+  <circle cx="420" cy="480" r="30" fill="url(#alpGrad2)" opacity="0.85"/>
+  <text x="420" y="485" text-anchor="middle" fill="white" font-size="10" font-family="system-ui, sans-serif">Grow</text>
+
+  <!-- Maintainer left -->
+  <circle cx="320" cy="220" r="32" fill="url(#alpGrad)" opacity="0.85"/>
+  <text x="320" y="225" text-anchor="middle" fill="white" font-size="10" font-family="system-ui, sans-serif">Maint</text>
+
+  <!-- Arrows on cycle -->
+  <g stroke="url(#alpGrad)" stroke-width="2" opacity="0.45" fill="none" marker-end="url(#arrow)">
+    <path d="M 630 125 Q 780 140 860 195"/>
+    <path d="M 875 255 Q 860 380 760 455"/>
+    <path d="M 740 495 Q 600 520 440 495"/>
+    <path d="M 390 455 Q 300 380 310 255"/>
+    <path d="M 350 195 Q 450 120 565 110"/>
+  </g>
+
+  <!-- Idea sparks -->
+  <circle cx="180" cy="120" r="6" fill="#fee140" opacity="0.8"/>
+  <circle cx="200" cy="150" r="4" fill="#fa709a" opacity="0.7"/>
+  <circle cx="165" cy="155" r="5" fill="#fee140" opacity="0.6"/>
+
+  <!-- Production block -->
+  <rect x="980" y="380" width="100" height="60" fill="url(#alpGrad)" opacity="0.35" rx="8"/>
+  <rect x="1000" y="400" width="60" height="20" fill="url(#alpGrad)" opacity="0.55" rx="4"/>
+
+  <text x="600" y="580" text-anchor="middle" fill="#667eea" font-size="14" font-family="system-ui, sans-serif" opacity="0.55">Prototyper - Builder - Sweeper - Grower - Maintainer</text>
+</svg>

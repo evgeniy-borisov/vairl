@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Как готовить ведущего специалиста по AI-агентам - VAIRL</title>
+    <meta name="description" content="Карта компетенций разработчика агентов и оркестраторов: физмат-фундамент уровня МФТИ, сеньорский Python, архитектуры DAG/FSM/BT, eval, безопасность и продукт...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Как готовить ведущего специалиста по AI-агентам | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Как готовить ведущего специалиста по AI-агентам" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Карта компетенций разработчика агентов и оркестраторов: физмат-фундамент уровня МФТИ, сеньорский Python, архитектуры DAG/FSM/BT, eval, безопасность и продуктовое мышление." />
+<meta name="twitter:description" property="og:description" content="Карта компетенций разработчика агентов и оркестраторов: физмат-фундамент уровня МФТИ, сеньорский Python, архитектуры DAG/FSM/BT, eval, безопасность и продуктовое мышление." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/best-ai-agent-specialist.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-29T11:27:18+00:00" />
+<meta property="article:modified_time" content="2026-06-29T11:27:18+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/best-ai-agent-specialist.svg" />
+<meta name="twitter:title" content="Как готовить ведущего специалиста по AI-агентам" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-29T11:27:18+00:00","datePublished":"2026-06-29T11:27:18+00:00","description":"Карта компетенций разработчика агентов и оркестраторов: физмат-фундамент уровня МФТИ, сеньорский Python, архитектуры DAG/FSM/BT, eval, безопасность и продуктовое мышление.","headline":"Как готовить ведущего специалиста по AI-агентам","image":"https://evgeniy-borisov.github.io/vairl/assets/images/best-ai-agent-specialist.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/best-ai-agent-specialist.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Как готовить ведущего специалиста по AI-агентам</h1>
+        <p class="post-date">29 June 2026, 11:27 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Ведущий специалист по AI-агентам — не тот, кто знает больше фреймворков. Это инженер, который проектирует <strong>агентов как управляемые системы</strong>: с предсказуемым поведением, измеримым качеством, контролируемой стоимостью и явными границами ответственности.</p>
+
+<p>Агент — не «LLM + промпт». Это <strong>runtime + память + инструменты + политика + наблюдаемость + контур обратной связи</strong>. Ниже — карта подготовки, разбитая на блоки. Устойчивость замкнутых контуров и аналогия с фазовым портретом в пространстве смыслов — в отдельной публикации: <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость agent control loops и фазовый портрет в Embedding Space</a>.</p>
+
+<h2 id="что-значит-ведущий">Что значит «ведущий»</h2>
+
+<p>Три критерия, по которым отличают ведущего специалиста от сильного middle/senior:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сильный инженер</th>
+      <th>Ведущий специалист</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Знает LangGraph / CrewAI / AutoGen</td>
+      <td>Проектирует <strong>state machine продукта</strong></td>
+    </tr>
+    <tr>
+      <td>Пишет промпты</td>
+      <td>Пишет <strong>контракты поведения и eval</strong></td>
+    </tr>
+    <tr>
+      <td>Дебажит по логам</td>
+      <td>Строит <strong>replay и counterfactual testing</strong></td>
+    </tr>
+    <tr>
+      <td>«Добавим ещё одного агента»</td>
+      <td>Сначала спрашивает: <strong>нужен ли агент вообще</strong></td>
+    </tr>
+    <tr>
+      <td>Оптимизирует accuracy ответа</td>
+      <td>Оптимизирует <strong>P(успех) / $</strong> за задачу</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart TB
+  F[Фундамент: матан, вероятности, графы]
+  M[ML / LLM literacy]
+  P[Сеньорский Python + distributed systems]
+  A[Парадигмы агентов: DAG / FSM / BT / planner]
+  Mem[Память + tools + eval]
+  O[Мультиагентность + оркестрация]
+  S[Security + economics + product sense]
+  D[Domain depth + research culture]
+  F --&gt; M --&gt; P --&gt; A --&gt; Mem --&gt; O --&gt; S --&gt; D
+</code></pre>
+
+<hr />
+
+<h2 id="i-физмат-фундамент-уровень-выпускника-мфти">I. Физмат-фундамент (уровень выпускника МФТИ)</h2>
+
+<p>Не ради красоты формул, а чтобы <strong>понимать, что оптимизируется</strong> и где ломается интуиция.</p>
+
+<h3 id="математический-анализ-и-линейная-алгебра">Математический анализ и линейная алгебра</h3>
+
+<p>Градиенты, выпуклость, условная оптимизация (Lagrange, KKT — хотя бы на уровне интуиции). Собственные значения, SVD, low-rank аппроксимации. Нормы и Lipschitz-непрерывность — почему «маленький шаг» в оптимизации и RL имеет смысл.</p>
+
+<h3 id="теория-вероятностей-и-статистика">Теория вероятностей и статистика</h3>
+
+<p>Условные вероятности, байесовский вывод. MLE, MAP, bias–variance. Доверительные интервалы и проверка гипотез — основа <strong>eval-культуры</strong>: агент без статистики неотличим от агента с удачной демо-сессией.</p>
+
+<h3 id="дискретная-математика-и-теория-графов">Дискретная математика и теория графов</h3>
+
+<p>Графы, деревья, DAG, топологическая сортировка. Динамическое программирование. Сложность алгоритмов — почему «ещё один ReAct-цикл» может стоить экспоненциально по времени и деньгам.</p>
+
+<h3 id="теория-информации">Теория информации</h3>
+
+<p>Энтропия, KL-дивергенция, mutual information. Rate–distortion — интуиция для <strong>сжатия контекста</strong>, summarization и RAG: что можно выбросить, не разрушив задачу.</p>
+
+<h3 id="оптимизация-и-численные-методы">Оптимизация и численные методы</h3>
+
+<p>SGD и варианты — на уровне понимания, не обязательно тренировки моделей с нуля. Constraint satisfaction, ILP — связь с планированием и schedulers.</p>
+
+<h3 id="сигналы-и-системы-выборочно">Сигналы и системы (выборочно)</h3>
+
+<p>Фильтрация шума, feedback loops, устойчивость. Прямой мост к agent control loops — см. <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">отдельную статью про устойчивость</a>.</p>
+
+<p><strong>Практический вывод:</strong> без этого слоя специалист не отличит «магию промпта» от <strong>структурной ошибки в постановке задачи</strong>.</p>
+
+<h3 id="материалы-для-обучения-и-агента-преподавателя">Материалы для обучения и агента-преподавателя</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Материал</th>
+      <th>Зачем</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="/vairl/assets/docs/mipt-physmath-fundamentals.txt">mipt-physmath-fundamentals.txt</a></td>
+      <td>22 дисциплины МФТИ: перечень курсов и тем по математике и физике — карта фундамента блока I</td>
+    </tr>
+    <tr>
+      <td><a href="/vairl/assets/docs/mipt-teacher-agent-instructions.txt">mipt-teacher-agent-instructions.txt</a></td>
+      <td>Роутер агента-репетитора: куда направить вопрос, 8 скиллов <code class="language-plaintext highlighter-rouge">teach-*</code> — готовый системный контекст для coding-агента</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="ii-ml--llm-фундамент">II. ML / LLM-фундамент</h2>
+
+<p>Не обязательно быть research scientist, но глубже типичного API-пользователя.</p>
+
+<h3 id="transformer-и-attention">Transformer и attention</h3>
+
+<p>Positional encoding, KV-cache, trade-offs context window. Fine-tuning vs prompting vs RAG vs tool use — <strong>когда что</strong>, а не «всегда RAG».</p>
+
+<h3 id="embeddings-и-retrieval">Embeddings и retrieval</h3>
+
+<p>Dense vs sparse, reranking, chunking. Метрики: recall@k, MRR, nDCG. Понимание того, что retrieval — это <strong>первый контур обратной связи</strong> с внешним знанием.</p>
+
+<h3 id="eval-для-llm-и-агентов">Eval для LLM и агентов</h3>
+
+<p>Offline vs online eval. LLM-as-judge: когда полезен, когда систематически врёт. Golden datasets, regression suites, counterfactual tests.</p>
+
+<h3 id="alignment-и-ограничения-инженерный-уровень">Alignment и ограничения (инженерный уровень)</h3>
+
+<p>System prompts, guardrails, policy layers. Prompt injection как threat model, а не как «edge case».</p>
+
+<hr />
+
+<h2 id="iii-python-на-уровне-сеньора">III. Python на уровне сеньора</h2>
+
+<h3 id="язык-и-runtime">Язык и runtime</h3>
+
+<p><code class="language-plaintext highlighter-rouge">asyncio</code>, concurrency vs parallelism. Typing (<code class="language-plaintext highlighter-rouge">Protocol</code>, <code class="language-plaintext highlighter-rouge">Generic</code>, <code class="language-plaintext highlighter-rouge">TypedDict</code>), mypy/pyright в CI. Context managers, descriptors — когда код агента должен читаться как библиотека, а не как скрипт.</p>
+
+<h3 id="архитектура">Архитектура</h3>
+
+<p>Ports &amp; adapters, dependency injection. Чистые функции для policy steps; side effects — только на границах. Idempotency, retries, circuit breakers.</p>
+
+<h3 id="надёжность-и-observability">Надёжность и observability</h3>
+
+<p>Structured logging, tracing (OpenTelemetry). Метрики: latency, token cost, success rate, tool error rate. Feature flags, graceful degradation.</p>
+
+<h3 id="data--infra-literacy">Data &amp; infra literacy</h3>
+
+<p>PostgreSQL / Redis, очереди (хотя бы одна система глубоко). Docker, базовый K8s, secrets management. CI/CD для agent pipelines.</p>
+
+<h3 id="тестирование">Тестирование</h3>
+
+<p>Unit tests для детерминированных частей. Contract tests для tools. Simulation / replay tests для trajectories. Property-based testing для парсеров и JSON-схем.</p>
+
+<hr />
+
+<h2 id="iv-структуры-и-методы-программирования-агентов">IV. Структуры и методы программирования агентов</h2>
+
+<p>Ядро компетенции. Подробнее о трёх классических представлениях — в публикации <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/">Гибридный агент: DAG, FSM и Behavior Tree</a>.</p>
+
+<h3 id="парадигмы-описания-поведения">Парадигмы описания поведения</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Парадигма</th>
+      <th>Сильная сторона</th>
+      <th>Типичный риск</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DAG / workflow</strong></td>
+      <td>Параллель, audit trail, LangGraph-пайплайны</td>
+      <td>Слабая реактивность</td>
+    </tr>
+    <tr>
+      <td><strong>FSM / HFSM</strong></td>
+      <td>Режимы, compliance, протоколы</td>
+      <td>Взрыв числа состояний</td>
+    </tr>
+    <tr>
+      <td><strong>Behavior Tree</strong></td>
+      <td>Reactive control, модульность</td>
+      <td>Сложность tick-by-tick отладки</td>
+    </tr>
+    <tr>
+      <td><strong>Planner + executor</strong></td>
+      <td>Долгие задачи, делегирование</td>
+      <td>Drift плана</td>
+    </tr>
+    <tr>
+      <td><strong>Blackboard / shared memory</strong></td>
+      <td>Мультиагентность</td>
+      <td>Race conditions</td>
+    </tr>
+    <tr>
+      <td><strong>Actor model</strong></td>
+      <td>Масштаб, изоляция</td>
+      <td>Сложность end-to-end трассировки</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="классические-паттерны">Классические паттерны</h3>
+
+<ul>
+  <li><strong>ReAct</strong> — observe → think → act</li>
+  <li><strong>Plan-and-Execute</strong> — план отдельно от исполнения</li>
+  <li><strong>Reflexion / self-critique</strong> — цикл улучшения (осторожно с положительной обратной связью)</li>
+  <li><strong>Tool-calling</strong> — schema-first, валидация аргументов до вызова</li>
+  <li><strong>Subagents / supervisor</strong> — иерархия ролей</li>
+  <li><strong>Human-in-the-loop</strong> — approval gates для необратимых действий</li>
+</ul>
+
+<h3 id="память-агента">Память агента</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Тип</th>
+      <th>Содержимое</th>
+      <th>Типичная реализация</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Working</td>
+      <td>Текущий контекст</td>
+      <td>Context window, scratchpad</td>
+    </tr>
+    <tr>
+      <td>Episodic</td>
+      <td>Траектории сессий</td>
+      <td>Логи, checkpoint store</td>
+    </tr>
+    <tr>
+      <td>Semantic</td>
+      <td>Факты, документы</td>
+      <td>Vector DB, RAG</td>
+    </tr>
+    <tr>
+      <td>Procedural</td>
+      <td>Навыки, playbooks</td>
+      <td>Skills registry, few-shot banks</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Политики забывания, summarization, compaction — не «оптимизация», а <strong>условие устойчивости</strong> длинных сессий.</p>
+
+<h3 id="планирование">Планирование</h3>
+
+<p>Classical planning (STRIPS, PDDL — читать и интегрировать). HTN, temporal planning. LLM-as-planner vs dedicated planner. Нейросимволические пайплайны — см. <a href="/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/">LLM → PDDL → критик</a>.</p>
+
+<h3 id="мультиагентные-системы">Мультиагентные системы</h3>
+
+<p>Роли: planner, critic, executor, researcher. Консенсус vs competition. Shared context vs message passing. Типичные патологии: deadlock, infinite debate, cost explosion.</p>
+
+<h3 id="оркестраторы">Оркестраторы</h3>
+
+<p>Знать <strong>глубоко</strong> 2–3 фреймворка, остальные — по контрактам API. Критерии выбора: state model, checkpointing, human interrupts, debuggability — не «что в тренде».</p>
+
+<hr />
+
+<h2 id="v-то-что-часто-недооценивают">V. То, что часто недооценивают</h2>
+
+<h3 id="systems-design">Systems design</h3>
+
+<p>Backpressure, timeouts, bulkheads. Exactly-once vs at-least-once для tool side effects. Saga patterns для длинных workflows.</p>
+
+<h3 id="agent-security">Agent security</h3>
+
+<p>Prompt injection, indirect injection через RAG. Tool privilege escalation. Sandboxing. Data exfiltration через агентов.</p>
+
+<h3 id="продуктовое-мышление">Продуктовое мышление</h3>
+
+<p>Когда агент <strong>не нужен</strong> — достаточно формы, rule engine или search. Latency budgets, streaming UX. Прозрачность: «что агент сейчас делает».</p>
+
+<h3 id="экономика-агентов">Экономика агентов</h3>
+
+<p>Token economics, caching, model routing (small/large). <strong>Cost per successful task</strong> — главная метрика. Batch vs interactive trade-offs.</p>
+
+<h3 id="domain-expertise">Domain expertise</h3>
+
+<p>Без глубокого понимания предметной области агент элегантно ошибается: финансы, био, юриспруденция, DevOps — <strong>домен не заменяется промптом</strong>.</p>
+
+<h3 id="исследовательская-культура">Исследовательская культура</h3>
+
+<p>Ключевые papers: ReAct, Toolformer, Reflexion, Voyager, SWE-agent. Reproduce baseline перед «улучшением». A/B и ablation mindset. Связь с <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/">синтезом гипотез для агентов</a>.</p>
+
+<h3 id="когнитивная-наука-и-кибернетика-лёгкий-слой">Когнитивная наука и кибернетика (лёгкий слой)</h3>
+
+<p>BDI-агенты, sense–plan–act. Metasystem transitions — см. <a href="/vairl/blog/2026/06/23/evolution-mind-mst-swarm/">эволюция разума и MST</a>. Ограниченная рациональность: «идеальный рациональный агент» — модель, не цель продакшена.</p>
+
+<hr />
+
+<h2 id="vi-чеклист-самопроверки">VI. Чеклист самопроверки</h2>
+
+<p>Перед тем как называть систему «продакшен-агентом», ответьте честно:</p>
+
+<ol>
+  <li>Могу ли я нарисовать FSM сессии и указать режимы recovery / escalation?</li>
+  <li>Есть ли golden eval set с регрессией в CI?</li>
+  <li>Знаю ли я <strong>стоимость одного успешного task</strong> end-to-end?</li>
+  <li>Что произойдёт при prompt injection через документ в RAG?</li>
+  <li>Как восстановить сессию после падения на шаге 7 из 12?</li>
+  <li>Где error signal на каждом шаге control loop?</li>
+  <li>Есть ли лимиты, предотвращающие runaway cost и бесконечные циклы?</li>
+</ol>
+
+<p>Если на половину вопросов ответ «не знаю» — это нормально для старта. Ненормально — не знать, что вопросы существуют.</p>
+
+<hr />
+
+<h2 id="vii-roadmap-на-12-месяцев">VII. Roadmap на 12 месяцев</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Квартал</th>
+      <th>Фокус</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Q1</strong></td>
+      <td>Python async + графы + один оркестратор (например LangGraph)</td>
+    </tr>
+    <tr>
+      <td><strong>Q2</strong></td>
+      <td>RAG + eval + observability</td>
+    </tr>
+    <tr>
+      <td><strong>Q3</strong></td>
+      <td>FSM / BT + гибридный оркестратор</td>
+    </tr>
+    <tr>
+      <td><strong>Q4</strong></td>
+      <td>Multi-agent + security + cost optimization</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Книги и papers — по 3–5 на блок; важнее <strong>один end-to-end проект</strong> с метриками, чем десять туториалов без eval.</p>
+
+<hr />
+
+<h2 id="связанные-публикации">Связанные публикации</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость agent control loops и фазовый портрет</a> — feedback, gain, фазовый портрет и путешествия по Embedding Space</li>
+  <li><a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/">Гибридный агент: DAG, FSM, Behavior Tree</a></li>
+  <li><a href="/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/">Нейросимволическое планирование</a></li>
+  <li><a href="/vairl/blog/2026/06/22/agent-evolution-behavior-tree/">Эволюция агентов и Behavior Tree</a></li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

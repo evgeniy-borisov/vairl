@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semantic Torrent: торрент-протокол и векторный поиск по смыслу - VAIRL</title>
+    <meta name="description" content="Как совместить content-addressed обмен кусками файла с семантическими embedding: децентрализованный поиск фрагментов по содержанию, расширение DHT и интеракт...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Semantic Torrent: торрент-протокол и векторный поиск по смыслу | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Semantic Torrent: торрент-протокол и векторный поиск по смыслу" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Как совместить content-addressed обмен кусками файла с семантическими embedding: децентрализованный поиск фрагментов по содержанию, расширение DHT и интерактивный пример." />
+<meta name="twitter:description" property="og:description" content="Как совместить content-addressed обмен кусками файла с семантическими embedding: децентрализованный поиск фрагментов по содержанию, расширение DHT и интерактивный пример." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/semantic-torrent.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-01T11:11:38+00:00" />
+<meta property="article:modified_time" content="2026-07-01T11:11:38+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/semantic-torrent.svg" />
+<meta name="twitter:title" content="Semantic Torrent: торрент-протокол и векторный поиск по смыслу" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-01T11:11:38+00:00","datePublished":"2026-07-01T11:11:38+00:00","description":"Как совместить content-addressed обмен кусками файла с семантическими embedding: децентрализованный поиск фрагментов по содержанию, расширение DHT и интерактивный пример.","headline":"Semantic Torrent: торрент-протокол и векторный поиск по смыслу","image":"https://evgeniy-borisov.github.io/vairl/assets/images/semantic-torrent.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/semantic-torrent.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Semantic Torrent: торрент-протокол и векторный поиск по смыслу</h1>
+        <p class="post-date">01 July 2026, 11:11 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Классический BitTorrent отвечает на вопрос: <strong>«у кого есть байты с таким хэшем?»</strong>. Векторный поиск отвечает на другой: <strong>«какие фрагменты близки по смыслу к запросу?»</strong>. <strong>Semantic Torrent</strong> — гибрид: файл по-прежнему делится на куски с криптографическим хэшем, но каждый кусок дополнительно несёт <strong>embedding</strong>; пиры объявляют и хэш, и вектор в распределённый индекс. Поиск по смыслу возвращает <code class="language-plaintext highlighter-rouge">piece_hash</code> → дальше работает обычный обмен блоками.</p>
+
+<p>Связанные темы в блоге VAIRL: <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрия и vector search</a>, <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">пространство гипотез (PaCMAP)</a>, <a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">как готовить ведущего специалиста по AI-агентам</a>.</p>
+
+<p><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/semantic-torrent.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" /></a></p>
+
+<h2 id="зачем-совмещать-торрент-и-embeddings">Зачем совмещать торрент и embeddings</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Подход</th>
+      <th>Сильная сторона</th>
+      <th>Слабое место</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>BitTorrent</strong></td>
+      <td>Децентрализованная доставка, проверка целостности по хэшу</td>
+      <td>Нужен точный <code class="language-plaintext highlighter-rouge">info_hash</code>; нельзя «найти кусок про X»</td>
+    </tr>
+    <tr>
+      <td><strong>Vector DB (RAG)</strong></td>
+      <td>Поиск по смыслу, top-k релевантных чанков</td>
+      <td>Обычно централизованный индекс</td>
+    </tr>
+    <tr>
+      <td><strong>Semantic Torrent</strong></td>
+      <td>И то, и другое: ANN по embedding → fetch по hash у пиров</td>
+      <td>Сложнее протокол объявлений и согласование моделей</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Практические сценарии:</p>
+
+<ul>
+  <li><strong>Федеративный корпус знаний</strong> — узлы держат подмножество документов, глобального сервера нет;</li>
+  <li><strong>P2P RAG</strong> — агент ищет релевантные куски в рое, не выгружая весь индекс на один хост;</li>
+  <li><strong>Доказуемая целостность</strong> — после семантического hit скачивание и верификация по хэшу, как в классическом торренте.</li>
+</ul>
+
+<h2 id="классический-торрент-напоминание">Классический торрент (напоминание)</h2>
+
+<pre><code class="language-mermaid">flowchart LR
+  F[Файл] --&gt; P[Куски 256 KiB]
+  P --&gt; H[SHA-1 / piece hash]
+  H --&gt; T[.torrent метаданные]
+  T --&gt; DHT[DHT / трекер]
+  DHT --&gt; PEER[Пиры]
+  PEER --&gt; DL[Скачивание + verify]
+</code></pre>
+
+<p>Клиент знает <strong>полный набор хэшей</strong> заранее (из <code class="language-plaintext highlighter-rouge">.torrent</code>). Запрос в сеть: «мне нужен кусок #7» или «у кого есть этот piece hash». Семантики в протоколе нет.</p>
+
+<h2 id="semantic-torrent-расширенная-модель">Semantic Torrent: расширенная модель</h2>
+
+<pre><code class="language-mermaid">flowchart TB
+  DOC[Документ / датасет] --&gt; CH[Семантические чанки]
+  CH --&gt; HASH[piece_hash]
+  CH --&gt; EMB[embedding]
+  HASH --&gt; META[.semantic-torrent]
+  EMB --&gt; META
+  META --&gt; ANN[Семантический индекс / DHT]
+  Q[Запрос пользователя] --&gt; QV[query embedding]
+  QV --&gt; ANN
+  ANN --&gt; HIT[piece_hash + peer list]
+  HIT --&gt; FETCH[BitTorrent block exchange]
+  FETCH --&gt; ASM[Сборка + verify hash]
+</code></pre>
+
+<p>Ключевые отличия:</p>
+
+<ol>
+  <li><strong>Чанкинг</strong> — не только фиксированный размер: границы абзацев/предложений, чтобы кусок нёс связную мысль (как в RAG).</li>
+  <li><strong>Двойной идентификатор</strong> — <code class="language-plaintext highlighter-rouge">piece_hash</code> для целостности, <code class="language-plaintext highlighter-rouge">embedding</code> для поиска.</li>
+  <li><strong>Объявление пира</strong> — <code class="language-plaintext highlighter-rouge">(info_hash, piece_index, piece_hash, embedding, peer_id)</code> вместо только «у меня есть кусок #k».</li>
+</ol>
+
+<h2 id="семантическое-разбиение-файла">Семантическое разбиение файла</h2>
+
+<p>Гибридная схема (часто используют на практике):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Уровень</th>
+      <th>Роль</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Торрент-слой</strong></td>
+      <td>Фиксированные блоки для эффективной передачи и merkle-дерева</td>
+    </tr>
+    <tr>
+      <td><strong>Семантический слой</strong></td>
+      <td>Один блок может содержать несколько «смысловых» чанков; у каждого — свой embedding и ссылка на byte-range / piece indices</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>В ноутбуке — упрощённый вариант: один текст → абзацы → предложения при переполнении → список <code class="language-plaintext highlighter-rouge">SemanticPiece</code>.</p>
+
+<h2 id="распределённый-индекс">Распределённый индекс</h2>
+
+<p>Варианты реализации объявлений:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Архитектура</th>
+      <th>Идея</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Расширение DHT</strong></td>
+      <td>Ключ — LSH-бакет от embedding; значение — список <code class="language-plaintext highlighter-rouge">(piece_hash, peer)</code></td>
+    </tr>
+    <tr>
+      <td><strong>Специализированные search-ноды</strong></td>
+      <td>Пиры стримят объявления; ноды строят HNSW / IVF поверх потока</td>
+    </tr>
+    <tr>
+      <td><strong>Гибрид</strong></td>
+      <td>DHT по <code class="language-plaintext highlighter-rouge">info_hash</code> для fetch; отдельный gossip для embedding-объявлений</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Поиск:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>query → embed(q) → ANN top-k по индексу → [(piece_hash, score, peers)]
+     → parallel request blocks у пиров → verify SHA-256 → отдать агенту / UI
+</code></pre></div></div>
+
+<p>Важно: <strong>модель embedding должна быть согласована</strong> между объявляющими и ищущими (версия в метаданных <code class="language-plaintext highlighter-rouge">.semantic-torrent</code>).</p>
+
+<h2 id="метаданные-semantic-torrent">Метаданные <code class="language-plaintext highlighter-rouge">.semantic-torrent</code></h2>
+
+<p>Расширение к <code class="language-plaintext highlighter-rouge">.torrent</code>:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"info_hash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a3f8c21e9b004d12ab91"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"embedding_model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"embedding_dim"</span><span class="p">:</span><span class="w"> </span><span class="mi">384</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"pieces"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"index"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"piece_hash"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a3f8c21e9b004d12"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"byte_range"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">262144</span><span class="p">],</span><span class="w">
+      </span><span class="nl">"text_preview"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BitTorrent делит файл..."</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Полные векторы могут храниться в метаданных (малые файлы), в отдельном <strong>sidecar</strong> или вычисляться локально после скачивания куска — с trade-off между трафиком объявлений и задержкой первого поиска.</p>
+
+<h2 id="безопасность-и-доверие">Безопасность и доверие</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Риск</th>
+      <th>Митигация</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Подмена embedding при объявлении</td>
+      <td>Подпись объявления ключом пира; репутация</td>
+    </tr>
+    <tr>
+      <td>Poisoning индекса</td>
+      <td>Верификация текста после скачивания по hash; не доверять только ANN-score</td>
+    </tr>
+    <tr>
+      <td>Утечка PII в объявлениях</td>
+      <td>Embeddings по redacted тексту; opt-in публикация</td>
+    </tr>
+    <tr>
+      <td>Model skew</td>
+      <td>Жёсткая версия <code class="language-plaintext highlighter-rouge">embedding_model</code> в манифесте</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Content-addressed слой остаётся <strong>источником истины</strong>: семантический индекс — только указатель, куда скачать и что проверить.</p>
+
+<h2 id="связь-с-rag-и-агентами">Связь с RAG и агентами</h2>
+
+<p>Агент с Semantic Torrent в tool loop:</p>
+
+<ol>
+  <li>Пользовательский запрос → embedding.</li>
+  <li>Tool <code class="language-plaintext highlighter-rouge">semantic_swarm_search(query)</code> → top-k <code class="language-plaintext highlighter-rouge">piece_hash</code> + peers.</li>
+  <li>Tool <code class="language-plaintext highlighter-rouge">fetch_pieces(hashes)</code> → верифицированные тексты.</li>
+  <li>Дальше — обычный RAG / reasoning.</li>
+</ol>
+
+<p>Это перекликается с <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрией</a>: те же чанки можно логировать, искать похожие сессии и пополнять eval. Отличие — <strong>транспорт и индекс децентрализованы</strong>, а не сидят в одном PostgreSQL/pgvector.</p>
+
+<h3 id="интерактив-рой-пиров-и-поиск-по-смыслу">Интерактив: рой пиров и поиск по смыслу</h3>
+
+<p>Упрощённая симуляция: куски в 2D-проекции embedding space, пиры (квадраты) хранят подмножество кусков, запрос (звезда) подсвечивает ближайшие по смыслу фрагменты и пиров, у которых они есть. Полный пайплайн с TF-IDF, хэшами и matplotlib — в <a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/semantic-torrent.ipynb">Colab-ноутбуке</a>.</p>
+
+<div id="semantic-torrent-demo" class="semantic-torrent-widget">
+  <div class="st-header">
+    <p>Децентрализованный рой: у каждого куска — <code>piece_hash</code> и позиция в embedding space. Выберите запрос — увидите, какие куски и пиры отвечают на семантический поиск.</p>
+  </div>
+  <div class="st-controls">
+    <button type="button" data-st-query="0" class="active">векторный поиск</button>
+    <button type="button" data-st-query="1">DHT и торрент</button>
+    <button type="button" data-st-query="2">RAG для агента</button>
+    <button type="button" data-st-query="3">децентрализация</button>
+  </div>
+  <div class="st-result"></div>
+  <div class="st-canvas-wrap">
+    <canvas id="semantic-torrent-canvas"></canvas>
+  </div>
+  <div class="st-chunk-list"></div>
+  <div class="st-legend">
+    <span class="st-leg-item"><span class="st-leg-dot" style="background: linear-gradient(135deg, #667eea, #764ba2);"></span> кусок (hash + embedding)</span>
+    <span class="st-leg-item"><span class="st-leg-dot" style="background: #667eea; border-radius: 2px;"></span> пир</span>
+    <span class="st-leg-item"><span class="st-leg-dot" style="background: #fa709a;"></span> запрос</span>
+  </div>
+</div>
+
+<script src="/vairl/assets/js/semantic-torrent-demo.js"></script>
+
+<h2 id="ограничения-и-открытые-вопросы">Ограничения и открытые вопросы</h2>
+
+<ul>
+  <li><strong>Масштаб ANN</strong> — миллиарды объявлений требуют шардирования и приближённого поиска; точность vs latency.</li>
+  <li><strong>Чанкинг vs торрент-блоки</strong> — несовпадение границ: нужна явная таблица соответствия byte-range ↔ semantic chunk.</li>
+  <li><strong>Обновление файла</strong> — новая версия → новый <code class="language-plaintext highlighter-rouge">info_hash</code>; семантический индекс версионируется вместе с манифестом.</li>
+  <li><strong>Юридический слой</strong> — децентрализация не отменяет ответственность за контент; технически это тот же P2P с дополнительным индексом.</li>
+</ul>
+
+<h2 id="практический-минимум-для-прототипа">Практический минимум для прототипа</h2>
+
+<ol>
+  <li>Семантический чанкер + <code class="language-plaintext highlighter-rouge">piece_hash</code> (SHA-256).</li>
+  <li>Локальный embedding (TF-IDF для демо, sentence-transformers для продакшена).</li>
+  <li>In-memory «DHT» с косинусным поиском (как в ноутбуке).</li>
+  <li>Симуляция пиров с случайным подмножеством кусков.</li>
+  <li>Визуализация PCA + экспорт JSON-манифеста.</li>
+</ol>
+
+<p>Следующий шаг к реальности — gossip объявлений поверх существующего P2P-стека (libtorrent, WebTorrent) и вынос ANN на search-ноды с репликацией.</p>
+
+<h2 id="further-reading">Further reading</h2>
+
+<ul>
+  <li><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/semantic-torrent.ipynb">Semantic Torrent (Colab)</a> — разбиение на чанки, хэши, TF-IDF, поиск, визуализация</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия AI-агентов</a> — централизованный vector search и task mining</li>
+  <li><a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">Пространство гипотез и PaCMAP</a> — геометрия embedding space</li>
+  <li>BitTorrent Specification (BEP 3, BEP 5 DHT) — базовый протокол для слоя доставки</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

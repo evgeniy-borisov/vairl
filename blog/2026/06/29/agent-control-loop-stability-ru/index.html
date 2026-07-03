@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Устойчивость agent control loops и фазовый портрет в Embedding Space - VAIRL</title>
+    <meta name="description" content="Замкнутые контуры AI-агентов через призму теории управления: обратная связь, gain, критичность передачи смысла, фазовый портрет и траектории в embedding space.">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Устойчивость agent control loops и фазовый портрет в Embedding Space | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Устойчивость agent control loops и фазовый портрет в Embedding Space" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Замкнутые контуры AI-агентов через призму теории управления: обратная связь, gain, критичность передачи смысла, фазовый портрет и траектории в embedding space." />
+<meta name="twitter:description" property="og:description" content="Замкнутые контуры AI-агентов через призму теории управления: обратная связь, gain, критичность передачи смысла, фазовый портрет и траектории в embedding space." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-control-loop-stability-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-control-loop-stability-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-control-loop-stability.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-29T11:28:00+00:00" />
+<meta property="article:modified_time" content="2026-06-29T11:28:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-control-loop-stability.svg" />
+<meta name="twitter:title" content="Устойчивость agent control loops и фазовый портрет в Embedding Space" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-29T11:28:00+00:00","datePublished":"2026-06-29T11:28:00+00:00","description":"Замкнутые контуры AI-агентов через призму теории управления: обратная связь, gain, критичность передачи смысла, фазовый портрет и траектории в embedding space.","headline":"Устойчивость agent control loops и фазовый портрет в Embedding Space","image":"https://evgeniy-borisov.github.io/vairl/assets/images/agent-control-loop-stability.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-control-loop-stability-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-control-loop-stability-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/06/29/agent-control-loop-stability-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/agent-control-loop-stability.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Устойчивость agent control loops и фазовый портрет в Embedding Space</h1>
+        <p class="post-date">29 June 2026, 11:28 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>В классической теории управления <strong>устойчивость</strong> — свойство системы возвращаться к приемлемому режиму после возмущения, а не уходить в расходящийся режим: осцилляции, накопление ошибки, «разгон» до катастрофы.</p>
+
+<p>У AI-агента возмущение — не только шум датчика. Это <strong>галлюцинация модели</strong>, <strong>битый tool call</strong>, <strong>устаревший контекст в RAG</strong>, <strong>изменение API</strong> или <strong>пользователь, который меняет цель на полпути</strong>. Карта компетенций, в которую вписывается этот материал — в публикации <a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">Как готовить ведущего специалиста по AI-агентам</a>.</p>
+
+<h2 id="agent-control-loop">Agent control loop</h2>
+
+<p>Замкнутый контур агента:</p>
+
+<pre><code class="language-mermaid">flowchart LR
+  S[State / memory] --&gt; P[Policy: LLM + rules]
+  P --&gt; A[Action: tool / message]
+  A --&gt; E[Environment]
+  E --&gt; O[Observation]
+  O --&gt; S
+</code></pre>
+
+<p>Тот же каркас, что у термостата или cruise control: <strong>состояние → решение → действие → наблюдение → обновление состояния</strong>. Разница в том, что «регулятор» стохастический, с задержкой в секунды–минуты и с динамикой, которую вы <strong>проектируете</strong>, а не выводите из уравнений объекта.</p>
+
+<hr />
+
+<h2 id="обратная-связь-стабилизирующая-и-разгоняющая">Обратная связь: стабилизирующая и разгоняющая</h2>
+
+<p><strong>Отрицательная обратная связь</strong> уменьшает ошибку — стабилизирует систему.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>В теории управления</th>
+      <th>В агенте</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Датчик измеряет отклонение от setpoint</td>
+      <td>Critic / validator / schema check</td>
+    </tr>
+    <tr>
+      <td>Корректирующее воздействие</td>
+      <td>Replan, retry, уточняющий вопрос</td>
+    </tr>
+    <tr>
+      <td>Демпфирование</td>
+      <td>Лимит циклов, cooldown, «остановись и спроси»</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Положительная обратная связь</strong> усиливает отклонение — контур «разгоняется»:</p>
+
+<ul>
+  <li><strong>Reflexion без критерия остановки</strong> — метрика не растёт, растут только токены</li>
+  <li><strong>Planner ↔ critic в мультиагентной системе</strong> — взаимное подталкивание к ложной уверенности</li>
+  <li><strong>RAG feedback loop</strong> — агент записывает галлюцинацию в память, потом «находит» её как факт</li>
+  <li><strong>Retry storm</strong> — тот же tool call с теми же аргументами в цикле</li>
+</ul>
+
+<p>Хороший оркестратор явно маркирует, <strong>где feedback отрицательный</strong>, а <strong>где контур нужно разорвать</strong> внешним арбитром или human gate.</p>
+
+<hr />
+
+<h2 id="setpoint-и-сигнал-ошибки">Setpoint и сигнал ошибки</h2>
+
+<p>В регуляторе: error = setpoint − measurement.</p>
+
+<p>У агента setpoint — <strong>вектор ограничений</strong>, а не одно число:</p>
+
+<ul>
+  <li>достичь цели пользователя;</li>
+  <li>не нарушить policy;</li>
+  <li>уложиться в budget (время, деньги, число tool calls);</li>
+  <li>сохранить согласованность с памятью и схемой данных.</li>
+</ul>
+
+<p>Без формализованного error signal контур неустойчив по определению: оптимизируется то, что легче измерить (длина ответа, уверенный тон), а не то, что нужно продукту.</p>
+
+<p>Минимальный набор proxy-метрик на каждом шаге: <code class="language-plaintext highlighter-rouge">task_success</code>, <code class="language-plaintext highlighter-rouge">schema_valid</code>, <code class="language-plaintext highlighter-rouge">citation_grounded</code>, <code class="language-plaintext highlighter-rouge">cost_so_far</code>, <code class="language-plaintext highlighter-rouge">steps_remaining</code>.</p>
+
+<hr />
+
+<h2 id="задержки-и-устаревшие-наблюдения">Задержки и устаревшие наблюдения</h2>
+
+<p>Большие задержки в контуре — классический источник колебаний: система реагирует на уже неактуальные данные.</p>
+
+<p>У агента задержки повсюду: inference, цепочка tools, human approval, eventual consistency в vector DB.</p>
+
+<p>Симптом — <strong>охотничьи колебания</strong>: plan → act → observation obsolete → replan в другую сторону.</p>
+
+<p>Стабилизаторы:</p>
+
+<ul>
+  <li>версионирование state (epoch / revision);</li>
+  <li>идемпотентные действия;</li>
+  <li>debounce на replan;</li>
+  <li>cancel tokens для долгих веток.</li>
+</ul>
+
+<hr />
+
+<h2 id="gain-слишком-агрессивная-или-вялая-политика">Gain: слишком агрессивная или вялая политика</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Высокий gain</th>
+      <th>Низкий gain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Полный replan при любой ошибке</td>
+      <td>Молча продолжать после сбоя</td>
+    </tr>
+    <tr>
+      <td>Temperature 0.9 + 20 tool calls</td>
+      <td>Бесконечные уточнения без действия</td>
+    </tr>
+    <tr>
+      <td>Автономный write без подтверждения</td>
+      <td>Никогда не вызывать инструменты</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Настройка gain — пороги в FSM, <code class="language-plaintext highlighter-rouge">max_iterations</code>, model routing, escalation ladder: retry → альтернативный tool → human.</p>
+
+<hr />
+
+<h2 id="насыщение-saturation-и-anti-windup">Насыщение (saturation) и anti-windup</h2>
+
+<p>Исполнитель насыщается: context window, rate limits, исчерпан budget, очередь reviewers.</p>
+
+<p>Без учёта saturation контур ведёт себя как <strong>интегратор с windup</strong>: внутренний «план на 50 шагов» обрезается контекстом, а позже выстреливает неконтролируемым действием.</p>
+
+<p><strong>Anti-windup для агентов:</strong> при лимите — остановить накопление плана, сделать compaction, сбросить sub-goals, а не дожимать тем же loop.</p>
+
+<hr />
+
+<h2 id="робастность-короткий-горизонт-планирования">Робастность: короткий горизонт планирования</h2>
+
+<p>Точной модели среды нет. Отсюда <strong>receding horizon</strong> — план на 1–3 шага, переплан после каждого observation; guard conditions перед необратимыми действиями; второй critic или rule-based checker.</p>
+
+<p>Ближе к <strong>MPC (model predictive control)</strong> с коротким горизонтом, чем к open-loop planner на 15 шагов.</p>
+
+<hr />
+
+<h2 id="фазовый-портрет-от-физики-к-агенту">Фазовый портрет: от физики к агенту</h2>
+
+<p>В динамических системах <strong>фазовое пространство</strong> — множество всех возможных состояний системы. Ось (или оси) — переменные состояния: положение, скорость, заряд, температура. <strong>Траектория</strong> — путь системы во времени. <strong>Фазовый портрет</strong> — геометрия всех типичных траекторий на плоскости фаз.</p>
+
+<pre><code class="language-mermaid">flowchart LR
+  subgraph phase["Фазовое пространство (control theory)"]
+    x1["x₁: положение"]
+    x2["x₂: скорость"]
+  end
+  subgraph embed["Embedding Space (агент)"]
+    e1["e₁: тема / intent"]
+    e2["e₂: уверенность / grounding"]
+  end
+  phase -. "аналогия" .-&gt; embed
+</code></pre>
+
+<p>Для агента точное фазовое пространство бесконечномерно: полный state — память, tool outputs, план, история сообщений. Но <strong>проекция на embedding space</strong> даёт ту же геометрическую интуицию.</p>
+
+<hr />
+
+<h2 id="embedding-space-как-фазовое-пространство-смыслов">Embedding Space как фазовое пространство смыслов</h2>
+
+<p>Каждый шаг агента — <strong>переход в семантическом пространстве</strong>:</p>
+
+<ol>
+  <li>Observation (текст, JSON tool, документ из RAG) кодируется в вектор — или косвенно, через то, как LLM «представляет» контекст.</li>
+  <li>Policy выбирает следующее действие — это <strong>векторное поле</strong>: из текущей области смыслов куда tendит динамика.</li>
+  <li>Несколько шагов подряд образуют <strong>траекторию</strong> — путь по manifold смыслов.</li>
+</ol>
+
+<p>Мы не видим 4096 измерений. Но после PCA, UMAP или t-SNE на эмбеддингах шагов сессии получаем <strong>2D-фазовый портрет агента</strong> — диагностический инструмент, а не игрушку.</p>
+
+<h3 id="аттракторы--куда-притягивает-динамика">Аттракторы — куда «притягивает» динамика</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Тип в фазовом портрете</th>
+      <th>Аналог в агенте</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Устойчивый аттрактор (точка)</strong></td>
+      <td>Заземлённый ответ, согласованный с RAG и schema</td>
+    </tr>
+    <tr>
+      <td><strong>Предельный цикл (limit cycle)</strong></td>
+      <td>ReAct-loop без прогресса: «подумаю ещё» → тот же tool → снова</td>
+    </tr>
+    <tr>
+      <td><strong>Седло</strong></td>
+      <td>Развилка: два правдоподобных intent, малый шум в промпте меняет исход</td>
+    </tr>
+    <tr>
+      <td><strong>Бассейн притяжения</strong></td>
+      <td>Область начальных формулировок, сходящихся к одному (верному или ложному) выводу</td>
+    </tr>
+    <tr>
+      <td><strong>Расходящаяся траектория</strong></td>
+      <td>Runaway hallucination, уход от темы, рост «уверенности» без grounding</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Визуально:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>        ·  ·    ← расходящиеся (галлюцинация)
+         \ |
+    ······(●)·····  ← устойчивый аттрактор (correct answer)
+       ↗     ↘
+      ·       ·
+       \     /
+        (○)───(○)   ← предельный цикл (бесполезный loop)
+</code></pre></div></div>
+
+<h3 id="векторное-поле-политики">Векторное поле политики</h3>
+
+<p>В фазовом портрете <strong>стрелки</strong> показывают, куда система движется из каждой точки. У агента поле задаётся совокупностью:</p>
+
+<ul>
+  <li>system prompt и few-shot examples (смещают бассейны);</li>
+  <li>temperature и sampling (добавляют стохастический разброс);</li>
+  <li>tools и RAG (внешние «силы», притягивающие к документам);</li>
+  <li>guardrails (барьеры, через которые траектория не проходит).</li>
+</ul>
+
+<p>Изменить поведение агента — значит <strong>изменить поле</strong>, а не только «написать более вежливый промпт».</p>
+
+<h3 id="интерактив-дискретное-embedding-space">Интерактив: дискретное embedding space</h3>
+
+<p>Ниже — упрощённая <strong>2D-проекция</strong> дискретного embedding space (как после PCA / UMAP). Фоновые стрелки — <strong>векторное поле политики</strong>; узлы с подписями — шаги <strong>chain of thought</strong>; движущаяся точка — текущая «мысль» LLM. Переключите режим: <strong>сходимость к аттрактору</strong> (успешный CoT) или <strong>предельный цикл</strong> (бесполезный ReAct-loop).</p>
+
+<div class="phase-portrait-widget">
+  <div class="phase-portrait-controls">
+    <button type="button" data-phase-mode="cycle" class="active">Предельный цикл</button>
+    <button type="button" data-phase-mode="converge">Сходимость к аттрактору</button>
+  </div>
+  <div id="embedding-phase-portrait" class="phase-portrait-canvas"></div>
+  <div id="phase-prompt-display" class="phase-portrait-prompts" aria-live="polite"></div>
+  <p class="phase-portrait-caption">Оси — условные компоненты проекции эмбеддингов. В режиме <em>Предельный цикл</em> точки лежат на окружности; движущаяся точка идёт по замкнутой траектории, на каждом шаге подсвечивается короткий промпт. Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a>.</p>
+</div>
+
+<script src="/vairl/assets/js/embedding-phase-portrait.js"></script>
+
+<h3 id="сепаратрисы--границы-между-исходами">Сепаратрисы — границы между исходами</h3>
+
+<p><strong>Сепаратриса</strong> — траектория, разделяющая бассейны притяжения. В embedding space это граница между «агент понял задачу как SQL-запрос» и «агент понял как chat». Малые изменения начального промпта или порядка документов в RAG могут <strong>перебросить через сепаратрису</strong> — отсюда нестабильность без злого умысла.</p>
+
+<p>Инженерный вывод: критичные развилки нужно <strong>вынести в явный FSM или Condition-узел BT</strong>, а не оставлять на откуп стохастике LLM.</p>
+
+<hr />
+
+<h2 id="траектории-в-embedding-space-что-логировать">Траектории в Embedding Space: что логировать</h2>
+
+<p>Чтобы построить фазовый портрет сессии, на каждом шаге control loop сохраняйте:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Поле</th>
+      <th>Зачем</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">step_embedding</code></td>
+      <td>embedding последнего сообщения / summary state</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">intent_label</code></td>
+      <td>классификатор или эвристика</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">grounding_score</code></td>
+      <td>overlap с RAG, citation check</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">error_proxy</code></td>
+      <td>расстояние до цели по метрике</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mode</code></td>
+      <td>FSM-состояние: Planning / Executing / Recovering</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Траектория <code class="language-plaintext highlighter-rouge">(e₀, e₁, …, eₙ)</code> в проекции 2D показывает:</p>
+
+<ul>
+  <li><strong>сходимость</strong> — траектория входит в аттрактор успеха;</li>
+  <li><strong>цикл</strong> — замкнутый контур в проекции;</li>
+  <li><strong>дрейф</strong> — монотонный уход от RAG-области;</li>
+  <li><strong>прыжок</strong> — резкий скачок после tool call (часто норма; иногда — injection).</li>
+</ul>
+
+<p>Связь с <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">гипотезным пространством и PaCMAP</a>: там траектории — по <strong>гипотезам</strong>; здесь — по <strong>состояниям агента</strong> во времени. Оба случая — геометрия поиска в высокомерном пространстве.</p>
+
+<hr />
+
+<h2 id="политики-обучения-где-сигнал-на-траектории">Политики обучения: где сигнал на траектории</h2>
+
+<p>На этапе <strong>RL-выравнивания</strong> (PPO, GRPO) политика $\pi_\theta$ тоже описывается траекторией в embedding space — только эту траекторию мы <strong>сознательно сдвигаем</strong> градиентом. Путаница частая: кажется, что PPO «оценивает ризонинг по ходу», а GRPO — «только финальный ответ». <strong>Почти так, но с важной поправкой.</strong></p>
+
+<h3 id="уточнение-верификатор-всё-равно-в-конце">Уточнение: верификатор всё равно в конце</h3>
+
+<p>И в <strong>PPO</strong>, и в <strong>GRPO</strong> scalar-награда от RM или verifiable checker (0/1 за математику, unit test за код) в типичном RLVR-пайплайне приходит <strong>на последнем токене</strong> полного completion — включая CoT и reasoning-токены. <strong>Отдельной пошаговой проверки каждого шага ризонинга</strong> в обоих случаях нет, если вы явно не ввели process reward.</p>
+
+<p>Разница не в том, <em>когда</em> внешний судья смотрит на ответ, а в том, <strong>как сигнал распределяется по токенам при обновлении весов</strong>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>PPO (actor-critic)</th>
+      <th>GRPO (group baseline)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Rollout на промпт</strong></td>
+      <td>Обычно <strong>1</strong> траектория</td>
+      <td><strong>G</strong> полных траекторий (4–64)</td>
+    </tr>
+    <tr>
+      <td><strong>Где r</strong></td>
+      <td>Terminal (конец completion)</td>
+      <td>Terminal для каждого $o_i$</td>
+    </tr>
+    <tr>
+      <td><strong>Credit assignment</strong></td>
+      <td><strong>Потокенный</strong>: критик $V(s_t)$ + GAE → разный $A_t$ на каждом токене</td>
+      <td><strong>Outcome</strong>: один $A_i$ на <strong>весь</strong> ответ $o_i$</td>
+    </tr>
+    <tr>
+      <td><strong>Baseline</strong></td>
+      <td>Обучаемый критик</td>
+      <td>$\mathrm{mean}(r)$ по группе на том же $q$</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>PPO</strong> не «судит ризонинг в реальном времени» — критик <strong>учится предсказывать</strong> ожидаемую ценность частичного префикса и через GAE <strong>размазывает</strong> terminal reward назад по цепочке. <strong>GRPO</strong> честнее в этом смысле: после групповой нормализации <strong>все токены одного ответа получают одинаковый градиент</strong> — хороший или плохой trace целиком.</p>
+
+<p>Подробный разбор формул и архитектуры — в <a href="/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/">GRPO vs PPO</a>.</p>
+
+<h3 id="интерактив-два-режима-credit-assignment">Интерактив: два режима credit assignment</h3>
+
+<p>Переключите <strong>PPO / GRPO</strong> и нажимайте <strong>«Следующий шаг»</strong>: сверху — траектории в проекции embedding space; снизу — ось времени CoT → ответ. Обратите внимание: <strong>зелёная/красная награда r всегда в конце</strong>; отличается только то, что происходит <em>после</em> неё.</p>
+
+<div id="rl-policy-credit-widget" class="rl-policy-credit-widget">
+  <div class="rl-credit-header">
+    <p>Где обучающий сигнал «цепляется» за траекторию: PPO — локально по токенам (GAE); GRPO — единым весом на весь trace после сравнения с группой.</p>
+  </div>
+  <div class="rl-credit-controls">
+    <button type="button" data-credit-mode="ppo" class="active">PPO</button>
+    <button type="button" data-credit-mode="grpo">GRPO</button>
+    <button type="button" class="rl-credit-step-btn" data-credit-step="">Следующий шаг →</button>
+  </div>
+  <div class="rl-credit-canvas-wrap">
+    <canvas id="rl-policy-credit-canvas"></canvas>
+  </div>
+  <div class="rl-credit-legend"></div>
+  <p class="rl-credit-caption"></p>
+</div>
+
+<script src="/vairl/assets/js/rl-policy-credit.js"></script>
+
+<h3 id="сводка-стоимость-и-вычислительная-сложность">Сводка: стоимость и вычислительная сложность</h3>
+
+<p>Экономический компромисс — зеркало компромисса «память vs генерация» в control loop обучения:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Экономический критерий</th>
+      <th>PPO (классика, в т.ч. GLM-стек)</th>
+      <th>GRPO (DeepSeek, RLVR)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Затраты на VRAM</strong></td>
+      <td>Высокие: критик удваивает (или существенно увеличивает) память под базовую модель</td>
+      <td>Ниже: отдельного критика нет</td>
+    </tr>
+    <tr>
+      <td><strong>Стоимость генерации (rollout)</strong></td>
+      <td>Ниже: <strong>1</strong> ответ на промпт за шаг обновления</td>
+      <td>Выше: <strong>G</strong> полных completions на каждый промпт</td>
+    </tr>
+    <tr>
+      <td><strong>Зависимость от длины контекста</strong></td>
+      <td>Близка к <strong>линейной</strong>: один длинный trace</td>
+      <td><strong>Мультипликативная</strong>: $G \times L$ — группа длинных CoT (10k+ токенов) резко бьёт по FLOPs</td>
+    </tr>
+    <tr>
+      <td><strong>Скорость схождения</strong></td>
+      <td>Часто быстрее на задачах с длинным credit path и shaped reward</td>
+      <td>Быстро на коротких верифицируемых задачах (math); на длинных агентских сценариях группа может не дать тонкого сигнала</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Зависимость GRPO от длины — не буквально «экспоненциальная», а <strong>произведение</strong> числа сэмплов на длину каждого; на практике при reasoning 10k+ токенов это ощущается как взрывной рост счёта за обучение.</p>
+
+<h3 id="фазовый-портрет-inference-vs-фазовый-портрет-обучения">Фазовый портрет inference vs фазовый портрет обучения</h3>
+
+<p>Это <strong>два разных среза</strong> одной геометрии — их полезно не смешивать:</p>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph infer["Inference (runtime)"]
+    I1[Траектория в embedding space] --&gt; I2[Аттракторы / циклы / сепаратрисы]
+    I2 --&gt; I3[Диагностика устойчивости агента]
+  end
+  subgraph train["Training (RL)"]
+    T1[Траектории rollout] --&gt; T2[Terminal r + credit assignment]
+    T2 --&gt; T3[Сдвиг векторного поля π_θ]
+  end
+  infer -. "одна сессия, без градиента" .-&gt; train
+  train -. "меняет поле для будущих сессий" .-&gt; infer
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аспект фазового портрета</th>
+      <th>Во время работы агента</th>
+      <th>Во время RL-обучения</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Что за траектория</strong></td>
+      <td>Один trace на задачу пользователя</td>
+      <td>Множество rollouts на обучающих промптах</td>
+    </tr>
+    <tr>
+      <td><strong>Кто двигает точку</strong></td>
+      <td>Политика + среда + tools</td>
+      <td>Policy gradient по награде</td>
+    </tr>
+    <tr>
+      <td><strong>PPO-аналог</strong></td>
+      <td>Локальные «стрелки» поля меняются от шага к шагу (разный grounding на каждом hop)</td>
+      <td>GAE даёт <strong>разный толчок</strong> на ранних и поздних токенах — <strong>локальное искривление</strong> траекторий в пространстве политики</td>
+    </tr>
+    <tr>
+      <td><strong>GRPO-аналог</strong></td>
+      <td>Несколько параллельных попыток на один запрос (best-of-N)</td>
+      <td>Целые траектории <strong>ранжируются</strong> относительно группы — <strong>сдвиг бассейнов</strong> «весь trace выше/ниже среднего»</td>
+    </tr>
+    <tr>
+      <td><strong>Риск неустойчивости</strong></td>
+      <td>Limit cycle, расходимость, суперкритичность CoT</td>
+      <td>Ошибочный критик (PPO) или $\sigma \to 0$ в группе (GRPO) — положительная обратная связь в <strong>обучающем</strong> контуре</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Практический вывод:</strong> фазовый портрет из разделов выше — инструмент <strong>мониторинга runtime</strong>. Таблица PPO/GRPO — про <strong>как вы платите</strong>, чтобы <strong>перекроить</strong> это поле на offline-данных. Длинный агентский DAG с редким terminal success ближе к боли GRPO (мало контраста в группе, дорогие rollouts); задачи с плотным промежуточным сигналом или необходимостью точного потокенного кредита — к сильным сторонам PPO, ценой VRAM.</p>
+
+<hr />
+
+<h2 id="критичность-передача-смысла-по-сети-агента">Критичность: передача смысла по сети агента</h2>
+
+<p>В нейронауке <strong>гипотеза критичности</strong> (criticality hypothesis) утверждает: кора работает <strong>на границе фазового перехода</strong> — между режимом, где активность затухает, и режимом, где она неконтролируемо усиливается. В этой точке, по данным экспериментов и моделей, <strong>оптимизируется обработка информации</strong>: возникают масштабно-инвариантные «нейронные лавины», длинные корреляции во времени и в пространстве сети. Классическое введение — John Beggs, <em>The Cortex and the Critical Point</em> (MIT Press).</p>
+
+<p>Для разработчика агентов это не метафора «мозг = LLM», а <strong>переносимая метрика</strong>: chain of thought, вызовы tools и сообщения между subagents — это <strong>распространение сигнала по направленному графу</strong>. Сигнал может <strong>затухать</strong> (потеря intent к концу цепочки), <strong>взрываться</strong> (runaway CoT, reflexion-лавина) или идти в <strong>критическом режиме</strong> — далеко по графу без потери связи с целью и без хаотического размножения шума.</p>
+
+<h3 id="три-режима--по-аналогии-с-критичностью-мозга">Три режима — по аналогии с критичностью мозга</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Режим</th>
+      <th>Нейросеть (упрощённо)</th>
+      <th>Chain of thought / агент</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Субкритический</strong> (subcritical)</td>
+      <td>Возмущение затухает; короткая корреляция по сети</td>
+      <td>Каждый шаг CoT слабо связан с целью; intent «забывается»; RAG-факт не доходит до финального ответа</td>
+    </tr>
+    <tr>
+      <td><strong>Критический</strong> (critical)</td>
+      <td>Максимальная длина корреляции; оптимальная передача</td>
+      <td>Смысл цели <strong>передаётся</strong> через несколько hop’ов (plan → tool → synthesize), но объём рассуждения не растёт лавинообразно</td>
+    </tr>
+    <tr>
+      <td><strong>Суперкритический</strong> (supercritical)</td>
+      <td>Лавины растут без ограничения; шум усиливается</td>
+      <td>Галлюцинация, раздувание плана, multi-agent hype, положительная обратная связь без dampening</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart LR
+  subgraph sub["Субкритический"]
+    G1[goal] -.-&gt;|слабая связь| S1[step n]
+  end
+  subgraph crit["Критический"]
+    G2[goal] --&gt; S2a[step 1] --&gt; S2b[step k] --&gt; S2c[answer]
+  end
+  subgraph super["Суперкритический"]
+    G3[шум] --&gt; A1[ветка] --&gt; A2[ветка] --&gt; A3[лавина]
+    A2 --&gt; A4[ветка]
+  end
+</code></pre>
+
+<p>С точки зрения <strong>устойчивости систем</strong> (см. gain и обратную связь выше): субкритический режим — <strong>передемпфирование</strong> (сигнал ошибки не доходит до нужного узла); суперкритический — <strong>положительная обратная связь с gain &gt; 1</strong>; критический — работа <strong>на границе устойчивости</strong>, где пропускная способность канала максимальна.</p>
+
+<h3 id="интерактив-лавина-сигнала-на-квадратной-сетке">Интерактив: лавина сигнала на квадратной сетке</h3>
+
+<p>Упрощённая модель <strong>нейронной лавины</strong> (Beggs): квадратная решётка — дискретное embedding-/agent-space; возбуждение входит слева и распространяется в соседние <strong>квадратные клетки</strong>. Параметр <strong>σ</strong> (branching ratio) задаёт режим; <strong>направленность</strong> — доля передачи вправо (по DAG / chain of thought). Субкритическое — вспышки гаснут; критическое — лавины умеренного размера доходят до выхода; суперкритическое — лавина разрастается по всей сети.</p>
+
+<div id="criticality-grid-widget" class="criticality-widget">
+  <div class="criticality-header">
+    <p>Клеточный автомат: покой → возбуждение → активность → рефрактерность. Каждый тик — один шаг передачи сигнала по сети агента.</p>
+  </div>
+  <div class="criticality-controls">
+    <div class="crit-ctrl-group">
+      <span class="crit-ctrl-label">σ, режим:</span>
+      <div class="crit-state-btns">
+        <button type="button" class="crit-state-btn" data-crit-mode="subcritical">Субкритическое</button>
+        <button type="button" class="crit-state-btn active" data-crit-mode="critical">Критическое</button>
+        <button type="button" class="crit-state-btn" data-crit-mode="supercritical">Суперкритическое</button>
+      </div>
+    </div>
+    <div class="crit-ctrl-group">
+      <span class="crit-ctrl-label">Скорость</span>
+      <input type="range" id="crit-speed" min="1" max="5" value="3" step="1" />
+    </div>
+    <div class="crit-ctrl-group">
+      <span class="crit-ctrl-label">Направленность →</span>
+      <input type="range" id="crit-bias" min="0" max="100" value="70" step="1" />
+      <span id="crit-bias-out" class="crit-bias-out">70%</span>
+    </div>
+  </div>
+  <div class="criticality-metrics">
+    <div>σ: <span id="crit-sigma-val">1.00</span></div>
+    <div>Активных клеток: <span id="crit-active-count">0</span></div>
+    <div>Лавин: <span id="crit-ava-count">0</span></div>
+    <div>Размер последней: <span id="crit-ava-size">—</span></div>
+    <div>Фронт сигнала: <span id="crit-wave-speed">—</span></div>
+  </div>
+  <div class="criticality-wave-row">
+    <span>вход</span>
+    <div class="crit-wave-bar"><div class="crit-wave-fill" id="crit-wave-bar"></div></div>
+    <span>выход →</span>
+  </div>
+  <div class="criticality-canvas-wrap">
+    <canvas id="criticality-grid-canvas"></canvas>
+  </div>
+  <div class="criticality-legend">
+    <div class="crit-leg-item"><span class="crit-leg-swatch" style="background:#eef0f4;border:1px solid #dde1e8"></span>покой</div>
+    <div class="crit-leg-item"><span class="crit-leg-swatch" style="background:#b8f0d8"></span>возбуждение</div>
+    <div class="crit-leg-item"><span class="crit-leg-swatch" style="background:#667eea"></span>активен</div>
+    <div class="crit-leg-item"><span class="crit-leg-swatch" style="background:#3a3a48"></span>рефрактерный</div>
+  </div>
+  <p class="criticality-caption">Квадратные клетки — узлы дискретного пространства; стрелки — предпочтительное направление передачи (аналог directed graph). При σ ≈ 1 и умеренной направленности сигнал доходит далеко без взрывного роста — критический режим для CoT.</p>
+</div>
+
+<script src="/vairl/assets/js/criticality-grid.js"></script>
+
+<h3 id="шеннон-и-канал-передачи">Шеннон и канал передачи</h3>
+
+<p>В теории информации Шеннона <strong>пропускная способность канала</strong> зависит от отношения сигнал/шум. Слишком слабый сигнал — декодер не восстанавливает сообщение (субкритичность). Слишком агрессивное усиление шума вместе с сигналом — хаос на выходе (суперкритичность).</p>
+
+<p>У агента «канал» — ребро directed graph: выход узла <code class="language-plaintext highlighter-rouge">plan</code> → вход узла <code class="language-plaintext highlighter-rouge">execute_tool</code>. <strong>Смысл</strong> (intent, constraints, citations) — сообщение; <strong>температура, длинный контекст, нерелевантный RAG</strong> — шум. Оркестратор с критичностью ближе к критической точке:</p>
+
+<ul>
+  <li>не обрезает цепочку так, что goal term теряется к середине DAG;</li>
+  <li>не запускает unbounded branching (20 параллельных subagents без aggregation);</li>
+  <li>вставляет <strong>повторители</strong> (summarize + restate goal) там, где корреляция по дистанции падает слишком быстро — аналог регенерации сигнала в длинной линии связи.</li>
+</ul>
+
+<h3 id="directed-graph-работы-агента">Directed graph работы агента</h3>
+
+<p>Топология исполнения — прежде всего <strong>DAG</strong> (batch, LangGraph, пайплайн plan→act), иногда <strong>DAG с внешним циклом</strong> (FSM супервизор перезапускает acyclic spine) — см. <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/">гибридный оркестратор</a>.</p>
+
+<pre><code class="language-mermaid">flowchart LR
+  goal[goal / user intent] --&gt; retrieve
+  retrieve --&gt; plan
+  plan --&gt; t1[tool: search]
+  plan --&gt; t2[tool: code]
+  t1 --&gt; synth[synthesize]
+  t2 --&gt; synth
+  synth --&gt; critic
+  critic --&gt;|ok| out[answer]
+  critic --&gt;|fail| plan
+</code></pre>
+
+<p><strong>Узлы</strong> — шаги с логируемым артефактом: сообщение, CoT-чанк, tool I/O, embedding состояния. <strong>Рёбра</strong> — направленная передача контекста. Расстояние <code class="language-plaintext highlighter-rouge">d</code> — число hop’ов по кратчайшему пути (или по фактическому trace, если были параллельные ветки).</p>
+
+<p>Циклы (<code class="language-plaintext highlighter-rouge">critic → plan</code>) не отменяют метрику: считайте <strong>итерацию</strong> как увеличение «времени» <code class="language-plaintext highlighter-rouge">t</code> и отдельно — <strong>расстояние по acyclic spine</strong> внутри одной итерации. Суперкритичность часто видна именно на <strong>повторных</strong> проходах через один и тот же узел (растущая корреляция с шумом, падающая — с исходным goal).</p>
+
+<h3 id="метрика-критичности-корреляция-сигнала-на-разных-дистанциях">Метрика критичности: корреляция сигнала на разных дистанциях</h3>
+
+<p>Базовое определение: для каждого расстояния <code class="language-plaintext highlighter-rouge">d</code> по графу (или по индексу шага в CoT) оцените <strong>корреляцию сигнала</strong> между парами узлов на этом расстоянии.</p>
+
+<p>Пусть <code class="language-plaintext highlighter-rouge">s(v)</code> — вектор сигнала на узле <code class="language-plaintext highlighter-rouge">v</code> (embedding шага, embedding цели, или проекция на ось intent). Тогда:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C(d) = mean_{u,v : dist(u,v)=d} corr( s(u), s(v) )
+</code></pre></div></div>
+
+<p>Интерпретация:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Профиль C(d)</th>
+      <th>Режим</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Быстрый экспоненциальный спад</strong></td>
+      <td>Субкритический</td>
+      <td>Усилить передачу goal (restated constraints, structured memory); укоротить DAG</td>
+    </tr>
+    <tr>
+      <td><strong>Медленный спад</strong> (степенной / длинный «хвост»)</td>
+      <td>Ближе к критическому</td>
+      <td>Обычно желаемо для многошаговых задач</td>
+    </tr>
+    <tr>
+      <td><strong>Рост или осцилляция на больших d</strong></td>
+      <td>Суперкритический</td>
+      <td>Снизить gain, лимит ветвления, dampening в FSM Recovering</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Дополнительно — <strong>branching ratio</strong> <code class="language-plaintext highlighter-rouge">σ</code>: среднее число «активных» потомков, несущих смысл goal дальше по графу (не любой tool call, а шаг, увеличивающий <code class="language-plaintext highlighter-rouge">grounding_score</code> или снижающий <code class="language-plaintext highlighter-rouge">error_proxy</code>):</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">σ &lt; 1</code> — сигнал затухает (субкритический);</li>
+  <li><code class="language-plaintext highlighter-rouge">σ ≈ 1</code> — граница (критический);</li>
+  <li><code class="language-plaintext highlighter-rouge">σ &gt; 1</code> — лавинообразное размножение рассуждений (суперкритический).</li>
+</ul>
+
+<p>В терминах <strong>фазового портрета</strong>: субкритический CoT — траектория быстро <strong>схлопывается</strong> к аттрактору, не связанному с goal; суперкритический — <strong>расходящаяся</strong> траектория или limit cycle с ростом «уверенности»; критический — траектория <strong>длинная, но сходящаяся</strong> к заземлённому аттрактору.</p>
+
+<h3 id="предпосылки-для-использования-метрики">Предпосылки для использования метрики</h3>
+
+<p>Метрика осмысленна, только если выполнены условия:</p>
+
+<ol>
+  <li><strong>Известная топология</strong> — явный DAG (или trace с <code class="language-plaintext highlighter-rouge">parent_id</code> / LangGraph state); без графа нет «дистанции <code class="language-plaintext highlighter-rouge">d</code>».</li>
+  <li><strong>Сигнал на каждом узле</strong> — <code class="language-plaintext highlighter-rouge">step_embedding</code>, фиксированный <code class="language-plaintext highlighter-rouge">goal_embedding</code>, опционально embedding RAG-чанков; одна и та же модель эмбеддингов в рамках сессии.</li>
+  <li><strong>Сопоставимость узлов</strong> — однотипные артефакты (не смешивать raw tool JSON и финальный prose без проекции).</li>
+  <li><strong>Достаточно трасс</strong> — <code class="language-plaintext highlighter-rouge">C(d)</code> оценивается по ансамблю сессий или bootstrap по одной длинной сессии; одна короткая цепочка — только эвристика.</li>
+  <li><strong>Разделение сигнал / шум</strong> — явный <code class="language-plaintext highlighter-rouge">goal</code> и <code class="language-plaintext highlighter-rouge">grounding_score</code>; иначе высокая корреляция может быть <strong>ложной</strong> (агенты согласно галлюцинируют в унисон).</li>
+  <li><strong>Учёт циклов и параллели</strong> — для fork-join в DAG усредняйте по веткам; для <code class="language-plaintext highlighter-rouge">critic → plan</code> отслеживайте деградацию <code class="language-plaintext highlighter-rouge">C(d)</code> по номеру итерации.</li>
+</ol>
+
+<p>Без (1)–(2) «критичность» сводится к субъективной оценке длины промпта.</p>
+
+<h3 id="связь-с-устойчивостью-и-control-loop">Связь с устойчивостью и control loop</h3>
+
+<p>Критичность — <strong>мост</strong> между геометрией embedding space и классической устойчивостью:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Понятие control theory</th>
+      <th>Критичность на графе агента</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Gain</td>
+      <td>Branching ratio σ, temperature, число parallel subagents</td>
+    </tr>
+    <tr>
+      <td>Демпфирование</td>
+      <td>Субкритический спад C(d); summarization, critic</td>
+    </tr>
+    <tr>
+      <td>Положительная обратная связь</td>
+      <td>σ &gt; 1, Reflexion без stop, RAG feedback loop</td>
+    </tr>
+    <tr>
+      <td>Граница устойчивости</td>
+      <td>Критический режим: max передача intent при bounded cost</td>
+    </tr>
+    <tr>
+      <td>Correlation length (Beggs)</td>
+      <td>Дистанция d, на которой C(d) ещё выше порога — «как далеко по DAG несётся цель»</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Практический регулятор:</strong> на каждой итерации control loop вычисляйте <code class="language-plaintext highlighter-rouge">C(1)</code> (локальная связность соседних шагов) и <code class="language-plaintext highlighter-rouge">C(d_max)</code> (связь с goal на противоположном конце spine). Если <code class="language-plaintext highlighter-rouge">C(d_max)</code> падает ниже порога при растущем <code class="language-plaintext highlighter-rouge">cost</code> — режим субкритический → restate goal, compaction. Если <code class="language-plaintext highlighter-rouge">σ</code> и token cost растут, а <code class="language-plaintext highlighter-rouge">error_proxy</code> нет — суперкритический → FSM Recovering, снижение gain.</p>
+
+<h3 id="что-добавить-в-логирование">Что добавить в логирование</h3>
+
+<p>К полям из раздела про траектории:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Поле</th>
+      <th>Зачем</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">graph_node_id</code>, <code class="language-plaintext highlighter-rouge">parent_ids</code></td>
+      <td>Топология DAG</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">graph_distance_to_goal</code></td>
+      <td>d для пары с якорным goal-узлом</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">goal_correlation</code></td>
+      <td>corr(s(v), s(goal)) на этом шаге</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">branching_factor</code></td>
+      <td>Число активных исходящих рёбер с полезным сигналом</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">criticality_band</code></td>
+      <td>Эвристика: sub / critical / super по порогам C(d) и σ</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="устойчивость-по-ляпунову--практическая-версия">Устойчивость по Ляпунову — практическая версия</h2>
+
+<p>Строго: найти функцию «энергии», убывающую вдоль траектории. Для агентов:</p>
+
+<blockquote>
+  <p>На каждом витке loop <strong>дистанция до цели</strong> (или <strong>мера риска</strong>) в среднем не должна расти без внешнего события.</p>
+</blockquote>
+
+<p>Паттерны:</p>
+
+<ul>
+  <li><strong>progress gates</strong> в DAG — шаг N+1 не стартует без validated artifact;</li>
+  <li><strong>stagnation detector</strong> — три итерации без улучшения error → escalate;</li>
+  <li><strong>Lyapunov-like budget</strong> — <code class="language-plaintext highlighter-rouge">remaining_steps</code>, <code class="language-plaintext highlighter-rouge">remaining_cost</code> только убывают.</li>
+</ul>
+
+<p>В терминах фазового портрета: траектория должна <strong>входить в бассейн аттрактора успеха</strong>, а не застревать на предельном цикле или уходить к расходящейся области. <strong>Критичность</strong> (раздел выше) уточняет, <em>как далеко по DAG</em> смысл цели ещё «несётся» вместе с траекторией — без отдельной метрики Lyapunov-like budget не видно, затухает ли сигнал по пути или разгоняется.</p>
+
+<hr />
+
+<h2 id="связь-с-dag--fsm--behavior-tree">Связь с DAG / FSM / Behavior Tree</h2>
+
+<p>Три представления из <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/">гибридного оркестратора</a> — способы <strong>ограничить геометрию</strong> фазового пространства:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Структура</th>
+      <th>Эффект на фазовый портрет</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DAG</strong></td>
+      <td>Траектория — ломаная без циклов внутри batch; feedforward</td>
+    </tr>
+    <tr>
+      <td><strong>FSM</strong></td>
+      <td>Разбиение плоскости на зоны (режимы); переходы — дискретные скачки</td>
+    </tr>
+    <tr>
+      <td><strong>BT</strong></td>
+      <td>Каждый тик — переоценка; Selector выбирает ветку = смена локального поля</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Гибридный оркестратор — <strong>switching control</strong>: в норме BT, при ошибке FSM → Recovering, для batch — DAG. На фазовом портрете это выглядит как <strong>кусочно-гладкая траектория</strong> с переключением векторного поля на границах режимов.</p>
+
+<pre><code class="language-mermaid">stateDiagram-v2
+  [*] --&gt; Executing
+  Executing --&gt; Recovering : error / stagnation
+  Recovering --&gt; Executing : replan_ok
+  Recovering --&gt; Escalated : budget_exhausted
+  Executing --&gt; Complete : goal_reached
+  Complete --&gt; [*]
+  Escalated --&gt; [*]
+</code></pre>
+
+<p>Режим Recovering — явная попытка <strong>вернуть траекторию в бассейн устойчивого аттрактора</strong> после возмущения.</p>
+
+<hr />
+
+<h2 id="разомкнутый-vs-замкнутый-контур">Разомкнутый vs замкнутый контур</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Режим</th>
+      <th>Устойчивость</th>
+      <th>Когда уместен</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Разомкнутый</strong> (один промпт → ответ)</td>
+      <td>Только статистика обучения модели</td>
+      <td>Нет side effects</td>
+    </tr>
+    <tr>
+      <td><strong>Замкнутый</strong> (observe → act в среде)</td>
+      <td>Требует проектирования feedback</td>
+      <td>Почти весь продакшен-агент</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Ошибки замкнутого контура: drift в embedding space, limit cycles, runaway cost — проявляются <strong>геометрически</strong> на траектории, даже если текстовые логи выглядят «разумно».</p>
+
+<hr />
+
+<h2 id="чеклист-для-разработчика">Чеклист для разработчика</h2>
+
+<ol>
+  <li>Где <strong>error signal</strong> на каждом шаге? Его можно вычислить?</li>
+  <li>Есть ли <strong>положительная обратная связь</strong> (память, retries, multi-agent hype)?</li>
+  <li>Как policy узнаёт, что observation <strong>устарело</strong>?</li>
+  <li>Где <strong>saturation</strong> и что происходит при ней?</li>
+  <li>Есть ли <strong>гарантированный выход</strong> в Idle / Complete / Escalated?</li>
+  <li>Можно ли построить <strong>траекторию в embedding space</strong> и увидеть limit cycle или расходимость?</li>
+  <li>Критичные <strong>сепаратрисы</strong> вынесены в детерминированные guard-условия?</li>
+  <li>Измеряете ли <strong>C(d)</strong> — корреляцию сигнала (intent / embedding) на дистанции <code class="language-plaintext highlighter-rouge">d</code> по DAG?</li>
+  <li>В каком режиме сессия: <strong>субкритический</strong> (intent затухает), <strong>критический</strong> или <strong>суперкритический</strong> (лавина CoT / σ &gt; 1)?</li>
+</ol>
+
+<hr />
+
+<h2 id="литература-и-источники">Литература и источники</h2>
+
+<ul>
+  <li>John Beggs, <em>The Cortex and the Critical Point: Understanding Complexity in Brain Function</em> (MIT Press) — критичность коры, нейронные лавины, оптимальная передача информации на границе фазового перехода.</li>
+  <li>C. Shannon, теория информации — пропускная способность канала, компромисс сигнал/шум (аналог gain и dampening в агенте).</li>
+  <li>Self-organized criticality (Bak et al.) — лавинная динамика; переносимая интуиция для runaway tool/CoT cascades.</li>
+</ul>
+
+<hr />
+
+<h2 id="связанные-публикации">Связанные публикации</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">Как готовить ведущего специалиста по AI-агентам</a> — полная карта компетенций</li>
+  <li><a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/">Гибридный агент: DAG, FSM, Behavior Tree</a></li>
+  <li><a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">Пространство гипотез и PaCMAP</a></li>
+  <li><a href="/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/">GRPO vs PPO: выравнивание LLM</a> — формулы, VRAM, стабильность обучающего контура</li>
+  <li><a href="/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/">Нейросимволическое планирование</a> — символьный критик как отрицательная обратная связь</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - VAIRL</title>
+    <meta name="description" content="Virtual AI Research Lab">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Blog | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Blog" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Virtual AI Research Lab" />
+<meta name="twitter:description" property="og:description" content="Virtual AI Research Lab" />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Blog" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Virtual AI Research Lab","headline":"Blog","url":"https://evgeniy-borisov.github.io/vairl/blog/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            <div class="blog-list" id="blog-list-en">
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape/">
+                <img src="/vairl/assets/images/agent-fundamentals-rag-mcp.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape/">Agent fundamentals: RAG, context window, skills, MCP, and the 2026 agent landscape</a>
+        </h2>
+        <p class="blog-post-date">July 02, 2026, 09:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">RAG, context, skills, MCP, and agent landscape: Pi, Aider, Codex, OpenCode, Hermes, Claude Code, and more—with a dedicated TUI comparison and feature tables.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape/" class="read-more" data-i18n="read_more">read more</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/neural-model-evolution-tree/">
+                <img src="/vairl/assets/images/neural-model-evolution-tree.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/neural-model-evolution-tree/">AI model evolution is a tree, not a timeline</a>
+        </h2>
+        <p class="blog-post-date">July 02, 2026, 06:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Neural network history branches and cross-pollinates—not a single line. Three Python visualizations: semicircular phylogeny, architectural influence graph, and time-ordered clusters.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/neural-model-evolution-tree/" class="read-more" data-i18n="read_more">read more</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/">
+                <img src="/vairl/assets/images/hybrid-agent-dag-fsm-behavior-tree.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/">Hybrid Agent: DAG, Finite State Machines, and Behavior Trees</a>
+        </h2>
+        <p class="blog-post-date">June 26, 2026, 17:46 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Three classic ways to describe agent logic — DAG, FSM, and Behavior Tree — and how to combine them, switch modes, and visualize them as graphs. When conversion between formats is possible.</p>
+        
+        
+        <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/" class="read-more" data-i18n="read_more">read more</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/">
+                <img src="/vairl/assets/images/llm-hypothesis-synthesis-agents.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/">Local LLM Hypothesis Synthesis for Agent Quality</a>
+        </h2>
+        <p class="blog-post-date">June 26, 2026, 17:44 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">A Colab pipeline to generate testable hypotheses for improving LLM agents with a local model, ChromaDB storage, and hypothesis-space visualization.</p>
+        
+        
+        <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/" class="read-more" data-i18n="read_more">read more</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/01/17/future-ai-research-labs/">
+                <img src="/vairl/assets/images/future-ai-labs.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/01/17/future-ai-research-labs/">The Future of AI Research Labs</a>
+        </h2>
+        <p class="blog-post-date">January 17, 2026, 14:54 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">As AI continues to advance at a rapid pace, the nature of AI research labs is evolving. What will the AI research lab of the future look like?</p>
+        
+        
+        <a href="/vairl/blog/2026/01/17/future-ai-research-labs/" class="read-more" data-i18n="read_more">read more</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/01/17/evolutionary-algorithms-ai/">
+                <img src="/vairl/assets/images/evolutionary-algorithms.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/01/17/evolutionary-algorithms-ai/">Evolutionary Algorithms in AI Research</a>
+        </h2>
+        <p class="blog-post-date">January 17, 2026, 14:52 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Evolutionary algorithms draw inspiration from biological evolution to solve complex optimization problems. These techniques are proving invaluable in modern AI research.</p>
+        
+        
+        <a href="/vairl/blog/2026/01/17/evolutionary-algorithms-ai/" class="read-more" data-i18n="read_more">read more</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/01/17/neural-architecture-search/">
+                <img src="/vairl/assets/images/nas-architecture.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/01/17/neural-architecture-search/">Introduction to Neural Architecture Search</a>
+        </h2>
+        <p class="blog-post-date">January 17, 2026, 14:50 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Neural Architecture Search (NAS) is revolutionizing how we design deep learning models. Instead of manually crafting architectures, we can now automate the process.</p>
+        
+        
+        <a href="/vairl/blog/2026/01/17/neural-architecture-search/" class="read-more" data-i18n="read_more">read more</a>
+    </article>
+        
+        
+    
+</div>
+
+<div class="blog-list" id="blog-list-ru" style="display: none;">
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/03/agent-rag-approaches-ru/">
+                <img src="/vairl/assets/images/agent-rag-approaches-2026.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/03/agent-rag-approaches-ru/">RAG для агентов в 2026: от naive retrieval до agentic RAC, векторные БД и чанкинг</a>
+        </h2>
+        <p class="blog-post-date">03 July 2026, 07:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Обзор актуальных RAG-подходов для AI-агентов: Enhanced и Agentic RAG, RAC (Clarification и Correction), GraphRAG, гибридный поиск, reranking, влияние размера чанков, векторные БД и SOTA-решения с метриками.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/03/agent-rag-approaches-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/">
+                <img src="/vairl/assets/images/agent-fundamentals-rag-mcp.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/">Фундамент агентных систем: RAG, контекст, skills, MCP и обзор агентов</a>
+        </h2>
+        <p class="blog-post-date">02 July 2026, 09:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">RAG, контекст, skills, MCP и обзор агентов: Pi, Aider, Codex, OpenCode, Hermes, Claude Code и другие — с отдельным сравнением TUI-интерфейсов и таблицами функций.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/llm-alignment-methods-handbook-ru/">
+                <img src="/vairl/assets/images/llm-alignment-methods-handbook.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/llm-alignment-methods-handbook-ru/">Справочник методов выравнивания LLM: PPO, DPO, GRPO и смежные подходы</a>
+        </h2>
+        <p class="blog-post-date">02 July 2026, 07:30 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Хронология и краткое описание ключевых алгоритмов выравнивания языковых моделей: RLHF, PPO, GRPO, DPO, SimPO, KTO, ORPO, PRM, STaR, MCTS и RLVR — со ссылками на оригинальные статьи.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/llm-alignment-methods-handbook-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/who-needs-ai-russia-ru/">
+                <img src="/vairl/assets/images/who-needs-ai-russia.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/who-needs-ai-russia-ru/">Кому в России нужен ИИ? Население, компании, процессы и матч с AI-системами</a>
+        </h2>
+        <p class="blog-post-date">02 July 2026, 07:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Карта спроса на ИИ в России: 146 млн жителей, 74,6 млн занятых, отрасли и кластеры бизнеса, структура госсектора (Указ № 326), уровни L0–L5 и матч с AI-системами.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/who-needs-ai-russia-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/sakana-fugu-multi-agent-orchestration-ru/">
+                <img src="/vairl/assets/images/sakana-fugu-orchestration.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/sakana-fugu-multi-agent-orchestration-ru/">Sakana Fugu: TRINITY, Conductor и мультиагентная оркестрация через один API</a>
+        </h2>
+        <p class="blog-post-date">02 July 2026, 07:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Как Sakana Fugu объединяет исследования TRINITY и Conductor в коммерческий продукт: выбор моделей, бенчмарки, цена, интеграция через OpenAI-compatible API и практический гид для продакшена.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/sakana-fugu-multi-agent-orchestration-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/neural-model-evolution-tree-ru/">
+                <img src="/vairl/assets/images/neural-model-evolution-tree.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/neural-model-evolution-tree-ru/">Эволюция моделей ИИ: не линия времени, а дерево</a>
+        </h2>
+        <p class="blog-post-date">02 July 2026, 06:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Развитие нейросетей — ветвящееся дерево, а не прямая ось. Три Python-визуализации: полукруглое phylogenetic tree, граф архитектурных заимствований и кластеры, упорядоченные по времени.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/neural-model-evolution-tree-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/ai-automation-smb-ru/">
+                <img src="/vairl/assets/images/ai-automation-smb.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/ai-automation-smb-ru/">ИИ для малого и среднего бизнеса: агенты, NoCode и автономные системы без программирования</a>
+        </h2>
+        <p class="blog-post-date">02 July 2026, 06:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Уровни автоматизации от детерминированных FSM до CoffeeBench: n8n, агенты, OpenClaw, нейросимволика, исследование операций, случайность LLM и принципы Apollo — практический гид для МСБ без программирования.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/ai-automation-smb-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/agent-trajectory-formats-ru/">
+                <img src="/vairl/assets/images/agent-trajectory-formats.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/agent-trajectory-formats-ru/">Форматы траекторий AI-агентов: выгрузка, конвертация и сравнение фреймворков</a>
+        </h2>
+        <p class="blog-post-date">02 July 2026, 05:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Форматы траекторий агентов (ShareGPT, OpenAI, LangChain, CrewAI), конвертеры, а также индустриальные практики: телеметрия, кластеризация задач и решений, process mining и FSM из успешных трасс.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/agent-trajectory-formats-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/02/systems-theory-task-types-ru/">
+                <img src="/vairl/assets/images/systems-theory-task-types.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/02/systems-theory-task-types-ru/">Типы задач в теории систем: вход, система, выход</a>
+        </h2>
+        <p class="blog-post-date">02 July 2026, 00:30 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Классификация задач системного анализа по тому, что задано (U, S, Y) и что нужно найти: анализ, синтез, идентификация, управление и граничные случаи неопределенности - с примерами для AI-агентов и инженерии.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/02/systems-theory-task-types-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/">
+                <img src="/vairl/assets/images/margaret-hamilton-apollo.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/">Маргарет Гамильтон: Apollo, software engineering и языки надёжного ПО</a>
+        </h2>
+        <p class="blog-post-date">01 July 2026, 17:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Эволюция software engineering от Apollo к USL: эмпирический анализ ошибок, HOS, USE.IT, DBTF, шесть аксиом управления, FMap/TMap и 001 Tool Suite — и современные аналоги формальной надёжности.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/01/maestro-airi-stack-ru/">
+                <img src="/vairl/assets/images/maestro-airi-stack.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/01/maestro-airi-stack-ru/">MAESTRO от AIRI: стек, микросервисы и подходы к мультиагентным системам</a>
+        </h2>
+        <p class="blog-post-date">01 July 2026, 14:20 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Разбор платформы MAESTRO (Multi-Agent Ecosystem of Task Reasoning and Orchestration) и MAESTRO CARE от AIRI: библиотеки MMAR, gRPC-сервисы, CARL, GigaEvo, требования к модулям и ссылки на репозитории.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/01/maestro-airi-stack-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/">
+                <img src="/vairl/assets/images/grpo-vs-ppo.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/">GRPO vs PPO: сравнительный анализ для выравнивания LLM</a>
+        </h2>
+        <p class="blog-post-date">01 July 2026, 13:37 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Group Relative Policy Optimization и Proximal Policy Optimization в RLHF/RLVR: actor-critic против группового baseline, память, стабильность и связь с устойчивостью control loop агента.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/01/grpo-vs-ppo-llm-alignment-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/01/pytorch-edge-browser-onnx-ru/">
+                <img src="/vairl/assets/images/pytorch-edge-browser-onnx.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/01/pytorch-edge-browser-onnx-ru/">Деплой нейросети на конечное устройство: PyTorch → ONNX → браузер</a>
+        </h2>
+        <p class="blog-post-date">01 July 2026, 13:00 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Как обучить лёгкую CNN в PyTorch, экспортировать в ONNX и запустить инференс в браузере через ONNX Runtime Web и p5.js с веб-камерой.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/01/pytorch-edge-browser-onnx-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/">
+                <img src="/vairl/assets/images/cybernetic-planning-ogas-cybersyn.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/">ОГАС, КиберСин и наследие кибернетического планирования</a>
+        </h2>
+        <p class="blog-post-date">01 July 2026, 12:28 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Обзор советского ОГАС и чилийского Project Cybersyn: методология управления ресурсами и транспортом, библиография, связь с исследованием операций, современными агентными системами и роевым интеллектом в логистике.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">
+                <img src="/vairl/assets/images/agent-lifecycle-pipeline.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">Пайплайн агентов: Прототипировщик, Строитель, Уборщик, Раститель, Хранитель</a>
+        </h2>
+        <p class="blog-post-date">01 July 2026, 11:37 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Концепция мультиагентного цикла разработки: пять ролей с разными целями, метриками и правами — от безумных прототипов до промышленной эксплуатации и борьбы с ИИ-мусором.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/">
+                <img src="/vairl/assets/images/semantic-torrent.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/">Semantic Torrent: торрент-протокол и векторный поиск по смыслу</a>
+        </h2>
+        <p class="blog-post-date">01 July 2026, 11:11 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Как совместить content-addressed обмен кусками файла с семантическими embedding: децентрализованный поиск фрагментов по содержанию, расширение DHT и интерактивный пример.</p>
+        
+        
+        <a href="/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">
+                <img src="/vairl/assets/images/agent-telemetry.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия AI-агентов: сбор запросов, хранение и поиск похожих задач</a>
+        </h2>
+        <p class="blog-post-date">29 June 2026, 15:36 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Обзор практик логирования коммуникации пользователя с агентом: трассы, задачи, хранилища, PII, embedding-поиск похожих сессий, связь с eval и бенчмарками, фундаментальная литература.</p>
+        
+        
+        <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">
+                <img src="/vairl/assets/images/agent-benchmark-generation.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">Генерация бенчмарков для AI-агентов: обзор подходов</a>
+        </h2>
+        <p class="blog-post-date">29 June 2026, 14:51 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Обзор методов создания eval-наборов для агентов, которые действуют: от ручной курации и симуляторов до синтетической генерации задач большими моделями и верификации по состоянию мира.</p>
+        
+        
+        <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">
+                <img src="/vairl/assets/images/agent-control-loop-stability.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость agent control loops и фазовый портрет в Embedding Space</a>
+        </h2>
+        <p class="blog-post-date">29 June 2026, 11:28 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Замкнутые контуры AI-агентов через призму теории управления: обратная связь, gain, критичность передачи смысла, фазовый портрет и траектории в embedding space.</p>
+        
+        
+        <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">
+                <img src="/vairl/assets/images/best-ai-agent-specialist.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">Как готовить ведущего специалиста по AI-агентам</a>
+        </h2>
+        <p class="blog-post-date">29 June 2026, 11:27 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Карта компетенций разработчика агентов и оркестраторов: физмат-фундамент уровня МФТИ, сеньорский Python, архитектуры DAG/FSM/BT, eval, безопасность и продуктовое мышление.</p>
+        
+        
+        <a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">
+                <img src="/vairl/assets/images/hybrid-agent-dag-fsm-behavior-tree.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">Гибридный агент: DAG, конечный автомат и деревья поведения</a>
+        </h2>
+        <p class="blog-post-date">26 June 2026, 17:46 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Три классических способа описать логику агента — DAG, FSM и Behavior Tree — и как их комбинировать, переключать и визуализировать как графы. Когда возможна конвертация между форматами.</p>
+        
+        
+        <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">
+                <img src="/vairl/assets/images/llm-hypothesis-synthesis-agents.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">Синтез гипотез локальной LLM для повышения качества агентов</a>
+        </h2>
+        <p class="blog-post-date">26 June 2026, 17:44 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Как генерировать проверяемые гипотезы об улучшении LLM-агентов с помощью локальной модели в Google Colab, хранить их в ChromaDB и исследовать пространство решений.</p>
+        
+        
+        <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/01/17/future-ai-research-labs-ru/">
+                <img src="/vairl/assets/images/future-ai-labs.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/01/17/future-ai-research-labs-ru/">Будущее лабораторий исследований ИИ</a>
+        </h2>
+        <p class="blog-post-date">17 January 2026, 14:55 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Поскольку ИИ продолжает стремительно развиваться, природа исследовательских лабораторий ИИ эволюционирует. Как будет выглядеть лаборатория исследований ИИ будущего?</p>
+        
+        
+        <a href="/vairl/blog/2026/01/17/future-ai-research-labs-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/01/17/evolutionary-algorithms-ai-ru/">
+                <img src="/vairl/assets/images/evolutionary-algorithms.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/01/17/evolutionary-algorithms-ai-ru/">Эволюционные алгоритмы в исследованиях ИИ</a>
+        </h2>
+        <p class="blog-post-date">17 January 2026, 14:53 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Эволюционные алгоритмы черпают вдохновение из биологической эволюции для решения сложных задач оптимизации. Эти методы оказываются бесценными в современных исследованиях ИИ.</p>
+        
+        
+        <a href="/vairl/blog/2026/01/17/evolutionary-algorithms-ai-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+        
+        
+    <article class="blog-post">
+        
+        <div class="blog-post-image">
+            <a href="/vairl/blog/2026/01/17/neural-architecture-search-ru/">
+                <img src="/vairl/assets/images/nas-architecture.svg" alt="" />
+            </a>
+        </div>
+        
+        <h2 class="blog-post-title">
+            <a href="/vairl/blog/2026/01/17/neural-architecture-search-ru/">Введение в поиск нейронных архитектур</a>
+        </h2>
+        <p class="blog-post-date">17 January 2026, 14:51 MSK</p>
+        
+        
+        <p class="blog-post-excerpt">Поиск нейронных архитектур (NAS) революционизирует способ проектирования моделей глубокого обучения. Вместо ручного создания архитектур мы можем автоматизировать процесс.</p>
+        
+        
+        <a href="/vairl/blog/2026/01/17/neural-architecture-search-ru/" class="read-more" data-i18n="read_more">читать далее</a>
+    </article>
+        
+        
+    
+        
+        
+        
+    
+</div>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

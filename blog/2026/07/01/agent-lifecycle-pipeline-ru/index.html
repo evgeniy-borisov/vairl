@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пайплайн агентов: Прототипировщик, Строитель, Уборщик, Раститель, Хранитель - VAIRL</title>
+    <meta name="description" content="Концепция мультиагентного цикла разработки: пять ролей с разными целями, метриками и правами — от безумных прототипов до промышленной эксплуатации и борьбы с...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Пайплайн агентов: Прототипировщик, Строитель, Уборщик, Раститель, Хранитель | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Пайплайн агентов: Прототипировщик, Строитель, Уборщик, Раститель, Хранитель" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Концепция мультиагентного цикла разработки: пять ролей с разными целями, метриками и правами — от безумных прототипов до промышленной эксплуатации и борьбы с ИИ-мусором." />
+<meta name="twitter:description" property="og:description" content="Концепция мультиагентного цикла разработки: пять ролей с разными целями, метриками и правами — от безумных прототипов до промышленной эксплуатации и борьбы с ИИ-мусором." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-lifecycle-pipeline.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-01T11:37:58+00:00" />
+<meta property="article:modified_time" content="2026-07-01T11:37:58+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-lifecycle-pipeline.svg" />
+<meta name="twitter:title" content="Пайплайн агентов: Прототипировщик, Строитель, Уборщик, Раститель, Хранитель" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-01T11:37:58+00:00","datePublished":"2026-07-01T11:37:58+00:00","description":"Концепция мультиагентного цикла разработки: пять ролей с разными целями, метриками и правами — от безумных прототипов до промышленной эксплуатации и борьбы с ИИ-мусором.","headline":"Пайплайн агентов: Прототипировщик, Строитель, Уборщик, Раститель, Хранитель","image":"https://evgeniy-borisov.github.io/vairl/assets/images/agent-lifecycle-pipeline.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/agent-lifecycle-pipeline.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Пайплайн агентов: Прототипировщик, Строитель, Уборщик, Раститель, Хранитель</h1>
+        <p class="post-date">01 July 2026, 11:37 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Один «универсальный» coding-агент, который и придумывает, и строит, и чинит прод — звучит удобно, но на практике <strong>смешивает несовместимые оптимизации</strong>. Прототипу нужна скорость и диверсификация идей; продакшену — контракты, тесты и предсказуемость; эксплуатации — SLO и безопасность. Попытка решить всё одним промптом даёт <strong>средний код без явного владельца качества</strong>.</p>
+
+<p>Ниже — концепция <strong>пайплайна из пяти агентов-ролей</strong>, которые работают <strong>последовательно в цикле</strong>. Каждая роль имеет свой charter: что входит, что выходит, какие tools разрешены и когда цикл переходит к следующему этапу. Связанные материалы: <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">гибридный оркестратор DAG/FSM/BT</a>, <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивость control loops</a>, <a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">карта компетенций агент-разработчика</a>.</p>
+
+<h2 id="зачем-пять-ролей-а-не-один">Зачем пять ролей, а не один</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Один супер-агент</th>
+      <th>Пайплайн ролей</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Одинаковый temperature на всё</td>
+      <td>Высокий на Prototyper, низкий на Maintainer</td>
+    </tr>
+    <tr>
+      <td>Нет явного kill criteria для идей</td>
+      <td>Prototyper генерирует много; gate отсекает до Builder</td>
+    </tr>
+    <tr>
+      <td>«Напиши быстро и надёжно» — противоречие</td>
+      <td>Builder и Sweeper оптимизируют разное</td>
+    </tr>
+    <tr>
+      <td>ИИ-мусор накапливается незаметно</td>
+      <td>Sweeper — отдельная фаза с mandate на упрощение</td>
+    </tr>
+    <tr>
+      <td>Масштабирование смешано с починкой</td>
+      <td>Grower vs Maintainer — разные метрики</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Аналогия с инженерной организацией: R&amp;D, product engineering, platform, growth, SRE — <strong>разные KPI</strong>, один человек на все роли редко тянет всё одновременно.</p>
+
+<h2 id="цикл-пайплайна">Цикл пайплайна</h2>
+
+<p>Агенты идут <strong>по кольцу</strong>. Не каждый артефакт проходит все пять фаз за один круг — на каждом переходе есть <strong>gate</strong> (критерий допуска). Многие концепты Prototyper <strong>умирают до Builder</strong>; зрелый продукт чаще крутится в петле <strong>Grower → Maintainer → Sweeper</strong>.</p>
+
+<pre><code class="language-mermaid">flowchart LR
+  P[Prototyper\nПрототипировщик]
+  B[Builder\nСтроитель]
+  S[Sweeper\nУборщик]
+  G[Grower\nРаститель]
+  M[Maintainer\nХранитель]
+  P --&gt;|promote| B
+  B --&gt; S
+  S --&gt; G
+  G --&gt; M
+  M --&gt;|debt / incidents| S
+  M --&gt;|new bets| P
+  G --&gt;|experiments| P
+</code></pre>
+
+<p><strong>Оркестратор</strong> (FSM или supervisor-агент) хранит <code class="language-plaintext highlighter-rouge">artifact_id</code>, <code class="language-plaintext highlighter-rouge">current_role</code>, <code class="language-plaintext highlighter-rouge">lifecycle_stage</code> и журнал handoff. Передача между ролями — не «новый чат», а <strong>структурированный пакет</strong>: код, ADR, метрики, список известного долга, eval-результаты.</p>
+
+<hr />
+
+<h2 id="1-прототипировщик-prototyper">1. Прототипировщик (Prototyper)</h2>
+
+<p><strong>Мандат:</strong> генерировать <strong>много смелых гипотез</strong> и собирать <strong>быстрые концепты</strong> — spike, mock, vertical slice. Большинство идей <strong>не должны</strong> доходить до релиза; это норма, а не провал.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аспект</th>
+      <th>Содержание</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Вход</strong></td>
+      <td>Product bet, user pain, tech constraint, «что если…»</td>
+    </tr>
+    <tr>
+      <td><strong>Выход</strong></td>
+      <td>POC-репозиторий, demo, 1-pager гипотезы, список рисков</td>
+    </tr>
+    <tr>
+      <td><strong>Tools</strong></td>
+      <td>Sandbox без prod-доступа, быстрые генераторы UI/API, synthetic data</td>
+    </tr>
+    <tr>
+      <td><strong>Метрики</strong></td>
+      <td>Time-to-demo, diversity идей, % гипотез с измеримым learning</td>
+    </tr>
+    <tr>
+      <td><strong>Запрещено</strong></td>
+      <td>Прямой деплой в prod, долгоживущие секреты, «вечные» костыли без пометки</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Как работает агент:</strong> высокая temperature, параллельные ветки (несколько концептов на одну ставку), жёсткий <strong>timebox</strong> (часы, не недели). Каждый концепт сопровождается <strong>falsification criteria</strong>: что опровергнет идею. Связь с <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">синтезом гипотез</a> — Prototyper поставляет кандидатов в пространство решений.</p>
+
+<p><strong>Gate на Builder:</strong> есть working demo <strong>или</strong> чёткий negative result; гипотеза согласована с продуктом; оценён порядок величины cost/complexity.</p>
+
+<hr />
+
+<h2 id="2-строитель-builder">2. Строитель (Builder)</h2>
+
+<p><strong>Мандат:</strong> взять <strong>сырой прототип</strong> и превратить в <strong>промышленный каркас</strong> — модули, контракты API, тесты, CI, observability hooks.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аспект</th>
+      <th>Содержание</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Вход</strong></td>
+      <td>Promoted POC, ADR от Prototyper, acceptance criteria</td>
+    </tr>
+    <tr>
+      <td><strong>Выход</strong></td>
+      <td>Production-grade codebase v1, contract tests, deployment manifest</td>
+    </tr>
+    <tr>
+      <td><strong>Tools</strong></td>
+      <td>Repo write, CI, linters, schema registry, staging deploy</td>
+    </tr>
+    <tr>
+      <td><strong>Метрики</strong></td>
+      <td>Test coverage критических путей, build time, defect escape rate</td>
+    </tr>
+    <tr>
+      <td><strong>Запрещено</strong></td>
+      <td>Переписывание с нуля без ADR; новые «безумные» фичи без gate</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Как работает агент:</strong> низкая temperature, <strong>DAG-пайплайн</strong> (design → implement → test → integrate), обязательный <strong>critic/validator</strong> на схемы и API. Builder <strong>не придумывает продукт</strong> — реализует charter. Паттерны из <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">гибридного DAG/FSM</a>: acyclic spine + FSM «Building / Blocked / Review».</p>
+
+<p><strong>Gate на Sweeper:</strong> staging green; критические user flows покрыты; нет известных P0 security holes.</p>
+
+<hr />
+
+<h2 id="3-уборщик-sweeper">3. Уборщик (Sweeper)</h2>
+
+<p><strong>Мандат:</strong> <strong>очистить код</strong>, упростить архитектуру, выбросить <strong>ИИ-мусор</strong> — дубли, мёртвые ветки, over-abstraction, «галлюцинированные» утилиты, лишние зависимости.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аспект</th>
+      <th>Содержание</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Вход</strong></td>
+      <td>Код после Builder или после волн Grower; отчёт static analysis</td>
+    </tr>
+    <tr>
+      <td><strong>Выход</strong></td>
+      <td>Меньше LOC при том же поведении, упрощённый граф модулей, changelog долга</td>
+    </tr>
+    <tr>
+      <td><strong>Tools</strong></td>
+      <td>Refactoring, dead-code detection, complexity metrics, benchmark suite</td>
+    </tr>
+    <tr>
+      <td><strong>Метрики</strong></td>
+      <td>Cyclomatic complexity ↓, p95 latency ↓, bundle size ↓, duplicate blocks ↓</td>
+    </tr>
+    <tr>
+      <td><strong>Запрещено</strong></td>
+      <td>Функциональные изменения без explicit approval; silent behavior change</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Как работает агент:</strong> режим <strong>subtractive engineering</strong> — сначала инвентаризация «мусора» (AI slop patterns: unused wrappers, redundant layers, copy-paste prompts в коде), затем <strong>малые PR</strong> с regression tests. Sweeper — это не «форматирование», а <strong>архитектурная гигиена</strong>. Часто запускается <strong>после</strong> Builder и <strong>периодически</strong> из Maintainer при росте entropy.</p>
+
+<p>Типичные цели Sweeper:</p>
+
+<ul>
+  <li>слить три одинаковых helper’а, которые написал агент в разных файлах;</li>
+  <li>убрать speculative abstraction «на будущее»;</li>
+  <li>заменить цепочку if-ов на одну явную state machine, если это <strong>упрощает</strong>;</li>
+  <li>прогнать perf benchmark до/после.</li>
+</ul>
+
+<p><strong>Gate на Grower:</strong> eval/regression зелёные; complexity budget в норме; документированы оставшиеся осознанные компромиссы.</p>
+
+<hr />
+
+<h2 id="4-раститель-grower">4. Раститель (Grower)</h2>
+
+<p><strong>Мандат:</strong> <strong>масштабировать и дорабатывать</strong> существующий продукт под <strong>запросы рынка</strong> — новые сегменты, интеграции, локализация, pricing tiers, feature flags.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аспект</th>
+      <th>Содержание</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Вход</strong></td>
+      <td>Stable product, market signal, analytics, customer requests</td>
+    </tr>
+    <tr>
+      <td><strong>Выход</strong></td>
+      <td>Shipped features behind flags, migration guides, updated eval sets</td>
+    </tr>
+    <tr>
+      <td><strong>Tools</strong></td>
+      <td>Feature flags, A/B infra, analytics, customer ticket mining</td>
+    </tr>
+    <tr>
+      <td><strong>Метрики</strong></td>
+      <td>Adoption, retention, revenue proxy, feature-level eval</td>
+    </tr>
+    <tr>
+      <td><strong>Запрещено</strong></td>
+      <td>Ломать core invariants; релиз без rollback plan</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Как работает агент:</strong> цикл <strong>discover → spec → increment → measure</strong>. Grower отличается от Prototyper тем, что <strong>база уже есть</strong> — расширяем, а не изобретаем с чистого листа. Эксперименты идут через flags; неудачные ветки <strong>срезаются</strong> без guilt. Телеметрия из <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">статьи про logging</a> питает backlog Grower: какие задачи пользователи реально приносят.</p>
+
+<p><strong>Gate на Maintainer:</strong> feature в prod с мониторингом; runbook обновлён; security review для новых surface area.</p>
+
+<hr />
+
+<h2 id="5-хранитель-maintainer">5. Хранитель (Maintainer)</h2>
+
+<p><strong>Мандат:</strong> продукт остаётся <strong>безопасным, надёжным и быстрым</strong> по мере роста компании — патчи, SLO, инциденты, capacity, compliance.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аспект</th>
+      <th>Содержание</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Вход</strong></td>
+      <td>Prod workload, alerts, CVE feeds, SLO dashboards, audit findings</td>
+    </tr>
+    <tr>
+      <td><strong>Выход</strong></td>
+      <td>Patches, postmortems, capacity plans, updated threat model</td>
+    </tr>
+    <tr>
+      <td><strong>Tools</strong></td>
+      <td>Observability, on-call playbooks, dependency scanners, chaos drills</td>
+    </tr>
+    <tr>
+      <td><strong>Метрики</strong></td>
+      <td>Uptime, MTTR, vulnerability SLA, cost per request</td>
+    </tr>
+    <tr>
+      <td><strong>Запрещено</strong></td>
+      <td>«Тихие» изменения без audit trail; игнор degraded SLO</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Как работает агент:</strong> <strong>reactive</strong> (инцидент → triage → fix) и <strong>proactive</strong> (dependency updates, cert rotation, load tests). Maintainer триггерит <strong>Sweeper</strong>, когда техдолг влияет на SLO, и <strong>Prototyper</strong>, когда нужен принципиально новый подход (не patch, а bet). Control loop устойчивости — в <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">отдельной публикации</a>: Maintainer — носитель <strong>отрицательной обратной связи</strong> для всей системы.</p>
+
+<p><strong>Выход из цикла:</strong> стабильный prod + сигнал для Grower (рост) или Prototyper (новая ставка) или Sweeper (entropy).</p>
+
+<hr />
+
+<h2 id="последовательное-исполнение-в-цикле">Последовательное исполнение в цикле</h2>
+
+<p>Один <strong>виток оркестратора</strong> для артефакта <code class="language-plaintext highlighter-rouge">X</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. Prototyper  → concept_packet (или tombstone «не идём дальше»)
+2. Builder     → только если gate promote
+3. Sweeper     → hygiene_pass
+4. Grower      → increment_shipped (может быть no-op виток)
+5. Maintainer  → slo_ok + security_ok
+6. Следующий виток: решение supervisor — Grower / Sweeper / Prototyper / стоп
+</code></pre></div></div>
+
+<pre><code class="language-mermaid">stateDiagram-v2
+  [*] --&gt; Prototyping
+  Prototyping --&gt; Building : promote
+  Prototyping --&gt; [*] : kill
+  Building --&gt; Sweeping : staging_ok
+  Sweeping --&gt; Growing : hygiene_ok
+  Growing --&gt; Maintaining : shipped
+  Maintaining --&gt; Sweeping : debt_alert
+  Maintaining --&gt; Growing : market_signal
+  Maintaining --&gt; Prototyping : new_bet
+  Maintaining --&gt; [*] : sunset
+</code></pre>
+
+<p><strong>Важно:</strong> роли <strong>не параллелятся на одном артефакте</strong> в одной фазе — иначе Builder и Prototyper снова сольются. Параллель допустим <strong>между разными артефактами</strong>: Prototyper крутит три ставки, пока Maintainer обслуживает prod.</p>
+
+<hr />
+
+<h2 id="handoff-пакет-между-ролями">Handoff-пакет между ролями</h2>
+
+<p>Минимальная схема передачи (JSON / issue template):</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"artifact_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"feat-semantic-search"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"from_role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"builder"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"to_role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sweeper"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"repo_ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha:abc123"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"summary"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MVP semantic search API"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"known_debt"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"no pagination on /search"</span><span class="p">,</span><span class="w"> </span><span class="s2">"tmp in-memory index"</span><span class="p">],</span><span class="w">
+  </span><span class="nl">"eval_results"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"regression"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pass"</span><span class="p">,</span><span class="w"> </span><span class="nl">"latency_p95_ms"</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"human_gates_required"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Без handoff-пакета следующий агент <strong>перечитывает весь репозиторий с нуля</strong> — дорого, шумно, провоцирует повторный ИИ-мусор.</p>
+
+<hr />
+
+<h2 id="конфигурация-агентов-по-ролям">Конфигурация агентов по ролям</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Параметр</th>
+      <th>Prototyper</th>
+      <th>Builder</th>
+      <th>Sweeper</th>
+      <th>Grower</th>
+      <th>Maintainer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Temperature</td>
+      <td>высокая</td>
+      <td>низкая</td>
+      <td>низкая</td>
+      <td>средняя</td>
+      <td>низкая</td>
+    </tr>
+    <tr>
+      <td>Max steps</td>
+      <td>малый timebox</td>
+      <td>средний</td>
+      <td>средний</td>
+      <td>средний</td>
+      <td>по инциденту</td>
+    </tr>
+    <tr>
+      <td>Tool access</td>
+      <td>sandbox</td>
+      <td>staging + CI</td>
+      <td>repo + bench</td>
+      <td>flags + analytics</td>
+      <td>prod read, patch branch</td>
+    </tr>
+    <tr>
+      <td>Success criterion</td>
+      <td>learning</td>
+      <td>contract + tests</td>
+      <td>simpler + same behavior</td>
+      <td>adoption</td>
+      <td>SLO + CVE</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Один и тот же base model может служить всем ролям; <strong>различаются system prompt, tools и eval</strong>.</p>
+
+<hr />
+
+<h2 id="антипаттерны">Антипаттерны</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Проблема</th>
+      <th>Симптом</th>
+      <th>Лечение</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Builder-прототип</strong></td>
+      <td>POC сразу в main без тестов</td>
+      <td>Жёсткий gate Prototyper → Builder</td>
+    </tr>
+    <tr>
+      <td><strong>Вечный Prototyper</strong></td>
+      <td>Нет promote, только демо</td>
+      <td>Product owner + kill/promote weekly</td>
+    </tr>
+    <tr>
+      <td><strong>Sweeper без тестов</strong></td>
+      <td>«Упростили» — сломали prod</td>
+      <td>Обязательный regression перед merge</td>
+    </tr>
+    <tr>
+      <td><strong>Grower без Maintainer</strong></td>
+      <td>Фичи копят incidents</td>
+      <td>Нельзя ship без runbook и alerts</td>
+    </tr>
+    <tr>
+      <td><strong>Maintainer как единственный агент</strong></td>
+      <td>Только патчи, нет роста</td>
+      <td>Явный Grower в цикле</td>
+    </tr>
+    <tr>
+      <td><strong>Один чат на всех</strong></td>
+      <td>Смешение стилей и целей</td>
+      <td>Отдельные threads / handoff per role</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="связь-с-eval-и-телеметрией">Связь с eval и телеметрией</h2>
+
+<p>Каждая роль добавляет <strong>свои тесты</strong> в общий eval-набор:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Роль</th>
+      <th>Тип eval</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Prototyper</td>
+      <td>«Гипотеза измерима?» checklist</td>
+    </tr>
+    <tr>
+      <td>Builder</td>
+      <td>Contract + integration</td>
+    </tr>
+    <tr>
+      <td>Sweeper</td>
+      <td>Regression + complexity budget</td>
+    </tr>
+    <tr>
+      <td>Grower</td>
+      <td>Feature-level A/B + task success</td>
+    </tr>
+    <tr>
+      <td>Maintainer</td>
+      <td>SLO burn rate, security scans</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия</a> и <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">бенчмарки</a> замыкают цикл: Maintainer и Grower кормят реальными кейсами, Prototyper — новыми ставками.</p>
+
+<hr />
+
+<h2 id="минимальный-прототип-оркестратора">Минимальный прототип оркестратора</h2>
+
+<ol>
+  <li>FSM с пятью состояниями и таблицей переходов (см. diagram выше).</li>
+  <li>Пять prompt-шаблонов + пять tool policies.</li>
+  <li>Handoff JSON в git (папка <code class="language-plaintext highlighter-rouge">.agent-lifecycle/</code>).</li>
+  <li>Human approve на promote и на prod patch.</li>
+  <li>Один артефакт — один виток; метрики по ролям в <a href="https://langfuse.com/">Langfuse</a>-подобной системе.</li>
+</ol>
+
+<p>Дальше — привязка к LangGraph / custom supervisor и replay трасс по <code class="language-plaintext highlighter-rouge">artifact_id</code>.</p>
+
+<h2 id="further-reading">Further reading</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">Гибридный агент: DAG, FSM, BT</a> — как описать оркестратор формально</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость agent control loops</a> — feedback и gain по фазам</li>
+  <li><a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">Синтез гипотез локальной LLM</a> — топливо для Prototyper</li>
+  <li><a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">Как готовить ведущего специалиста по AI-агентам</a> — кто проектирует такие пайплайны</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

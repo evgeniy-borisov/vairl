@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фундамент агентных систем: RAG, контекст, skills, MCP и обзор агентов - VAIRL</title>
+    <meta name="description" content="RAG, контекст, skills, MCP и обзор агентов: Pi, Aider, Codex, OpenCode, Hermes, Claude Code и другие — с отдельным сравнением TUI-интерфейсов и таблицами фун...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Фундамент агентных систем: RAG, контекст, skills, MCP и обзор агентов | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Фундамент агентных систем: RAG, контекст, skills, MCP и обзор агентов" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="RAG, контекст, skills, MCP и обзор агентов: Pi, Aider, Codex, OpenCode, Hermes, Claude Code и другие — с отдельным сравнением TUI-интерфейсов и таблицами функций." />
+<meta name="twitter:description" property="og:description" content="RAG, контекст, skills, MCP и обзор агентов: Pi, Aider, Codex, OpenCode, Hermes, Claude Code и другие — с отдельным сравнением TUI-интерфейсов и таблицами функций." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-fundamentals-rag-mcp.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-02T09:00:00+00:00" />
+<meta property="article:modified_time" content="2026-07-02T09:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-fundamentals-rag-mcp.svg" />
+<meta name="twitter:title" content="Фундамент агентных систем: RAG, контекст, skills, MCP и обзор агентов" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-02T09:00:00+00:00","datePublished":"2026-07-02T09:00:00+00:00","description":"RAG, контекст, skills, MCP и обзор агентов: Pi, Aider, Codex, OpenCode, Hermes, Claude Code и другие — с отдельным сравнением TUI-интерфейсов и таблицами функций.","headline":"Фундамент агентных систем: RAG, контекст, skills, MCP и обзор агентов","image":"https://evgeniy-borisov.github.io/vairl/assets/images/agent-fundamentals-rag-mcp.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape/",
+    "ru": "/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/agent-fundamentals-rag-mcp.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Фундамент агентных систем: RAG, контекст, skills, MCP и обзор агентов</h1>
+        <p class="post-date">02 July 2026, 09:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Чтобы проектировать или оценивать <strong>ИИ-агентов</strong>, недостаточно знать название модели. Нужно понимать четыре слоя, которые повторяются почти везде: <strong>знания</strong> (RAG), <strong>память сессии</strong> (контекстное окно), <strong>навыки</strong> (skills) и <strong>инструменты</strong> (часто через <strong>MCP</strong>). Поверх этого — <strong>агентный цикл</strong>: план → действие → наблюдение → повтор.</p>
+
+<p>В этой статье — базовые понятия с примерами, типовая архитектура агентной системы и <strong>сравнительный обзор</strong> шести актуальных агентных программ плюс <strong>g3</strong> как особый случай (диалектическое автокодирование).</p>
+
+<p>Связанные материалы VAIRL: <a href="/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/">g3 и диалектическое автокодирование</a>, <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">гибридный оркестратор DAG/FSM/BT</a>, <a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">жизненный цикл агента</a>, <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрия агентов</a>.</p>
+
+<hr />
+
+<h2 id="карта-статьи">Карта статьи</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Раздел</th>
+      <th>О чём</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="#что-такое-rag">RAG</a></td>
+      <td>Как агент «подтягивает» знания извне</td>
+    </tr>
+    <tr>
+      <td><a href="#контекстное-окно">Контекстное окно</a></td>
+      <td>Лимит памяти одного вызова LLM</td>
+    </tr>
+    <tr>
+      <td><a href="#что-такое-skill">Skills</a></td>
+      <td>Переносимые пакеты инструкций</td>
+    </tr>
+    <tr>
+      <td><a href="#зачем-нужен-mcp">MCP</a></td>
+      <td>Стандарт подключения инструментов</td>
+    </tr>
+    <tr>
+      <td><a href="#базовые-элементы-агентной-системы">Базовые элементы</a></td>
+      <td>Цикл, tools, память, оркестрация</td>
+    </tr>
+    <tr>
+      <td><a href="#обзор-актуальных-агентных-программ">Обзор агентов</a></td>
+      <td>Pi, Aider, Codex, OpenCode и другие</td>
+    </tr>
+    <tr>
+      <td><a href="#сравнение-tui-терминальных-интерфейсов">TUI-интерфейсы</a></td>
+      <td>Как устроен терминальный UX</td>
+    </tr>
+    <tr>
+      <td><a href="#сравнительная-таблица-агентов">Таблицы</a></td>
+      <td>Сравнение и перечень функций</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="что-такое-rag">Что такое RAG</h2>
+
+<p><strong>RAG</strong> (Retrieval-Augmented Generation) — паттерн, при котором модель <strong>не полагается только на веса</strong>, а перед ответом <strong>ищет релевантные фрагменты</strong> во внешнем хранилище и вставляет их в промпт.</p>
+
+<h3 id="как-это-работает-пошагово">Как это работает (пошагово)</h3>
+
+<pre><code class="language-mermaid">flowchart LR
+  Q[Запрос пользователя] --&gt; E[Эмбеддинг запроса]
+  E --&gt; V[(Векторная БД\nдокументы, код, wiki)]
+  V --&gt; R[Top-K чанков]
+  R --&gt; P[Промпт: контекст + вопрос]
+  P --&gt; LLM[LLM]
+  LLM --&gt; A[Ответ с опорой на источники]
+</code></pre>
+
+<ol>
+  <li><strong>Индексация (offline):</strong> документы режутся на чанки → эмбеддинги → векторное хранилище (Pinecone, pgvector, FAISS, локальный LanceDB).</li>
+  <li><strong>Retrieval (online):</strong> запрос пользователя эмбеддится → similarity search → top-K фрагментов.</li>
+  <li><strong>Augmentation:</strong> чанки вставляются в system/user prompt («используй только эту информацию»).</li>
+  <li><strong>Generation:</strong> LLM синтезирует ответ; хорошие системы добавляют <strong>цитаты</strong> и проверку faithfulness.</li>
+</ol>
+
+<h3 id="пример-для-coding-агента">Пример для coding-агента</h3>
+
+<p>Пользователь: <em>«Где в нашем репозитории настраивается rate limit?»</em></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Без RAG</th>
+      <th>С RAG</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Модель угадывает по общим паттернам</td>
+      <td>Агент ищет по <code class="language-plaintext highlighter-rouge">middleware/</code>, <code class="language-plaintext highlighter-rouge">config/</code>, комментариям в коде</td>
+    </tr>
+    <tr>
+      <td>Высокий риск галлюцинаций</td>
+      <td>Ответ со ссылкой на <code class="language-plaintext highlighter-rouge">rate_limiter.rs:42</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Semantic torrent</strong> и подобные схемы в блоге VAIRL — частный случай RAG: потоковая доставка релевантных чанков в контекст агента.</p>
+
+<h3 id="ограничения-rag">Ограничения RAG</h3>
+
+<ul>
+  <li>Качество зависит от <strong>чанкинга</strong> и <strong>эмбеддинга</strong></li>
+  <li>«Правильный, но не тот» чанк → уверенная ошибка</li>
+  <li>Не заменяет <strong>tools</strong> (агент всё равно должен уметь читать файлы и запускать команды)</li>
+</ul>
+
+<hr />
+
+<h2 id="контекстное-окно">Контекстное окно</h2>
+
+<p><strong>Контекстное окно</strong> — максимальный объём текста (в токенах), который модель <strong>видит за один forward-pass</strong>: system prompt + история диалога + tool results + RAG-чанки.</p>
+
+<h3 id="что-входит-в-контекст-coding-агента">Что входит в контекст coding-агента</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Компонент</th>
+      <th>Пример содержимого</th>
+      <th>Типичная доля</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>System prompt</td>
+      <td>Роль, правила, список tools</td>
+      <td>2–15%</td>
+    </tr>
+    <tr>
+      <td>Project rules</td>
+      <td><code class="language-plaintext highlighter-rouge">CLAUDE.md</code>, <code class="language-plaintext highlighter-rouge">AGENTS.md</code>, <code class="language-plaintext highlighter-rouge">.cursor/rules</code></td>
+      <td>1–10%</td>
+    </tr>
+    <tr>
+      <td>История сообщений</td>
+      <td>Прошлые реплики user/assistant</td>
+      <td>20–60%</td>
+    </tr>
+    <tr>
+      <td>Tool outputs</td>
+      <td>Diff, логи тестов, stdout</td>
+      <td>30–70%</td>
+    </tr>
+    <tr>
+      <td>RAG / skills</td>
+      <td>Документация, SKILL.md</td>
+      <td>5–25%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="почему-это-критично">Почему это критично</h3>
+
+<p>Когда окно заполняется, агент <strong>теряет ранние детали</strong> (имя файла, условие задачи, результат теста). Отсюда:</p>
+
+<ul>
+  <li><strong>Compaction / summarization</strong> — сжатие старых ходов в краткое резюме (Hermes, g3, OpenCode)</li>
+  <li><strong>Context thinning</strong> — большие выводы tools заменяются ссылками на файлы (g3)</li>
+  <li><strong>Sub-agents</strong> — тяжёлый поиск в отдельной сессии, в родителя — только итог (OpenCode <code class="language-plaintext highlighter-rouge">explore</code>, Claude Code subagents)</li>
+  <li><strong>Fresh instance per turn</strong> — новый инстанс агента на ход (g3 Coach/Player)</li>
+</ul>
+
+<h3 id="мини-пример">Мини-пример</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Окно 200K токенов, задача на 40 ходов:
+  ход 1–10:  всё помещается
+  ход 25:    старые tool outputs вытесняют requirements.md из «активной» зоны
+  ход 40:    агент «забывает» исходное ТЗ → регрессии
+</code></pre></div></div>
+
+<p><strong>Инженерный вывод:</strong> контекст — не «память навсегда», а <strong>скользящий буфер</strong> с политикой eviction. Её нужно проектировать явно.</p>
+
+<hr />
+
+<h2 id="что-такое-skill">Что такое skill</h2>
+
+<p><strong>Skill</strong> — <strong>переносимый пакет знаний и процедур</strong> для агента, обычно в виде каталога с файлом <code class="language-plaintext highlighter-rouge">SKILL.md</code> (стандарт <a href="https://agentskills.io">agentskills.io</a>).</p>
+
+<h3 id="структура-skill">Структура skill</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>my-skill/
+├── SKILL.md          # инструкции: когда применять, шаги, ограничения
+├── scripts/          # опционально: вспомогательные скрипты
+└── references/       # опционально: шаблоны, примеры
+</code></pre></div></div>
+
+<h3 id="чем-skill-отличается-от-tool">Чем skill отличается от tool</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th><strong>Tool</strong></th>
+      <th><strong>Skill</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Что делает</td>
+      <td>Выполняет действие (bash, API, SQL)</td>
+      <td>Учит агент <strong>как</strong> действовать</td>
+    </tr>
+    <tr>
+      <td>Когда виден</td>
+      <td>Всегда в tool schema (или по MCP)</td>
+      <td>Подгружается <strong>по релевантности</strong> задачи</td>
+    </tr>
+    <tr>
+      <td>Пример</td>
+      <td><code class="language-plaintext highlighter-rouge">read_file</code>, <code class="language-plaintext highlighter-rouge">grep</code>, <code class="language-plaintext highlighter-rouge">run_tests</code></td>
+      <td>«Как писать миграции Alembic в этом репо»</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="пример-фрагмента-skillmd">Пример фрагмента SKILL.md</h3>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh"># Deploy to staging</span>
+
+Use when the user asks to deploy or release to staging.
+
+<span class="gu">## Steps</span>
+<span class="p">1.</span> Run <span class="sb">`make test`</span> — abort if failing
+<span class="p">2.</span> Bump version in pyproject.toml
+<span class="p">3.</span> <span class="sb">`git tag v{X.Y.Z}`</span> and push
+<span class="p">4.</span> Trigger GitHub Actions workflow <span class="sb">`deploy-staging.yml`</span>
+</code></pre></div></div>
+
+<p>Агент <strong>не вызывает</strong> skill как функцию — он <strong>читает</strong> инструкцию и выполняет шаги через обычные tools.</p>
+
+<p><strong>Где встречается:</strong> g3 (<code class="language-plaintext highlighter-rouge">.g3/skills/</code>), Claude Code, Cursor, py-code-agent, Hermes (plugins).</p>
+
+<hr />
+
+<h2 id="зачем-нужен-mcp">Зачем нужен MCP</h2>
+
+<p><strong>MCP</strong> (Model Context Protocol) — открытый протокол от Anthropic для <strong>стандартного подключения внешних возможностей</strong> к агенту: базы данных, браузер, GitHub, Slack, произвольные API.</p>
+
+<h3 id="проблема-без-mcp">Проблема без MCP</h3>
+
+<p>Каждый агент изобретал свой формат плагинов → N агентов × M интеграций = <strong>взрыв адаптеров</strong>.</p>
+
+<h3 id="что-такое-mcp-сервер">Что такое MCP-сервер</h3>
+
+<p><strong>MCP server</strong> — отдельный процесс (или in-process модуль), который:</p>
+
+<ol>
+  <li>Регистрирует <strong>tools</strong> (вызовы с JSON-schema)</li>
+  <li>Может отдавать <strong>resources</strong> (чтение файлов, документов)</li>
+  <li>Может слать <strong>prompts</strong> (шаблоны)</li>
+</ol>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph client [Агент / IDE / CLI]
+    A[Claude Code / Cursor / OpenCode]
+  end
+  subgraph mcp [MCP-серверы]
+    S1[filesystem]
+    S2[github]
+    S3[postgres]
+    S4[custom API]
+  end
+  A &lt;--&gt;|JSON-RPC stdio/HTTP| S1
+  A &lt;--&gt; S2
+  A &lt;--&gt; S3
+  A &lt;--&gt; S4
+</code></pre>
+
+<h3 id="пример-вызова">Пример вызова</h3>
+
+<p>Агент решает: «нужен issue #42 из GitHub». Вместо хардкода API клиент вызывает MCP-tool <code class="language-plaintext highlighter-rouge">get_issue</code> на сервере <code class="language-plaintext highlighter-rouge">github</code> → сервер ходит в API → результат возвращается в контекст как tool result.</p>
+
+<h3 id="зачем-это-инженеру">Зачем это инженеру</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Без MCP</th>
+      <th>С MCP</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Интеграция в каждый агент отдельно</td>
+      <td>Один сервер — много клиентов</td>
+    </tr>
+    <tr>
+      <td>Сложный аудит прав</td>
+      <td>Централизованные permissions на сервер</td>
+    </tr>
+    <tr>
+      <td>Vendor lock-in</td>
+      <td>Переносимость между Claude Code, Cursor, OpenCode</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>ACP</strong> (Agent Client Protocol) — смежный стандарт: не tools, а <strong>подключение целого агента к IDE</strong> (Zed, JetBrains, OpenCode).</p>
+
+<hr />
+
+<h2 id="базовые-элементы-агентной-системы">Базовые элементы агентной системы</h2>
+
+<p>Почти любой production-агент собирается из одних и тех же блоков:</p>
+
+<pre><code class="language-mermaid">flowchart TB
+  U[User / API / Webhook] --&gt; O[Orchestrator]
+  O --&gt; P[Planner]
+  P --&gt; L[Agent Loop]
+  L --&gt; LLM[LLM Provider]
+  L --&gt; T[Tools / MCP]
+  L --&gt; M[Memory]
+  M --&gt; RAG[(Vector store)]
+  M --&gt; KV[(Session / SQLite)]
+  T --&gt; E[Environment\nshell, FS, browser]
+  L --&gt; C[Critic / Reviewer]
+  C --&gt; L
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Элемент</th>
+      <th>Роль</th>
+      <th>Примеры реализации</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Orchestrator</strong></td>
+      <td>Маршрутизация задач, лимиты, retry</td>
+      <td>LangGraph, g3-execution, OpenCode Session</td>
+    </tr>
+    <tr>
+      <td><strong>Agent loop</strong></td>
+      <td>while: LLM → tool calls → observe</td>
+      <td>ReAct, function calling</td>
+    </tr>
+    <tr>
+      <td><strong>Tools</strong></td>
+      <td>Side effects в мире</td>
+      <td>bash, edit, grep, browser</td>
+    </tr>
+    <tr>
+      <td><strong>Memory</strong></td>
+      <td>Краткосрочная + долгосрочная</td>
+      <td>SQLite sessions, CLAUDE.md, Hermes profiles</td>
+    </tr>
+    <tr>
+      <td><strong>RAG</strong></td>
+      <td>Внешние знания</td>
+      <td>Embeddings + retrieval</td>
+    </tr>
+    <tr>
+      <td><strong>Skills</strong></td>
+      <td>Процедурные знания</td>
+      <td>SKILL.md</td>
+    </tr>
+    <tr>
+      <td><strong>MCP</strong></td>
+      <td>Стандартизированные tools</td>
+      <td><code class="language-plaintext highlighter-rouge">@modelcontextprotocol/server-*</code></td>
+    </tr>
+    <tr>
+      <td><strong>Critic</strong></td>
+      <td>Независимая проверка</td>
+      <td>g3 Coach, CI, human-in-the-loop</td>
+    </tr>
+    <tr>
+      <td><strong>Permissions</strong></td>
+      <td>Что можно без спроса</td>
+      <td>OpenCode ruleset, Claude hooks</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="типовой-цикл-react">Типовой цикл (ReAct)</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Thought:  нужно найти определение RateLimiter
+Action:   grep(pattern="RateLimiter", path="src/")
+Observe:  src/middleware/limit.rs:12
+Thought:  прочитаю файл целиком
+Action:   read_file("src/middleware/limit.rs")
+Observe:  [содержимое файла]
+Thought:  готово объяснить пользователю
+Action:   respond(...)
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="обзор-актуальных-агентных-программ">Обзор актуальных агентных программ</h2>
+
+<p>Ниже — агенты, которые чаще всего встречаются в терминальной разработке 2026 года. Для <strong>Pi, Aider, Codex и OpenCode</strong> отдельно разобран <a href="#сравнение-tui-терминальных-интерфейсов">TUI</a>.</p>
+
+<blockquote>
+  <p><strong>Примечание:</strong> «агент Idar» из ранней версии статьи — это <strong>IDAD</strong> (<a href="https://idad.io/">idad.io</a>).</p>
+</blockquote>
+
+<hr />
+
+<h3 id="pi-coding-agent-pi-mono">Pi coding agent (pi-mono)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Тип</strong></td>
+      <td>Open-source минималистичный coding agent</td>
+    </tr>
+    <tr>
+      <td><strong>Репозиторий</strong></td>
+      <td><a href="https://github.com/badlogic/pi-mono">badlogic/pi-mono</a> (форк/линия <a href="https://github.com/earendil-works/pi">earendil-works/pi</a>)</td>
+    </tr>
+    <tr>
+      <td><strong>Стек</strong></td>
+      <td>TypeScript monorepo: <code class="language-plaintext highlighter-rouge">pi-ai</code> → <code class="language-plaintext highlighter-rouge">pi-agent-core</code> → <code class="language-plaintext highlighter-rouge">pi-tui</code> → <code class="language-plaintext highlighter-rouge">pi-coding-agent</code></td>
+    </tr>
+    <tr>
+      <td><strong>Архитектура</strong></td>
+      <td>Event-driven agent loop, provider-neutral messages, tools: <code class="language-plaintext highlighter-rouge">read</code> / <code class="language-plaintext highlighter-rouge">write</code> / <code class="language-plaintext highlighter-rouge">edit</code> / <code class="language-plaintext highlighter-rouge">bash</code></td>
+    </tr>
+    <tr>
+      <td><strong>Особенности</strong></td>
+      <td>Skills, extensions, prompt templates, sub-agents, сессии, multi-provider (Claude, GPT, Ollama…)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Принцип:</strong> «весь core помещается в голове» — прозрачный tool-use loop без лишних слоёв. Каждый слой можно использовать отдельно: только LLM API, только agent runtime, или полный CLI.</p>
+
+<p><strong>Режимы CLI:</strong> интерактивный TUI (default), <code class="language-plaintext highlighter-rouge">--json</code> (события в stdout), RPC/JSONL для встраивания в другие процессы.</p>
+
+<hr />
+
+<h3 id="aider">Aider</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Тип</strong></td>
+      <td>Open-source <strong>pair programmer</strong> в терминале (Python)</td>
+    </tr>
+    <tr>
+      <td><strong>Репозиторий</strong></td>
+      <td><a href="https://github.com/Aider-AI/aider">Aider-AI/aider</a></td>
+    </tr>
+    <tr>
+      <td><strong>Архитектура</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">Coder</code> orchestrator + LiteLLM (100+ моделей) + git auto-commit</td>
+    </tr>
+    <tr>
+      <td><strong>Контекст</strong></td>
+      <td><strong>Repo map</strong> — граф символов + PageRank вместо дампа всего репо</td>
+    </tr>
+    <tr>
+      <td><strong>Edit formats</strong></td>
+      <td>whole/diff/udiff и др. — подбираются под возможности модели</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Принцип:</strong> не «автономный демон на час», а <strong>быстрый цикл чат → diff → commit</strong>. Сильная сторона — работа с уже открытыми файлами и умный отбор контекста из кодовой базы.</p>
+
+<p><strong>Интерфейс:</strong> scrollback-чат (не full-screen TUI) — <code class="language-plaintext highlighter-rouge">prompt_toolkit</code> + <strong>Rich</strong> markdown stream. Slash-команды (<code class="language-plaintext highlighter-rouge">/add</code>, <code class="language-plaintext highlighter-rouge">/commit</code>, <code class="language-plaintext highlighter-rouge">/model</code>), голос (Whisper), file watcher для IDE.</p>
+
+<hr />
+
+<h3 id="openai-codex-cli">OpenAI Codex (CLI)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Тип</strong></td>
+      <td>Terminal coding agent от OpenAI (open source, Rust)</td>
+    </tr>
+    <tr>
+      <td><strong>Репозиторий</strong></td>
+      <td><a href="https://github.com/openai/codex">openai/codex</a></td>
+    </tr>
+    <tr>
+      <td><strong>Запуск</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">codex</code> → интерактивный TUI; <code class="language-plaintext highlighter-rouge">codex exec</code> — скриптуемый режим</td>
+    </tr>
+    <tr>
+      <td><strong>Архитектура</strong></td>
+      <td>Локальный агент: читает/меняет/запускает код в выбранной директории</td>
+    </tr>
+    <tr>
+      <td><strong>Особенности</strong></td>
+      <td>Sandbox, approval modes, MCP (<code class="language-plaintext highlighter-rouge">codex mcp</code>), sub-agents, web search, Codex Cloud tasks</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Принцип:</strong> <strong>terminal-native</strong> агент с подпиской ChatGPT Plus/Pro/Business или API key. Отдельные поверхности: CLI, Desktop (<code class="language-plaintext highlighter-rouge">codex app</code>), IDE-плагины, облако <a href="https://chatgpt.com/codex">chatgpt.com/codex</a>.</p>
+
+<p><strong>TUI:</strong> полноценная сессия с <code class="language-plaintext highlighter-rouge">/model</code>, вложениями изображений, narration шагов, переключением режимов одобрения (<code class="language-plaintext highlighter-rouge">--sandbox</code>, <code class="language-plaintext highlighter-rouge">--ask-for-approval</code>).</p>
+
+<hr />
+
+<h3 id="opencode">OpenCode</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Тип</strong></td>
+      <td>Open-source coding agent (MIT)</td>
+    </tr>
+    <tr>
+      <td><strong>Сайт</strong></td>
+      <td><a href="https://opencode.ai">opencode.ai</a></td>
+    </tr>
+    <tr>
+      <td><strong>Архитектура</strong></td>
+      <td><strong>Client/server</strong>: фоновый сервер (SQLite, SSE), TUI/CLI/Desktop/IDE — клиенты</td>
+    </tr>
+    <tr>
+      <td><strong>Агенты</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">build</code> (полный доступ), <code class="language-plaintext highlighter-rouge">plan</code> (read-only), <code class="language-plaintext highlighter-rouge">explore</code> (sub-agent)</td>
+    </tr>
+    <tr>
+      <td><strong>Особенности</strong></td>
+      <td>75+ LLM providers, ACP для IDE, doom-loop detection, context compaction</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Принцип:</strong> агент = <strong>декларативная конфигурация</strong> (permissions + prompt), единый <code class="language-plaintext highlighter-rouge">SessionPrompt.loop()</code> для всех ролей. Plan-агент <strong>не видит</strong> write-tools — безопасность через отсутствие инструмента.</p>
+
+<p><strong>TUI:</strong> клавиатурный full-screen интерфейс; <strong>Tab</strong> переключает <code class="language-plaintext highlighter-rouge">build</code> ↔ <code class="language-plaintext highlighter-rouge">plan</code>; сессия <strong>переживает</strong> обрыв терминала (сервер остаётся в фоне). Worker thread для LLM/MCP, main thread — рендер (как в зрелых TUI-приложениях).</p>
+
+<hr />
+
+<h3 id="py-code-agent-agent-py">py-code-agent (Agent Py)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Тип</strong></td>
+      <td>Open-source CLI coding agent (Python)</td>
+    </tr>
+    <tr>
+      <td><strong>Репозиторий</strong></td>
+      <td><a href="https://github.com/bonashen/py-code-agent">bonashen/py-code-agent</a></td>
+    </tr>
+    <tr>
+      <td><strong>Архитектура</strong></td>
+      <td>ReAct loop + pluggy plugins + LiteLLM (100+ провайдеров)</td>
+    </tr>
+    <tr>
+      <td><strong>Особенности</strong></td>
+      <td>MCP gateway, A2A protocol, session tree (fork/branch), 5-layer self-healing</td>
+    </tr>
+    <tr>
+      <td><strong>Модель работы</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">Thought → Action → Observation</code> до <code class="language-plaintext highlighter-rouge">task_done</code> с верификацией файлов</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Принцип:</strong> максимальная <strong>расширяемость</strong> через плагины и hooks; skills совместимы с форматом Claude Code (<code class="language-plaintext highlighter-rouge">SKILL.md</code>). TUI — обычный REPL-стиль CLI, без full-screen панелей.</p>
+
+<hr />
+
+<h3 id="hermes-agent">Hermes Agent</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Тип</strong></td>
+      <td>Open-source <strong>personal</strong> agent (не только код)</td>
+    </tr>
+    <tr>
+      <td><strong>Автор</strong></td>
+      <td><a href="https://github.com/NousResearch/hermes-agent">Nous Research</a></td>
+    </tr>
+    <tr>
+      <td><strong>Архитектура</strong></td>
+      <td>Монолитный Python: <code class="language-plaintext highlighter-rouge">AIAgent</code> + <code class="language-plaintext highlighter-rouge">conversation_loop.py</code> + SQLite sessions</td>
+    </tr>
+    <tr>
+      <td><strong>Интерфейсы</strong></td>
+      <td>CLI, <strong>gateway</strong> (Telegram, Discord, Slack, 20+ платформ), cron</td>
+    </tr>
+    <tr>
+      <td><strong>Особенности</strong></td>
+      <td>70+ tools, lineage-based compression, profiles, <code class="language-plaintext highlighter-rouge">delegate_task</code>, MCP</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Принцип:</strong> агент как <strong>долгоживущий сервис</strong> на сервере. CLI — интерактивный TUI с slash-командами и streaming; основная ценность — gateway в мессенджеры.</p>
+
+<hr />
+
+<h3 id="idad-issue-driven-agentic-development">IDAD (Issue Driven Agentic Development)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Тип</strong></td>
+      <td>GitHub-native <strong>multi-agent pipeline</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Сайт</strong></td>
+      <td><a href="https://idad.io/">idad.io</a></td>
+    </tr>
+    <tr>
+      <td><strong>Архитектура</strong></td>
+      <td>9 специализированных агентов + 2 human gates</td>
+    </tr>
+    <tr>
+      <td><strong>Движок</strong></td>
+      <td>Claude Code, Cursor Agent или OpenAI Codex (на выбор)</td>
+    </tr>
+    <tr>
+      <td><strong>Триггер</strong></td>
+      <td>Label <code class="language-plaintext highlighter-rouge">idad:issue-review</code> на GitHub issue</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Поток:</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Issue → Review → Planner → [human: approve plan] → Implementer
+  → Security → Reviewer → Documenter → [human: merge PR] → Self-improve
+</code></pre></div></div>
+
+<p><strong>Принцип:</strong> агентность на уровне <strong>организации</strong>, не одного чата. Человек контролирует <strong>план</strong> и <strong>merge</strong>; между ними — автоматизация.</p>
+
+<hr />
+
+<h3 id="chatgpt-agent-agent-mode">ChatGPT Agent (Agent Mode)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Тип</strong></td>
+      <td>Облачный consumer/enterprise agent</td>
+    </tr>
+    <tr>
+      <td><strong>Доступ</strong></td>
+      <td>Plus / Pro / Team / Enterprise</td>
+    </tr>
+    <tr>
+      <td><strong>Архитектура</strong></td>
+      <td>Виртуальный компьютер: visual browser + text browser + terminal + connectors</td>
+    </tr>
+    <tr>
+      <td><strong>Инструменты</strong></td>
+      <td>Gmail, GitHub, Google Drive, M365, Slack (Workspace Agents)</td>
+    </tr>
+    <tr>
+      <td><strong>Особенности</strong></td>
+      <td>Прерывание и takeover браузера, подтверждение перед покупками/письмами</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Принцип:</strong> <strong>chat-first orchestration</strong> — одна нить диалога управляет многошаговой задачей; пользователь видит narration действий. Для разработчиков параллельно существует <strong>AgentKit</strong> (Agent Builder, Connector Registry, ChatKit, Agents SDK).</p>
+
+<hr />
+
+<h3 id="claude-code-cloud-code">Claude Code (Cloud Code)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Тип</strong></td>
+      <td>Terminal + IDE agent от Anthropic</td>
+    </tr>
+    <tr>
+      <td><strong>Архитектура</strong></td>
+      <td>Agent loop + layered extensions</td>
+    </tr>
+    <tr>
+      <td><strong>Расширения</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">CLAUDE.md</code>, <strong>Skills</strong>, <strong>Hooks</strong> (25+ events), <strong>Subagents</strong>, <strong>MCP</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Особенности</strong></td>
+      <td>Hooks типа <code class="language-plaintext highlighter-rouge">mcp_tool</code> (v2.1.118+), sandbox, permission prompts</td>
+    </tr>
+    <tr>
+      <td><strong>Модель</strong></td>
+      <td>Обычно Claude Sonnet/Opus; сильная интеграция с экосистемой MCP</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Принцип:</strong> <strong>закрытые по умолчанию</strong> permissions + hooks. TUI — REPL в терминале (не панельный fullscreen); rich output через streaming markdown.</p>
+
+<hr />
+
+<h2 id="сравнение-tui-терминальные-интерфейсы">Сравнение TUI: терминальные интерфейсы</h2>
+
+<p>Не все «терминальные агенты» рисуют UI одинаково. Есть три семейства:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Семейство</th>
+      <th>Как выглядит</th>
+      <th>Примеры</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Full-screen TUI</strong></td>
+      <td>Весь экран — панели, списки, оверлеи; CSI 2026 / differential render</td>
+      <td><strong>Pi</strong>, <strong>Codex</strong>, <strong>OpenCode</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Scrollback chat</strong></td>
+      <td>Лента сообщений вниз; ввод внизу; без «рамки» на весь терминал</td>
+      <td><strong>Aider</strong>, <strong>Claude Code</strong>, py-code-agent</td>
+    </tr>
+    <tr>
+      <td><strong>Не-TUI</strong></td>
+      <td>Web, IDE, GitHub</td>
+      <td>ChatGPT Agent, IDAD</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="детальное-сравнение-tui">Детальное сравнение TUI</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Агент</th>
+      <th>Тип UI</th>
+      <th>Технология</th>
+      <th>Навигация и UX</th>
+      <th>Сильные стороны TUI</th>
+      <th>Ограничения</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Pi</strong></td>
+      <td>Full-screen TUI</td>
+      <td><code class="language-plaintext highlighter-rouge">@earendil-works/pi-tui</code>: differential rendering, CSI 2026, компоненты</td>
+      <td>Slash-команды, autocomplete путей, streaming tool calls, overlays</td>
+      <td>Без мерцания на медленных SSH; IME/CJK; inline-изображения (Kitty/iTerm2)</td>
+      <td>Нужен нормальный терминал с synchronized output</td>
+    </tr>
+    <tr>
+      <td><strong>Aider</strong></td>
+      <td>Scrollback REPL</td>
+      <td><code class="language-plaintext highlighter-rouge">prompt_toolkit</code> + <strong>Rich</strong></td>
+      <td>Enter / Alt+Enter, vi-mode, автодополнение файлов и <code class="language-plaintext highlighter-rouge">/commands</code></td>
+      <td>Привычный «чат в терминале»; markdown stream + spinner при ожидании LLM</td>
+      <td>Нет панелей diff side-by-side в TUI (diff в git/IDE)</td>
+    </tr>
+    <tr>
+      <td><strong>Codex</strong></td>
+      <td>Full-screen TUI</td>
+      <td>Rust, встроенный TUI</td>
+      <td><code class="language-plaintext highlighter-rouge">/model</code>, вложения картинок, narration, approval prompts</td>
+      <td>Sandbox + режимы одобрения в одном экране; <code class="language-plaintext highlighter-rouge">codex resume</code></td>
+      <td>Привязка к экосистеме OpenAI</td>
+    </tr>
+    <tr>
+      <td><strong>OpenCode</strong></td>
+      <td>Full-screen TUI</td>
+      <td>TUI-клиент + <strong>фоновый сервер</strong></td>
+      <td><strong>Tab</strong>: <code class="language-plaintext highlighter-rouge">build</code> ↔ <code class="language-plaintext highlighter-rouge">plan</code>; <code class="language-plaintext highlighter-rouge">@general</code> для sub-agent</td>
+      <td>Сессия живёт после закрытия терминала; event bus → live updates</td>
+      <td>Нужен запущенный server process</td>
+    </tr>
+    <tr>
+      <td><strong>Claude Code</strong></td>
+      <td>Scrollback REPL</td>
+      <td>Собственный terminal UI</td>
+      <td>Slash, permissions inline, subagent status</td>
+      <td>Глубокая интеграция hooks/skills/MCP</td>
+      <td>Не classic fullscreen TUI</td>
+    </tr>
+    <tr>
+      <td><strong>g3</strong></td>
+      <td>Scrollback + статус</td>
+      <td>Rust CLI</td>
+      <td><code class="language-plaintext highlighter-rouge">/compact</code>, <code class="language-plaintext highlighter-rouge">/stats</code>, <code class="language-plaintext highlighter-rouge">/thinnify</code></td>
+      <td>Прозрачность coach/player ходов</td>
+      <td>Нет отдельного UI-фреймворка как у Pi</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="схема-два-подхода-к-терминалу">Схема: два подхода к терминалу</h3>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph fullscreen [Full-screen TUI]
+    P[Pi pi-tui]
+    C[Codex TUI]
+    O[OpenCode TUI]
+  end
+  subgraph scroll [Scrollback chat]
+    A[Aider prompt_toolkit]
+    CC[Claude Code REPL]
+  end
+  fullscreen --&gt; R1[Панели, overlays, diff render]
+  scroll --&gt; R2[Лента + streaming markdown]
+</code></pre>
+
+<h3 id="когда-какой-tui-удобнее">Когда какой TUI удобнее</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сценарий</th>
+      <th>Лучше подходит</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Долгая сессия по SSH, нестабильная сеть</td>
+      <td><strong>OpenCode</strong> (persistent server) или <strong>Pi</strong> (differential TUI)</td>
+    </tr>
+    <tr>
+      <td>Быстрые правки в 2–3 файлах, pair programming</td>
+      <td><strong>Aider</strong></td>
+    </tr>
+    <tr>
+      <td>Единый стек OpenAI + sandbox + скрипты <code class="language-plaintext highlighter-rouge">codex exec</code></td>
+      <td><strong>Codex</strong></td>
+    </tr>
+    <tr>
+      <td>Минимализм, свой fork agent runtime</td>
+      <td><strong>Pi</strong> (pi-agent-core отдельно от TUI)</td>
+    </tr>
+    <tr>
+      <td>Enterprise governance, hooks</td>
+      <td><strong>Claude Code</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="сравнительная-таблица-агентов">Сравнительная таблица агентов</h2>
+
+<h3 id="terminal-first-агенты-фокус-статьи">Terminal-first агенты (фокус статьи)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Критерий</th>
+      <th style="text-align: center"><strong>Pi</strong></th>
+      <th style="text-align: center"><strong>Aider</strong></th>
+      <th style="text-align: center"><strong>Codex</strong></th>
+      <th style="text-align: center"><strong>OpenCode</strong></th>
+      <th style="text-align: center">Claude Code</th>
+      <th style="text-align: center"><strong>g3</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Open source</strong></td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">❌</td>
+      <td style="text-align: center">✅</td>
+    </tr>
+    <tr>
+      <td><strong>Язык</strong></td>
+      <td style="text-align: center">TypeScript</td>
+      <td style="text-align: center">Python</td>
+      <td style="text-align: center">Rust</td>
+      <td style="text-align: center">TypeScript</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">Rust</td>
+    </tr>
+    <tr>
+      <td><strong>TUI</strong></td>
+      <td style="text-align: center">Full-screen</td>
+      <td style="text-align: center">Scrollback</td>
+      <td style="text-align: center">Full-screen</td>
+      <td style="text-align: center">Full-screen</td>
+      <td style="text-align: center">Scrollback</td>
+      <td style="text-align: center">Scrollback</td>
+    </tr>
+    <tr>
+      <td><strong>Пара программист</strong></td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅ <strong>core</strong></td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">Coach/Player</td>
+    </tr>
+    <tr>
+      <td><strong>Repo map / RAG</strong></td>
+      <td style="text-align: center">extensions</td>
+      <td style="text-align: center">✅ PageRank</td>
+      <td style="text-align: center">web search</td>
+      <td style="text-align: center">LSP</td>
+      <td style="text-align: center">MCP</td>
+      <td style="text-align: center">tree-sitter</td>
+    </tr>
+    <tr>
+      <td><strong>Git auto-commit</strong></td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+    </tr>
+    <tr>
+      <td><strong>MCP</strong></td>
+      <td style="text-align: center">extensions</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅ native</td>
+      <td style="text-align: center">partial</td>
+    </tr>
+    <tr>
+      <td><strong>Skills</strong></td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">AGENTS.md</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅ .g3/skills</td>
+    </tr>
+    <tr>
+      <td><strong>Sub-agents</strong></td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">explore</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">Coach+Player</td>
+    </tr>
+    <tr>
+      <td><strong>Мульти-модель</strong></td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">LiteLLM 100+</td>
+      <td style="text-align: center">OpenAI</td>
+      <td style="text-align: center">75+</td>
+      <td style="text-align: center">Claude</td>
+      <td style="text-align: center">several</td>
+    </tr>
+    <tr>
+      <td><strong>Уникальность</strong></td>
+      <td style="text-align: center">Минимальный stack</td>
+      <td style="text-align: center">Repo map</td>
+      <td style="text-align: center">OpenAI sandbox</td>
+      <td style="text-align: center">Persistent server</td>
+      <td style="text-align: center">Hooks depth</td>
+      <td style="text-align: center">Adversarial loop</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="расширенный-ландшафт">Расширенный ландшафт</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Критерий</th>
+      <th style="text-align: center">py-code-agent</th>
+      <th style="text-align: center">Hermes</th>
+      <th style="text-align: center">IDAD</th>
+      <th style="text-align: center">ChatGPT Agent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Фокус</strong></td>
+      <td style="text-align: center">Код</td>
+      <td style="text-align: center">Personal + код</td>
+      <td style="text-align: center">GitHub workflow</td>
+      <td style="text-align: center">Универсальные задачи</td>
+    </tr>
+    <tr>
+      <td><strong>Интерфейс</strong></td>
+      <td style="text-align: center">CLI REPL</td>
+      <td style="text-align: center">CLI + мессенджеры</td>
+      <td style="text-align: center">GitHub Issues</td>
+      <td style="text-align: center">Web</td>
+    </tr>
+    <tr>
+      <td><strong>MCP</strong></td>
+      <td style="text-align: center">Gateway</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">Через CLI</td>
+      <td style="text-align: center">Connectors</td>
+    </tr>
+    <tr>
+      <td><strong>Human gates</strong></td>
+      <td style="text-align: center">Опционально</td>
+      <td style="text-align: center">Allowlists</td>
+      <td style="text-align: center"><strong>2 обязательных</strong></td>
+      <td style="text-align: center">Confirm actions</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="перечень-функций-детально">Перечень функций (детально)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Функция</th>
+      <th style="text-align: center">Pi</th>
+      <th style="text-align: center">Aider</th>
+      <th style="text-align: center">Codex</th>
+      <th style="text-align: center">OpenCode</th>
+      <th style="text-align: center">py-code-agent</th>
+      <th style="text-align: center">Hermes</th>
+      <th style="text-align: center">Claude Code</th>
+      <th style="text-align: center">g3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Full-screen TUI</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">partial</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">—</td>
+    </tr>
+    <tr>
+      <td>Scrollback REPL</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+    </tr>
+    <tr>
+      <td>Чтение/запись файлов</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+    </tr>
+    <tr>
+      <td>Shell / bash</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+    </tr>
+    <tr>
+      <td>Git operations</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✅ auto</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+    </tr>
+    <tr>
+      <td>Repo map / smart context</td>
+      <td style="text-align: center">ext</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">search</td>
+      <td style="text-align: center">LSP</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">memory</td>
+      <td style="text-align: center">MCP</td>
+      <td style="text-align: center">tree-sitter</td>
+    </tr>
+    <tr>
+      <td>ReAct / tool loop</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+    </tr>
+    <tr>
+      <td>Edit formats (diff/whole)</td>
+      <td style="text-align: center">edit tool</td>
+      <td style="text-align: center">✅ many</td>
+      <td style="text-align: center">patch</td>
+      <td style="text-align: center">patch</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">patch</td>
+      <td style="text-align: center">patch</td>
+    </tr>
+    <tr>
+      <td>Code review</td>
+      <td style="text-align: center">self-review</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✅ agent</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">plugins</td>
+      <td style="text-align: center">background</td>
+      <td style="text-align: center">subagent</td>
+      <td style="text-align: center"><strong>Coach</strong></td>
+    </tr>
+    <tr>
+      <td>MCP</td>
+      <td style="text-align: center">ext</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">gateway</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">partial</td>
+    </tr>
+    <tr>
+      <td>Context compaction</td>
+      <td style="text-align: center">sessions</td>
+      <td style="text-align: center">history</td>
+      <td style="text-align: center">internal</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">lineage</td>
+      <td style="text-align: center">/compact</td>
+      <td style="text-align: center">thinning</td>
+    </tr>
+    <tr>
+      <td>Persistent session</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">resume</td>
+      <td style="text-align: center"><strong>server</strong></td>
+      <td style="text-align: center">tree</td>
+      <td style="text-align: center">SQLite</td>
+      <td style="text-align: center">resume</td>
+      <td style="text-align: center">per-turn</td>
+    </tr>
+    <tr>
+      <td>Локальные модели</td>
+      <td style="text-align: center">Ollama</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">llama.cpp</td>
+      <td style="text-align: center">Ollama</td>
+      <td style="text-align: center">✅</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">Metal</td>
+    </tr>
+    <tr>
+      <td>Диалектика 2 агентов</td>
+      <td style="text-align: center">sub</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">sub</td>
+      <td style="text-align: center">explore</td>
+      <td style="text-align: center">—</td>
+      <td style="text-align: center">delegate</td>
+      <td style="text-align: center">subagents</td>
+      <td style="text-align: center"><strong>core</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="как-g3-можно-считать-агентом">Как g3 можно считать агентом</h2>
+
+<p><strong>g3</strong> (<a href="https://github.com/dhanji/g3">dhanji/g3</a>) — полноценный <strong>coding agent</strong>, но с нестандартной <strong>оркестрацией</strong>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Обычный single-agent</th>
+      <th>g3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Один LLM + tools в длинном треде</td>
+      <td><strong>Player</strong> (код) + <strong>Coach</strong> (ревью)</td>
+    </tr>
+    <tr>
+      <td>Self-report «готово»</td>
+      <td>Coach <strong>независимо</strong> проверяет требования</td>
+    </tr>
+    <tr>
+      <td>Контекст накапливается</td>
+      <td><strong>Свежий инстанс</strong> на ход + thinning</td>
+    </tr>
+    <tr>
+      <td>Один проход ревью в конце</td>
+      <td>Adversarial цикл <strong>на каждом шаге</strong> (~10 ходов)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="чем-g3-похож-на-других">Чем g3 похож на других</h3>
+
+<ul>
+  <li><strong>Как Claude Code / OpenCode:</strong> terminal agent, tools, skills, автономный режим по <code class="language-plaintext highlighter-rouge">requirements.md</code></li>
+  <li><strong>Как IDAD:</strong> разделение ролей (implementer vs reviewer), human/agent gates</li>
+  <li><strong>Как OpenCode plan/build:</strong> разные <strong>permission sets</strong> для разных ролей — у g3 это Player vs Coach</li>
+</ul>
+
+<h3 id="чем-g3-отличается">Чем g3 отличается</h3>
+
+<ol>
+  <li><strong>Adversarial cooperation</strong> — ревью не опциональный subagent, а <strong>обязательный</strong> второй участник петли (<a href="https://block.xyz/documents/adversarial-cooperation-in-code-synthesis.pdf">статья Block AI Research</a>)</li>
+  <li><strong>Контракт требований</strong> — общий <code class="language-plaintext highlighter-rouge">requirements.md</code> как source of truth для обоих агентов</li>
+  <li><strong>Coach APPROVED</strong> — явный критерий завершения, а не stop token модели</li>
+  <li><strong>Rust-workspace</strong> — <code class="language-plaintext highlighter-rouge">g3-core</code>, providers, execution, computer-control как отдельные крейты</li>
+</ol>
+
+<h3 id="g3-в-сравнительной-матрице-тип-агента">g3 в сравнительной матрице «тип агента»</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Тип</th>
+      <th>Примеры</th>
+      <th>g3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Interactive pair programmer</td>
+      <td><strong>Aider</strong>, Pi chat, Cursor</td>
+      <td>частично (<code class="language-plaintext highlighter-rouge">--chat</code>)</td>
+    </tr>
+    <tr>
+      <td>Autonomous coder</td>
+      <td>Codex, OpenCode build, Claude Code</td>
+      <td>✅ default</td>
+    </tr>
+    <tr>
+      <td>Full-screen TUI coding</td>
+      <td><strong>Pi, Codex, OpenCode</strong></td>
+      <td>— (scrollback CLI)</td>
+    </tr>
+    <tr>
+      <td>Multi-agent orchestrator</td>
+      <td>IDAD, Hermes delegate</td>
+      <td>✅ Coach/Player</td>
+    </tr>
+    <tr>
+      <td>Personal assistant</td>
+      <td>Hermes gateway, ChatGPT</td>
+      <td>❌</td>
+    </tr>
+    <tr>
+      <td>CI/CD bot</td>
+      <td>IDAD</td>
+      <td>❌ (локальный CLI)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="как-выбрать-агента-практически">Как выбрать агента (практически)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Задача</th>
+      <th>Разумный выбор</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Pair programming в терминале, repo map</td>
+      <td><strong>Aider</strong></td>
+    </tr>
+    <tr>
+      <td>Full-screen TUI, минимальный код агента</td>
+      <td><strong>Pi</strong></td>
+    </tr>
+    <tr>
+      <td>OpenAI-стек, sandbox, <code class="language-plaintext highlighter-rouge">codex exec</code></td>
+      <td><strong>Codex</strong></td>
+    </tr>
+    <tr>
+      <td>Persistent server, Tab build/plan</td>
+      <td><strong>OpenCode</strong></td>
+    </tr>
+    <tr>
+      <td>Локальный open-source + BYOK</td>
+      <td>OpenCode, Pi, py-code-agent, g3</td>
+    </tr>
+    <tr>
+      <td>24/7 бот в Telegram/Slack</td>
+      <td>Hermes</td>
+    </tr>
+    <tr>
+      <td>Issue → PR на GitHub с ревью</td>
+      <td>IDAD</td>
+    </tr>
+    <tr>
+      <td>Enterprise IDE + governance</td>
+      <td>Claude Code</td>
+    </tr>
+    <tr>
+      <td>Нетехнический пользователь, web-задачи</td>
+      <td>ChatGPT Agent</td>
+    </tr>
+    <tr>
+      <td>Максимальная проверка кода adversarial-петлёй</td>
+      <td><strong>g3</strong></td>
+    </tr>
+    <tr>
+      <td>Свой стек, BYOK, persistent sessions</td>
+      <td>OpenCode</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="резюме">Резюме</h2>
+
+<ol>
+  <li><strong>RAG</strong> даёт знания извне; <strong>контекстное окно</strong> — ограниченную память; <strong>skills</strong> — процедуры; <strong>MCP</strong> — стандарт для tools.</li>
+  <li>Любая агентная система = <strong>loop + tools + memory + (опционально) critic</strong>.</li>
+  <li>Ландшафт 2026: <strong>Pi / Aider / Codex / OpenCode</strong> — главные terminal-first агенты; TUI бывает fullscreen (Pi, Codex, OpenCode) и scrollback (Aider, Claude Code).</li>
+  <li><strong>g3</strong> — агент с уникальной <strong>диалектической</strong> архитектурой: не «больше tools», а <strong>структурированное противоречие</strong> Player/Coach.</li>
+</ol>
+
+<hr />
+
+<h2 id="источники-и-ссылки">Источники и ссылки</h2>
+
+<ul>
+  <li><a href="https://modelcontextprotocol.io/">Model Context Protocol</a></li>
+  <li><a href="https://agentskills.io/">Agent Skills (agentskills.io)</a></li>
+  <li><a href="https://github.com/badlogic/pi-mono">Pi mono</a> · <a href="https://github.com/badlogic/pi-mono/tree/main/packages/tui">pi-tui</a></li>
+  <li><a href="https://aider.chat/">Aider</a> · <a href="https://github.com/Aider-AI/aider">GitHub</a></li>
+  <li><a href="https://developers.openai.com/codex/cli">OpenAI Codex CLI</a> · <a href="https://github.com/openai/codex">GitHub</a></li>
+  <li><a href="https://opencode.ai">OpenCode</a> · <a href="https://github.com/anomalyco/opencode">GitHub</a></li>
+  <li><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/architecture">Hermes Agent docs</a></li>
+  <li><a href="https://github.com/bonashen/py-code-agent">py-code-agent</a></li>
+  <li><a href="https://idad.io/">IDAD</a></li>
+  <li><a href="https://openai.com/index/introducing-chatgpt-agent/">ChatGPT agent (OpenAI)</a></li>
+  <li><a href="https://code.claude.com/docs">Claude Code docs</a></li>
+  <li><a href="/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/">g3 — VAIRL черновик</a> · <a href="https://block.xyz/documents/adversarial-cooperation-in-code-synthesis.pdf">Block AI Research PDF</a></li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

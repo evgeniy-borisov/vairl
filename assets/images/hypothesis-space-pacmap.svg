@@ -1,0 +1,43 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pacG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="pacG2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#fa709a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbff"/>
+  <!-- high-D cube -->
+  <g transform="translate(140,200)">
+    <text x="0" y="-20" fill="#667eea" font-family="system-ui,sans-serif" font-size="16" font-weight="600">N-dimensional</text>
+    <rect x="0" y="0" width="120" height="120" fill="none" stroke="url(#pacG1)" stroke-width="2" opacity="0.6"/>
+    <rect x="30" y="-30" width="120" height="120" fill="none" stroke="url(#pacG1)" stroke-width="2" opacity="0.4"/>
+    <line x1="0" y1="0" x2="30" y2="-30" stroke="#667eea" stroke-width="2" opacity="0.4"/>
+    <line x1="120" y1="0" x2="150" y2="-30" stroke="#667eea" stroke-width="2" opacity="0.4"/>
+    <circle cx="40" cy="40" r="6" fill="#667eea" opacity="0.7"/>
+    <circle cx="80" cy="70" r="6" fill="#764ba2" opacity="0.7"/>
+    <circle cx="60" cy="100" r="6" fill="#43e97b" opacity="0.7"/>
+    <circle cx="100" cy="30" r="6" fill="#fa709a" opacity="0.7"/>
+  </g>
+  <!-- arrow PaCMAP -->
+  <text x="380" y="280" fill="#888" font-family="system-ui,sans-serif" font-size="28">PaCMAP -&gt;</text>
+  <!-- 2D scatter -->
+  <g transform="translate(520,140)">
+    <rect x="0" y="0" width="480" height="320" rx="16" fill="white" stroke="url(#pacG2)" stroke-width="2" opacity="0.9"/>
+    <text x="240" y="36" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="16" font-weight="600">2D Hypothesis Space</text>
+    <circle cx="80" cy="120" r="14" fill="#667eea" opacity="0.75"/>
+    <circle cx="140" cy="90" r="10" fill="#667eea" opacity="0.55"/>
+    <circle cx="200" cy="180" r="16" fill="#43e97b" opacity="0.8"/>
+    <circle cx="260" cy="140" r="12" fill="#43e97b" opacity="0.6"/>
+    <circle cx="320" cy="220" r="18" fill="#fa709a" opacity="0.75"/>
+    <circle cx="380" cy="100" r="11" fill="#764ba2" opacity="0.65"/>
+    <circle cx="420" cy="260" r="13" fill="#fee140" opacity="0.7"/>
+    <circle cx="160" cy="260" r="9" fill="#38f9d7" opacity="0.6"/>
+    <ellipse cx="200" cy="150" rx="90" ry="60" fill="none" stroke="#667eea" stroke-width="1.5" opacity="0.25" stroke-dasharray="6 4"/>
+    <ellipse cx="350" cy="200" rx="70" ry="50" fill="none" stroke="#43e97b" stroke-width="1.5" opacity="0.25" stroke-dasharray="6 4"/>
+  </g>
+  <text x="600" y="540" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="18" opacity="0.6">local + global structure preserved</text>
+</svg>

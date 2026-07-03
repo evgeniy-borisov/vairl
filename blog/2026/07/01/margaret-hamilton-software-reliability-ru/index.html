@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Маргарет Гамильтон: Apollo, software engineering и языки надёжного ПО - VAIRL</title>
+    <meta name="description" content="Эволюция software engineering от Apollo к USL: эмпирический анализ ошибок, HOS, USE.IT, DBTF, шесть аксиом управления, FMap/TMap и 001 Tool Suite — и совреме...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Маргарет Гамильтон: Apollo, software engineering и языки надёжного ПО | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Маргарет Гамильтон: Apollo, software engineering и языки надёжного ПО" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Эволюция software engineering от Apollo к USL: эмпирический анализ ошибок, HOS, USE.IT, DBTF, шесть аксиом управления, FMap/TMap и 001 Tool Suite — и современные аналоги формальной надёжности." />
+<meta name="twitter:description" property="og:description" content="Эволюция software engineering от Apollo к USL: эмпирический анализ ошибок, HOS, USE.IT, DBTF, шесть аксиом управления, FMap/TMap и 001 Tool Suite — и современные аналоги формальной надёжности." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/margaret-hamilton-apollo.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-01T17:00:00+00:00" />
+<meta property="article:modified_time" content="2026-07-01T17:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/margaret-hamilton-apollo.svg" />
+<meta name="twitter:title" content="Маргарет Гамильтон: Apollo, software engineering и языки надёжного ПО" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-01T17:00:00+00:00","datePublished":"2026-07-01T17:00:00+00:00","description":"Эволюция software engineering от Apollo к USL: эмпирический анализ ошибок, HOS, USE.IT, DBTF, шесть аксиом управления, FMap/TMap и 001 Tool Suite — и современные аналоги формальной надёжности.","headline":"Маргарет Гамильтон: Apollo, software engineering и языки надёжного ПО","image":"https://evgeniy-borisov.github.io/vairl/assets/images/margaret-hamilton-apollo.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/margaret-hamilton-apollo.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Маргарет Гамильтон: Apollo, software engineering и языки надёжного ПО</h1>
+        <p class="post-date">01 July 2026, 17:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p><strong>Маргарет Гамильтон</strong> (Margaret Hamilton, род. 1936) — один из архитекторов современной инженерии ПО. В MIT Instrumentation Laboratory она возглавила разработку <strong>бортового ПО Apollo Guidance Computer (AGC)</strong> для программы «Аполлон» и позже сформулировала подход, который лёг в основу <strong>Universal Systems Language (USL)</strong> — языка и методологии, где ошибки <strong>предотвращаются на этапе проектирования</strong>, а не ищутся после релиза.</p>
+
+<p>Ниже — краткая биография, языки Apollo, процесс верификации космического кода, <strong>эволюция методов надёжности</strong> от «тестировать до смерти» к <strong>Development Before The Fact</strong>, подробно — <strong>как работает USL</strong>, и современные аналоги. Связанные темы VAIRL: <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрия агентов</a>, <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">генерация бенчмарков</a>, <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивость control loops</a>.</p>
+
+<figure style="margin: 2em auto; text-align: center;">
+  <img src="/vairl/assets/images/margaret-hamilton.png" alt="Маргарет Гамильтон с распечатками кода бортового компьютера Apollo" style="max-width: 50%; height: auto; display: block; margin: 0 auto 0.75em;" />
+  <figcaption style="font-size: 0.9em; color: #666; max-width: 640px; margin: 0 auto;">Маргарет Гамильтон с кодом Apollo — символ масштаба и дисциплины документирования каждой строки. Фото: <a href="https://thecode.media/">thecode.media</a></figcaption>
+</figure>
+
+<h2 id="кто-такая-маргарет-гамильтон">Кто такая Маргарет Гамильтон</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Этап</th>
+      <th>Роль</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1960–63</strong></td>
+      <td>Lincoln Laboratory, система ПВО <strong>SAGE</strong> — первый опыт с отказоустойчивым ПО в реальном времени</td>
+    </tr>
+    <tr>
+      <td><strong>1965–72</strong></td>
+      <td>MIT Instrumentation Lab → Director of <strong>Software Engineering Division</strong>; ПО для CM, LM и Skylab</td>
+    </tr>
+    <tr>
+      <td><strong>1969</strong></td>
+      <td>Команда Гамильтон — <strong>Priority Displays</strong> и restart-логика; Apollo 11 пережил alarm 1202 и продолжил посадку</td>
+    </tr>
+    <tr>
+      <td><strong>1976</strong></td>
+      <td>Основала <strong>Higher Order Software</strong> (HOS)</td>
+    </tr>
+    <tr>
+      <td><strong>1986</strong></td>
+      <td><strong>Hamilton Technologies</strong> — USL и <strong>001 Tool Suite</strong></td>
+    </tr>
+    <tr>
+      <td><strong>2016</strong></td>
+      <td>Presidential Medal of Freedom</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Гамильтон ввела термин <strong>«software engineering»</strong> (инженерия программного обеспечения), чтобы разработка ПO получила тот же статус дисциплины, что и аппаратная инженерия: правила, ревью, трассируемость, формальные уровни тестирования. До Apollo «программист» часто писал код без отдельной инженерной методологии.</p>
+
+<hr />
+
+<h2 id="apollo-на-каком-языке-писали-код">Apollo: на каком языке писали код</h2>
+
+<p>ПО для AGC <strong>не писали на USL</strong> — этот язык появился позже, как обобщение уроков Apollo. В 1960-х использовали стек, заточенный под <strong>~2 KB RAM</strong> и <strong>read-only core rope memory</strong>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Компонент</th>
+      <th>Описание</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>AGC assembly (AGC4)</strong></td>
+      <td>Низкоуровневый ассемблер для 15-битной архитектуры AGC; инструкции вроде <code class="language-plaintext highlighter-rouge">TC</code>, <code class="language-plaintext highlighter-rouge">CCS</code>, <code class="language-plaintext highlighter-rouge">INDEX</code>; ассемблировался системой <strong>YUL</strong> / <strong>GAP</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Interpretive language</strong></td>
+      <td>«Интерпретируемый» слой поверх ассемблера: векторная математика, тригонометрия, линейное адресное пространство — одна interpretive-инструкция заменяет много assembly-кода</td>
+    </tr>
+    <tr>
+      <td><strong>MAC (MIT Algebraic Compiler)</strong></td>
+      <td>Алгебраические выражения → assembly; ускорял написание навигационных расчётов</td>
+    </tr>
+    <tr>
+      <td><strong>Executive / OS AGC</strong></td>
+      <td>Планировщик с <strong>приоритетами задач</strong> (priority scheduling), прерывания, restart — инфраструктура, без которой невозможна была error recovery</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Типичная программа — <strong>смесь</strong> assembly и interpretive-блоков: критичные по времени участки на ассемблере, навигация и математика через interpreter.</p>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph dev [Разработка на наземной машине]
+    SRC[Assembly + interpretive + MAC]
+    YUL[YUL / GAP assembler]
+    LIST[Symbolic listing + документация]
+  end
+  subgraph hw [Борт]
+    ROPE[Core rope memory — прошитая «верёвка»]
+    AGC[Apollo Guidance Computer]
+  end
+  SRC --&gt; YUL --&gt; LIST
+  LIST --&gt; ROPE --&gt; AGC
+</code></pre>
+
+<p><strong>Core rope memory</strong> — программа физически <strong>прошивалась</strong> в магнитные кольца проводами («rope mother»). Исправить баг после изготовления модуля — недели работы. Отсюда культ <strong>«сделать правильно до прошивки»</strong>: исчерпывающая симуляция, ревью и многоуровневая верификация.</p>
+
+<hr />
+
+<h2 id="как-проверяли-надёжность-кода-apollo">Как проверяли надёжность кода Apollo</h2>
+
+<p>Гамильтон описывает <strong>шесть формальных уровней</strong> тестирования и набор «software engineering techniques» — правила, инструменты и процессы для ultra-reliable ПO в разработке и в полёте.</p>
+
+<h3 id="процесс-верификации">Процесс верификации</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Этап</th>
+      <th>Что делали</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Unit / module tests</strong></td>
+      <td>Специализированные тест-программы на симуляторе AGC</td>
+    </tr>
+    <tr>
+      <td><strong>Digital simulation</strong></td>
+      <td>Полная симуляция траектории и логики на наземных машинах</td>
+    </tr>
+    <tr>
+      <td><strong>Analog / hybrid simulation</strong></td>
+      <td>Связка с реальным железом AGC в контурe</td>
+    </tr>
+    <tr>
+      <td><strong>Code review + documentation</strong></td>
+      <td>Каждая строка с объяснением; <strong>Computer Program Board</strong> (CPB) — формальное одобрение</td>
+    </tr>
+    <tr>
+      <td><strong>Manufacturing verification</strong></td>
+      <td>Перфолента → прошивка rope → контроль symbolic listing против модуля</td>
+    </tr>
+    <tr>
+      <td><strong>Flight software integration</strong></td>
+      <td>CM + LM + systems software; регрессия при каждом изменении</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Документация включала <strong>Computer Program Assembly Drawing</strong>, symbolic listing (MH 1800), TDRR (Technical Data Release Record) — тот самый «гор stack бумаги», который виден на знаменитой фотографии.</p>
+
+<h3 id="error-detection-и-recovery">Error detection и recovery</h3>
+
+<p>Команда Гамильтон разработала:</p>
+
+<ul>
+  <li><strong>Priority Displays</strong> — асинхронные дисплеи с приоритетом над фоновыми задачами;</li>
+  <li><strong>Restart / re-entry</strong> — при перегрузке или ошибке система <strong>сбрасывала</strong> неважные задачи и продолжала критичные;</li>
+  <li><strong>1202 alarm (Apollo 11)</strong> — радарная задача перегрузила CPU; executive отбросил lower-priority work, посадка продолжилась.</li>
+</ul>
+
+<p>Это не «магия assembler’а», а <strong>архитектура управления</strong>: планировщик + явные приоритеты + доказанная процедура восстановления — прямой предок современных watchdog и graceful degradation.</p>
+
+<hr />
+
+<h2 id="эволюция-software-engineering-от-apollo-к-usl">Эволюция software engineering: от Apollo к USL</h2>
+
+<p>Гамильтон не остановилась на успехе Apollo. После программы она провела <strong>эмпирический анализ</strong> всего жизненного цикла flight software — не «что сломалось», а <strong>какие классы ошибок повторяются</strong> и как их <strong>запретить структурой системы</strong>, а не бесконечным тестированием.</p>
+
+<h3 id="что-показал-анализ-apollo">Что показал анализ Apollo</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Наблюдение</th>
+      <th>Вывод для будущих методологий</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>~75%</strong> найденных ошибок — <strong>интерфейсные</strong> (data flow, приоритеты, timing между модулями)</td>
+      <td>Главный враг — не «опечатка в строке», а <strong>стык</strong> между компонентами</td>
+    </tr>
+    <tr>
+      <td><strong>~50%</strong> бюджета жизненного цикла — симуляция, но <strong>44%</strong> ошибок нашли <strong>вручную</strong> (eyeballing)</td>
+      <td>Нужна <strong>статическая</strong> автоматизация, не только dynamic sim</td>
+    </tr>
+    <tr>
+      <td><strong>~60%</strong> ошибок уже <strong>летали</strong> в космосе до обнаружения</td>
+      <td>Ошибки могут быть тонкими годами; надёжность — свойство <strong>определения</strong> системы</td>
+    </tr>
+    <tr>
+      <td>Приоритеты и асинхронность — суть real-time, а не «дополнение к синхронному коду»</td>
+      <td>Язык спецификации должен <strong>встроить</strong> время, события и приоритеты</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Каждую ошибку классифицировали: <strong>как изменить способ определения системы</strong>, чтобы этот класс <strong>не мог возникнуть</strong>. Так родилась <strong>математическая теория управления</strong> — позже формализованная в <strong>шести аксиомах control</strong> и трёх примитивных структурах.</p>
+
+<h3 id="две-парадигмы-after-the-fact-vs-before-the-fact">Две парадигмы: After The Fact vs Before The Fact</h3>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph datf [Development After The Fact — традиция]
+    W1[Пишем код]
+    W2[Тестируем]
+    W3[Находим баги]
+    W4[Чиним]
+    W1 --&gt; W2 --&gt; W3 --&gt; W4
+    W4 -.-&gt;|цикл| W2
+  end
+  subgraph dbtf [Development Before The Fact — DBTF]
+    B1[Определяем систему на USL]
+    B2[001 Analyzer — статическая проверка]
+    B3[001 Generator — код + design]
+    B1 --&gt; B2 --&gt; B3
+  end
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th><strong>After The Fact (лечение)</strong></th>
+      <th><strong>Before The Fact (профилактика)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Качество</td>
+      <td>Тестировать, пока ошибки не исчезнут</td>
+      <td><strong>Не допускать</strong> ошибки грамматикой и аксиомами</td>
+    </tr>
+    <tr>
+      <td>Интерфейсы</td>
+      <td>Integration testing в конце</td>
+      <td>Исключены <strong>на этапе определения</strong></td>
+    </tr>
+    <tr>
+      <td>Надёжность vs продуктивность</td>
+      <td>Чем надёжнее — тем <strong>дороже</strong> тесты</td>
+      <td>Чем надёжнее — тем <strong>меньше</strong> нужно тестов</td>
+    </tr>
+    <tr>
+      <td>Apollo</td>
+      <td>6 уровней sim + CPB + rope</td>
+      <td>Эмпирика, из которой выросла теория</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>DBTF — не «меньше QA», а <strong>перенос корректности в спецификацию</strong>: система моделирует не только приложение (авионика, банк), но и <strong>свой life cycle</strong> — traceability, интеграцию, отсутствие interface errors «едут бесплатно».</p>
+
+<h3 id="хронология-от-дисциплины-к-языку">Хронология: от дисциплины к языку</h3>
+
+<pre><code class="language-mermaid">flowchart LR
+  A[Apollo 1965–72&lt;br/&gt;software engineering] --&gt; B[Эмпирический анализ&lt;br/&gt;классы ошибок]
+  B --&gt; C[HOS 1976&lt;br/&gt;6 axioms + IEEE TSE]
+  C --&gt; D[USE.IT 1980-е&lt;br/&gt;первый CASE ultra-reliable]
+  D --&gt; E[001AXES / AXES&lt;br/&gt;формальная семантика]
+  E --&gt; F[USL + 001 Tool Suite&lt;br/&gt;DBTF + автогенерация]
+  F --&gt; G[SysML semantics&lt;br/&gt;INCOSE 2007+]
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Этап</th>
+      <th>Год</th>
+      <th>Артефакт</th>
+      <th>Вклад</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Apollo</strong></td>
+      <td>1965–72</td>
+      <td>AGC assembly, 6 уровней V&amp;V, CPB</td>
+      <td>Термин <em>software engineering</em>; ultra-reliable <strong>процесс</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Эмпирический анализ</strong></td>
+      <td>~1972–76</td>
+      <td>Категоризация ошибок, теория control</td>
+      <td>75% interface errors → цель «eliminate by design»</td>
+    </tr>
+    <tr>
+      <td><strong>HOS</strong></td>
+      <td>1976</td>
+      <td><em>Higher Order Software</em> (Hamilton &amp; Zeldin, IEEE TSE)</td>
+      <td>Формальная иерархия интерфейсов; <strong>6 axioms</strong>; multiprogrammed real-time</td>
+    </tr>
+    <tr>
+      <td><strong>USE.IT</strong></td>
+      <td>1980–85</td>
+      <td>Higher Order Software, Inc.</td>
+      <td>Первый CASE: spec → <strong>Analyzer</strong> → auto code + docs</td>
+    </tr>
+    <tr>
+      <td><strong>001AXES / USL</strong></td>
+      <td>1986+</td>
+      <td>Hamilton Technologies</td>
+      <td>Метаязык: <strong>FMap + TMap</strong>, SOO, DBTF</td>
+    </tr>
+    <tr>
+      <td><strong>001 Tool Suite</strong></td>
+      <td>1994+</td>
+      <td>Analyzer, Generator, RAT, DXecutor</td>
+      <td>001 <strong>определён на USL и генерирует сам себя</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>HOS (Higher Order Software)</strong> — промежуточный шаг: система описывается как <strong>одна вычислимая система</strong> с явными интерфейсами software↔software, software↔hardware, software↔management. Шесть аксиом задают, как <strong>родитель</strong> управляет <strong>непосредственными</strong> детьми — без «прыжков» через уровни, без несанкционированного доступа к данным.</p>
+
+<p><strong>USE.IT</strong> автоматизировал цикл HOS: иерархическая спецификация → <strong>исчерпывающий анализ</strong> data/control relations по всему дереву → исправление до <strong>логической полноты</strong> → генерация кода. Ошибки типизации, control, recursion, data conflict и interface отображались на экране — это прямой предок сегодняшних <strong>static analyzer + formal verifier</strong> в CI.</p>
+
+<hr />
+
+<h2 id="usl-и-001-как-это-работает">USL и 001: как это работает</h2>
+
+<p><strong>Universal Systems Language (USL)</strong> — реализация идей DBTF через метаязык <strong>001AXES</strong> (эволюция AXES → 001AXES). Это не «ещё один синтаксис программирования», а <strong>универсальная семантика систем</strong>: formal, но по замыслу практичный (в отличие от многих academic formal methods).</p>
+
+<h3 id="философия-system-oriented-objects">Философия: system-oriented objects</h3>
+
+<p>В традиционном OOP думают <strong>object-oriented</strong>. В USL — <strong>system-oriented objects (SOO)</strong>:</p>
+
+<ul>
+  <li><strong>Каждая система — объект, каждый объект — система</strong> (рекурсивно).</li>
+  <li>Надёжная система собирается <strong>только из надёжных блоков</strong>; только надёжные механизмы их интегрируют.</li>
+  <li>SOO <strong>inherently</strong> объединяет function-, object- и <strong>timing</strong>-aspects — не три разрозненных артефакта (requirements / design / code).</li>
+  <li>Системы <strong>асинхронны и event-driven</strong>: расписание не прописывают вручную — оно <strong>вытекает</strong> из взаимодействий объектов (урок Apollo executive).</li>
+</ul>
+
+<h3 id="два-мира-fmap-и-tmap">Два мира: FMap и TMap</h3>
+
+<p>Любое представление системы в USL — пара карт, <strong>inherently integrated</strong>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Карта</th>
+      <th>Мир</th>
+      <th>Что моделирует</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>FMap</strong> (Function Map)</td>
+      <td>Динамика — «doing»</td>
+      <td>Функции, control flow, <strong>время и приоритеты</strong></td>
+    </tr>
+    <tr>
+      <td><strong>TMap</strong> (Type Map)</td>
+      <td>Статика — «being»</td>
+      <td>Типы, пространственные отношения, containment</td>
+    </tr>
+    <tr>
+      <td><strong>OMap</strong></td>
+      <td>Экземпляры типов</td>
+      <td>Состояния объектов в runtime</td>
+    </tr>
+    <tr>
+      <td><strong>EMap</strong></td>
+      <td>Execution Map</td>
+      <td>Инстанцирование FMap на performance pass</td>
+    </tr>
+    <tr>
+      <td><strong>RMap</strong></td>
+      <td>Road Map</td>
+      <td>Организация всех объектов системы</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>FMap и TMap <strong>взаимно определяют друг друга</strong>: изменили тип на TMap — 001 <strong>прослеживает</strong> все затронутые FMap; primitive operations типа на TMap — листья FMap.</p>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph spec [Определение SOO]
+    TM[TMap: типы и отношения]
+    FM[FMap: функции и control]
+    TM &lt;--&gt;|inherent integration| FM
+  end
+  subgraph runtime [Runtime]
+    OM[OMap: object states]
+    EM[EMap: function instances]
+    FM --&gt; EM
+    TM --&gt; OM
+  end
+  spec --&gt; 001A[001 Analyzer]
+  001A --&gt; 001G[001 Generator / RAT]
+  001G --&gt; CODE[Production code + docs]
+  EM --&gt; DX[001 DXecutor]
+</code></pre>
+
+<p><strong>Типичный workflow команды:</strong> набросать TMap (какие объекты и связи) → параллельно RMap → FMap «почти сам» выстраивается из natural functionality типов → Analyzer → правки → Generator.</p>
+
+<h3 id="шесть-аксиом-управления-axioms-of-control">Шесть аксиом управления (axioms of control)</h3>
+
+<p>Основа теории — <strong>шесть аксиом</strong> «немедленного доминирования» родителя над <strong>только непосредственными</strong> детьми. Объединение этих отношений — <strong>control</strong>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Аксиома</th>
+      <th>Смысл</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1</strong></td>
+      <td>Invocation</td>
+      <td>Родитель управляет <strong>вызовом</strong> только immediate children; mapping родителя <strong>полностью заменяется</strong> детьми — не больше, не меньше</td>
+    </tr>
+    <tr>
+      <td><strong>2</strong></td>
+      <td>Output responsibility (codomain)</td>
+      <td>Родитель <strong>ответственен</strong> за свой output; дети помогают, но не делегируют «доставку» результата</td>
+    </tr>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>Output access rights</td>
+      <td>Родитель выдаёт детям права <strong>изменять</strong> только свои output-переменные на immediate level</td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>Input access rights (domain)</td>
+      <td>Дети получают domain родителя <strong>только для чтения</strong>; input/output одной функции не пересекаются</td>
+    </tr>
+    <tr>
+      <td><strong>5</strong></td>
+      <td>Input validation</td>
+      <td>Родитель <strong>отвергает</strong> invalid elements своего domain (error detection)</td>
+    </tr>
+    <tr>
+      <td><strong>6</strong></td>
+      <td>Ordering</td>
+      <td>Родитель управляет <strong>порядком и приоритетом</strong> вызова детей (time, events, importance)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Следствия (derived theorems):</strong> уникальный parent; приоритет ребёнка <strong>ниже</strong> родителя; siblings общаются <strong>только через level</strong> (не напрямую через hierarchy); <strong>single reference / single assignment</strong>; process <strong>не прерывает</strong> себя или родителя; traceability <strong>instance by instance</strong>; система <strong>event-driven</strong> (каждый input/output — событие).</p>
+
+<p>Именно эти правила <strong>устраняют класс interface errors</strong>, который на Apollo давал ~75% багов.</p>
+
+<h3 id="три-примитивные-control-структуры">Три примитивные control-структуры</h3>
+
+<p>Любая FMap/TMap <strong>полностью</strong> выводится из трёх примитивов (аналог constructive type theory — новые структуры <strong>derived</strong> из примитивов, а не добавлены ad hoc):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Примитив</th>
+      <th>Отношение</th>
+      <th>Когда</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Join</strong></td>
+      <td><strong>Dependent</strong> — дети выполняются последовательно-зависимо</td>
+      <td>B нужен результат A</td>
+    </tr>
+    <tr>
+      <td><strong>Include</strong></td>
+      <td><strong>Independent</strong> — параллельные ветви</td>
+      <td>Concurrent subfunctions</td>
+    </tr>
+    <tr>
+      <td><strong>Or</strong></td>
+      <td><strong>Decision</strong> — выбор ветви</td>
+      <td>Partition / guard</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Непримитивные структуры (<strong>Async</strong>, <strong>interrupt</strong>, <strong>schedulePeriod</strong>, <strong>TreeOf</strong>, <strong>Jset</strong> …) — <strong>шаблоны reuse</strong>, ultimately reducible к Join/Include/Or и поэтому <strong>подчинены тем же аксиомам</strong>. Пример из avionics: вложенный <strong>periodic structure</strong> для Guidance/Navigation/Control — control прерывает guidance, guidance — navigation; приоритет <strong>зашит в позицию</strong> на FMap, не в отдельный scheduler-код (~80% UML2 scheduling, по оценке HTI, можно убрать при USL substrate).</p>
+
+<h3 id="001-tool-suite-автоматизация-dbtf">001 Tool Suite: автоматизация DBTF</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Компонент</th>
+      <th>Роль</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>001 Analyzer</strong></td>
+      <td>Статический анализ USL-определения: корректность грамматики, data/control, constraints; «before-the-fact testing» на каждом шаге</td>
+    </tr>
+    <tr>
+      <td><strong>001 Generator</strong></td>
+      <td>Design + <strong>production-ready code</strong> + документация из тех же FMap/TMap</td>
+    </tr>
+    <tr>
+      <td><strong>001 RAT</strong> (Resource Allocation Tool)</td>
+      <td>Автоматическое распределение по CPU/архитектуре; без ручного porting</td>
+    </tr>
+    <tr>
+      <td><strong>001 DXecutor</strong></td>
+      <td>Распределённый runtime: иерархия executors, TCP/IP, <strong>async event-driven</strong> scheduling по приоритетам из грамматики</td>
+    </tr>
+    <tr>
+      <td><strong>Constraints (maps)</strong></td>
+      <td>Global/local ограничения (напр. <code class="language-plaintext highlighter-rouge">sendBy:vehicle = 2h</code>) с static/dynamic analysis и trace объекта через функции</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Полный цикл:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. Define SOO in USL (FMaps + TMaps + optional RMap)
+2. 001 Analyzer → errors on screen → edit until logically complete
+3. Simulate via OMaps/EMaps (observe behavior, cost, real-time)
+4. 001 Generator → code + docs (target architecture via RAT)
+5. 001 DXecutor → deploy async distributed execution
+</code></pre></div></div>
+
+<p>NASA Spinoff описывает 001 как средство для <strong>ultra-reliable</strong> моделей и ПO «free of interface errors, logically complete, no data or control flow errors» — устранение <strong>≥75%</strong> software-related errors по оценке HTI.</p>
+
+<p><strong>001 определён на USL и генерирует сам себя</strong> — dogfooding на уровне meta-CASE. DoD Software Engineering Tools Experiment (1992) и последующие внедрения (aerospace, banking, SDI, factory models) фиксировали рост продуктивности, <strong>растущий</strong> с размером системы — обратно традиционным методам.</p>
+
+<h3 id="чем-usl-отличается-от-просто-formal-methods">Чем USL отличается от «просто formal methods»</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Традиционный formalism</th>
+      <th>USL / DBTF</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Syntax first, semantics informal</td>
+      <td><strong>Semantics first</strong>, syntax independent</td>
+    </tr>
+    <tr>
+      <td>Proof отдельно от кода</td>
+      <td>Correctness <strong>в grammar</strong> + Analyzer</td>
+    </tr>
+    <tr>
+      <td>Ограниченный размер/домен</td>
+      <td>Любой масштаб: от embedded до distributed SDI</td>
+    </tr>
+    <tr>
+      <td>Object-centric</td>
+      <td><strong>System-centric</strong>; time/space в formalism</td>
+    </tr>
+    <tr>
+      <td>Ad hoc extensions</td>
+      <td>Новые механизмы <strong>derived</strong> из примитивов</td>
+    </tr>
+    <tr>
+      <td>Можно «обойти» правила</td>
+      <td>Interface errors <strong>structurally impossible</strong> при correct use</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>USL может давать <strong>формальную семантику</strong> для других нотаций — Hamilton &amp; Hackler показывали mapping на <strong>SysML</strong> (INCOSE 2007): та же идея «одна семантика — много синтаксисов».</p>
+
+<p><strong>Важно:</strong> USL — <strong>уровень спецификации и генерации</strong>, не замена AGC assembly в 1969. Apollo дал <strong>эмпирику и six levels of V&amp;V</strong>; USL — <strong>теорию, язык и automation</strong>, чтобы не повторять «44% errors by eyeballing».</p>
+
+<hr />
+
+<h2 id="современные-аналоги-от-apollo-к-2026">Современные аналоги: от Apollo к 2026</h2>
+
+<p>Идеи Гамильтон — shift-left, формальные контракты, трассируемость, приоритеты в real-time — живы в нескольких семействах инструментов:</p>
+
+<h3 id="формальные-методы-и-correctness-by-construction">Формальные методы и «correctness by construction»</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Подход</th>
+      <th>Примеры</th>
+      <th>Аналог идеи Гамильтон</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Model checking</strong></td>
+      <td>TLA+, Alloy, SPIN</td>
+      <td>DBTF: проверить модель <strong>до</strong> кода; аналог 001 Analyzer</td>
+    </tr>
+    <tr>
+      <td><strong>Model-based code gen</strong></td>
+      <td>SCADE, Simulink, <strong>001 Generator</strong></td>
+      <td>FMap/TMap → executable; одна семантика — много targets</td>
+    </tr>
+    <tr>
+      <td><strong>Доказательство программ</strong></td>
+      <td>Coq, Isabelle/HOL, Dafny, F*</td>
+      <td>Гарантии в логике; USL — correctness <strong>в grammar</strong> без отдельного prover</td>
+    </tr>
+    <tr>
+      <td><strong>Verified compilation</strong></td>
+      <td>CompCert (C → asm с доказательством)</td>
+      <td>Symbolic listing ↔ rope; traceability SOO ↔ code</td>
+    </tr>
+    <tr>
+      <td><strong>Contract-based design</strong></td>
+      <td>Eiffel (Design by Contract), Ada SPARK</td>
+      <td>Аксиомы 3–5 USL: domain/codomain access rights</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="критическое-по-в-авиации-и-космосе-сегодня">Критическое ПО в авиации и космосе сегодня</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Стандарт / стек</th>
+      <th>Где</th>
+      <th>Связь с Apollo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DO-178C</strong> (авиация)</td>
+      <td>Сертификация бортового ПO</td>
+      <td>Формальные уровни V&amp;V, traceability — наследник CPB</td>
+    </tr>
+    <tr>
+      <td><strong>ECSS / NASA-STD-8739.8</strong></td>
+      <td>ESA, NASA software assurance</td>
+      <td>Independent V&amp;V, coding standards</td>
+    </tr>
+    <tr>
+      <td><strong>HAL/S</strong></td>
+      <td>Space Shuttle (Intermetrics, 1970-е)</td>
+      <td>Следующий шаг после assembly: высокоуровневый язык для полётного ПO</td>
+    </tr>
+    <tr>
+      <td><strong>Rust + MISRA C</strong></td>
+      <td>CubeSat, Mars rovers, новые миссии</td>
+      <td>Память без GC; статический анализ + тесты</td>
+    </tr>
+    <tr>
+      <td><strong>Simulink / SCADE</strong></td>
+      <td>Model-based design + certified code gen</td>
+      <td>USL-like: модель → проверенный код</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="инженерия-надёжности-в-ml-и-ai-агентах">Инженерия надёжности в ML и AI-агентах</h3>
+
+<p>Apollo не знал LLM, но <strong>контур</strong> тот же: траектория → verifier → regression:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Практика 2020-х</th>
+      <th>Apollo-аналог</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">Deterministic evals</a> (SWE-bench, τ-bench)</td>
+      <td>Unit + integration tests на симуляторе</td>
+    </tr>
+    <tr>
+      <td><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия траекторий</a></td>
+      <td>Symbolic listing + flight logs</td>
+    </tr>
+    <tr>
+      <td>Priority / preemption в orchestrator</td>
+      <td>AGC executive + Priority Displays</td>
+    </tr>
+    <tr>
+      <td>Formal specs (OpenAPI, JSON Schema) для tools</td>
+      <td>Interface control documents Apollo</td>
+    </tr>
+    <tr>
+      <td><strong>LLM-as-a-Judge</strong></td>
+      <td>Последняя линия; Гамильтон предпочла бы <strong>state oracle</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart LR
+  subgraph apollo [Apollo 1960s]
+    A1[Assembly spec]
+    A2[Simulation + CPB]
+    A3[Rope — immutable deploy]
+  end
+  subgraph today [High-assurance 2020s]
+    T1[Formal model / USL-like spec]
+    T2[Prover / model checker / CI eval]
+    T3[Signed artifact deploy]
+  end
+  A1 --&gt; A2 --&gt; A3
+  T1 --&gt; T2 --&gt; T3
+</code></pre>
+
+<hr />
+
+<h2 id="чему-учит-гамильтон-разработчиков-агентов">Чему учит Гамильтон разработчиков агентов</h2>
+
+<ol>
+  <li><strong>Надёжность — свойство процесса и языка определения</strong>, не «ещё один тест в конце». Apollo → HOS → USL — одна линия: от six levels V&amp;V к <strong>DBTF</strong>.</li>
+  <li><strong>75% багов — на стыках</strong> — для агентов это tool schemas, handoff между ролями, priority при overload; USL-аналог — typed FSM/DAG + formal tool contracts.</li>
+  <li><strong>Исправление после «прошивки» дорого</strong> — «rope moment» агента: промпт в prod без eval.</li>
+  <li><strong>Recovery важнее идеального кода</strong> — Priority Displays ≈ shed lower-priority tool calls, сохранить user outcome.</li>
+  <li><strong>Join / Include / Or</strong> на оркестраторе — явная dependent/independent/decision структура вместо ad hoc ReAct loop.</li>
+  <li><strong>Analyzer до Generator</strong> — spec → static check → code; не генерировать код агентом без verifier pass.</li>
+</ol>
+
+<hr />
+
+<h2 id="краткая-хронология-сводка">Краткая хронология (сводка)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Год</th>
+      <th>Артефакт</th>
+      <th>Связь с USL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1965–72</td>
+      <td>Apollo AGC + <em>software engineering</em></td>
+      <td>Эмпирика: 75% interface errors, 6 уровней V&amp;V</td>
+    </tr>
+    <tr>
+      <td>1976</td>
+      <td><strong>HOS</strong> + 6 axioms (IEEE TSE)</td>
+      <td>Теория control; формальные интерфейсы</td>
+    </tr>
+    <tr>
+      <td>1980–85</td>
+      <td><strong>USE.IT</strong></td>
+      <td>Analyzer + auto code — прототип 001</td>
+    </tr>
+    <tr>
+      <td>1986+</td>
+      <td>Hamilton Technologies, <strong>001AXES</strong></td>
+      <td>FMap/TMap, SOO, semantics-first</td>
+    </tr>
+    <tr>
+      <td>1994+</td>
+      <td><strong>001 Tool Suite</strong>, DBTF в <em>Electronic Design</em></td>
+      <td>Полный life-cycle automation</td>
+    </tr>
+    <tr>
+      <td>2007+</td>
+      <td>Formal semantics for <strong>SysML</strong> (INCOSE)</td>
+      <td>USL как metalanguage для industry UML</td>
+    </tr>
+    <tr>
+      <td>2020-е</td>
+      <td>TLA+, SPARK, certified MBSE, agent eval CI</td>
+      <td>Массовизация идей DBTF</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="литература-и-ссылки">Литература и ссылки</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Источник</th>
+      <th>Тема</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hamilton M. H., <em>The Apollo On-Board Flight Software</em> (2019)</td>
+      <td><a href="https://wehackthemoon.com/sites/default/files/2019-03/mhh.software.final-1.pdf">wehackthemoon.com PDF</a></td>
+    </tr>
+    <tr>
+      <td>Hamilton M. H., ICSE 2018 keynote <em>The Language as a Software Engineer</em></td>
+      <td><a href="https://www.youtube.com/watch?v=ZbVOF0Uk5lU">YouTube</a></td>
+    </tr>
+    <tr>
+      <td>Computer History Museum — профиль</td>
+      <td><a href="https://computerhistory.org/profile/margaret-hamilton/">computerhistory.org</a></td>
+    </tr>
+    <tr>
+      <td>National Air and Space Museum — «Rope Mother»</td>
+      <td><a href="https://airandspace.si.edu/stories/editorial/rope-mother-margaret-hamilton">airandspace.si.edu</a></td>
+    </tr>
+    <tr>
+      <td>Hamilton M. H. &amp; Zeldin S., <em>Higher Order Software—A Methodology for Defining Software</em> (1976)</td>
+      <td><a href="https://doi.org/10.1109/tse.1976.233798">IEEE TSE</a> — 6 axioms, HOS</td>
+    </tr>
+    <tr>
+      <td>Hamilton M. H. &amp; Hackler W. R., <em>Universal Systems Language for Preventative Systems Engineering</em> (2007)</td>
+      <td><a href="http://www.htius.com/Articles/36.pdf">CSER 2007</a> — FMap/TMap, SOO, 001</td>
+    </tr>
+    <tr>
+      <td>Hamilton M. H., <em>Universal Systems Language: Lessons Learned from Apollo</em> (2008)</td>
+      <td><a href="https://doi.org/10.1109/mc.2008.541">IEEE Computer</a></td>
+    </tr>
+    <tr>
+      <td>Hamilton M. H., <em>Inside Development Before the Fact</em> (1994)</td>
+      <td><em>Electronic Design</em> — DBTF</td>
+    </tr>
+    <tr>
+      <td>NASA NTRS — Error-free Software (001)</td>
+      <td><a href="https://ntrs.nasa.gov/api/citations/20020087694/downloads/20020087694.pdf">ntrs.nasa.gov PDF</a></td>
+    </tr>
+    <tr>
+      <td>Computer History Museum — USE.IT brochure</td>
+      <td><a href="https://archive.computerhistory.org/resources/access/text/2023/04/102737144-05-01-acc.pdf">archive.computerhistory.org</a></td>
+    </tr>
+    <tr>
+      <td>Virtual AGC — assembly manual</td>
+      <td><a href="http://apollo.josefsipek.net/assembly_language_manual.html">apollo.josefsipek.net</a></td>
+    </tr>
+    <tr>
+      <td>Wikipedia — Universal Systems Language</td>
+      <td><a href="https://en.wikipedia.org/wiki/Universal_Systems_Language">en.wikipedia.org/wiki/Universal_Systems_Language</a></td>
+    </tr>
+    <tr>
+      <td>NASA Spinoff — Error-Free Software (001)</td>
+      <td><a href="https://spinoff.nasa.gov/node/9550">spinoff.nasa.gov</a></td>
+    </tr>
+    <tr>
+      <td>Hamilton Technologies</td>
+      <td><a href="https://www.htos.com/">htos.com</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="связанные-публикации-vairl">Связанные публикации VAIRL</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия AI-агентов</a> — трассировка trajectories как symbolic listing</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">Генерация бенчмарков</a> — deterministic evals и sandbox</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость control loops</a> — overload, recovery, метрики σ</li>
+  <li><a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">Пайплайн ролей агента</a> — инженерная дисциплина жизненного цикла</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

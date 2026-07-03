@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Деплой нейросети на конечное устройство: PyTorch → ONNX → браузер - VAIRL</title>
+    <meta name="description" content="Как обучить лёгкую CNN в PyTorch, экспортировать в ONNX и запустить инференс в браузере через ONNX Runtime Web и p5.js с веб-камерой.">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Деплой нейросети на конечное устройство: PyTorch → ONNX → браузер | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Деплой нейросети на конечное устройство: PyTorch → ONNX → браузер" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Как обучить лёгкую CNN в PyTorch, экспортировать в ONNX и запустить инференс в браузере через ONNX Runtime Web и p5.js с веб-камерой." />
+<meta name="twitter:description" property="og:description" content="Как обучить лёгкую CNN в PyTorch, экспортировать в ONNX и запустить инференс в браузере через ONNX Runtime Web и p5.js с веб-камерой." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/pytorch-edge-browser-onnx-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/pytorch-edge-browser-onnx-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/pytorch-edge-browser-onnx.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-01T13:00:00+00:00" />
+<meta property="article:modified_time" content="2026-07-01T13:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/pytorch-edge-browser-onnx.svg" />
+<meta name="twitter:title" content="Деплой нейросети на конечное устройство: PyTorch → ONNX → браузер" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-01T13:00:00+00:00","datePublished":"2026-07-01T13:00:00+00:00","description":"Как обучить лёгкую CNN в PyTorch, экспортировать в ONNX и запустить инференс в браузере через ONNX Runtime Web и p5.js с веб-камерой.","headline":"Деплой нейросети на конечное устройство: PyTorch → ONNX → браузер","image":"https://evgeniy-borisov.github.io/vairl/assets/images/pytorch-edge-browser-onnx.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/pytorch-edge-browser-onnx-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/pytorch-edge-browser-onnx-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/01/pytorch-edge-browser-onnx-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/pytorch-edge-browser-onnx.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Деплой нейросети на конечное устройство: PyTorch → ONNX → браузер</h1>
+        <p class="post-date">01 July 2026, 13:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Обучить модель в PyTorch — полдела. Для <strong>edge</strong> и <strong>браузера</strong> нужен другой рантайм: веса в компактном формате, инференс без Python и GPU в дата-центре. Ниже — практический пайплайн на примере <strong>распознавания рукописных цифр MNIST</strong>: обучение в Jupyter, экспорт <strong>ONNX</strong>, запуск в JavaScript через <strong>ONNX Runtime Web</strong> и интерактив с <strong>p5.js</strong> и камерой.</p>
+
+<p>Связанные материалы VAIRL: <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрия агентов</a>, <a href="/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/">Semantic Torrent</a>, <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">гибридный оркестратор</a>.</p>
+
+<p><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/pytorch-to-browser-onnx.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" /></a></p>
+
+<h2 id="зачем-выносить-нейросеть-на-устройство">Зачем выносить нейросеть на устройство</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сценарий</th>
+      <th>Плюс edge / on-device</th>
+      <th>Минус только облака</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Приватность</strong></td>
+      <td>Кадры с камеры не уходят на сервер</td>
+      <td>Задержка + регуляторика</td>
+    </tr>
+    <tr>
+      <td><strong>Офлайн</strong></td>
+      <td>Работает без сети после загрузки модели</td>
+      <td>Недоступность при обрыве</td>
+    </tr>
+    <tr>
+      <td><strong>Стоимость</strong></td>
+      <td>Нет платы за каждый запрос к API</td>
+      <td>Масштабирование inference в облаке</td>
+    </tr>
+    <tr>
+      <td><strong>Латентность</strong></td>
+      <td>Десятки миллисекунд на WASM / NPU</td>
+      <td>RTT + очередь на бэкенде</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>«Конечное устройство» — не только телефон: <strong>браузер</strong> на ноутбуке тоже edge: JavaScript + WebAssembly + (опционально) WebGPU.</p>
+
+<h2 id="ландшафт-рантаймов">Ландшафт рантаймов</h2>
+
+<pre><code class="language-mermaid">flowchart LR
+  PT[PyTorch / training] --&gt; EXP[Экспорт]
+  EXP --&gt; ONNX[ONNX]
+  EXP --&gt; TFL[TensorFlow Lite]
+  EXP --&gt; CORE[Core ML]
+  ONNX --&gt; ORT_M[ONNX Runtime mobile]
+  ONNX --&gt; ORT_W[ONNX Runtime Web]
+  TFL --&gt; AND[Android / embedded]
+  CORE --&gt; IOS[iOS / macOS]
+  PT --&gt; TFJS[TensorFlow.js]
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Стек</th>
+      <th>Когда выбирать</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>ONNX + ONNX Runtime Web</strong></td>
+      <td>Универсальный путь из PyTorch; WASM в браузере; тот же <code class="language-plaintext highlighter-rouge">.onnx</code> для мобильного ORT</td>
+    </tr>
+    <tr>
+      <td><strong>TensorFlow.js</strong></td>
+      <td>Модель уже в TF/Keras или нужен <code class="language-plaintext highlighter-rouge">tfjs-converter</code> из SavedModel</td>
+    </tr>
+    <tr>
+      <td><strong>TensorFlow Lite</strong></td>
+      <td>Android, микроконтроллеры, Coral</td>
+    </tr>
+    <tr>
+      <td><strong>Core ML</strong></td>
+      <td>Экосистема Apple</td>
+    </tr>
+    <tr>
+      <td><strong>ExecuTorch / PyTorch Mobile</strong></td>
+      <td>Нативный C++ без промежуточного ONNX</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>В статье основной путь — <strong>PyTorch → ONNX → ONNX Runtime Web</strong>. TensorFlow.js — хорошая альтернатива, если вы стартуете из Keras; для PyTorch чаще делают ONNX или <code class="language-plaintext highlighter-rouge">torch.jit</code> + собственный WASM-слой, что сложнее в поддержке.</p>
+
+<h2 id="архитектура-демо">Архитектура демо</h2>
+
+<pre><code class="language-mermaid">flowchart TB
+  NB[Jupyter / Colab] --&gt; TR[Обучение TinyCNN]
+  TR --&gt; ONNX_F[mnist-digit-cnn.onnx]
+  ONNX_F --&gt; GH[GitHub Pages / static host]
+  GH --&gt; ORT[ONNX Runtime Web WASM]
+  CAM[getUserMedia] --&gt; P5[p5.js препроцессинг 28×28]
+  P5 --&gt; ORT
+  ORT --&gt; UI[Цифра 0–9 + confidence]
+</code></pre>
+
+<p>Модель намеренно <strong>маленькая</strong> (~16 KB граф + веса): два свёрточных слоя, пулинг, полносвязный классификатор на 10 классов. На MNIST после короткого обучения — около <strong>97–98%</strong> accuracy на тесте; в браузере с камерой качество зависит от освещения и того, насколько цифра похожа на MNIST (белое на тёмном, по центру кадра).</p>
+
+<h2 id="шаг-1-обучение-и-экспорт-в-ноутбуке">Шаг 1. Обучение и экспорт в ноутбуке</h2>
+
+<p>Полный код — в <a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/pytorch-to-browser-onnx.ipynb">Colab-ноутбуке</a>. Кратко:</p>
+
+<ol>
+  <li>Загрузка MNIST, нормализация <code class="language-plaintext highlighter-rouge">(x - 0.1307) / 0.3081</code>.</li>
+  <li>Класс <code class="language-plaintext highlighter-rouge">TinyMNISTCNN</code>: Conv → ReLU → Pool × 2 → Linear(10).</li>
+  <li>Экспорт:</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">torch</span><span class="p">.</span><span class="n">onnx</span><span class="p">.</span><span class="nf">export</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">dummy</span><span class="p">,</span> <span class="sh">"</span><span class="s">mnist-digit-cnn.onnx</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">input</span><span class="sh">"</span><span class="p">],</span>
+    <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">logits</span><span class="sh">"</span><span class="p">],</span>
+    <span class="n">dynamic_axes</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">input</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="sh">"</span><span class="s">batch</span><span class="sh">"</span><span class="p">},</span> <span class="sh">"</span><span class="s">logits</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="sh">"</span><span class="s">batch</span><span class="sh">"</span><span class="p">}},</span>
+    <span class="n">opset_version</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Имена тензоров <strong><code class="language-plaintext highlighter-rouge">input</code></strong> и <strong><code class="language-plaintext highlighter-rouge">logits</code></strong> должны совпадать с JavaScript-стороной. Форма входа: <code class="language-plaintext highlighter-rouge">[1, 1, 28, 28]</code> (NCHW, один канал).</p>
+
+<p>Готовый артефакт лежит в репозитории: <code class="language-plaintext highlighter-rouge">assets/models/mnist-digit-cnn.onnx</code> (~225 KB, веса внутри файла — ONNX Runtime Web не поддерживает внешний <code class="language-plaintext highlighter-rouge">.onnx.data</code> по HTTP).</p>
+
+<h2 id="шаг-2-onnx-runtime-web-в-браузере">Шаг 2. ONNX Runtime Web в браузере</h2>
+
+<p>Подключаем рантайм с CDN и создаём сессию с WASM-бэкендом (работает везде, где есть WebAssembly):</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="o">*</span> <span class="nx">as</span> <span class="nx">ort</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">onnxruntime-web</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="nx">ort</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">wasm</span><span class="p">.</span><span class="nx">wasmPaths</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">session</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">ort</span><span class="p">.</span><span class="nx">InferenceSession</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="dl">'</span><span class="s1">/assets/models/mnist-digit-cnn.onnx</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">executionProviders</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">wasm</span><span class="dl">'</span><span class="p">],</span>
+<span class="p">});</span>
+
+<span class="kd">const</span> <span class="nx">tensor</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ort</span><span class="p">.</span><span class="nc">Tensor</span><span class="p">(</span><span class="dl">'</span><span class="s1">float32</span><span class="dl">'</span><span class="p">,</span> <span class="nx">float32Array</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">]);</span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">logits</span> <span class="p">}</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">session</span><span class="p">.</span><span class="nf">run</span><span class="p">({</span> <span class="na">input</span><span class="p">:</span> <span class="nx">tensor</span> <span class="p">});</span>
+</code></pre></div></div>
+
+<p>Для продакшена можно включить <strong><code class="language-plaintext highlighter-rouge">webgpu</code></strong> или <strong><code class="language-plaintext highlighter-rouge">webgl</code></strong> в списке <code class="language-plaintext highlighter-rouge">executionProviders</code>, если модель и браузер это поддерживают; для крошечной CNN WASM обычно достаточно.</p>
+
+<p>Препроцессинг с камеры:</p>
+
+<ul>
+  <li>Захват кадра, ресайз до 28×28.</li>
+  <li>Grayscale, деление на 255.</li>
+  <li>Нормализация MNIST: mean <code class="language-plaintext highlighter-rouge">0.1307</code>, std <code class="language-plaintext highlighter-rouge">0.3081</code>.</li>
+  <li>Softmax по <code class="language-plaintext highlighter-rouge">logits</code> → argmax → цифра 0–9.</li>
+</ul>
+
+<h2 id="шаг-3-p5js-камера-и-кнопки-start--stop">Шаг 3. p5.js: камера и кнопки Start / Stop</h2>
+
+<p><strong>p5.js</strong> уже подключён в layout блога. Скетч в instance mode не конфликтует с другими canvas на странице:</p>
+
+<ul>
+  <li><strong>Запустить</strong> — <code class="language-plaintext highlighter-rouge">createCapture(VIDEO)</code>, инференс каждые ~180 ms.</li>
+  <li><strong>Остановить</strong> — <code class="language-plaintext highlighter-rouge">getTracks().forEach(t =&gt; t.stop())</code>, освобождение камеры.</li>
+</ul>
+
+<p>Камера требует <strong>HTTPS</strong> (GitHub Pages подходит) или <code class="language-plaintext highlighter-rouge">localhost</code>. Пользователь должен разрешить доступ к устройству.</p>
+
+<h3 id="интерактив-цифра-с-веб-камеры">Интерактив: цифра с веб-камеры</h3>
+
+<p>Покажите рукописную цифру в центре рамки (как в MNIST: контрастный символ на светлом фоне). Слева — поток с камеры, справа — увеличенный превью 28×28, который реально подаётся в сеть.</p>
+
+<div id="edge-nn-demo" class="edge-nn-widget" data-model-url="/vairl/assets/models/mnist-digit-cnn.onnx?v=2">
+  <div class="edge-nn-header">
+    <p>Локальный инференс: ONNX Runtime Web (WASM) + p5.js. Модель не отправляет кадры на сервер — всё выполняется в вашем браузере.</p>
+  </div>
+  <div class="edge-nn-controls">
+    <button type="button" data-edge-start="">Запустить</button>
+    <button type="button" data-edge-stop="" disabled="">Остановить</button>
+  </div>
+  <div class="edge-nn-body">
+    <div class="edge-nn-canvas-mount"></div>
+    <div class="edge-nn-side">
+      <canvas class="edge-nn-preview" width="112" height="112" aria-label="Превью 28×28"></canvas>
+      <p class="edge-nn-prediction">—</p>
+      <p style="font-size:12px;color:#888;margin:0;">Вход модели: 28×28, нормализация MNIST</p>
+    </div>
+  </div>
+  <p class="edge-nn-status">Инициализация…</p>
+</div>
+
+<script src="/vairl/assets/js/edge-nn-webcam-demo.js"></script>
+
+<p>Исходник виджета: <code class="language-plaintext highlighter-rouge">assets/js/edge-nn-webcam-demo.js</code>.</p>
+
+<h2 id="сравнение-с-tensorflowjs">Сравнение с TensorFlow.js</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>ONNX Runtime Web</th>
+      <th>TensorFlow.js</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Источник модели</strong></td>
+      <td>PyTorch, TF, scikit-learn (через конвертеры) → ONNX</td>
+      <td>Keras, TF SavedModel</td>
+    </tr>
+    <tr>
+      <td><strong>Конвертация</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">torch.onnx.export</code></td>
+      <td><code class="language-plaintext highlighter-rouge">tensorflowjs_converter</code></td>
+    </tr>
+    <tr>
+      <td><strong>Бэкенды</strong></td>
+      <td>WASM, WebGL, WebGPU, WebNN (эксп.)</td>
+      <td>WebGL, WASM, WebGPU</td>
+    </tr>
+    <tr>
+      <td><strong>Размер</strong></td>
+      <td>ort.min.js ~сотни KB + модель</td>
+      <td>tf.min.js + модель</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Если вы уже в экосистеме PyTorch, ONNX — меньше сюрпризов с операторами, чем прямой порт в TF.js.</p>
+
+<h2 id="мобильные-и-встраиваемые-устройства">Мобильные и встраиваемые устройства</h2>
+
+<p>Тот же файл <code class="language-plaintext highlighter-rouge">mnist-digit-cnn.onnx</code> можно загрузить в:</p>
+
+<ul>
+  <li><strong>ONNX Runtime Mobile</strong> (iOS / Android native);</li>
+  <li><strong>React Native</strong> через <code class="language-plaintext highlighter-rouge">onnxruntime-react-native</code>;</li>
+  <li><strong>TFLite</strong> — через отдельную конвертацию <code class="language-plaintext highlighter-rouge">onnx-tflite</code>, если нужен NNAPI / GPU delegate.</li>
+</ul>
+
+<p>Браузерный путь хорош для <strong>демо, внутренних инструментов и PWA</strong> без публикации в сторах.</p>
+
+<h2 id="ограничения-и-улучшения">Ограничения и улучшения</h2>
+
+<ul>
+  <li><strong>Domain gap</strong>: MNIST ≠ реальная камера; для продакшена — аугментации, fine-tune на своих кадрах, бинаризация фона.</li>
+  <li><strong>Квантизация</strong>: <code class="language-plaintext highlighter-rouge">onnxruntime</code> dynamic quantization или ONNX Runtime Web INT8 уменьшит вес и ускорит WASM.</li>
+  <li><strong>Worker</strong>: вынести <code class="language-plaintext highlighter-rouge">session.run</code> в Web Worker, чтобы не блокировать UI при тяжёлых моделях.</li>
+  <li><strong>Безопасность</strong>: статическая модель — не секрет; не встраивайте API-ключи в клиентский JS.</li>
+</ul>
+
+<h2 id="практический-чеклист">Практический чеклист</h2>
+
+<ol>
+  <li>Обучить и проверить accuracy в ноутбуке.</li>
+  <li>Экспорт ONNX, проверить имена входов/выходов (<code class="language-plaintext highlighter-rouge">netron.app</code>).</li>
+  <li>Положить <code class="language-plaintext highlighter-rouge">.onnx</code> (+ <code class="language-plaintext highlighter-rouge">.onnx.data</code> при external weights) на CDN / static host.</li>
+  <li>Подключить ONNX Runtime Web, препроцессинг как при обучении.</li>
+  <li>Добавить UI с явным <strong>вкл/выкл</strong> камеры и индикатором статуса.</li>
+</ol>
+
+<h2 id="further-reading">Further reading</h2>
+
+<ul>
+  <li><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/pytorch-to-browser-onnx.ipynb">PyTorch → браузер (Colab)</a> — обучение, экспорт, проверка ONNX</li>
+  <li><a href="https://onnxruntime.ai/docs/tutorials/web/">ONNX Runtime Web</a> — провайдеры, perf</li>
+  <li><a href="https://netron.app/">Netron</a> — визуализация графа ONNX</li>
+  <li><a href="https://www.tensorflow.org/js">TensorFlow.js</a> — альтернативный JS-стек</li>
+  <li><a href="https://p5js.org/reference/">p5.js reference</a> — <code class="language-plaintext highlighter-rouge">createCapture</code>, instance mode</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

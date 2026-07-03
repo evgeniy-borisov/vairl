@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генерация бенчмарков для AI-агентов: обзор подходов - VAIRL</title>
+    <meta name="description" content="Обзор методов создания eval-наборов для агентов, которые действуют: от ручной курации и симуляторов до синтетической генерации задач большими моделями и вери...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Генерация бенчмарков для AI-агентов: обзор подходов | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Генерация бенчмарков для AI-агентов: обзор подходов" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Обзор методов создания eval-наборов для агентов, которые действуют: от ручной курации и симуляторов до синтетической генерации задач большими моделями и верификации по состоянию мира." />
+<meta name="twitter:description" property="og:description" content="Обзор методов создания eval-наборов для агентов, которые действуют: от ручной курации и симуляторов до синтетической генерации задач большими моделями и верификации по состоянию мира." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-benchmark-generation-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-benchmark-generation-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-benchmark-generation.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-29T14:51:14+00:00" />
+<meta property="article:modified_time" content="2026-06-29T14:51:14+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-benchmark-generation.svg" />
+<meta name="twitter:title" content="Генерация бенчмарков для AI-агентов: обзор подходов" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-29T14:51:14+00:00","datePublished":"2026-06-29T14:51:14+00:00","description":"Обзор методов создания eval-наборов для агентов, которые действуют: от ручной курации и симуляторов до синтетической генерации задач большими моделями и верификации по состоянию мира.","headline":"Генерация бенчмарков для AI-агентов: обзор подходов","image":"https://evgeniy-borisov.github.io/vairl/assets/images/agent-benchmark-generation.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-benchmark-generation-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-benchmark-generation-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/06/29/agent-benchmark-generation-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/agent-benchmark-generation.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Генерация бенчмарков для AI-агентов: обзор подходов</h1>
+        <p class="post-date">29 June 2026, 14:51 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Статические бенчмарки вроде MMLU измеряют <strong>ответ в один ход</strong>. Современные AI-агенты — другое: они <strong>вызывают tools</strong>, меняют состояние БД, кликают по GUI, ведут многоходовый диалог с пользователем и восстанавливаются после ошибок. Нужны бенчмарки, где успех — это <strong>верифицируемый исход действий</strong>, а не совпадение текста с эталоном.</p>
+
+<p>Генерация и проведение таких eval-наборов — одно из самых динамичных направлений индустрии: оценка смещается от статичных текстов к <strong>поведению в динамической среде</strong> — планированию, tool use, самокоррекции и памяти на длинных горизонтах.</p>
+
+<p>Ниже — обзор <strong>текущего положения дел</strong>, семейств eval-наборов для action-агентов и <strong>подходов к генерации</strong> новых бенчмарков — включая использование других LLM, симуляторов и гибридные пайплайны. В конце — <strong>таблицы</strong> с обзорной литературой, исследователями, компаниями и книгами. Связанные темы в блоге VAIRL: <a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">карта компетенций агент-разработчика</a>, <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивость control loops</a>, <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">синтез гипотез для улучшения агентов</a>.</p>
+
+<h2 id="уровни-оценки-и-методы-валидации">Уровни оценки и методы валидации</h2>
+
+<p>Помимо осей «генерация → среда → верификатор» (см. ниже), в обзорах 2025–2026 выделяют <strong>три уровня</strong> измерения и <strong>три класса</strong> проверки результата.</p>
+
+<h3 id="уровни-измерения">Уровни измерения</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Уровень</th>
+      <th>Что измеряется</th>
+      <th>Примеры метрик</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>End-to-End (E2E)</strong></td>
+      <td>Только финальный успех задачи</td>
+      <td>Task Success Rate; закрыт ли issue; достигнуто ли целевое состояние БД</td>
+    </tr>
+    <tr>
+      <td><strong>Trajectory-level</strong></td>
+      <td>Пошаговый лог рассуждений и tool calls</td>
+      <td>Избыточность шагов, зацикливание, оптимальность пути, pass^k</td>
+    </tr>
+    <tr>
+      <td><strong>Component-level</strong></td>
+      <td>Изолированные модули агента</td>
+      <td>Качество tool calling, RAG recall, точность декомпозиции плана</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="методы-валидации-результата">Методы валидации результата</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Метод</th>
+      <th>Суть</th>
+      <th>Надёжность</th>
+      <th>Когда применять</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Deterministic evals</strong></td>
+      <td>Unit-тесты, diff состояния, program checker</td>
+      <td>Высокая</td>
+      <td>Код, API, DB-oracle (SWE-bench, τ-bench, WebArena-Verified)</td>
+    </tr>
+    <tr>
+      <td><strong>LLM-as-a-Judge</strong></td>
+      <td>Сильная модель + рубрика в промпте</td>
+      <td>Средняя; риск bias</td>
+      <td>Открытые ответы, prefilter синтетики; не единственный scorer</td>
+    </tr>
+    <tr>
+      <td><strong>Динамическая генерация</strong></td>
+      <td>Процедурные / эволюционные задачи на лету</td>
+      <td>Зависит от verifier</td>
+      <td>Борьба с contamination; поток задач 2025–2026</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="почему-бенчмарк-агента--не-набор-вопросов">Почему бенчмарк агента — не «набор вопросов»</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Статический QA-бенчмарк</th>
+      <th>Бенчмарк action-агента</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Один prompt → один ответ</td>
+      <td>Многошаговая траектория</td>
+    </tr>
+    <tr>
+      <td>Метрика: exact match / LLM-judge</td>
+      <td>Метрика: <strong>состояние среды</strong> (DB, файлы, API)</td>
+    </tr>
+    <tr>
+      <td>Нет side effects</td>
+      <td>Side effects обязательны</td>
+    </tr>
+    <tr>
+      <td>Низкая стоимость прогона</td>
+      <td>Sandbox, Docker, VM, долгий runtime</td>
+    </tr>
+    <tr>
+      <td>Риск contamination из обучения</td>
+      <td>Риск <strong>reward hacking</strong> и утечки тестов</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Агентный eval отвечает на три вопроса:</p>
+
+<ol>
+  <li><strong>Достигнута ли цель?</strong> (task success)</li>
+  <li><strong>Насколько надёжно?</strong> (pass^k — успех в k независимых прогонах)</li>
+  <li><strong>С какой ценой?</strong> (шаги, токены, время, число tool calls)</li>
+</ol>
+
+<pre><code class="language-mermaid">flowchart LR
+  T[Задача] --&gt; A[Агент]
+  A --&gt; E[Среда: web / OS / DB / API]
+  E --&gt; V[Верификатор]
+  V --&gt;|pass / fail| M[Метрики]
+</code></pre>
+
+<hr />
+
+<h2 id="текущий-ландшафт-агенты-которые-действуют">Текущий ландшафт: агенты, которые действуют</h2>
+
+<p>Обзор ключевых семейств (2024–2026). SOTA на action-бенчмарках <strong>существенно ниже</strong>, чем на knowledge-QA — это нормально и ожидаемо.</p>
+
+<h3 id="код-и-репозитории">Код и репозитории</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Бенчмарк</th>
+      <th>Что измеряет</th>
+      <th>Верификация</th>
+      <th>Генерация задач</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SWE-bench</strong> / <strong>Verified</strong></td>
+      <td>Патч по GitHub issue</td>
+      <td>Unit-тесты репозитория</td>
+      <td><strong>Майнинг</strong> реальных issues + human filter</td>
+    </tr>
+    <tr>
+      <td><strong>SWE-bench Pro</strong> / <strong>Multimodal</strong></td>
+      <td>Расширения домена</td>
+      <td>Тесты + окружение</td>
+      <td>Курация + синтетика</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Золотой стандарт «реальный мир»: задача из продакшена, проверка объективна. Минус — дорогая курация и дрейф репозиториев.</p>
+
+<h3 id="web-и-gui">Web и GUI</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Бенчмарк</th>
+      <th>Среда</th>
+      <th>Особенность</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>WebArena</strong></td>
+      <td>5 self-hosted web-приложений</td>
+      <td>Долгие multi-step сценарии; evaluators на ответе и действиях</td>
+    </tr>
+    <tr>
+      <td><strong>WebArena-Verified</strong></td>
+      <td>Аудит 812 задач</td>
+      <td>Детерминированная проверка, offline по HAR; subset <strong>Hard</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Mind2Web</strong></td>
+      <td>Реальные сайты (снимки)</td>
+      <td>Курация человеческих траекторий</td>
+    </tr>
+    <tr>
+      <td><strong>OSWorld</strong></td>
+      <td>Desktop VM (Ubuntu/Win/macOS)</td>
+      <td>Реальные приложения; высокая стоимость среды</td>
+    </tr>
+    <tr>
+      <td><strong>Windows Agent Arena</strong> / <strong>AndroidWorld</strong></td>
+      <td>Платформенные GUI</td>
+      <td>Фрагментация ОС и UI</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Тренд: от «живого веба» к <strong>воспроизводимым</strong> sandbox + <strong>программным</strong> evaluators (меньше LLM-as-judge).</p>
+
+<h3 id="tool--user--policy">Tool + user + policy</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Бенчмарк</th>
+      <th>Суть</th>
+      <th>Метрики</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>τ-bench</strong> → <strong>τ²</strong> → <strong>τ³</strong></td>
+      <td>Агент + <strong>симулированный пользователь</strong> + API + policy docs</td>
+      <td>Сравнение <strong>состояния БД</strong>; pass^k</td>
+    </tr>
+    <tr>
+      <td>Расширения (Toloka и др.)</td>
+      <td>Adversarial prompts, длинные цепочки policy</td>
+      <td>Auto-evaluable tasks</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Отличие от SWE-bench: не код, а <strong>customer service</strong> — диалог, политики, отказ от действия там, где нельзя.</p>
+
+<h3 id="мульти-доменные-сьюты">Мульти-доменные сьюты</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Бенчмарк</th>
+      <th>Домены</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>AgentBench</strong></td>
+      <td>OS shell, DB, KG, игры, web shopping, browsing</td>
+    </tr>
+    <tr>
+      <td><strong>GAIA</strong></td>
+      <td>Многошаговые вопросы с tools (поиск, файлы)</td>
+    </tr>
+    <tr>
+      <td><strong>AgentSynth</strong></td>
+      <td>Генерация + <strong>packs</strong> с outcome checkers; leaderboard, pass^k</td>
+    </tr>
+    <tr>
+      <td><strong>Terminal-Bench</strong></td>
+      <td>Shell-агенты в контейнере</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>AgentBench</strong> задал шаблон «много сред в одном сьюте»; <strong>AgentSynth</strong> явно позиционирует <strong>генерацию</strong> задач как продукт.</p>
+
+<h3 id="планирование-и-ограничения">Планирование и ограничения</h3>
+
+<p><strong>TravelPlanner</strong>, <strong>API-Bank</strong>, <strong>ToolBench</strong> — узкие домены с rule-based или state-based проверкой. Полезны как <strong>строительные блоки</strong> для синтетических генераторов (схема API + constraints).</p>
+
+<hr />
+
+<h2 id="оси-классификации-подходов-к-генерации">Оси классификации подходов к генерации</h2>
+
+<p>Удобная рамка (по мотивам обзоров 2025 — task generation / execution / assessment):</p>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph gen["Генерация задач"]
+    M1[Ручная курация]
+    M2[Майнинг логов / issues]
+    M3[LLM-синтез]
+    M4[Процедурная генерация]
+    M5[Эволюция / diversity search]
+  end
+  subgraph env["Среда"]
+    S1[Live web]
+    S2[Self-hosted sandbox]
+    S3[Симулятор + mock API]
+  end
+  subgraph ver["Верификация"]
+    V1[Состояние БД / файлов]
+    V2[Программный checker]
+    V3[LLM-as-judge]
+    V4[Human audit]
+  end
+  gen --&gt; env --&gt; ver
+</code></pre>
+
+<hr />
+
+<h2 id="1-ручная-курация-экспертами">1. Ручная курация экспертами</h2>
+
+<p><strong>Как:</strong> доменный эксперт пишет задачу, эталонную траекторию, expected state, edge cases.</p>
+
+<p><strong>Плюсы:</strong> высокое качество, мало ложных pass/fail, доверие индустрии (SWE-bench Verified, WebArena-Verified).</p>
+
+<p><strong>Минусы:</strong> медленно, дорого, плохо масштабируется, устаревание (API, UI).</p>
+
+<p><strong>Когда выбирать:</strong> регуляторика, high-stakes домены, эталонный «gold set» на 50–200 задач.</p>
+
+<hr />
+
+<h2 id="2-майнинг-реальных-траекторий">2. Майнинг реальных траекторий</h2>
+
+<p><strong>Как:</strong> GitHub issues → SWE-bench; support tickets → τ-подобные сценарии; логи браузера → Mind2Web; trajectories продакшен-агентов → фильтрация и анонимизация.</p>
+
+<p><strong>Плюсы:</strong> реализм, естественное распределение сложности.</p>
+
+<p><strong>Минусы:</strong> шум, PII, неполные логи, сложная верификация без воспроизводимой среды.</p>
+
+<p><strong>Пайплайн:</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Реальный лог → дедупликация → восстановление среды → автоматический checker → human spot-check
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="3-генерация-задач-с-помощью-llm">3. Генерация задач с помощью LLM</h2>
+
+<p>Самый быстро растущий класс. Большая модель выступает как <strong>автор задач</strong>, <strong>пользователя</strong>, <strong>критика</strong> или <strong>судьи</strong>.</p>
+
+<h3 id="31-llm-как-автор-задач-task-synthesis">3.1 LLM как автор задач (task synthesis)</h3>
+
+<p><strong>Вход:</strong> схема API, policy document, описание БД, grammar действий.<br />
+<strong>Выход:</strong> (instruction, expected_actions, success_predicate).</p>
+
+<p>Примеры паттернов:</p>
+
+<ul>
+  <li><strong>Schema-first:</strong> «Сгенерируй 100 задач, совместимых с OpenAPI X; каждая достижима за ≤ 12 tool calls»</li>
+  <li><strong>Constraint sampling:</strong> TravelPlanner-style — SQL/DSL выбирает параметры, LLM оформляет natural language</li>
+  <li><strong>AgentSynth-style:</strong> generate → judge loop по 6 измерениям → pack с outcome checkers</li>
+</ul>
+
+<p><strong>Риски:</strong> невыполнимые задачи, ambiguous instructions, «галлюцинированные» предусловия.<br />
+<strong>Смягчение:</strong> oracle-агент или symbolic planner проверяет достижимость; второй LLM как <strong>validator</strong>; отбраковка по dry-run в симуляторе.</p>
+
+<h3 id="32-llm-как-симулятор-пользователя">3.2 LLM как симулятор пользователя</h3>
+
+<p><strong>τ-bench / τ² / τ³:</strong> user-LLM ведёт диалог по сценарию; агент вызывает tools; успех — <strong>финальное состояние БД</strong>, не текст.</p>
+
+<p>При <strong>генерации</strong> бенчмарка тот же приём: LLM играет и пользователя, и «злого» клиента для adversarial веток.</p>
+
+<h3 id="33-llm-as-judge-фильтрация-и-оценка">3.3 LLM-as-judge (фильтрация и оценка)</h3>
+
+<p>Используется для:</p>
+
+<ul>
+  <li>ранжирования синтетических задач по сложности/реализму;</li>
+  <li>проверки соответствия policy;</li>
+  <li><strong>не</strong> как единственный финальный scorer там, где есть state check (WebArena-Verified сознательно уходит от judge к детерминизму).</li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th>Роль LLM-judge</th>
+      <th>OK</th>
+      <th>Опасно</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Prefilter кандидатов</td>
+      <td>✓</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>Субъективный стиль ответа</td>
+      <td>✓</td>
+      <td>bias между моделями</td>
+    </tr>
+    <tr>
+      <td>Единственный критерий success</td>
+      <td>—</td>
+      <td>✗ reward hacking</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="34-multi-llm-панель">3.4 Multi-LLM панель</h3>
+
+<p>Разные модели: одна генерирует, вторая ломает (adversarial), третья верифицирует. Аналог <a href="/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/">dialectical / coach-player</a> для <strong>данных</strong>, а не кода.</p>
+
+<hr />
+
+<h2 id="4-процедурная-и-символическая-генерация">4. Процедурная и символическая генерация</h2>
+
+<p><strong>Как:</strong> грамматики задач, HTN/PDDL-шаблоны, random walk по графу API, procedural worlds (игры, VMAS).</p>
+
+<p><strong>Плюсы:</strong> бесконечный поток задач, контроль сложности, нет API-cost на генерацию.</p>
+
+<p><strong>Минусы:</strong> «синтетический запах», разрыв с natural language пользователей.</p>
+
+<p><strong>Гибрид (нейросимволика):</strong> LLM переводит цель в символы → планировщик генерирует валидную цепочку → LLM вербализует instruction для агента. См. <a href="/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/">LLM → PDDL → критик</a>.</p>
+
+<hr />
+
+<h2 id="5-эволюция-diversity-search-hypothesis-space">5. Эволюция, diversity search, hypothesis space</h2>
+
+<p>Генерировать не случайно, а <strong>искать</strong> в пространстве задач:</p>
+
+<ul>
+  <li>мутировать сценарии (усложнить policy, добавить конфликт constraints);</li>
+  <li>отбирать по <strong>diversity</strong> в embedding space сценариев;</li>
+  <li>наращивать «белые пятна», где агент стабильно падает.</li>
+</ul>
+
+<p>Связь с <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">пространством гипотез и PaCMAP</a> и <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">синтезом гипотез локальной LLM</a>: бенчмарк — не статический файл, а <strong>пополняемый корпус</strong> кандидатов с верификацией.</p>
+
+<hr />
+
+<h2 id="6-верификация-без-неё-генерация-бессмысленна">6. Верификация: без неё генерация бессмысленна</h2>
+
+<p>Приоритет методов (от сильного к слабому):</p>
+
+<ol>
+  <li><strong>Детерминированное состояние</strong> — snapshot DB, diff файлов, hash артефакта</li>
+  <li><strong>Программный evaluator</strong> — как WebArena reference programs</li>
+  <li><strong>Replay</strong> — HAR / network trace без live-среды</li>
+  <li><strong>Unit / integration tests</strong> — SWE-bench</li>
+  <li><strong>pass^k</strong> — надёжность при повторе (τ-bench)</li>
+  <li><strong>LLM-as-judge</strong> — только если нет state</li>
+  <li><strong>Human audit</strong> — выборочно на gold subset</li>
+</ol>
+
+<pre><code class="language-mermaid">flowchart TD
+  A[Агент завершил эпизод] --&gt; B{Есть oracle state?}
+  B --&gt;|да| C[Сравнить DB / файлы / API]
+  B --&gt;|нет| D{Есть program checker?}
+  D --&gt;|да| E[Запустить evaluator]
+  D --&gt;|нет| F[LLM-judge + human spot-check]
+  C --&gt; G[pass^k агрегация]
+  E --&gt; G
+  F --&gt; G
+</code></pre>
+
+<hr />
+
+<h2 id="7-типовой-пайплайн-генерации-бенчмарка">7. Типовой пайплайн генерации бенчмарка</h2>
+
+<p>Практическая схема для команды, которая строит <strong>свой</strong> eval:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Этап</th>
+      <th>Действие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1. Контракт среды</strong></td>
+      <td>API schema, policy, начальное состояние, reset()</td>
+    </tr>
+    <tr>
+      <td><strong>2. Генерация кандидатов</strong></td>
+      <td>LLM / procedural / майнинг — batch 10× больше целевого N</td>
+    </tr>
+    <tr>
+      <td><strong>3. Oracle pass</strong></td>
+      <td>Сильный агент или scripted oracle; отбросить невыполнимые</td>
+    </tr>
+    <tr>
+      <td><strong>4. Dry-run verifier</strong></td>
+      <td>Каждый task должен fail на null-агенте и pass на oracle</td>
+    </tr>
+    <tr>
+      <td><strong>5. Adversarial pass</strong></td>
+      <td>Вторая LLM ищет ambiguous / leaky shortcuts</td>
+    </tr>
+    <tr>
+      <td><strong>6. Human audit</strong></td>
+      <td>5–10% выборка + все failures verifier</td>
+    </tr>
+    <tr>
+      <td><strong>7. Freeze + versioning</strong></td>
+      <td>Как WebArena-Verified: immutable dataset + changelog</td>
+    </tr>
+    <tr>
+      <td><strong>8. Regression CI</strong></td>
+      <td>pass^k на каждый PR агента; cap cost</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="8-подводные-камни">8. Подводные камни</h2>
+
+<h3 id="reward-hacking">Reward hacking</h3>
+
+<p>Агент читает файл с ответом, меняет тест, эксплуатирует баг sandbox. <strong>Лечение:</strong> изоляция, проверка побочных изменений, hidden tests, периодический red-team.</p>
+
+<h3 id="contamination-и-утечка">Contamination и утечка</h3>
+
+<p>Синтетические задачи из GPT часто <strong>похожи</strong> на публичные бенчмарки. <strong>Лечение:</strong> holdout по embedding, private test set, динамическое пополнение.</p>
+
+<h3 id="saturation">Saturation</h3>
+
+<p>Когда SOTA &gt; 90%, бенчмарк перестаёт различать модели. <strong>Лечение:</strong> harder subset, adversarial generation, обновление задач (τ³ task fixes).</p>
+
+<h3 id="стоимость">Стоимость</h3>
+
+<p>OSWorld / live web дороги. <strong>Лечение:</strong> hard subsets (258 из 812), mock layer, offline replay.</p>
+
+<h3 id="нестабильность-llm-judge">Нестабильность LLM-judge</h3>
+
+<p>Judge-модель favours «своих». <strong>Лечение:</strong> state-first; judge только для tie-break.</p>
+
+<hr />
+
+<h2 id="9-что-выбрать-под-ваш-агент">9. Что выбрать под ваш агент</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Тип агента</th>
+      <th>Ориентир</th>
+      <th>Генерация</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Coding / PR</td>
+      <td>SWE-bench Verified</td>
+      <td>Майнинг issues + human verify</td>
+    </tr>
+    <tr>
+      <td>Customer service + API</td>
+      <td>τ³-bench</td>
+      <td>LLM user + DB oracle; расширять policy-aware synth</td>
+    </tr>
+    <tr>
+      <td>Web automation</td>
+      <td>WebArena-Verified</td>
+      <td>Курация + программные evaluators; synth из schema сайта</td>
+    </tr>
+    <tr>
+      <td>Desktop</td>
+      <td>OSWorld</td>
+      <td>Пока mostly manual; procedural — исследования</td>
+    </tr>
+    <tr>
+      <td>Универсальный research</td>
+      <td>AgentBench / AgentSynth</td>
+      <td>Синтетика + multi-env packs</td>
+    </tr>
+    <tr>
+      <td>Свой продукт</td>
+      <td>Custom pack</td>
+      <td>Логи → sandbox → LLM augment → verifier</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="10-направления-на-20262027">10. Направления на 2026–2027</h2>
+
+<ol>
+  <li><strong>Генерация + верификация в одном репозитории</strong> (как AgentSynth packs) — dataset не отрывается от checker.</li>
+  <li><strong>Policy-aware synthesis</strong> — задачи явно тестируют отказ, escalation, compliance.</li>
+  <li><strong>pass^k как стандарт отчётности</strong> — средний success недостаточен для продакшена.</li>
+  <li><strong>Меньше judge, больше state</strong> — детерминизм как в WebArena-Verified.</li>
+  <li><strong>Динамические бенчмарки</strong> — curated stream вместо frozen test set; CI на подмножестве.</li>
+  <li><strong>Связка с control loop</strong> — метрики устойчивости, критичности σ, cost per success из <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">статьи про устойчивость</a>.</li>
+</ol>
+
+<hr />
+
+<h2 id="краткий-чеклист-перед-публикацией-бенчмарка">Краткий чеклист перед публикацией бенчмарка</h2>
+
+<ol>
+  <li>Есть ли <strong>reset</strong> и детерминированное начальное состояние?</li>
+  <li>Провален ли task <strong>null-агентом</strong> и <strong>сломанным</strong> агентом?</li>
+  <li>Проходит ли <strong>oracle</strong> (скрипт или сильная модель)?</li>
+  <li>Измеряете ли <strong>pass^k</strong>, а не только pass@1?</li>
+  <li>Сколько стоит <strong>один полный прогон</strong>?</li>
+  <li>Какой % задач прошёл <strong>human audit</strong>?</li>
+  <li>Есть ли план обновления при <strong>saturation</strong> SOTA?</li>
+</ol>
+
+<hr />
+
+<h2 id="связанные-публикации-vairl">Связанные публикации VAIRL</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">Как готовить ведущего специалиста по AI-агентам</a> — eval-культура в карте компетенций</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость agent control loops</a> — метрики надёжности траекторий</li>
+  <li><a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">Синтез гипотез локальной LLM</a> — генерация проверяемых гипотез об улучшении агентов</li>
+  <li><a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">Пространство гипотез и PaCMAP</a> — diversity в пространстве задач</li>
+  <li><a href="/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/">g3: диалектическое автокодирование</a> — multi-agent генерация с критиком</li>
+</ul>
+
+<hr />
+
+<h2 id="обзорные-работы-survey-papers">Обзорные работы (Survey Papers)</h2>
+
+<p>Фундаментальные академические обзоры для погружения в таксономию eval-агентов:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Работа</th>
+      <th>Год</th>
+      <th>Фокус</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Evaluation and Benchmarking of LLM Agents: A Survey</strong></td>
+      <td>2025</td>
+      <td>Двумерная таксономия: <em>что</em> оценивать (безопасность, capabilities, надёжность) и <em>как</em> (среды, бенчмарки, метрики)</td>
+      <td><a href="https://arxiv.org/abs/2507.21504">arXiv:2507.21504</a> · <a href="https://github.com/Asaf-Yehudai/LLM-Agent-Evaluation-Survey">GitHub-репозиторий</a></td>
+    </tr>
+    <tr>
+      <td><strong>A Survey on Evaluation of LLM-based Agents</strong></td>
+      <td>2026</td>
+      <td>Эволюция агентских бенчмарков; память (эпизодическая / семантическая); мультиагентные среды</td>
+      <td><a href="https://arxiv.org/html/2503.16416v2">arXiv:2503.16416</a></td>
+    </tr>
+    <tr>
+      <td><strong>Survey of Emerging Trends in LLM Agent Benchmarking</strong> (ACM)</td>
+      <td>2026</td>
+      <td>Хрупкость мультимодальных агентов; контейнеризированные модульные testbeds; динамическое усложнение</td>
+      <td><a href="https://dl.acm.org/doi/10.1145/3784013.3784018">ACM DL</a></td>
+    </tr>
+    <tr>
+      <td><strong>Establishing Best Practices for Building Rigorous Agentic Benchmarks</strong></td>
+      <td>2025</td>
+      <td>Практика построения надёжных бенчмарков; ложноположительные при auto-check кода и API</td>
+      <td><a href="https://arxiv.org/html/2507.02825v2">arXiv:2507.02825</a></td>
+    </tr>
+    <tr>
+      <td><strong>A Systematic Survey of AI Agent Evaluation Methods and Metrics</strong></td>
+      <td>2026</td>
+      <td>Систематизация методов и метрик оценки агентов</td>
+      <td><a href="https://www.researchgate.net/publication/400639175_A_Systematic_Survey_of_AI_Agent_Evaluation_Methods_and_Metrics">ResearchGate</a></td>
+    </tr>
+    <tr>
+      <td><strong>Evaluation and Benchmarking of Generative and Agentic AI Systems: A Comprehensive Survey</strong></td>
+      <td>2026</td>
+      <td>Комплексный обзор generative и agentic систем</td>
+      <td><a href="https://www.researchgate.net/publication/398749814_Evaluation_and_Benchmarking_of_Generative_and_Agentic_AI_Systems_A_Comprehensive_Survey">ResearchGate</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="ключевые-исследователи">Ключевые исследователи</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Исследователь</th>
+      <th>Аффилиация / контекст</th>
+      <th>Вклад в eval агентов</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Shunyu Yao</strong></td>
+      <td>Princeton</td>
+      <td>ReAct; <strong>τ-bench</strong> / τ² / τ³; симулированный пользователь + DB-oracle</td>
+      <td><a href="https://ysymyth.github.io/">ysymyth.github.io</a></td>
+    </tr>
+    <tr>
+      <td><strong>Carlos E. Jimenez</strong></td>
+      <td>Princeton</td>
+      <td>Ведущий автор <strong>SWE-bench</strong>; строгая верификация coding-агентов на реальных GitHub issues</td>
+      <td><a href="https://www.carlos-e-jimenez.com/">carlos-e-jimenez.com</a></td>
+    </tr>
+    <tr>
+      <td><strong>Jianxiong Gao</strong> et al.</td>
+      <td>THUDM / Tsinghua</td>
+      <td><strong>AgentBench</strong> — многосредовая оценка (ОС, DB, KG, web, игры)</td>
+      <td><a href="https://github.com/THUDM/AgentBench">AgentBench</a></td>
+    </tr>
+    <tr>
+      <td><strong>Shuyan Zhou</strong></td>
+      <td>CMU / Stanford</td>
+      <td><strong>WebArena</strong> — self-hosted web-среды и программные evaluators</td>
+      <td><a href="https://shuyanzhou.com/">shuyanzhou.com</a></td>
+    </tr>
+    <tr>
+      <td><strong>Asaf Yehudai</strong> et al.</td>
+      <td>—</td>
+      <td>Кураторский survey + каталог фреймворков eval</td>
+      <td><a href="https://github.com/Asaf-Yehudai/LLM-Agent-Evaluation-Survey">LLM-Agent-Evaluation-Survey</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="компании-и-платформы">Компании и платформы</h2>
+
+<p>Рынок делится на <strong>создателей эталонных бенчмарков</strong> и <strong>Enterprise-платформы</strong> для внутреннего LLM Ops / CI eval.</p>
+
+<h3 id="индустриальные-эталоны-и-лаборатории">Индустриальные эталоны и лаборатории</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Организация</th>
+      <th>Роль</th>
+      <th>Фокус eval</th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>OpenAI</strong></td>
+      <td>Эталонные eval</td>
+      <td>OpenAI Evals; <strong>SWE-bench Verified</strong>; Computer-Using Agents</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><strong>Anthropic</strong></td>
+      <td>Внутренние + публичные бенчмарки</td>
+      <td>Claude Code, tool use, безопасность, jailbreak-resistance</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><strong>ServiceNow</strong></td>
+      <td>Курация</td>
+      <td><strong>WebArena-Verified</strong> — детерминизм, offline HAR</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><strong>Sierra</strong></td>
+      <td>Продукт + research</td>
+      <td><strong>τ³-bench</strong> — customer service, policy, pass^k</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><strong>IBM Research</strong></td>
+      <td>Обзоры и бенчмарки</td>
+      <td>Аналитика agent benchmarks для enterprise</td>
+      <td><a href="https://research.ibm.com/blog/AI-agent-benchmarks">IBM Research blog</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="платформы-генерации-прогона-и-observability">Платформы генерации, прогона и observability</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Платформа</th>
+      <th>Тип</th>
+      <th>Что даёт для бенчмарков</th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Confident AI (DeepEval)</strong></td>
+      <td>Open-source + commercial</td>
+      <td>Метрики траекторий, tool calls, детерминированные checks</td>
+      <td><a href="https://www.confident-ai.com/blog/llm-agent-evaluation-complete-guide">Complete guide</a></td>
+    </tr>
+    <tr>
+      <td><strong>Galileo</strong></td>
+      <td>Enterprise</td>
+      <td>Agent Leaderboard; галлюцинации, cost per task, надёжность</td>
+      <td><a href="https://galileo.ai/">galileo.ai</a></td>
+    </tr>
+    <tr>
+      <td><strong>Adaline</strong></td>
+      <td>CI/CD eval 2026</td>
+      <td>Контролируемые выборки 200–5000 сценариев, непрерывное тестирование</td>
+      <td><a href="https://www.adaline.ai/blog/complete-guide-llm-ai-agent-evaluation-2026">adaline.ai guide</a></td>
+    </tr>
+    <tr>
+      <td><strong>Langfuse</strong></td>
+      <td>Tracing</td>
+      <td>Визуализация графа вызовов; отладка шага, где ломается логика</td>
+      <td><a href="https://langfuse.com/">langfuse.com</a></td>
+    </tr>
+    <tr>
+      <td><strong>Arize Phoenix</strong></td>
+      <td>Tracing + eval</td>
+      <td>Трейсы, датасеты, эксперименты на trajectories</td>
+      <td><a href="https://arize.com/docs/phoenix">arize.com/phoenix</a></td>
+    </tr>
+    <tr>
+      <td><strong>AgentSynth</strong></td>
+      <td>Generate–judge–pack</td>
+      <td>Синтетическая генерация задач + outcome checkers + leaderboard</td>
+      <td><a href="https://agentsynth.tech/">agentsynth.tech</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="практические-гайды-и-подборки-веб">Практические гайды и подборки (веб)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Материал</th>
+      <th>Тема</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Phil Schmid — Benchmark Compendium</td>
+      <td>Сводка бенчмарков LLM/агентов</td>
+      <td><a href="https://www.philschmid.de/benchmark-compedium">philschmid.de</a></td>
+    </tr>
+    <tr>
+      <td>Simmering — Agent Benchmarks</td>
+      <td>Обзор agent benchmarks</td>
+      <td><a href="https://simmering.dev/blog/agent-benchmarks/">simmering.dev</a></td>
+    </tr>
+    <tr>
+      <td>Alopatenko — LLM Evaluation</td>
+      <td>Каталог ресурсов по оценке</td>
+      <td><a href="https://alopatenko.github.io/LLMEvaluation/">alopatenko.github.io</a></td>
+    </tr>
+    <tr>
+      <td>Zylos Research</td>
+      <td>LLM evaluation &amp; benchmarking 2026</td>
+      <td><a href="https://zylos.ai/research/2026-01-16-llm-evaluation-benchmarking/">zylos.ai</a></td>
+    </tr>
+    <tr>
+      <td>Habr — обзор agent benchmarks</td>
+      <td>Русскоязычный контекст</td>
+      <td><a href="https://habr.com/ru/articles/1017082/">habr.com</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="книги-и-фундаментальная-литература">Книги и фундаментальная литература</h2>
+
+<p>Классические книги не успевают за индустрией agent eval, но задают <strong>теоретическую базу</strong> для таксономии тестов, траекторий и детерминированной верификации.</p>
+
+<h3 id="фундаментальная-теория-ai-агентов-и-систем">Фундаментальная теория AI-агентов и систем</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Книга</th>
+      <th>Авторы</th>
+      <th>Зачем для бенчмарков</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><em>Artificial Intelligence: A Modern Approach</em> (4th ed.)</td>
+      <td>Stuart Russell, Peter Norvig</td>
+      <td>Рациональный агент, task environments, PEAS — основа таксономии «что тестировать»</td>
+    </tr>
+    <tr>
+      <td><em>An Introduction to MultiAgent Systems</em> (2nd ed.)</td>
+      <td>Michael Wooldridge</td>
+      <td>Кооперация, конкуренция, протоколы общения — eval мультиагентных систем (AutoGen, CrewAI, MAESTRO)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="тестирование-и-оценка-llm--ml-систем">Тестирование и оценка LLM / ML-систем</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Книга</th>
+      <th>Авторы / издатель</th>
+      <th>Зачем для бенчмарков</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><em>Evaluating LLMs and LLM-Based Applications</em></td>
+      <td>O’Reilly (сборник)</td>
+      <td>Практика метрик, LLM-as-a-Judge, eval chains и tool calling в продакшене</td>
+    </tr>
+    <tr>
+      <td><em>Building Intelligent Systems</em></td>
+      <td>Geoff Hulten</td>
+      <td>Continuous evaluation, телеметрия, edge cases, построение test suites</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="смежные-дисциплины-rl-и-автоматизация-тестирования">Смежные дисциплины: RL и автоматизация тестирования</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Книга</th>
+      <th>Авторы</th>
+      <th>Зачем для бенчмарков</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><em>Reinforcement Learning: An Introduction</em> (2nd ed.)</td>
+      <td>Richard S. Sutton, Andrew G. Barto</td>
+      <td>MDP, reward, оценка траекторий — язык интерактивных сред (WebArena, OSWorld)</td>
+    </tr>
+    <tr>
+      <td><em>Software Test Automation</em></td>
+      <td>Mark Fewster, Dorothy Graham</td>
+      <td>Детерминированные checks, изоляция sandbox/Docker, ложноположительные</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="ключевые-бенчмарки-статьи-и-проекты">Ключевые бенчмарки (статьи и проекты)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Бенчмарк</th>
+      <th>Авторы / организация</th>
+      <th>Домен</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SWE-bench</strong> / Verified</td>
+      <td>Jimenez et al.; OpenAI Verified</td>
+      <td>Coding / GitHub issues</td>
+      <td><a href="https://www.swebench.com/">swe-bench.com</a></td>
+    </tr>
+    <tr>
+      <td><strong>WebArena</strong> / Verified</td>
+      <td>Zhou et al.; ServiceNow Verified</td>
+      <td>Self-hosted web</td>
+      <td><a href="https://webarena.dev/">webarena.dev</a></td>
+    </tr>
+    <tr>
+      <td><strong>τ-bench</strong> → <strong>τ²</strong> → <strong>τ³</strong></td>
+      <td>Yao; Barres; Sierra</td>
+      <td>Customer service + API + policy</td>
+      <td><a href="https://github.com/sierra-research/tau2-bench">τ²-bench</a></td>
+    </tr>
+    <tr>
+      <td><strong>AgentBench</strong></td>
+      <td>Liu et al. / THUDM</td>
+      <td>Multi-env (OS, DB, web, …)</td>
+      <td><a href="https://github.com/THUDM/AgentBench">GitHub</a></td>
+    </tr>
+    <tr>
+      <td><strong>OSWorld</strong></td>
+      <td>Xie et al.</td>
+      <td>Desktop VM</td>
+      <td><a href="https://os-world.github.io/">os-world.github.io</a></td>
+    </tr>
+    <tr>
+      <td><strong>GAIA</strong></td>
+      <td>Mialon et al.</td>
+      <td>Multi-step QA + tools</td>
+      <td><a href="https://huggingface.co/gaia-benchmark">huggingface.co/gaia-benchmark</a></td>
+    </tr>
+    <tr>
+      <td><strong>Mind2Web</strong></td>
+      <td>—</td>
+      <td>Реальные веб-траектории</td>
+      <td><a href="https://mind2web.github.io/">mind2web.github.io</a></td>
+    </tr>
+    <tr>
+      <td><strong>Terminal-Bench</strong></td>
+      <td>—</td>
+      <td>Shell-агенты в контейнере</td>
+      <td><a href="https://www.tbench.ai/">tbench.ai</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="библиография-дополнительно">Библиография (дополнительно)</h2>
+
+<ul>
+  <li>Springer — обзор методов оценки агентов: <a href="https://link.springer.com/article/10.1007/s10462-026-11571-0">link.springer.com</a></li>
+  <li>Medium / Future AGI — frameworks &amp; metrics 2026: <a href="https://futureagi.com/blog/llm-evaluation-2025/">futureagi.com</a></li>
+  <li>YouTube — обзорные лекции по agent eval: <a href="https://www.youtube.com/watch?v=LyNhRF4IflU">LyNhRF4IflU</a>, <a href="https://www.youtube.com/watch?v=96cfC7m10ks">96cfC7m10ks</a></li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

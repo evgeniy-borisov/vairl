@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форматы траекторий AI-агентов: выгрузка, конвертация и сравнение фреймворков - VAIRL</title>
+    <meta name="description" content="Форматы траекторий агентов (ShareGPT, OpenAI, LangChain, CrewAI), конвертеры, а также индустриальные практики: телеметрия, кластеризация задач и решений, pro...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Форматы траекторий AI-агентов: выгрузка, конвертация и сравнение фреймворков | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Форматы траекторий AI-агентов: выгрузка, конвертация и сравнение фреймворков" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Форматы траекторий агентов (ShareGPT, OpenAI, LangChain, CrewAI), конвертеры, а также индустриальные практики: телеметрия, кластеризация задач и решений, process mining и FSM из успешных трасс." />
+<meta name="twitter:description" property="og:description" content="Форматы траекторий агентов (ShareGPT, OpenAI, LangChain, CrewAI), конвертеры, а также индустриальные практики: телеметрия, кластеризация задач и решений, process mining и FSM из успешных трасс." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/agent-trajectory-formats-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/agent-trajectory-formats-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-trajectory-formats.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-02T05:00:00+00:00" />
+<meta property="article:modified_time" content="2026-07-02T05:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-trajectory-formats.svg" />
+<meta name="twitter:title" content="Форматы траекторий AI-агентов: выгрузка, конвертация и сравнение фреймворков" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-02T05:00:00+00:00","datePublished":"2026-07-02T05:00:00+00:00","description":"Форматы траекторий агентов (ShareGPT, OpenAI, LangChain, CrewAI), конвертеры, а также индустриальные практики: телеметрия, кластеризация задач и решений, process mining и FSM из успешных трасс.","headline":"Форматы траекторий AI-агентов: выгрузка, конвертация и сравнение фреймворков","image":"https://evgeniy-borisov.github.io/vairl/assets/images/agent-trajectory-formats.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/agent-trajectory-formats-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/agent-trajectory-formats-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/02/agent-trajectory-formats-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/agent-trajectory-formats.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Форматы траекторий AI-агентов: выгрузка, конвертация и сравнение фреймворков</h1>
+        <p class="post-date">02 July 2026, 05:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Когда агент <strong>решает задачу пользователя</strong>, за кулисами накапливается не один ответ, а <strong>траектория</strong>: запрос, рассуждения, вызовы инструментов, наблюдения, промежуточные состояния и финальный исход. Эта выгрузка нужна для <strong>дообучения</strong> (SFT, RL), <strong>eval и replay</strong>, <strong>task mining</strong> и отладки — но каждый фреймворк пишет её в своём формате.</p>
+
+<p>В <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">статье про телеметрию</a> мы разобрали, <em>что</em> собирать и <em>куда</em> складывать. Здесь — <em>в каком виде</em> агенты сериализуют траектории, <strong>какие конвертеры</strong> приводят их к общему знаменателю, <strong>как компании-вендоры и продуктовые команды</strong> строят аналитику поверх логов (кластеризация задач и решений, process mining, FSM) и <strong>как выбрать целевой формат</strong> под задачу.</p>
+
+<p>Связанные материалы: <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">генерация бенчмарков</a>, <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/">фундамент агентных систем</a>, <a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">жизненный цикл агента</a>.</p>
+
+<hr />
+
+<h2 id="зачем-вообще-выгружать-траектории">Зачем вообще выгружать траектории</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Цель</th>
+      <th>Что нужно из траектории</th>
+      <th>Типичный целевой формат</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SFT / instruction tuning</strong></td>
+      <td>Пары «запрос → ответ» с tool use</td>
+      <td>ShareGPT, OpenAI messages</td>
+    </tr>
+    <tr>
+      <td><strong>RL / preference learning</strong></td>
+      <td>Полный эпизод + reward</td>
+      <td>JSONL с <code class="language-plaintext highlighter-rouge">completed</code>, outcome</td>
+    </tr>
+    <tr>
+      <td><strong>Eval / regression</strong></td>
+      <td>Воспроизводимые шаги + oracle</td>
+      <td>Trajex, OTel spans, ATIF</td>
+    </tr>
+    <tr>
+      <td><strong>Аналитика продакшена</strong></td>
+      <td>Агрегаты по tools, cost, errors</td>
+      <td>Parquet (agent-traces), ClickHouse</td>
+    </tr>
+    <tr>
+      <td><strong>Кластеризация задач / решений</strong></td>
+      <td>task_label, tool skeleton, Topics</td>
+      <td>Braintrust, custom ETL + embed</td>
+    </tr>
+    <tr>
+      <td><strong>Process mining / FSM</strong></td>
+      <td>state sequence, DFG</td>
+      <td>AgentFlow, явный <code class="language-plaintext highlighter-rouge">fsm_state</code> в spans</td>
+    </tr>
+    <tr>
+      <td><strong>Сравнение агентов</strong></td>
+      <td>Единая схема сессий</td>
+      <td>minitrace, agent-traces</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart LR
+  subgraph sources [Нативные логи]
+    LC[LangChain / LangGraph]
+    AG[AutoGen]
+    CR[CrewAI]
+    CD[Coding agents]
+  end
+  subgraph converters [Конвертеры]
+    TX[trajex]
+    AT[agent-traces]
+    MT[minitrace]
+    HM[Hermes normalizer]
+  end
+  subgraph targets [Целевые форматы]
+    SG[ShareGPT / JSONL]
+    OAI[OpenAI messages]
+    PQ[Parquet / analytics]
+    OT[OTel spans]
+  end
+  sources --&gt; converters --&gt; targets
+</code></pre>
+
+<hr />
+
+<h2 id="сравнительная-таблица-форматов">Сравнительная таблица форматов</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Агент / фреймворк</th>
+      <th>Ключевые роли</th>
+      <th>Структура траектории</th>
+      <th>Где лежит на диске</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>ShareGPT</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">human</code>, <code class="language-plaintext highlighter-rouge">gpt</code>, иногда <code class="language-plaintext highlighter-rouge">system</code>, <code class="language-plaintext highlighter-rouge">tool</code></td>
+      <td>Плоский массив <code class="language-plaintext highlighter-rouge">conversations</code> в JSON/JSONL</td>
+      <td>HuggingFace datasets, LLaMA-Factory</td>
+    </tr>
+    <tr>
+      <td><strong>OpenAI / Anthropic API</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">system</code>, <code class="language-plaintext highlighter-rouge">user</code>, <code class="language-plaintext highlighter-rouge">assistant</code>, <code class="language-plaintext highlighter-rouge">tool</code></td>
+      <td>Массив messages + <code class="language-plaintext highlighter-rouge">tool_calls</code> / <code class="language-plaintext highlighter-rouge">tool_call_id</code></td>
+      <td>SDK traces, fine-tuning export</td>
+    </tr>
+    <tr>
+      <td><strong>LangChain (BaseMessage)</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">System</code>, <code class="language-plaintext highlighter-rouge">Human</code>, <code class="language-plaintext highlighter-rouge">AI</code>, <code class="language-plaintext highlighter-rouge">Tool</code>, <code class="language-plaintext highlighter-rouge">Function</code></td>
+      <td>Объекты с <code class="language-plaintext highlighter-rouge">content</code>, <code class="language-plaintext highlighter-rouge">additional_kwargs</code>, <code class="language-plaintext highlighter-rouge">tool_calls</code></td>
+      <td><code class="language-plaintext highlighter-rouge">messages_to_dict()</code>, LangSmith runs</td>
+    </tr>
+    <tr>
+      <td><strong>LangGraph</strong></td>
+      <td>как LangChain + state</td>
+      <td>Граф состояний, checkpoint, <code class="language-plaintext highlighter-rouge">messages</code> в state</td>
+      <td><code class="language-plaintext highlighter-rouge">.checkpointer</code>, LangSmith thread</td>
+    </tr>
+    <tr>
+      <td><strong>AutoGen (Microsoft)</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">user</code>, <code class="language-plaintext highlighter-rouge">assistant</code>, <code class="language-plaintext highlighter-rouge">tool</code></td>
+      <td>История между агентами в group chat; event log</td>
+      <td><code class="language-plaintext highlighter-rouge">chat_messages</code>, OTel (v0.4+)</td>
+    </tr>
+    <tr>
+      <td><strong>CrewAI</strong></td>
+      <td>Task → Agent, ReAct-лог</td>
+      <td>Текстовые логи: Thought / Action / Observation</td>
+      <td>stdout, <code class="language-plaintext highlighter-rouge">crew_output</code>, callbacks</td>
+    </tr>
+    <tr>
+      <td><strong>OpenAI Agents SDK</strong></td>
+      <td>run items, handoffs</td>
+      <td><code class="language-plaintext highlighter-rouge">RunResult</code> с items: message, tool_call, handoff</td>
+      <td>JSONL через custom processor</td>
+    </tr>
+    <tr>
+      <td><strong>Hermes Agent</strong></td>
+      <td>ShareGPT + XML-теги</td>
+      <td><code class="language-plaintext highlighter-rouge">conversations</code> + нормализация thinking/tool XML</td>
+      <td><code class="language-plaintext highlighter-rouge">trajectory_samples.jsonl</code></td>
+    </tr>
+    <tr>
+      <td><strong>Coding agents</strong> (Pi, Claude Code, Codex, Cursor)</td>
+      <td><code class="language-plaintext highlighter-rouge">type</code>-события в JSONL</td>
+      <td>Поток событий: message, tool_use, tool_result</td>
+      <td><code class="language-plaintext highlighter-rouge">~/.claude/</code>, <code class="language-plaintext highlighter-rouge">sessions/</code>, SQLite</td>
+    </tr>
+    <tr>
+      <td><strong>ATIF</strong></td>
+      <td>унифицированные events</td>
+      <td>Agent Trajectory Interchange — pipe-delimited JSONL</td>
+      <td>vtcode, agent-traces</td>
+    </tr>
+    <tr>
+      <td><strong>Trajex</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">step_type</code>: tool_call, llm, …</td>
+      <td>Версионированный <code class="language-plaintext highlighter-rouge">Trace</code> с <code class="language-plaintext highlighter-rouge">steps[]</code></td>
+      <td><code class="language-plaintext highlighter-rouge">.json</code>, emitters</td>
+    </tr>
+    <tr>
+      <td><strong>minitrace</strong></td>
+      <td>turns, tool_calls, metrics</td>
+      <td><code class="language-plaintext highlighter-rouge">.minitrace.json</code> — кросс-фреймворк сессия</td>
+      <td>адаптеры на 11+ систем</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Важно:</strong> «траектория» в eval-смысле (<a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">trajectory-level метрики</a>) — это не только диалог, но и <strong>последовательность действий в среде</strong> (tool calls, изменения state). Формат сообщений и формат <strong>behavior trace</strong> часто конвертируются разными инструментами.</p>
+
+<hr />
+
+<h2 id="нативные-форматы-примеры">Нативные форматы: примеры</h2>
+
+<h3 id="1-sharegpt-стандарт-для-sft">1. ShareGPT (стандарт для SFT)</h3>
+
+<p>Самый распространённый формат для дообучения через <a href="https://github.com/hiyouga/LLaMA-Factory">LLaMA-Factory</a>, Axolotl и HuggingFace <code class="language-plaintext highlighter-rouge">datasets</code>. Роли жёстко именованы:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"session_01"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"conversations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w"> </span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="s2">"human"</span><span class="p">,</span><span class="w"> </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Привет! Кто ты?"</span><span class="w"> </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w"> </span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gpt"</span><span class="p">,</span><span class="w"> </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Я ИИ-ассистент."</span><span class="w"> </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w"> </span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="s2">"human"</span><span class="p">,</span><span class="w"> </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Какая погода в Берлине?"</span><span class="w"> </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w"> </span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gpt"</span><span class="p">,</span><span class="w"> </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Сегодня солнечно, +22°C."</span><span class="w"> </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Современные парсеры поддерживают отдельное поле <code class="language-plaintext highlighter-rouge">system</code> на уровне объекта и роль <code class="language-plaintext highlighter-rouge">"from": "tool"</code> в массиве (как в <a href="https://hermes-agent.nousresearch.com/docs/developer-guide/trajectory-format">Hermes Agent</a>).</p>
+
+<h3 id="2-openai-chat-completions-мультиагентные-системы">2. OpenAI Chat Completions (мультиагентные системы)</h3>
+
+<p>Де-факто стандарт для API и для LangChain/LangGraph при сериализации:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w"> </span><span class="nl">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"system"</span><span class="p">,</span><span class="w"> </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ты полезный ИИ-агент."</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w"> </span><span class="nl">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w"> </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Посчитай 2 + 2 * 2"</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"tool_calls"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"call_123"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"function"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calculator"</span><span class="p">,</span><span class="w"> </span><span class="nl">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{</span><span class="se">\"</span><span class="s2">expr</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">2 + 2 * 2</span><span class="se">\"</span><span class="s2">}"</span><span class="w"> </span><span class="p">}</span><span class="w">
+    </span><span class="p">}]</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w"> </span><span class="nl">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tool"</span><span class="p">,</span><span class="w"> </span><span class="nl">"tool_call_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"call_123"</span><span class="p">,</span><span class="w"> </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"6"</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w"> </span><span class="nl">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w"> </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Результат вычисления равен 6."</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Плюсы: нативная поддержка <strong>function calling</strong>, совместимость с fine-tuning API OpenAI. Минусы: для ReAct-агентов «мысли» часто теряются, если не добавить в <code class="language-plaintext highlighter-rouge">content</code> вручную.</p>
+
+<h3 id="3-langchain-basemessage">3. LangChain BaseMessage</h3>
+
+<p>Внутреннее представление — типизированные классы; экспорт через <code class="language-plaintext highlighter-rouge">messages_to_dict()</code> / <code class="language-plaintext highlighter-rouge">message_to_dict()</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain_core.messages</span> <span class="kn">import</span> <span class="n">messages_to_dict</span>
+
+<span class="n">serialized</span> <span class="o">=</span> <span class="nf">messages_to_dict</span><span class="p">(</span><span class="n">agent_messages</span><span class="p">)</span>
+<span class="c1"># [{"type": "human", "data": {"content": "...", "additional_kwargs": {}}},
+#  {"type": "ai", "data": {"content": "...", "tool_calls": [...]}}]
+</span></code></pre></div></div>
+
+<p><strong>LangSmith</strong> сохраняет runs как дерево span’ов с вложенными LLM/tool child runs — это <strong>observability-формат</strong>, не готовый ShareGPT. Экспорт dataset из LangSmith требует маппинга runs → messages.</p>
+
+<p><strong>LangGraph</strong> добавляет <code class="language-plaintext highlighter-rouge">thread_id</code>, checkpoints (<code class="language-plaintext highlighter-rouge">state["messages"]</code>) и опционально <code class="language-plaintext highlighter-rouge">interrupt</code> — для replay нужен checkpointer, не только JSONL.</p>
+
+<h3 id="4-autogen--мультиагентный-group-chat">4. AutoGen — мультиагентный group chat</h3>
+
+<p>Траектория — <strong>переписка между именованными агентами</strong> плюс tool results:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"agent"</span><span class="p">:</span><span class="w"> </span><span class="s2">"coder"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Вот патч для bugfix..."</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"coder"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>В AutoGen 0.4+ рекомендуется <strong>OpenTelemetry</strong> для трассировки. Нативный <code class="language-plaintext highlighter-rouge">chat_messages</code> удобен для отладки, но плохо стыкуется с SFT без конвертера: нужно склеить несколько агентов в один диалог или разметить <code class="language-plaintext highlighter-rouge">name</code> как под-роль.</p>
+
+<h3 id="5-crewai--task--agent-и-react-лог">5. CrewAI — Task / Agent и ReAct-лог</h3>
+
+<p>CrewAI пишет <strong>исполнение задачи</strong> как текстовый trace:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Thought: Мне нужно найти данные о компании.
+Action: search_tool
+Action Input: {"query": "SpaceX revenue 2025"}
+Observation: SpaceX is a private company...
+Final Answer: SpaceX — частная компания, точная выручка не раскрывается.
+</code></pre></div></div>
+
+<p>При экспорте в ShareGPT типичная стратегия — <strong>склеить</strong> Thought/Action/Observation в одно сообщение <code class="language-plaintext highlighter-rouge">gpt</code>, а <code class="language-plaintext highlighter-rouge">human</code> = исходный Task prompt. <a href="https://pypi.org/project/trajex/">Trajex</a> умеет строить behavioral trace из <code class="language-plaintext highlighter-rouge">crew.kickoff()</code> output через <code class="language-plaintext highlighter-rouge">trace_from_crew_output</code>.</p>
+
+<h3 id="6-coding-агенты-pi-claude-code-codex-opencode">6. Coding-агенты: Pi, Claude Code, Codex, OpenCode</h3>
+
+<p>Здесь форматы <strong>событийные</strong> (event-sourced JSONL), а не «массив сообщений»:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Агент</th>
+      <th>Хранилище</th>
+      <th>Маркеры детекции</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Pi</strong></td>
+      <td>JSONL</td>
+      <td>поле <code class="language-plaintext highlighter-rouge">type</code></td>
+    </tr>
+    <tr>
+      <td><strong>Claude Code</strong></td>
+      <td>JSONL</td>
+      <td><code class="language-plaintext highlighter-rouge">type</code> + <code class="language-plaintext highlighter-rouge">uuid</code> / <code class="language-plaintext highlighter-rouge">sessionId</code></td>
+    </tr>
+    <tr>
+      <td><strong>Codex</strong></td>
+      <td>JSONL</td>
+      <td><code class="language-plaintext highlighter-rouge">type: "item"</code> + обёртка <code class="language-plaintext highlighter-rouge">payload</code></td>
+    </tr>
+    <tr>
+      <td><strong>OpenCode</strong></td>
+      <td>SQLite</td>
+      <td>схема БД сессий</td>
+    </tr>
+    <tr>
+      <td><strong>ATIF</strong></td>
+      <td>JSONL</td>
+      <td>первый байт <code class="language-plaintext highlighter-rouge">\|</code> (pipe-format)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Библиотека <a href="https://github.com/davanstrien/agent-traces">agent-traces</a> нормализует их в <strong>три таблицы</strong> Polars/Parquet: <code class="language-plaintext highlighter-rouge">sessions</code>, <code class="language-plaintext highlighter-rouge">events</code>, <code class="language-plaintext highlighter-rouge">content</code> — удобно для аналитики и курации training data без ручного парсинга каждого агента.</p>
+
+<h3 id="7-hermes-agent--sharegpt-с-нормализацией">7. Hermes Agent — ShareGPT с нормализацией</h3>
+
+<p>Hermes — эталонный пример <strong>осознанного экспорта под обучение</strong>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>API role</th>
+      <th>ShareGPT <code class="language-plaintext highlighter-rouge">from</code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>system</td>
+      <td><code class="language-plaintext highlighter-rouge">system</code></td>
+    </tr>
+    <tr>
+      <td>user</td>
+      <td><code class="language-plaintext highlighter-rouge">human</code></td>
+    </tr>
+    <tr>
+      <td>assistant</td>
+      <td><code class="language-plaintext highlighter-rouge">gpt</code></td>
+    </tr>
+    <tr>
+      <td>tool</td>
+      <td><code class="language-plaintext highlighter-rouge">tool</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Дополнительно: reasoning нормализуется в XML-теги <code class="language-plaintext highlighter-rouge">redacted_thinking</code>, tool calls — в <code class="language-plaintext highlighter-rouge">&lt;tool_call&gt;</code>, ответы инструментов — в <code class="language-plaintext highlighter-rouge">&lt;tool_response&gt;</code>. Файлы: <code class="language-plaintext highlighter-rouge">trajectory_samples.jsonl</code> (успех) и <code class="language-plaintext highlighter-rouge">failed_trajectories.jsonl</code> (сбой) — сразу готовый корпус для SFT/RL с фильтром по <code class="language-plaintext highlighter-rouge">completed</code>.</p>
+
+<hr />
+
+<h2 id="конвертеры-и-канонические-слои">Конвертеры и «канонические» слои</h2>
+
+<p>Единого ISO-стандарта для agent trajectories <strong>пока нет</strong> — но сложился стек промежуточных форматов:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Инструмент</th>
+      <th>Вход</th>
+      <th>Выход</th>
+      <th>Назначение</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong><a href="https://pypi.org/project/trajex/">trajex</a></strong></td>
+      <td>LangChain, LangGraph, OpenAI Agents, CrewAI, Pydantic AI</td>
+      <td><code class="language-plaintext highlighter-rouge">Trace</code> JSON + assertions</td>
+      <td>Behavioral testing, CI, offline</td>
+    </tr>
+    <tr>
+      <td><strong><a href="https://github.com/davanstrien/agent-traces">agent-traces</a></strong></td>
+      <td>Pi, Claude Code, Codex, ATIF</td>
+      <td>Parquet (sessions/events/content)</td>
+      <td>Аналитика, cost, training curation</td>
+    </tr>
+    <tr>
+      <td><strong><a href="https://github.com/wesen/minitrace">minitrace</a></strong></td>
+      <td>11+ агентов и web-экспорты</td>
+      <td><code class="language-plaintext highlighter-rouge">.minitrace.json</code></td>
+      <td>Кросс-фреймворк сравнение поведения</td>
+    </tr>
+    <tr>
+      <td><strong><a href="https://github.com/MukundaKatta/trace-to-otel">trace-to-otel</a></strong></td>
+      <td>JSONL audit logs</td>
+      <td>OTLP spans</td>
+      <td>Jaeger, Tempo, Datadog без SDK в runtime</td>
+    </tr>
+    <tr>
+      <td><strong>Hermes <code class="language-plaintext highlighter-rouge">trajectory.py</code></strong></td>
+      <td>внутренний API chat</td>
+      <td>ShareGPT JSONL</td>
+      <td>SFT / RL datasets</td>
+    </tr>
+    <tr>
+      <td><strong>LangSmith export</strong></td>
+      <td>runs</td>
+      <td>dataset examples</td>
+      <td>Eval, human review</td>
+    </tr>
+    <tr>
+      <td><strong>Langfuse</strong></td>
+      <td>traces</td>
+      <td>OpenAI-format messages</td>
+      <td>Open-source observability</td>
+    </tr>
+    <tr>
+      <td><strong>LLaMA-Factory</strong></td>
+      <td>ShareGPT / Alpaca / OpenAI</td>
+      <td>training config</td>
+      <td>SFT pipeline</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph layer1 [Нативные логи фреймворков]
+    A1[LangChain messages]
+    A2[CrewAI ReAct text]
+    A3[Claude Code JSONL]
+  end
+  subgraph layer2 [Канонический behavioral слой]
+    B1[Trajex Trace]
+    B2[minitrace session]
+    B3[OTel GenAI spans]
+  end
+  subgraph layer3 [Training / eval слой]
+    C1[ShareGPT JSONL]
+    C2[OpenAI messages]
+    C3[Parquet for ML]
+  end
+  A1 --&gt; B1
+  A2 --&gt; B1
+  A3 --&gt; B2
+  B1 --&gt; C1
+  B2 --&gt; C3
+  B3 --&gt; C3
+  A1 --&gt; C2
+</code></pre>
+
+<p><strong>Trajex</strong> позиционируется как «OpenTelemetry для траекторий агентов»: версионированный wire format + emitters + <code class="language-plaintext highlighter-rouge">scan()</code> для поиска loop’ов и silent failures. <strong>Langfuse/LangSmith</strong> — SaaS observability; они потребляют traces, но не задают открытый interchange-стандарт.</p>
+
+<hr />
+
+<h2 id="правила-маппинга-ролей">Правила маппинга ролей</h2>
+
+<p>При конвертации в ShareGPT или OpenAI messages:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Источник</th>
+      <th>ShareGPT</th>
+      <th>OpenAI</th>
+      <th>Примечание</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">user</code> / <code class="language-plaintext highlighter-rouge">human</code> / <code class="language-plaintext highlighter-rouge">HumanMessage</code></td>
+      <td><code class="language-plaintext highlighter-rouge">human</code></td>
+      <td><code class="language-plaintext highlighter-rouge">user</code></td>
+      <td>1:1</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">assistant</code> / <code class="language-plaintext highlighter-rouge">ai</code> / <code class="language-plaintext highlighter-rouge">AIMessage</code></td>
+      <td><code class="language-plaintext highlighter-rouge">gpt</code></td>
+      <td><code class="language-plaintext highlighter-rouge">assistant</code></td>
+      <td>tool_calls → в content или отдельные turns</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">system</code> / <code class="language-plaintext highlighter-rouge">SystemMessage</code></td>
+      <td><code class="language-plaintext highlighter-rouge">system</code> или поле объекта</td>
+      <td><code class="language-plaintext highlighter-rouge">system</code></td>
+      <td>часто один раз в начале</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tool</code> / <code class="language-plaintext highlighter-rouge">ToolMessage</code></td>
+      <td><code class="language-plaintext highlighter-rouge">tool</code> или внутри <code class="language-plaintext highlighter-rouge">gpt</code></td>
+      <td><code class="language-plaintext highlighter-rouge">tool</code> + <code class="language-plaintext highlighter-rouge">tool_call_id</code></td>
+      <td>для SFT без native tool role — склеивать в ReAct-текст</td>
+    </tr>
+    <tr>
+      <td>ReAct Thought/Action/Obs</td>
+      <td>склеить в <code class="language-plaintext highlighter-rouge">gpt</code></td>
+      <td>один <code class="language-plaintext highlighter-rouge">assistant</code> turn</td>
+      <td>сохранить структуру тегами</td>
+    </tr>
+    <tr>
+      <td>Multi-agent <code class="language-plaintext highlighter-rouge">name</code></td>
+      <td>префикс <code class="language-plaintext highlighter-rouge">[coder]:</code></td>
+      <td><code class="language-plaintext highlighter-rouge">name</code> field (legacy)</td>
+      <td>или разбить на отдельные сессии</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="стратегии-обработки-tool-results">Стратегии обработки tool results</h3>
+
+<ol>
+  <li><strong>Native tool role</strong> — для моделей с function calling (Hermes, GPT-4o fine-tune).</li>
+  <li><strong>ReAct-текст</strong> — <code class="language-plaintext highlighter-rouge">Observation: ...</code> внутри <code class="language-plaintext highlighter-rouge">gpt</code>; проще для старых SFT-пайплайнов.</li>
+  <li><strong>Drop observations</strong> — обучение только на финальном ответе; теряется credit assignment для tool use.</li>
+</ol>
+
+<hr />
+
+<h2 id="пример-конвертера-langchain--sharegpt">Пример конвертера: LangChain → ShareGPT</h2>
+
+<p>Минимальный скрипт без внешних зависимостей (кроме <code class="language-plaintext highlighter-rouge">langchain_core</code>):</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">json</span>
+<span class="kn">from</span> <span class="n">langchain_core.messages</span> <span class="kn">import</span> <span class="n">BaseMessage</span><span class="p">,</span> <span class="n">HumanMessage</span><span class="p">,</span> <span class="n">AIMessage</span><span class="p">,</span> <span class="n">SystemMessage</span><span class="p">,</span> <span class="n">ToolMessage</span>
+
+<span class="n">ROLE_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">"</span><span class="s">human</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">human</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">ai</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">gpt</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">system</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">system</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">tool</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">tool</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">message_to_sharegpt</span><span class="p">(</span><span class="n">msg</span><span class="p">:</span> <span class="n">BaseMessage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">role</span> <span class="o">=</span> <span class="n">ROLE_MAP</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="nb">type</span><span class="p">,</span> <span class="sh">"</span><span class="s">gpt</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">msg</span><span class="p">.</span><span class="n">content</span> <span class="ow">or</span> <span class="sh">""</span>
+    <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">AIMessage</span><span class="p">)</span> <span class="ow">and</span> <span class="n">msg</span><span class="p">.</span><span class="n">tool_calls</span><span class="p">:</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">.</span><span class="n">tool_calls</span><span class="p">:</span>
+            <span class="n">blocks</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="sh">"</span><span class="s">&lt;tool_call&gt;</span><span class="se">\n</span><span class="si">{</span><span class="n">json</span><span class="p">.</span><span class="n">dumps</span><span class="p">(</span><span class="si">{</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="si">:</span> <span class="n">tc</span><span class="p">[</span><span class="sh">'</span><span class="s">name</span><span class="sh">'</span><span class="p">],</span> <span class="sh">'</span><span class="s">arguments</span><span class="sh">'</span><span class="si">:</span> <span class="n">tc</span><span class="p">[</span><span class="sh">'</span><span class="s">args</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s">&lt;/tool_call&gt;</span><span class="sh">"</span>
+            <span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="sh">"</span><span class="se">\n</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">ToolMessage</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">&lt;tool_response&gt;</span><span class="se">\n</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\n</span><span class="s">&lt;/tool_response&gt;</span><span class="sh">"</span>
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">from</span><span class="sh">"</span><span class="p">:</span> <span class="n">role</span><span class="p">,</span> <span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">export_session</span><span class="p">(</span><span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseMessage</span><span class="p">],</span> <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="n">session_id</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">conversations</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="nf">message_to_sharegpt</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">],</span>
+    <span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">to_jsonl</span><span class="p">(</span><span class="n">sessions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sh">"</span><span class="s">w</span><span class="sh">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="sh">"</span><span class="s">utf-8</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">json</span><span class="p">.</span><span class="nf">dumps</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">+</span> <span class="sh">"</span><span class="se">\n</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Для production лучше <strong>Trajex emitter</strong> или <strong>Hermes normalizer</strong> — они покрывают edge cases (пустой reasoning, двойной JSON в arguments, группировка tool responses).</p>
+
+<h3 id="пример-через-trajex-crewai--behavioral-trace--json">Пример через Trajex (CrewAI → behavioral trace → JSON)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trajex.emitters.crewai</span> <span class="kn">import</span> <span class="n">trace_from_crew_output</span>
+<span class="kn">from</span> <span class="n">trajex</span> <span class="kn">import</span> <span class="n">scan</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">crew</span><span class="p">.</span><span class="nf">kickoff</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">topic</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Илон Маск</span><span class="sh">"</span><span class="p">})</span>
+<span class="n">trace</span> <span class="o">=</span> <span class="nf">trace_from_crew_output</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="sh">"</span><span class="s">Найди информацию про Илона Маска</span><span class="sh">"</span><span class="p">,</span> <span class="n">crew_output</span><span class="o">=</span><span class="n">output</span><span class="p">)</span>
+<span class="n">trace</span><span class="p">.</span><span class="nf">to_json</span><span class="p">(</span><span class="sh">"</span><span class="s">crew_trace.json</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">report</span> <span class="o">=</span> <span class="nf">scan</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">report</span><span class="p">.</span><span class="nf">suggested_assertions</span><span class="p">())</span>  <span class="c1"># copy-paste в pytest
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="что-выгружать-помимо-сообщений">Что выгружать помимо сообщений</h2>
+
+<p>Для полноценной траектории (как в <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрии</a>) к диалогу добавляют метаданные:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Поле</th>
+      <th>Зачем</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">session_id</code>, <code class="language-plaintext highlighter-rouge">trace_id</code></td>
+      <td>Связь с OTel, replay</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">task_label</code></td>
+      <td>Task mining, кластеризация</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agent_version</code>, <code class="language-plaintext highlighter-rouge">model_id</code>, <code class="language-plaintext highlighter-rouge">prompt_hash</code></td>
+      <td>Регрессии при смене промпта</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outcome</code> / <code class="language-plaintext highlighter-rouge">completed</code></td>
+      <td>Фильтр успешных траекторий для SFT</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tool_stats</code>, <code class="language-plaintext highlighter-rouge">api_calls</code>, <code class="language-plaintext highlighter-rouge">cost_usd</code></td>
+      <td>Экономика и аномалии</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">fsm_state</code> / <code class="language-plaintext highlighter-rouge">graph_node</code></td>
+      <td>Оркестратор DAG/FSM/BT</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">environment_snapshot_id</code></td>
+      <td>Replay в sandbox (SWE-bench, WebArena)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Coding-агенты часто <strong>не пишут</strong> эти поля нативно — их добавляют на слое телеметрии или при конвертации в Parquet.</p>
+
+<hr />
+
+<h2 id="какой-формат-выбрать">Какой формат выбрать</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Задача</th>
+      <th>Рекомендация</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Дообучить модель с tool use</td>
+      <td>ShareGPT JSONL (Hermes-стиль) или OpenAI fine-tune format</td>
+    </tr>
+    <tr>
+      <td>CI-тесты на поведение агента</td>
+      <td>Trajex + assertions (<code class="language-plaintext highlighter-rouge">sequence</code>, <code class="language-plaintext highlighter-rouge">no_loop</code>)</td>
+    </tr>
+    <tr>
+      <td>Сравнить Claude Code vs Codex vs Pi</td>
+      <td>agent-traces или minitrace → Parquet</td>
+    </tr>
+    <tr>
+      <td>Интеграция с Jaeger/Grafana</td>
+      <td>trace-to-otel из audit JSONL</td>
+    </tr>
+    <tr>
+      <td>Human review + regression</td>
+      <td>LangSmith / Langfuse → dataset export</td>
+    </tr>
+    <tr>
+      <td>Eval trajectory-level (pass^k)</td>
+      <td>Нативный replay format + state oracle, не только messages</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="типичные-ошибки-при-экспорте">Типичные ошибки при экспорте</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Ошибка</th>
+      <th>Последствие</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Склеить все агенты AutoGen в один <code class="language-plaintext highlighter-rouge">human</code>/<code class="language-plaintext highlighter-rouge">gpt</code> без <code class="language-plaintext highlighter-rouge">name</code></td>
+      <td>Потеря мультиагентной структуры</td>
+    </tr>
+    <tr>
+      <td>Выбросить failed trajectories</td>
+      <td>Selection bias в SFT — модель не учится на recovery</td>
+    </tr>
+    <tr>
+      <td>Double-encode JSON в <code class="language-plaintext highlighter-rouge">arguments</code></td>
+      <td>Ломает парсеры tool calls при обучении</td>
+    </tr>
+    <tr>
+      <td>Нет <code class="language-plaintext highlighter-rouge">tool_call_id</code> при native tool role</td>
+      <td>Несовпадение пары call/response</td>
+    </tr>
+    <tr>
+      <td>Экспорт только final answer из CrewAI</td>
+      <td>Модель не видит chain-of-tools</td>
+    </tr>
+    <tr>
+      <td>Один формат для analytics и для SFT</td>
+      <td>Лишние трансформации; лучше два слоя (Parquet + ShareGPT)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="пайплайн-от-продакшена-к-training-set">Пайплайн: от продакшена к training set</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Сырые логи агента
+  → PII scrub (presidio / redact)
+  → нормализация (trajex / agent-traces / свой конвертер)
+  → фильтр: completed=true, outcome=success, tool_stats в норме
+  → дедуп по embedding task_label
+  → human review выборки
+  → ShareGPT JSONL → LLaMA-Factory / HF datasets
+  → параллельно: Parquet → аналитика и eval backlog
+</code></pre></div></div>
+
+<p>Связь с <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">генерацией бенчмарков</a>: успешные траектории → positive examples; failed + verifier → кандидаты в golden set.</p>
+
+<hr />
+
+<h2 id="индустриальные-практики-телеметрия--анализ--кластеры--fsm">Индустриальные практики: телеметрия → анализ → кластеры → FSM</h2>
+
+<p>Формат траектории — это <strong>сырьё</strong>. Компании, которые строят агентные продукты (LangChain/LangSmith, Braintrust, Anthropic, команды coding-агентов, enterprise MAS вроде <a href="/vairl/blog/2026/07/01/maestro-airi-stack-ru/">MAESTRO</a>), поверх одного и того же потока логов выстраивают <strong>аналитический контур</strong>: от сырой трассы к каталогу задач, кластерам решений и восстановленным автоматам успешного поведения.</p>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph ingest [Сбор]
+    RT[Runtime hooks / OTel]
+    GW[API gateway]
+    OBS[LangSmith / Langfuse / Braintrust]
+  end
+  subgraph normalize [Нормализация]
+    N1[task_label + outcome]
+    N2[tool sequence skeleton]
+    N3[fsm_state / graph_node / agent_id]
+  end
+  subgraph analyze [Анализ]
+    TC[Кластеризация задач]
+    SC[Кластеризация решений]
+    PM[Process mining / FSM discovery]
+  end
+  subgraph act [Действия]
+    SFT[SFT corpus]
+    EV[Eval datasets]
+    ORCH[Обновление оркестратора]
+  end
+  ingest --&gt; normalize --&gt; analyze --&gt; act
+</code></pre>
+
+<h3 id="как-собирают-телеметрию-компании-агенты">Как собирают телеметрию «компании-агенты»</h3>
+
+<p>Паттерн 2025–2026 сходится к <strong>трём слоям</strong> (подробнее — в <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">обзоре телеметрии</a>):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Слой</th>
+      <th>Кто так делает</th>
+      <th>Что пишется</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Instrumentation</strong></td>
+      <td>Все серьёзные команды</td>
+      <td>OTel SDK + <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/">GenAI semantic conventions</a>; <code class="language-plaintext highlighter-rouge">@traceable</code> / LangChain callbacks; custom audit JSONL</td>
+    </tr>
+    <tr>
+      <td><strong>Observability backend</strong></td>
+      <td>LangSmith, Braintrust, Langfuse, Arize Phoenix</td>
+      <td>Иерархия trace → span/run; threads по <code class="language-plaintext highlighter-rouge">session_id</code>; scores, tags, datasets</td>
+    </tr>
+    <tr>
+      <td><strong>Analytics warehouse</strong></td>
+      <td>Крупные продукты, coding-agent pipelines</td>
+      <td>Parquet / ClickHouse: <code class="language-plaintext highlighter-rouge">agent-traces</code>, nightly ETL из observability API</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>LangSmith</strong> (LangChain Inc.): traces как дерево runs; <strong>threads</strong> связывают multi-turn сессии; <strong>Insights</strong> — встроенный анализ продакшен-трасс с кластеризацией по темам и failure modes; <strong>trajectory evals</strong> проверяют порядок tools и выбор sub-agent’а, не только финальный ответ. Для LangGraph каждый <strong>узел графа</strong> — отдельный span → видны loop’ы и handoff state.</p>
+
+<p><strong>Braintrust</strong>: eval-first платформа; фича <strong><a href="https://www.braintrust.dev/blog/topics">Topics</a></strong> — автоматическая классификация traces. Архитектура (<a href="https://www.braintrust.dev/blog/topics-architecture">summarize → embed → cluster → label</a>) вдохновлена подходом Anthropic <strong>Clio</strong>: сначала LLM <strong>суммаризирует</strong> trace по одному измерению (Task / Sentiment / Issues) в 1–2 предложения, затем embedding, <strong>UMAP + HDBSCAN</strong>, именование кластера вторым LLM-проходом. Классификации пишутся обратно в логи как <strong>SQL-фильтруемые колонки</strong> → dataset builder, regression CI.</p>
+
+<p><strong>Langfuse</strong> (open-source, с 2026 — в экосистеме ClickHouse): on-prem traces, prompt versioning, экспорт в OpenAI-format messages; кластеризацию чаще делают <strong>своим пайплайном</strong> поверх экспорта (embed + HDBSCAN), зато полный контроль над данными.</p>
+
+<p><strong>Coding-агенты</strong> (Cursor, Claude Code, Codex, Pi): телеметрия часто <strong>локальная</strong> (JSONL/SQLite), агрегация — через <a href="https://github.com/davanstrien/agent-traces">agent-traces</a> / <a href="https://github.com/wesen/minitrace">minitrace</a> при выгрузке в аналитику; публичные датасеты (<code class="language-plaintext highlighter-rouge">pi-mono</code>, <code class="language-plaintext highlighter-rouge">claude-code-traces</code>) — основа для исследований поведения.</p>
+
+<p><strong>Hermes / RL-команды</strong>: сразу пишут <strong>training-ready</strong> JSONL (<code class="language-plaintext highlighter-rouge">trajectory_samples.jsonl</code> / <code class="language-plaintext highlighter-rouge">failed_trajectories.jsonl</code>) с <code class="language-plaintext highlighter-rouge">completed</code> и <code class="language-plaintext highlighter-rouge">tool_stats</code> — телеметрия и SFT-экспорт совмещены.</p>
+
+<p>Общий принцип: <strong>100% ошибок + sample успешных</strong> (см. <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/#sampling">телеметрию</a>); каждая запись привязана к <code class="language-plaintext highlighter-rouge">agent_version</code>, <code class="language-plaintext highlighter-rouge">model_id</code>, <code class="language-plaintext highlighter-rouge">prompt_hash</code>.</p>
+
+<h3 id="двухпроходный-пайплайн-анализа-industry-standard">Двухпроходный пайплайн анализа (industry standard)</h3>
+
+<p>На больших объёмах (тысячи+ traces/день) ручной разбор невозможен. Стандартная схема:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Проход</th>
+      <th>Вход</th>
+      <th>Выход</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1. Discovery</strong></td>
+      <td>Sample 500–50 000 traces (часто только <code class="language-plaintext highlighter-rouge">outcome=success</code> для «эталонов»)</td>
+      <td>Taxonomy: именованные кластеры задач и/или паттернов решений</td>
+    </tr>
+    <tr>
+      <td><strong>2. Assignment</strong></td>
+      <td>Каждая новая trace</td>
+      <td>Метки: <code class="language-plaintext highlighter-rouge">task_cluster_id</code>, <code class="language-plaintext highlighter-rouge">solution_variant_id</code>, <code class="language-plaintext highlighter-rouge">failure_topic</code></td>
+    </tr>
+    <tr>
+      <td><strong>3. Action</strong></td>
+      <td>Размеченный корпус</td>
+      <td>Eval dataset, SFT slice, алерт, правка промпта / FSM</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Discovery почти всегда <strong>не на сыром тексте trace</strong>, а на <strong>компактном представлении</strong> (facet summary, tool skeleton, state sequence) — иначе embedding не помещает контекст и шумит.</p>
+
+<h3 id="кластеризация-задач-task-clustering">Кластеризация задач (task clustering)</h3>
+
+<p>Цель: понять, <strong>какие задачи</strong> приносят пользователи, без ручной разметки каждой сессии. Практики:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Метод</th>
+      <th>Как работает</th>
+      <th>Кто / где</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Embedding opening message</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">user_message</code> → embed → HDBSCAN / k-means</td>
+      <td>Базовый task mining (<a href="/vairl/blog/2026/06/29/agent-telemetry-ru/#список-задач-пользователя-task-mining">телеметрия</a>)</td>
+    </tr>
+    <tr>
+      <td><strong>LLM task_label</strong></td>
+      <td>В конце сессии: «какую задачу решал пользователь?» → embed label</td>
+      <td>Продуктовые команды, nightly job</td>
+    </tr>
+    <tr>
+      <td><strong>Facet Task (Braintrust Topics)</strong></td>
+      <td>LLM извлекает intent из полной trace → embed → cluster</td>
+      <td>Автоматические топики вроде «Refund requests», «API auth errors»</td>
+    </tr>
+    <tr>
+      <td><strong>Intent classifier</strong></td>
+      <td>Supervised или weak labels из кластеров v1</td>
+      <td>Зрелые продукты после human review топ-кластеров</td>
+    </tr>
+    <tr>
+      <td><strong>Structured intake</strong></td>
+      <td>Форма / schema на входе → task = instance</td>
+      <td>Support bots, enterprise workflows</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Пайплайн каталога задач (из <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрии</a>):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Сырые сессии → PII scrub → task_label → embed → кластер → human review → taxonomy v1
+         ↓
+  success_rate, cost, frequency по кластеру → приоритет roadmap и eval
+</code></pre></div></div>
+
+<p>Визуализация кластеров в 2D (PaCMAP, UMAP) — карта «белых пятен» продукта; см. <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">пространство гипотез</a>.</p>
+
+<p><strong>Фильтр для обучения:</strong> в SFT часто берут кластеры с <strong>высоким success rate</strong> и низкой стоимостью — «эталонные» задачи. Failure-кластеры идут в eval, не в training (иначе selection bias).</p>
+
+<h3 id="кластеризация-решений-solution--execution-clustering">Кластеризация решений (solution / execution clustering)</h3>
+
+<p>Здесь кластеризуют не <em>что просил пользователь</em>, а <em>как агент действовал</em> — последовательность tools, узлов графа, переходов FSM.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Представление траектории</th>
+      <th>Алгоритм</th>
+      <th>Инструмент / источник</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Tool sequence skeleton</strong></td>
+      <td>Exact match на нормализованной строке <code class="language-plaintext highlighter-rouge">read_file→grep→edit</code></td>
+      <td><a href="https://github.com/Lucas-FManager/clustertrace">clustertrace</a> — failure rate по кластеру</td>
+    </tr>
+    <tr>
+      <td><strong>Span sequence</strong></td>
+      <td>Run-length collapse + equality</td>
+      <td>clustertrace <code class="language-plaintext highlighter-rouge">list_clusters</code></td>
+    </tr>
+    <tr>
+      <td><strong>Process graph (DFG)</strong></td>
+      <td>Directly-follows graph, variants</td>
+      <td><a href="https://github.com/ClemenceChee/AgentFlow">AgentFlow</a> — process mining для агентов</td>
+    </tr>
+    <tr>
+      <td><strong>DTW / edit distance</strong></td>
+      <td>Похожие последовательности с перестановками</td>
+      <td><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/#поиск-похожих-задач-и-сессий">телеметрия: trajectory similarity</a></td>
+    </tr>
+    <tr>
+      <td><strong>Action embeddings</strong></td>
+      <td>Verb-noun embeddings шагов → t-SNE</td>
+      <td><a href="https://aclanthology.org/2025.emnlp-demos.15/">AgentDiagnose</a></td>
+    </tr>
+    <tr>
+      <td><strong>Behavioral baseline</strong></td>
+      <td>Статистика по passing traces</td>
+      <td>Trajex <code class="language-plaintext highlighter-rouge">learn()</code> + <code class="language-plaintext highlighter-rouge">check_anomalies()</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Типичный инсайт: <em>«83% падений приходятся на 2 паттерна из 18»</em> — вместо чтения сотен traces вручную. Успешные кластеры становятся <strong>few-shot шаблонами</strong> и кандидатами в SFT; провальные — в <strong>trajectory eval</strong> с проверкой порядка tools.</p>
+
+<p><strong>Trajex 0.3</strong> учит baseline на каталоге успешных traces: новые прогоны сравнивают с <code class="language-plaintext highlighter-rouge">ordering_violation</code>, <code class="language-plaintext highlighter-rouge">new_tool_appeared</code>, <code class="language-plaintext highlighter-rouge">step_count_anomaly</code> — это <strong>кластеризация поведения через статистический эталон</strong>, без явного HDBSCAN.</p>
+
+<p><strong>minitrace</strong> даёт <code class="language-plaintext highlighter-rouge">read_ratio</code>, <code class="language-plaintext highlighter-rouge">tool_call_count</code>, <code class="language-plaintext highlighter-rouge">turn_count</code> — метрики для сравнения <strong>вариантов работы</strong> одного и того же агента между версиями и фреймворками.</p>
+
+<h3 id="выявление-конечных-автоматов-из-успешных-трасс">Выявление конечных автоматов из успешных трасс</h3>
+
+<p>Если кластеризация отвечает «какие группы похожи», <strong>process mining / FSM discovery</strong> отвечает «какая <strong>повторяющаяся машина состояний</strong> лежит в основе успеха».</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Подход</th>
+      <th>Суть</th>
+      <th>Результат</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Логирование <code class="language-plaintext highlighter-rouge">fsm_state</code> / <code class="language-plaintext highlighter-rouge">graph_node</code></strong></td>
+      <td>Явная разметка при исполнении</td>
+      <td>Готовая таблица переходов; mining = подсчёт частот <code class="language-plaintext highlighter-rouge">S_i → S_j</code> на <code class="language-plaintext highlighter-rouge">outcome=success</code></td>
+    </tr>
+    <tr>
+      <td><strong>Directly-follows graph (DFG)</strong></td>
+      <td>Из hundreds runs: A→B→C частоты</td>
+      <td>AgentFlow <code class="language-plaintext highlighter-rouge">discoverProcess()</code> — «73% идут A→B→C, 12% A→D с 80% fail»</td>
+    </tr>
+    <tr>
+      <td><strong>Conformance checking</strong></td>
+      <td>Сравнение новой trace с эталонной моделью</td>
+      <td><code class="language-plaintext highlighter-rouge">checkConformance()</code> — неожиданные переходы, пропущенные шаги</td>
+    </tr>
+    <tr>
+      <td><strong>PFSM из трасс (Skill-DisCo)</strong></td>
+      <td>Кластеризация фрагментов control-flow</td>
+      <td>Параметризованный FSM-subgraph как reusable skill (<a href="https://arxiv.org/html/2606.26669v1">arxiv</a>)</td>
+    </tr>
+    <tr>
+      <td><strong>State-transition timelines</strong></td>
+      <td>Визуализация переходов</td>
+      <td>AgentDiagnose — диагностика backtracking, decomposition</td>
+    </tr>
+    <tr>
+      <td><strong>Ручной гибрид</strong></td>
+      <td>FSM снаружи, DAG/BT внутри</td>
+      <td><a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">Гибридный оркестратор</a> — проектирование + валидация по логам</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Практический workflow <strong>reverse-engineering FSM из продакшена</strong>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. Фильтр: outcome=success, verifier=pass, cost &lt; p95
+2. Извлечь последовательность: fsm_state | graph_node | collapsed_tool_sequence
+3. Построить DFG / частотную матрицу переходов
+4. Отсечь переходы с support &lt; θ (например 5%)
+5. Human review → FSM v1 (Planning → Executing → Verifying → Done)
+6. Conformance на новых traces → drift alert
+7. Успешные варианты → SFT; отклонения → eval + guard в оркестраторе
+</code></pre></div></div>
+
+<p>Связь с <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">гибридным DAG/FSM/BT</a>: телеметрия <strong>не заменяет</strong> проектирование автомата, но <strong>проверяет</strong>, совпадает ли реальное поведение с задуманным — и предлагает новые состояния, если продукт «оброс» неучтёнными режимами (recovery, escalation, handoff).</p>
+
+<h3 id="мультиагентные-системы-что-логируют-отдельно">Мультиагентные системы: что логируют отдельно</h3>
+
+<p>В MAS (AutoGen, CrewAI, LangGraph multi-agent, <a href="/vairl/blog/2026/07/01/maestro-airi-stack-ru/">MAESTRO</a>) одной «плоской» траектории недостаточно. Известные практики:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Поле / практика</th>
+      <th>Зачем</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agent_id</code> / <code class="language-plaintext highlighter-rouge">role</code> / <code class="language-plaintext highlighter-rouge">crew_agent_name</code></td>
+      <td>Per-agent error rate, bottleneck</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">handoff_id</code>, <code class="language-plaintext highlighter-rouge">parent_agent</code>, <code class="language-plaintext highlighter-rouge">child_agent</code></td>
+      <td>Трассировка передачи state</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">handoff_payload_hash</code> / schema version</td>
+      <td>Детект schema drift между агентами</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">message_protocol</code> (gRPC, chat, blackboard)</td>
+      <td><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/#1-фундаментальная-теория-ai-агентов-и-систем">Wooldridge MAS</a> — разные топологии</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">thread_id</code> на всю сессию</td>
+      <td>LangSmith: связать traces разных агентов в один разговор</td>
+    </tr>
+    <tr>
+      <td>Span на <strong>каждый</strong> LLM + tool <strong>каждого</strong> агента</td>
+      <td>Каскадные сбои: tool error у агента A → галлюцинация у B</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">orchestrator_mode</code>: supervisor / groupchat / DAG</td>
+      <td>Сравнение топологий на одних задачах</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>LangSmith</strong> для multi-agent: фильтр traces по error status <strong>внутри конкретного node/agent</strong>; проверка <strong>handoff fidelity</strong> — совпадает ли input span агента B с output span агента A.</p>
+
+<p><strong>CrewAI / AutoGen</strong>: нативный лог — переписка с <code class="language-plaintext highlighter-rouge">name</code>; для аналитики конвертируют в <strong>единый trace</strong> с полем <code class="language-plaintext highlighter-rouge">speaker</code> или разбивают на <strong>sub-traces</strong> per agent, связанные <code class="language-plaintext highlighter-rouge">session_id</code>.</p>
+
+<p><strong>Кластеризация в MAS:</strong></p>
+
+<ul>
+  <li><strong>По задаче</strong> — как в single-agent (Task facet).</li>
+  <li><strong>По протоколу взаимодействия</strong> — последовательность <code class="language-plaintext highlighter-rouge">(agent_A, tool_x) → (agent_B, tool_y)</code>; кластеры = «типовые сценарии делегирования».</li>
+  <li><strong>По исходу handoff</strong> — доля успешных передач planner→coder→reviewer.</li>
+</ul>
+
+<h3 id="сводная-таблица-кто-что-делает-с-трассами">Сводная таблица: кто что делает с трассами</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Компания / продукт</th>
+      <th>Сбор</th>
+      <th>Кластеризация задач</th>
+      <th>Кластеризация решений</th>
+      <th>FSM / process model</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Braintrust</strong></td>
+      <td>Spans, scores</td>
+      <td>Topics: Task facet</td>
+      <td>Topics: Issues facet</td>
+      <td>Через taxonomy + eval gates</td>
+    </tr>
+    <tr>
+      <td><strong>LangSmith</strong></td>
+      <td>Runs, threads, Insights</td>
+      <td>Insights reports</td>
+      <td>Trajectory evals, node loops</td>
+      <td>LangGraph node graph = явный FSM/DAG</td>
+    </tr>
+    <tr>
+      <td><strong>Langfuse</strong></td>
+      <td>OTel-native traces</td>
+      <td>Custom ETL + embed</td>
+      <td>Custom / экспорт</td>
+      <td>Зависит от полей в attributes</td>
+    </tr>
+    <tr>
+      <td><strong>Hermes</strong></td>
+      <td>JSONL trajectories</td>
+      <td><code class="language-plaintext highlighter-rouge">metadata</code> + prompt_index</td>
+      <td><code class="language-plaintext highlighter-rouge">tool_stats</code></td>
+      <td>В оркестраторе агента</td>
+    </tr>
+    <tr>
+      <td><strong>clustertrace</strong></td>
+      <td>Decorator / OTel</td>
+      <td>Tags на trace</td>
+      <td>Span-sequence clusters</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>AgentFlow</strong></td>
+      <td>Execution graphs</td>
+      <td>—</td>
+      <td><code class="language-plaintext highlighter-rouge">findVariants()</code>, bottlenecks</td>
+      <td><code class="language-plaintext highlighter-rouge">discoverProcess()</code>, conformance</td>
+    </tr>
+    <tr>
+      <td><strong>Trajex</strong></td>
+      <td>Canonical Trace</td>
+      <td><code class="language-plaintext highlighter-rouge">prompt</code></td>
+      <td><code class="language-plaintext highlighter-rouge">learn()</code> baseline</td>
+      <td>Ordering assertions</td>
+    </tr>
+    <tr>
+      <td><strong>agent-traces</strong></td>
+      <td>Multi-format → Parquet</td>
+      <td><code class="language-plaintext highlighter-rouge">sessions</code> + content embed</td>
+      <td><code class="language-plaintext highlighter-rouge">events.tool_name</code> sequences</td>
+      <td>SQL/Polars aggregation</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="пайплайн-телеметрия--успешные-траектории--продукт">Пайплайн «телеметрия → успешные траектории → продукт»</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Продакшен traces (все frameworks → OTel / Parquet)
+  ├─ Task discovery (Topics / task_label / embed)
+  │     → task taxonomy + частоты + success_rate
+  ├─ Solution clustering (tool skeleton / DFG / Trajex learn)
+  │     → варианты работы + failure signatures
+  ├─ FSM mining (только success + verifier)
+  │     → эталонный автомат + conformance checks
+  └─ Выходы:
+        • ShareGPT slice для SFT (лучшие кластеры)
+        • Eval packs (провальные варианты + edge cases)
+        • Обновление FSM/guards в оркестраторе
+        • Алерты: новый task cluster, drift решения, loop в node
+</code></pre></div></div>
+
+<p>Это замыкает контур с <a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">синтезом гипотез из трасс</a>: кластеры подсказывают, <strong>где</strong> искать улучшения; FSM — <strong>какие</strong> переходы закрепить в коде; форматы из первой половины статьи — <strong>как</strong> выгрузить данные в training и eval инструменты.</p>
+
+<hr />
+
+<h2 id="обзор-инструментов-кратко">Обзор инструментов (кратко)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Категория</th>
+      <th>Инструмент</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SFT training</td>
+      <td>LLaMA-Factory</td>
+      <td><a href="https://github.com/hiyouga/LLaMA-Factory">github.com/hiyouga/LLaMA-Factory</a></td>
+    </tr>
+    <tr>
+      <td>Trajectory spec + tests</td>
+      <td>Trajex</td>
+      <td><a href="https://pypi.org/project/trajex/">pypi.org/project/trajex</a></td>
+    </tr>
+    <tr>
+      <td>Multi-agent analytics</td>
+      <td>agent-traces</td>
+      <td><a href="https://github.com/davanstrien/agent-traces">github.com/davanstrien/agent-traces</a></td>
+    </tr>
+    <tr>
+      <td>Cross-framework sessions</td>
+      <td>minitrace</td>
+      <td><a href="https://github.com/wesen/minitrace">github.com/wesen/minitrace</a></td>
+    </tr>
+    <tr>
+      <td>JSONL → OTel</td>
+      <td>trace-to-otel</td>
+      <td><a href="https://github.com/MukundaKatta/trace-to-otel">github.com/MukundaKatta/trace-to-otel</a></td>
+    </tr>
+    <tr>
+      <td>ShareGPT export reference</td>
+      <td>Hermes Agent</td>
+      <td><a href="https://hermes-agent.nousresearch.com/docs/developer-guide/trajectory-format">Trajectory Format docs</a></td>
+    </tr>
+    <tr>
+      <td>Observability</td>
+      <td>Langfuse, LangSmith, Phoenix</td>
+      <td>см. <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрию</a></td>
+    </tr>
+    <tr>
+      <td>Trace clustering / Topics</td>
+      <td>Braintrust Topics</td>
+      <td><a href="https://www.braintrust.dev/blog/topics">braintrust.dev/blog/topics</a></td>
+    </tr>
+    <tr>
+      <td>Solution clustering</td>
+      <td>clustertrace</td>
+      <td><a href="https://github.com/Lucas-FManager/clustertrace">github.com/Lucas-FManager/clustertrace</a></td>
+    </tr>
+    <tr>
+      <td>Process mining / FSM</td>
+      <td>AgentFlow</td>
+      <td><a href="https://github.com/ClemenceChee/AgentFlow">github.com/ClemenceChee/AgentFlow</a></td>
+    </tr>
+    <tr>
+      <td>Trajectory diagnosis</td>
+      <td>AgentDiagnose</td>
+      <td><a href="https://aclanthology.org/2025.emnlp-demos.15/">aclanthology.org/2025.emnlp-demos.15</a></td>
+    </tr>
+    <tr>
+      <td>PFSM skill discovery</td>
+      <td>Skill-DisCo</td>
+      <td><a href="https://arxiv.org/html/2606.26669v1">arxiv.org/html/2606.26669</a></td>
+    </tr>
+    <tr>
+      <td>OTel GenAI semconv</td>
+      <td>OpenTelemetry</td>
+      <td><a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/">opentelemetry.io/docs/specs/semconv/gen-ai</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="чеклист-перед-экспортом">Чеклист перед экспортом</h2>
+
+<ol>
+  <li>Определён <strong>целевой потребитель</strong>: SFT, eval, analytics или observability?</li>
+  <li>Зафиксирован <strong>маппинг ролей</strong> и стратегия для tool/observation.</li>
+  <li>Сохраняются <strong>failed</strong> и <strong>partial</strong> trajectories (с меткой <code class="language-plaintext highlighter-rouge">completed</code>).</li>
+  <li>Есть <strong>session_id</strong> и версия агента для replay.</li>
+  <li>PII вычищен <strong>до</strong> записи в training corpus.</li>
+  <li>Для multi-agent — решено, как кодировать <strong>имена агентов</strong>.</li>
+  <li>Проверен конвертер на <strong>10–20 ручных сессиях</strong> (tool_call pairing, encoding).</li>
+  <li>Настроен <strong>второй экспорт</strong> в analytics-формат, если SFT и SQL-аналитика расходятся.</li>
+  <li>Для продакшена: есть <strong>task_label</strong> или facet для кластеризации задач.</li>
+  <li>Логируется <strong>skeleton решения</strong> (<code class="language-plaintext highlighter-rouge">tool_sequence</code> / <code class="language-plaintext highlighter-rouge">fsm_state</code> / <code class="language-plaintext highlighter-rouge">graph_node</code>) для кластеризации вариантов работы.</li>
+  <li>Успешные traces (<code class="language-plaintext highlighter-rouge">outcome=success</code>) отделены для <strong>FSM mining</strong> и SFT; failed — для eval.</li>
+  <li>В MAS: есть <code class="language-plaintext highlighter-rouge">agent_id</code> и трассировка <strong>handoff</strong> между агентами.</li>
+</ol>
+
+<hr />
+
+<h2 id="связанные-публикации-vairl">Связанные публикации VAIRL</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия AI-агентов</a> — сбор, хранение, поиск похожих задач</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">Генерация бенчмарков</a> — trajectory-level eval</li>
+  <li><a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/">Фундамент агентных систем</a> — обзор Pi, Codex, Claude Code и др.</li>
+  <li><a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">Синтез гипотез из трасс</a> — анализ накопленных логов</li>
+  <li><a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">Гибридный оркестратор DAG/FSM/BT</a> — проектирование автоматов и вложенность исполнителей</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость control loops</a> — метрики на каждом шаге траектории</li>
+</ul>
+
+<hr />
+
+<h2 id="итог">Итог</h2>
+
+<p>Форматы траекторий <strong>намеренно различаются</strong>: LangChain хранит typed messages, CrewAI — ReAct-текст, coding-агенты — event JSONL, observability-платформы — span trees. Для обучения доминируют <strong>ShareGPT</strong> и <strong>OpenAI messages</strong>; для инженерии поведения — <strong>Trajex</strong>, <strong>minitrace</strong>, <strong>agent-traces</strong>, <strong>clustertrace</strong>, <strong>AgentFlow</strong>; для продакшена — <strong>OTel</strong>, Langfuse, LangSmith, Braintrust Topics.</p>
+
+<p>Практичный подход: <strong>два слоя данных</strong> — (1) behavioral trace для тестов, кластеризации решений и FSM mining; (2) training export (ShareGPT JSONL) — плюс <strong>двухпроходная аналитика</strong> (discover taxonomy → assign labels). Тогда выгрузка «задача + как агент действовал» становится не архивом логов, а входом в <strong>каталог задач</strong>, <strong>кластеры вариантов решения</strong> и <strong>эталонные автоматы</strong> успешной работы — в том числе в мультиагентных топологиях.</p>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

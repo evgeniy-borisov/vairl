@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эволюционные алгоритмы в исследованиях ИИ - VAIRL</title>
+    <meta name="description" content="Эволюционные алгоритмы черпают вдохновение из биологической эволюции для решения сложных задач оптимизации. Эти методы оказываются бесценными в современных и...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Эволюционные алгоритмы в исследованиях ИИ | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Эволюционные алгоритмы в исследованиях ИИ" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Эволюционные алгоритмы черпают вдохновение из биологической эволюции для решения сложных задач оптимизации. Эти методы оказываются бесценными в современных исследованиях ИИ." />
+<meta name="twitter:description" property="og:description" content="Эволюционные алгоритмы черпают вдохновение из биологической эволюции для решения сложных задач оптимизации. Эти методы оказываются бесценными в современных исследованиях ИИ." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/01/17/evolutionary-algorithms-ai-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/01/17/evolutionary-algorithms-ai-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/evolutionary-algorithms.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-01-17T14:53:00+00:00" />
+<meta property="article:modified_time" content="2026-01-17T14:53:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/evolutionary-algorithms.svg" />
+<meta name="twitter:title" content="Эволюционные алгоритмы в исследованиях ИИ" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-01-17T14:53:00+00:00","datePublished":"2026-01-17T14:53:00+00:00","description":"Эволюционные алгоритмы черпают вдохновение из биологической эволюции для решения сложных задач оптимизации. Эти методы оказываются бесценными в современных исследованиях ИИ.","headline":"Эволюционные алгоритмы в исследованиях ИИ","image":"https://evgeniy-borisov.github.io/vairl/assets/images/evolutionary-algorithms.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/01/17/evolutionary-algorithms-ai-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/01/17/evolutionary-algorithms-ai-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/2026/01/17/evolutionary-algorithms-ai/",
+    "ru": "/vairl/blog/2026/01/17/evolutionary-algorithms-ai-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/evolutionary-algorithms.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Эволюционные алгоритмы в исследованиях ИИ</h1>
+        <p class="post-date">17 January 2026, 14:53 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Эволюционные алгоритмы черпают вдохновение из биологической эволюции для решения сложных задач оптимизации. Эти методы оказываются бесценными в современных исследованиях ИИ.</p>
+
+<h2 id="биологическое-вдохновение">Биологическое вдохновение</h2>
+
+<p>Природа решает задачи оптимизации миллиарды лет через эволюцию. Процесс элегантен:</p>
+<ul>
+  <li>Случайные вариации создают разнообразие</li>
+  <li>Давление отбора благоприятствует полезным признакам</li>
+  <li>Успешные признаки распространяются на будущие поколения</li>
+</ul>
+
+<p>Эволюционные алгоритмы применяют те же принципы к вычислительным задачам.</p>
+
+<h2 id="основные-концепции">Основные концепции</h2>
+
+<h3 id="популяция">Популяция</h3>
+<p>Вместо одного решения эволюционные алгоритмы поддерживают популяцию решений-кандидатов. Это разнообразие помогает более тщательно исследовать пространство решений.</p>
+
+<h3 id="функция-приспособленности">Функция приспособленности</h3>
+<p>Каждое решение-кандидат оценивается с помощью функции приспособленности, которая измеряет, насколько хорошо оно решает задачу. Лучшие решения имеют более высокие оценки приспособленности.</p>
+
+<h3 id="отбор">Отбор</h3>
+<p>Решения с более высокой приспособленностью имеют больше шансов быть отобранными для размножения. Это имитирует естественный отбор.</p>
+
+<h3 id="операторы-вариации">Операторы вариации</h3>
+<ul>
+  <li><strong>Мутация</strong>: Случайные изменения в решениях создают новые вариации</li>
+  <li><strong>Скрещивание</strong>: Объединение частей двух родительских решений для создания потомства</li>
+</ul>
+
+<h2 id="применения-в-ии">Применения в ИИ</h2>
+
+<p>Эволюционные алгоритмы нашли множество применений в ИИ:</p>
+
+<h3 id="оптимизация-нейронных-сетей">Оптимизация нейронных сетей</h3>
+<ul>
+  <li>Эволюция архитектур сетей (нейроэволюция)</li>
+  <li>Оптимизация гиперпараметров</li>
+  <li>Обучение сетей без градиентного спуска</li>
+</ul>
+
+<h3 id="обучение-с-подкреплением">Обучение с подкреплением</h3>
+<ul>
+  <li>Прямая эволюция политик</li>
+  <li>Методы обучения на основе популяции</li>
+  <li>Стратегии исследования</li>
+</ul>
+
+<h3 id="робототехника">Робототехника</h3>
+<ul>
+  <li>Эволюция контроллеров роботов</li>
+  <li>Оптимизация морфологии роботов</li>
+  <li>Адаптивные поведенческие системы</li>
+</ul>
+
+<h2 id="преимущества-перед-традиционными-методами">Преимущества перед традиционными методами</h2>
+
+<p>Эволюционные алгоритмы предлагают несколько уникальных преимуществ:</p>
+
+<ol>
+  <li><strong>Не требуется градиент</strong>: Могут оптимизировать недифференцируемые цели</li>
+  <li><strong>Глобальный поиск</strong>: Меньше вероятность застрять в локальных оптимумах</li>
+  <li><strong>Параллельное вычисление</strong>: Члены популяции могут оцениваться одновременно</li>
+  <li><strong>Гибкость</strong>: Могут применяться практически к любой задаче оптимизации</li>
+</ol>
+
+<h2 id="недавние-прорывы">Недавние прорывы</h2>
+
+<p>Последние исследования показали, что эволюционные алгоритмы могут:</p>
+<ul>
+  <li>Соответствовать или превосходить методы на основе градиентов в некоторых областях</li>
+  <li>Масштабироваться до очень больших нейронных сетей</li>
+  <li>Обнаруживать новые решения, о которых люди не подумали бы</li>
+</ul>
+
+<p>В VAIRL мы особенно заинтересованы в гибридных подходах, которые сочетают эволюционные алгоритмы с другими методами оптимизации.</p>
+
+<h2 id="будущее">Будущее</h2>
+
+<p>По мере роста вычислительных ресурсов эволюционные алгоритмы становятся всё более практичными для крупномасштабных исследований ИИ. Мы верим, что они будут играть решающую роль в следующем поколении систем ИИ.</p>
+
+<p>Ключ в нахождении правильного баланса между исследованием и эксплуатацией, а также в разработке эффективных методов оценки больших популяций решений.</p>
+
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

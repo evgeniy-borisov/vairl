@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAESTRO от AIRI: стек, микросервисы и подходы к мультиагентным системам - VAIRL</title>
+    <meta name="description" content="Разбор платформы MAESTRO (Multi-Agent Ecosystem of Task Reasoning and Orchestration) и MAESTRO CARE от AIRI: библиотеки MMAR, gRPC-сервисы, CARL, GigaEvo, тр...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>MAESTRO от AIRI: стек, микросервисы и подходы к мультиагентным системам | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="MAESTRO от AIRI: стек, микросервисы и подходы к мультиагентным системам" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Разбор платформы MAESTRO (Multi-Agent Ecosystem of Task Reasoning and Orchestration) и MAESTRO CARE от AIRI: библиотеки MMAR, gRPC-сервисы, CARL, GigaEvo, требования к модулям и ссылки на репозитории." />
+<meta name="twitter:description" property="og:description" content="Разбор платформы MAESTRO (Multi-Agent Ecosystem of Task Reasoning and Orchestration) и MAESTRO CARE от AIRI: библиотеки MMAR, gRPC-сервисы, CARL, GigaEvo, требования к модулям и ссылки на репозитории." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/maestro-airi-stack-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/maestro-airi-stack-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/maestro-airi-stack.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-01T14:20:32+00:00" />
+<meta property="article:modified_time" content="2026-07-01T14:20:32+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/maestro-airi-stack.svg" />
+<meta name="twitter:title" content="MAESTRO от AIRI: стек, микросервисы и подходы к мультиагентным системам" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-01T14:20:32+00:00","datePublished":"2026-07-01T14:20:32+00:00","description":"Разбор платформы MAESTRO (Multi-Agent Ecosystem of Task Reasoning and Orchestration) и MAESTRO CARE от AIRI: библиотеки MMAR, gRPC-сервисы, CARL, GigaEvo, требования к модулям и ссылки на репозитории.","headline":"MAESTRO от AIRI: стек, микросервисы и подходы к мультиагентным системам","image":"https://evgeniy-borisov.github.io/vairl/assets/images/maestro-airi-stack.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/maestro-airi-stack-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/maestro-airi-stack-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/01/maestro-airi-stack-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/maestro-airi-stack.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">MAESTRO от AIRI: стек, микросервисы и подходы к мультиагентным системам</h1>
+        <p class="post-date">01 July 2026, 14:20 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p><strong>MAESTRO</strong> — открытый фреймворк <a href="https://airi.net/">AIRI</a> (Artificial Intelligence Research Institute) от группы <strong>«Мультимодальные архитектуры ИИ»</strong> (MMAR). Полное имя: <em>Multi-Agent Ecosystem of Task Reasoning and Orchestration</em>. Платформа предназначена для построения <strong>цифровых ассистентов и мультиагентных систем на LLM</strong> с явным разделением ролей, микросервисной оркестрацией и формализованными цепочками рассуждений.</p>
+
+<p>У экосистемы два уровня продуктов:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Продукт</th>
+      <th>Назначение</th>
+      <th>Точка входа</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MAESTRO</strong> (оркестратор)</td>
+      <td>Продакшен-платформа: gateway, LLM-hub, модерация, извлечение текста, бизнес-логика ботов</td>
+      <td><a href="https://github.com/AIRI-Institute/maestro-core">maestro-core</a>, Docker Compose</td>
+    </tr>
+    <tr>
+      <td><strong>MAESTRO CARE</strong></td>
+      <td>TUI/CLI для <strong>генерации, запуска и эволюции</strong> цепочек агентов поверх того же стека</td>
+      <td><a href="https://pypi.org/project/maestro-care/"><code class="language-plaintext highlighter-rouge">maestro-care</code> на PyPI</a>, <a href="https://github.com/AIRI-MAESTRO/care">AIRI-MAESTRO/care</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Ниже — архитектура, стек технологий, стандартные подходы команды и <strong>карта репозиториев</strong>. Связанные материалы VAIRL: <a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">пайплайн агентов-ролей</a>, <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">гибридный DAG/FSM/BT</a>, <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрия агентов</a>, <a href="/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/">ОГАС и Cybersyn</a>.</p>
+
+<blockquote>
+  <p><strong>Инструкции для агента-программиста</strong> — подробный текстовый файл с паттернами проектирования, архитектурой, программным стеком и стеком протоколов MAESTRO/MMAR: <a href="/vairl/assets/docs/maestro-agent-instructions.txt">maestro-agent-instructions.txt</a>. Его можно передать coding-агенту целиком как системный контекст при разработке модулей экосистемы.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="зачем-отдельный-оркестратор">Зачем отдельный оркестратор</h2>
+
+<p>Команда AIRI исходит из того, что <strong>один «универсальный» агент</strong> плохо масштабируется: смешиваются несовместимые задачи (извлечение фактов, диалог, модерация, вызов tools). MAESTRO предлагает:</p>
+
+<ol>
+  <li><strong>Декомпозицию</strong> — один агент = одна бизнес-задача; сложный сценарий = граф агентов.</li>
+  <li><strong>Микросервисы</strong> — каждая capability (LLM, OCR, классификатор вопросов) — отдельный сервис за gRPC.</li>
+  <li><strong>Единый внешний API</strong> — FastAPI gateway с JWT для клиентов (веб, Telegram, мобильные приложения).</li>
+  <li><strong>Формализацию рассуждений</strong> — библиотека <strong>CARL</strong> (Event → Action → Result) с DAG и параллельным исполнением.</li>
+</ol>
+
+<p>Презентация на AI Journey 2025, обзор на <a href="https://habr.com/ru/companies/airi/articles/967612/">Хабре</a> и <a href="https://medium.com/airi-institute/maestro-a-framework-for-building-multi-agent-digital-assistants-ff10ff8de3d9">англоязычный пост на Medium</a>. Официальная документация: <a href="https://airi-institute.github.io/maestro-cover/">maestro-cover</a> (<a href="https://airi-institute.github.io/maestro-cover/index-en.html">EN</a>).</p>
+
+<hr />
+
+<h2 id="два-контура-runtime-платформа-и-care">Два контура: runtime-платформа и CARE</h2>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph clients [Клиенты]
+    WEB[Web / мобильные приложения]
+    TG[Telegram frontend]
+    TUI[MAESTRO CARE TUI / CLI]
+  end
+
+  subgraph maestro [MAESTRO runtime — maestro-core]
+    GW[gateway :7731&lt;br/&gt;FastAPI + JWT]
+    CM[chat-manager-examples&lt;br/&gt;бизнес-логика / tracks]
+    LH[llm-hub&lt;br/&gt;OpenAI-compatible API]
+    MOD[moderators / question-detector]
+    EXT[text-extractor / document-extractor]
+  end
+
+  subgraph care_stack [CARE — генерация и эволюция]
+    MAGE[MAGE — генерация цепочек]
+    CARL[CARL — исполнение DAG]
+    MEM[GigaEvo Memory]
+    PLAT[GigaEvo Platform — GA / эволюция]
+  end
+
+  WEB --&gt; GW
+  TG --&gt; GW
+  TUI --&gt; MAGE
+  MAGE --&gt; CARL
+  CARL --&gt; MEM
+  CARL --&gt; PLAT
+  GW --&gt; CM
+  GW --&gt; LH
+  CM --&gt; MOD
+  CM --&gt; EXT
+  CM -.-&gt;|ptag gRPC| LH
+  CM -.-&gt;|ptag gRPC| MOD
+  CM -.-&gt;|ptag gRPC| EXT
+</code></pre>
+
+<p><strong>MAESTRO runtime</strong> — это «операционная система» ассистента: приём сообщений, маршрутизация, хранение чатов, вызов LLM и вспомогательных моделей.</p>
+
+<p><strong>MAESTRO CARE</strong> (<em>Collaborative Agent Reasoning Ecosystem</em>) — надстройка для разработчика/исследователя: из задачи на естественном языке <strong>сгенерировать</strong> цепочку агентов (MAGE), <strong>запустить</strong> (CARL), <strong>сохранить</strong> в библиотеку (GigaEvo Memory) и <strong>эволюционировать</strong> (GigaEvo Platform). Запуск: <code class="language-plaintext highlighter-rouge">uv run maestro</code> (TUI) или headless-подкоманды <code class="language-plaintext highlighter-rouge">maestro generate</code>, <code class="language-plaintext highlighter-rouge">maestro run</code>, <code class="language-plaintext highlighter-rouge">maestro evolve</code>.</p>
+
+<hr />
+
+<h2 id="библиотеки-mmar">Библиотеки MMAR</h2>
+
+<p>Ядро — набор Python-пакетов с префиксом <code class="language-plaintext highlighter-rouge">mmar-</code>, публикуемых на PyPI и vendored в <a href="https://github.com/AIRI-Institute/maestro-core/tree/main">maestro-core</a> как <code class="language-plaintext highlighter-rouge">lib--mmar-*</code>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Пакет</th>
+      <th>PyPI</th>
+      <th>Роль</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mmar-mapi</code></td>
+      <td><a href="https://pypi.org/project/mmar-mapi/">pypi</a></td>
+      <td>Контракты API: интерфейсы сервисов (<code class="language-plaintext highlighter-rouge">LLMHubAPI</code>, <code class="language-plaintext highlighter-rouge">TextExtractorAPI</code>, <code class="language-plaintext highlighter-rouge">BinaryClassifiersAPI</code>, <code class="language-plaintext highlighter-rouge">FileStorage</code>, …)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mmar-ptag</code></td>
+      <td><a href="https://pypi.org/project/mmar-ptag/">pypi</a></td>
+      <td><strong>p</strong>ydantically-<strong>t</strong>ype-<strong>a</strong>dapted-<strong>g</strong>RPC: типобезопасный RPC без ручного protobuf</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mmar-llm</code></td>
+      <td><a href="https://pypi.org/project/mmar-llm/">pypi</a></td>
+      <td>Доступ к LLM: GigaChat, OpenAI-compatible провайдеры, единая конфигурация</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mmar-carl</code></td>
+      <td><a href="https://pypi.org/project/mmar-carl/">pypi</a></td>
+      <td>Цепочки рассуждений: StepDescription, ReasoningChain, DAG, контекст</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mmar-flame</code></td>
+      <td><a href="https://pypi.org/project/mmar-flame/">pypi</a></td>
+      <td>Гибкая модерация (FLAME)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mmar-mcli</code></td>
+      <td><a href="https://pypi.org/project/mmar-mcli/">pypi</a></td>
+      <td>CLI-клиент к gateway</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mmar-utils</code></td>
+      <td><a href="https://pypi.org/project/mmar-utils/">pypi</a></td>
+      <td>Общие утилиты, трейсинг</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mmar-mage</code></td>
+      <td><a href="https://pypi.org/project/mmar-mage/">pypi</a></td>
+      <td>Генератор цепочек агентов (слой CARE)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="паттерн-ptag-как-сервисы-общаются">Паттерн ptag: как сервисы общаются</h3>
+
+<p>Внутри кластера MAESTRO <strong>не REST между микросервисами</strong>, а <strong>gRPC через <code class="language-plaintext highlighter-rouge">mmar-ptag</code></strong>. Идея: описать сервис как обычный Python-класс с keyword-only методами; Pydantic сериализует аргументы и ответы в protobuf «на лету».</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">mmar_mapi.api</span> <span class="kn">import</span> <span class="n">LLMHubAPI</span>
+<span class="kn">from</span> <span class="n">mmar_ptag</span> <span class="kn">import</span> <span class="n">ptag_client</span>
+
+<span class="n">llm</span> <span class="o">=</span> <span class="nf">ptag_client</span><span class="p">(</span><span class="n">LLMHubAPI</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">addresses</span><span class="p">.</span><span class="n">llm</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">llm</span><span class="p">.</span><span class="nf">complete</span><span class="p">(</span><span class="n">messages</span><span class="o">=</span><span class="p">[...],</span> <span class="n">trace_id</span><span class="o">=</span><span class="sh">"</span><span class="s">request-abc</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Особенности, которые команда закладывает в стандарт:</p>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">trace_id</code></strong> — сквозная трассировка через <code class="language-plaintext highlighter-rouge">mmar_mimpl.TRACE_ID_VAR</code>;</li>
+  <li><strong>автореконнект</strong> клиента (по умолчанию 5 попыток);</li>
+  <li><strong>интерфейс в <code class="language-plaintext highlighter-rouge">mmar-mapi</code></strong>, реализация в сервисе — контракт отделён от деплоя.</li>
+</ul>
+
+<p>Снаружи (для фронтендов и внешних интеграций) — <strong>FastAPI</strong> на gateway, <strong>JWT</strong> (<code class="language-plaintext highlighter-rouge">pyjwt</code>), опционально PostgreSQL для персистентности чатов (с v0.2.0 maestro-core).</p>
+
+<hr />
+
+<h2 id="микросервисы-в-maestro-core">Микросервисы в <code class="language-plaintext highlighter-rouge">maestro-core</code></h2>
+
+<p><a href="https://github.com/AIRI-Institute/maestro-core">maestro-core</a> — <strong>минимальный демонстрационный subset</strong> полной платформы. <code class="language-plaintext highlighter-rouge">compose.yaml</code> поднимает пять сервисов в сети <code class="language-plaintext highlighter-rouge">network-maestro-core</code>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сервис</th>
+      <th>Порт</th>
+      <th>Назначение</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">gateway</code></td>
+      <td>7731</td>
+      <td>Единая точка входа, FastAPI, DI (dishka), async SQLAlchemy + PostgreSQL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">chat-manager-examples</code></td>
+      <td>17231</td>
+      <td>Бизнес-логика ботов: <strong>tracks</strong> (сценарии диалога)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">llm-hub</code></td>
+      <td>40631</td>
+      <td>Прокси к LLM; TOML-конфиг; OpenAI / Anthropic / GigaChat / DeepSeek / OpenRouter</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">question-detector</code></td>
+      <td>31611</td>
+      <td>Бинарный классификатор: вопрос vs не-вопрос</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">text-extractor</code></td>
+      <td>9681</td>
+      <td>Извлечение текста из документов</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Дополнительно в репозитории (не всегда в базовом compose):</p>
+
+<ul>
+  <li><a href="https://github.com/AIRI-Institute/maestro-core/tree/main/service--document-extractor"><code class="language-plaintext highlighter-rouge">service--document-extractor</code></a> — PDF/OCR, Tesseract, таблицы в Markdown;</li>
+  <li><a href="https://github.com/AIRI-Institute/maestro-core/tree/main/service--frontend-telegram"><code class="language-plaintext highlighter-rouge">service--frontend-telegram</code></a> — интеграция с Telegram Bot API;</li>
+  <li><a href="https://github.com/AIRI-Institute/maestro-core/tree/main/service--moderators"><code class="language-plaintext highlighter-rouge">service--moderators</code></a> — модерация на <code class="language-plaintext highlighter-rouge">mmar-flame</code>.</li>
+</ul>
+
+<h3 id="стек-gateway-типичный-для-python-сервисов-maestro">Стек gateway (типичный для Python-сервисов MAESTRO)</h3>
+
+<p>Из <code class="language-plaintext highlighter-rouge">service--gateway/pyproject.toml</code>:</p>
+
+<ul>
+  <li><strong>Python 3.13+</strong>, FastAPI 0.115, Uvicorn, Pydantic 2.x, dishka (DI);</li>
+  <li><strong>mmar-ptag</strong>, <strong>mmar-mapi</strong>, <strong>mmar-llm</strong>, <strong>mmar-mcli</strong>;</li>
+  <li><strong>SQLAlchemy 2 async</strong> + <strong>asyncpg</strong> + <strong>Alembic</strong> (PostgreSQL);</li>
+  <li>качество: <strong>ruff</strong>, <strong>mypy</strong> (strict), <strong>pytest</strong> + testcontainers.</li>
+</ul>
+
+<p>Документация платформы указывает <strong>Python 3.12+</strong>, Docker, Docker Compose, PostgreSQL 12+ — для production-сборок ориентируйтесь на версии в <code class="language-plaintext highlighter-rouge">pyproject.toml</code> конкретного сервиса.</p>
+
+<hr />
+
+<h2 id="carl-цепочки-рассуждений">CARL: цепочки рассуждений</h2>
+
+<p><strong>CARL</strong> (<em>Collaborative Agent Reasoning Library</em>) — ключевая методология MMAR. Триада <strong>Event → Action → Result</strong> превращает экспертное мышление в структуру, понятную LLM:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Примитив</th>
+      <th>Смысл</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">StepDescription</code></td>
+      <td>Один шаг: событие, действие, ожидаемый результат</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ReasoningChain</code></td>
+      <td>Упорядоченная / параллельная цепочка шагов (DAG)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ReasoningContext</code></td>
+      <td>Накопленный контекст с RAG-подобным поиском релевантных фрагментов</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Параллельные ветки DAG исполняются независимо; контекст подмешивается в промпт следующих шагов. Это сознательный мост к <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">гибридным оркестраторам DAG/FSM</a>: CARL — <strong>DAG-слой «мышления»</strong>, chat-manager — <strong>FSM-слой диалога</strong> (tracks, slot-filling).</p>
+
+<p>Репозитории:</p>
+
+<ul>
+  <li><a href="https://github.com/AIRI-MAESTRO/carl">AIRI-MAESTRO/carl</a> — исходники экосистемы CARL;</li>
+  <li>vendored: <a href="https://github.com/AIRI-Institute/maestro-core/tree/main/lib--mmar-carl">lib–mmar-carl</a>.</li>
+</ul>
+
+<hr />
+
+<h2 id="maestro-care-четырёхслойный-стек">MAESTRO CARE: четырёхслойный стек</h2>
+
+<p>По <a href="https://github.com/AIRI-MAESTRO/care/blob/main/docs/ARCHITECTURE.md">ARCHITECTURE.md</a> CARE — <strong>consumer</strong> на вершине четырёх модулей:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Слой</th>
+      <th>Модуль</th>
+      <th>PyPI / SDK</th>
+      <th>Функция</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Generation</strong></td>
+      <td>MAGE</td>
+      <td><code class="language-plaintext highlighter-rouge">mmar-mage</code></td>
+      <td>NL-задача → CARL-цепочка</td>
+    </tr>
+    <tr>
+      <td><strong>Execution</strong></td>
+      <td>CARL</td>
+      <td><code class="language-plaintext highlighter-rouge">mmar-carl</code></td>
+      <td>Запуск цепочки, sandbox (Docker / e2b / firejail), ReAct-циклы</td>
+    </tr>
+    <tr>
+      <td><strong>Persistence</strong></td>
+      <td>GigaEvo Memory</td>
+      <td><code class="language-plaintext highlighter-rouge">gigaevo-client</code></td>
+      <td>Сущности chain / agent / agent_skill, библиотека, SSE</td>
+    </tr>
+    <tr>
+      <td><strong>Evolution</strong></td>
+      <td>GigaEvo Platform</td>
+      <td>—</td>
+      <td>Генетические алгоритмы, Pareto-front, accept-winner</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="режимы-чата">Режимы чата</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Режим</th>
+      <th>Поведение</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Ad-Hoc</strong></td>
+      <td>MAGE генерирует цепочку → CARL исполняет → ответ в чате. <strong>Ничего не сохраняется.</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Production</strong></td>
+      <td>Цепочка сохраняется в Memory (<code class="language-plaintext highlighter-rouge">chain_id</code>), baseline run → dataset, опционально evolution на Platform</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Конфигурация: <code class="language-plaintext highlighter-rouge">~/.config/care/config.toml</code>, <code class="language-plaintext highlighter-rouge">./care.toml</code>, env <code class="language-plaintext highlighter-rouge">CARE_*</code> (вложенность через <code class="language-plaintext highlighter-rouge">__</code>, например <code class="language-plaintext highlighter-rouge">CARE_MAGE__MODE=fast</code>). Телеметрия опционально в Langfuse (<code class="language-plaintext highlighter-rouge">CARE_TELEMETRY__*</code>).</p>
+
+<h3 id="gigaevo-platform-эволюция">GigaEvo Platform (эволюция)</h3>
+
+<p><a href="https://github.com/AIRI-Institute/gigaevo-platform">github.com/AIRI-Institute/gigaevo-platform</a> — отдельная микросервисная система экспериментов:</p>
+
+<ul>
+  <li><strong>Master API</strong> (FastAPI, Kafka, PostgreSQL, Redis) — оркестрация;</li>
+  <li><strong>Runner API</strong> — исполнение с GigaEvolve;</li>
+  <li><strong>WebUI</strong> (Gradio) — мониторинг и визуализация;</li>
+  <li>инфраструктура: Kafka (KRaft), MinIO, пул runner-контейнеров.</li>
+</ul>
+
+<p>CARE подключается через <a href="https://github.com/AIRI-MAESTRO/gigaevo-client">gigaevo-client</a> и фасады <code class="language-plaintext highlighter-rouge">CareMemory</code> / <code class="language-plaintext highlighter-rouge">CarePlatform</code>.</p>
+
+<hr />
+
+<h2 id="стандартные-подходы-команды">Стандартные подходы команды</h2>
+
+<h3 id="1-один-агент--одна-задача">1. Один агент — одна задача</h3>
+
+<p>Декомпозиция сценария на специализированных агентов (извлечение метаданных, ответ на вопрос, модерация). Сборка — в <strong>chat-manager</strong> через <strong>tracks</strong> или в CARL через <strong>ReasoningChain</strong>.</p>
+
+<h3 id="2-tracks-и-slot-filling">2. Tracks и slot-filling</h3>
+
+<p>В <code class="language-plaintext highlighter-rouge">chat-manager-examples</code> сценарии оформляются как <strong>tracks</strong> — конечные автоматы диалога. Пример: <a href="https://github.com/AIRI-Institute/maestro-core/tree/main/service--chat-manager-examples/src/chat_manager_examples/tracks"><code class="language-plaintext highlighter-rouge">filling_user_profile.py</code></a> — пошаговое заполнение слотов через разговор.</p>
+
+<h3 id="3-три-способа-собрать-агента-учебный-пример">3. Три способа собрать агента (учебный пример)</h3>
+
+<p><a href="https://airi-institute.github.io/maestro-cover/instruction.html">Инструкция «Создание ассистента»</a> сравнивает три трека для одной задачи (метаданные научной публикации):</p>
+
+<ol>
+  <li><strong>Нативный MAESTRO</strong> — tracks + ptag-клиенты к сервисам;</li>
+  <li><strong>LangChain</strong> — интеграция через те же gRPC-сервисы;</li>
+  <li><strong>ReAct</strong> — цикл рассуждение-действие.</li>
+</ol>
+
+<p>Схема и шаблон сервиса: <a href="https://github.com/AIRI-MAESTRO/maestro-service-template">AIRI-MAESTRO/maestro-service-template</a> (генерация через <strong>Copier</strong>: <code class="language-plaintext highlighter-rouge">copier copy https://github.com/AIRI-MAESTRO/maestro-grpc-service-template.git</code>).</p>
+
+<h3 id="4-llm-hub-как-единая-точка-к-моделям">4. LLM-hub как единая точка к моделям</h3>
+
+<p>С v0.2.0 — <strong>OpenAI-compatible</strong> архитектура и <code class="language-plaintext highlighter-rouge">llm-config.toml</code>. Один конфиг — много провайдеров; мониторинг LLM вынесен в нативные интеграции Langfuse (сервис <code class="language-plaintext highlighter-rouge">llm-hub-monitoring</code> удалён).</p>
+
+<h3 id="5-модерация-как-отдельный-сервис">5. Модерация как отдельный сервис</h3>
+
+<p><code class="language-plaintext highlighter-rouge">mmar-flame</code> + <code class="language-plaintext highlighter-rouge">moderators</code> — политики безопасности не вшиты в gateway, а вызываются по gRPC.</p>
+
+<h3 id="6-lazy-imports-в-care">6. Lazy imports в CARE</h3>
+
+<p>CARE не тянет MAGE/CARL/Platform на старте — опциональные зависимости подгружаются лениво, чтобы <code class="language-plaintext highlighter-rouge">maestro doctor</code> и узкие CLI-команды работали без полного стека.</p>
+
+<hr />
+
+<h2 id="требования-к-разработчику-модулей">Требования к разработчику модулей</h2>
+
+<p>Если вы пишете <strong>новый gRPC-сервис</strong> для MAESTRO:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Требование</th>
+      <th>Детали</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Язык</strong></td>
+      <td>Python 3.12–3.13 (сверяйтесь с шаблоном)</td>
+    </tr>
+    <tr>
+      <td><strong>Контракт</strong></td>
+      <td>Интерфейс в <code class="language-plaintext highlighter-rouge">mmar-mapi</code> или локальный ABC + регистрация в ptag</td>
+    </tr>
+    <tr>
+      <td><strong>Транспорт</strong></td>
+      <td>gRPC через <code class="language-plaintext highlighter-rouge">mmar-ptag</code> (<code class="language-plaintext highlighter-rouge">deploy_server</code>, <code class="language-plaintext highlighter-rouge">ptag_client</code>)</td>
+    </tr>
+    <tr>
+      <td><strong>Контейнер</strong></td>
+      <td>Dockerfile + запись в <code class="language-plaintext highlighter-rouge">compose.yaml</code></td>
+    </tr>
+    <tr>
+      <td><strong>Конфиг</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">.env</code> через <code class="language-plaintext highlighter-rouge">ENV_FILE</code>, общий volume <code class="language-plaintext highlighter-rouge">./data:/mnt/data</code></td>
+    </tr>
+    <tr>
+      <td><strong>Трейсинг</strong></td>
+      <td>Поддержка <code class="language-plaintext highlighter-rouge">trace_id</code> в сигнатурах методов</td>
+    </tr>
+    <tr>
+      <td><strong>Качество</strong></td>
+      <td>ruff, mypy, pytest — как в gateway</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Если вы пишете <strong>агента / цепочку</strong> для CARE:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Требование</th>
+      <th>Детали</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Формат</strong></td>
+      <td>CARL chain JSON; валидация: <code class="language-plaintext highlighter-rouge">maestro validate chain.json</code></td>
+    </tr>
+    <tr>
+      <td><strong>Tools</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">@carl_tool</code> + секция <code class="language-plaintext highlighter-rouge">CARE_TOOLS__*</code></td>
+    </tr>
+    <tr>
+      <td><strong>Skills</strong></td>
+      <td>AgentSkill в sandbox (<code class="language-plaintext highlighter-rouge">CARE_SANDBOX__*</code>: Docker по умолчанию)</td>
+    </tr>
+    <tr>
+      <td><strong>Персистентность</strong></td>
+      <td>GigaEvo Memory API (<code class="language-plaintext highlighter-rouge">CARE_MEMORY__BASE_URL</code>)</td>
+    </tr>
+    <tr>
+      <td><strong>Эволюция</strong></td>
+      <td>GigaEvo Platform + <code class="language-plaintext highlighter-rouge">maestro evolve &lt;chain_id&gt;</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Минимальный быстрый старт CARE:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>uv <span class="nb">sync
+</span>uv run maestro init
+uv run maestro          <span class="c"># TUI</span>
+uv run maestro doctor   <span class="c"># проверка Memory / MAGE / Platform</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="карта-репозиториев">Карта репозиториев</h2>
+
+<h3 id="airi-institute-платформа-и-документация">AIRI-Institute (платформа и документация)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Репозиторий</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>MAESTRO Core (демо)</td>
+      <td><a href="https://github.com/AIRI-Institute/maestro-core">github.com/AIRI-Institute/maestro-core</a></td>
+    </tr>
+    <tr>
+      <td>Документация (сайт)</td>
+      <td><a href="https://github.com/AIRI-Institute/maestro-cover">github.com/AIRI-Institute/maestro-cover</a> → <a href="https://airi-institute.github.io/maestro-cover/">airi-institute.github.io/maestro-cover</a></td>
+    </tr>
+    <tr>
+      <td>GigaEvo Platform</td>
+      <td><a href="https://github.com/AIRI-Institute/gigaevo-platform">github.com/AIRI-Institute/gigaevo-platform</a></td>
+    </tr>
+    <tr>
+      <td>Организация</td>
+      <td><a href="https://github.com/AIRI-Institute">github.com/AIRI-Institute</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="airi-maestro-care-и-экосистема-агентов">AIRI-MAESTRO (CARE и экосистема агентов)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Репозиторий</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MAESTRO CARE</strong> (TUI/CLI)</td>
+      <td><a href="https://github.com/AIRI-MAESTRO/care">github.com/AIRI-MAESTRO/care</a></td>
+    </tr>
+    <tr>
+      <td>MAGE (генерация цепочек)</td>
+      <td><a href="https://github.com/AIRI-MAESTRO/mage">github.com/AIRI-MAESTRO/mage</a></td>
+    </tr>
+    <tr>
+      <td>CARL</td>
+      <td><a href="https://github.com/AIRI-MAESTRO/carl">github.com/AIRI-MAESTRO/carl</a></td>
+    </tr>
+    <tr>
+      <td>CARL Agent Server</td>
+      <td><a href="https://github.com/AIRI-MAESTRO/carl-agent-server">github.com/AIRI-MAESTRO/carl-agent-server</a></td>
+    </tr>
+    <tr>
+      <td>GigaEvo Client SDK</td>
+      <td><a href="https://github.com/AIRI-MAESTRO/gigaevo-client">github.com/AIRI-MAESTRO/gigaevo-client</a></td>
+    </tr>
+    <tr>
+      <td>Шаблон gRPC-сервиса</td>
+      <td><a href="https://github.com/AIRI-MAESTRO/maestro-service-template">github.com/AIRI-MAESTRO/maestro-service-template</a></td>
+    </tr>
+    <tr>
+      <td>Документация CARE</td>
+      <td><a href="https://github.com/AIRI-MAESTRO/care-docs">github.com/AIRI-MAESTRO/care-docs</a></td>
+    </tr>
+    <tr>
+      <td>Организация</td>
+      <td><a href="https://github.com/AIRI-MAESTRO">github.com/AIRI-MAESTRO</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="pypi-установка-без-клонирования">PyPI (установка без клонирования)</h3>
+
+<ul>
+  <li><a href="https://pypi.org/project/maestro-care/">maestro-care</a> — CARE TUI/CLI</li>
+  <li><a href="https://pypi.org/project/mmar-mapi/">mmar-mapi</a>, <a href="https://pypi.org/project/mmar-ptag/">mmar-ptag</a>, <a href="https://pypi.org/project/mmar-llm/">mmar-llm</a>, <a href="https://pypi.org/project/mmar-carl/">mmar-carl</a>, <a href="https://pypi.org/project/mmar-flame/">mmar-flame</a>, <a href="https://pypi.org/project/mmar-mcli/">mmar-mcli</a>, <a href="https://pypi.org/project/mmar-mage/">mmar-mage</a></li>
+</ul>
+
+<hr />
+
+<h2 id="сводная-таблица-стека">Сводная таблица стека</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Слой</th>
+      <th>Технологии</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Язык</strong></td>
+      <td>Python 3.12–3.13</td>
+    </tr>
+    <tr>
+      <td><strong>Внешний API</strong></td>
+      <td>FastAPI, Starlette, Uvicorn, JWT</td>
+    </tr>
+    <tr>
+      <td><strong>Межсервисный RPC</strong></td>
+      <td>gRPC, protobuf, <code class="language-plaintext highlighter-rouge">mmar-ptag</code>, Pydantic 2</td>
+    </tr>
+    <tr>
+      <td><strong>LLM</strong></td>
+      <td>OpenAI-compatible API, GigaChat, Anthropic, DeepSeek, OpenRouter</td>
+    </tr>
+    <tr>
+      <td><strong>Хранение</strong></td>
+      <td>PostgreSQL 12+ (чаты, auth), файловая система, GigaEvo Memory</td>
+    </tr>
+    <tr>
+      <td><strong>Очереди / эксперименты</strong></td>
+      <td>Kafka, Redis, MinIO (GigaEvo Platform)</td>
+    </tr>
+    <tr>
+      <td><strong>Контейнеры</strong></td>
+      <td>Docker, Docker Compose</td>
+    </tr>
+    <tr>
+      <td><strong>CARE UI</strong></td>
+      <td>Textual (TUI), Pydantic Settings, TOML-конфиг</td>
+    </tr>
+    <tr>
+      <td><strong>Эволюция</strong></td>
+      <td>GigaEvolve, GA, Gradio WebUI</td>
+    </tr>
+    <tr>
+      <td><strong>Наблюдаемость</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">trace_id</code> в ptag, Langfuse (опционально в CARE)</td>
+    </tr>
+    <tr>
+      <td><strong>DI / качество</strong></td>
+      <td>dishka, ruff, mypy, pytest, Alembic</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="что-взять-на-заметку">Что взять на заметку</h2>
+
+<ol>
+  <li>
+    <p><strong>Два GitHub-организации</strong> — <code class="language-plaintext highlighter-rouge">AIRI-Institute</code> (runtime, GigaEvo, docs) и <code class="language-plaintext highlighter-rouge">AIRI-MAESTRO</code> (CARE, MAGE, CARL, шаблоны). PyPI-пакет <code class="language-plaintext highlighter-rouge">maestro-care</code> указывает на <code class="language-plaintext highlighter-rouge">AIRI-Institute/care</code>, но актуальный исходный код — в <strong>AIRI-MAESTRO/care</strong>.</p>
+  </li>
+  <li>
+    <p><strong>maestro-core — не весь MAESTRO</strong>, а учебный/демо-срез. Полная enterprise-платформа шире; для понимания архитектуры его достаточно.</p>
+  </li>
+  <li>
+    <p><strong>Разделение «диалог» vs «рассуждение»</strong> — tracks в chat-manager для UX, CARL для многошаговой экспертизы. CARE объединяет генерацию и исполнение цепочек в одном TUI.</p>
+  </li>
+  <li>
+    <p><strong>Модульность через контракт</strong> — новый сервис = интерфейс в mapi + ptag-сервер + Docker. Это ближе к классическим микросервисам, чем к monolith LangChain-приложению.</p>
+  </li>
+  <li>
+    <p><strong>Эволюция агентов</strong> — отдельный контур (GigaEvo), не встроенный в runtime чат-бота. Связь с <a href="/vairl/blog/2026/06/22/agent-evolution-behavior-tree-ru/">эволюцией агентов и Behavior Tree</a> и <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">бенчмарками</a>.</p>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="источники">Источники</h2>
+
+<ul>
+  <li><a href="/vairl/assets/docs/maestro-agent-instructions.txt">Инструкции для агента-программиста (TXT)</a> — паттерны, архитектура, стек, протоколы, чеклисты</li>
+  <li><a href="https://airi-institute.github.io/maestro-cover/">Документация MAESTRO (RU)</a></li>
+  <li><a href="https://habr.com/ru/companies/airi/articles/967612/">MAESTRO на Хабре</a></li>
+  <li><a href="https://medium.com/airi-institute/maestro-a-framework-for-building-multi-agent-digital-assistants-ff10ff8de3d9">Medium: MAESTRO framework</a></li>
+  <li><a href="https://airi-institute.github.io/maestro-cover/instruction.html">Пример: создание ассистента</a></li>
+  <li><a href="https://github.com/AIRI-MAESTRO/care/blob/main/docs/ARCHITECTURE.md">CARE Architecture</a></li>
+  <li><a href="https://github.com/AIRI-Institute/maestro-core/blob/main/NEWS.md">maestro-core NEWS.md</a> — changelog 0.1.x–0.2.0</li>
+</ul>
+
+<p>Контакты AIRI: <a href="mailto:partner@airi.net">partner@airi.net</a>, <a href="https://t.me/airi_research_institute">Telegram @airi_research_institute</a>.</p>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

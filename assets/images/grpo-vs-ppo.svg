@@ -1,0 +1,74 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="rlGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="rlGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fee140;stop-opacity:1" />
+    </linearGradient>
+    <filter id="rlGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- PPO: policy ? critic ? reward chain -->
+  <g transform="translate(100, 200)">
+    <circle cx="60" cy="80" r="40" fill="url(#rlGrad)" opacity="0.9" filter="url(#rlGlow)"/>
+    <polygon points="200,40 240,80 200,120 160,80" fill="url(#rlGrad3)" opacity="0.85"/>
+    <circle cx="340" cy="80" r="36" fill="url(#rlGrad2)" opacity="0.8"/>
+    <g stroke="url(#rlGrad)" stroke-width="3" opacity="0.45" fill="none">
+      <line x1="100" y1="80" x2="160" y2="80"/>
+      <line x1="240" y1="80" x2="304" y2="80"/>
+    </g>
+    <polygon points="148,80 160,74 160,86" fill="#667eea" opacity="0.7"/>
+    <polygon points="292,80 304,74 304,86" fill="#667eea" opacity="0.7"/>
+    <!-- separate value head branch -->
+    <line x1="200" y1="120" x2="200" y2="180" stroke="url(#rlGrad3)" stroke-width="2" opacity="0.4" stroke-dasharray="6 4"/>
+    <rect x="168" y="180" width="64" height="36" fill="url(#rlGrad3)" opacity="0.5" rx="8"/>
+  </g>
+
+  <!-- Divider -->
+  <line x1="600" y1="120" x2="600" y2="510" stroke="url(#rlGrad)" stroke-width="2" opacity="0.15" stroke-dasharray="12 8"/>
+
+  <!-- GRPO: policy + group samples + relative baseline -->
+  <g transform="translate(680, 160)">
+    <circle cx="80" cy="100" r="44" fill="url(#rlGrad)" opacity="0.92" filter="url(#rlGlow)"/>
+    <g transform="translate(200, 40)">
+      <rect x="0" y="100" width="26" height="50" fill="url(#rlGrad3)" opacity="0.45" rx="4"/>
+      <rect x="40" y="55" width="26" height="95" fill="url(#rlGrad2)" opacity="0.85" rx="4" filter="url(#rlGlow)"/>
+      <rect x="80" y="75" width="26" height="75" fill="url(#rlGrad)" opacity="0.55" rx="4"/>
+      <rect x="120" y="30" width="26" height="120" fill="url(#rlGrad2)" opacity="1" rx="4" filter="url(#rlGlow)"/>
+      <rect x="160" y="85" width="26" height="65" fill="url(#rlGrad3)" opacity="0.5" rx="4"/>
+      <rect x="200" y="60" width="26" height="90" fill="url(#rlGrad2)" opacity="0.7" rx="4"/>
+      <line x1="-8" y1="95" x2="238" y2="95" stroke="#667eea" stroke-width="2.5" stroke-dasharray="8 5" opacity="0.55"/>
+    </g>
+    <g stroke="url(#rlGrad2)" stroke-width="2" opacity="0.4" fill="none">
+      <line x1="124" y1="100" x2="200" y2="100"/>
+    </g>
+    <polygon points="192,100 200,94 200,106" fill="#43e97b" opacity="0.8"/>
+  </g>
+
+  <!-- Advantage curve (bottom) -->
+  <g transform="translate(180, 420)">
+    <path d="M 0 80 Q 120 20 240 50 T 480 30" stroke="url(#rlGrad)" stroke-width="4" fill="none" opacity="0.7"/>
+    <path d="M 0 100 Q 120 95 240 88 T 480 82" stroke="url(#rlGrad2)" stroke-width="3" fill="none" opacity="0.45" stroke-dasharray="8 5"/>
+    <circle cx="480" cy="30" r="9" fill="url(#rlGrad2)" filter="url(#rlGlow)"/>
+  </g>
+
+  <!-- KL trust region hint -->
+  <g transform="translate(720, 400)" opacity="0.55">
+    <ellipse cx="120" cy="60" rx="100" ry="55" fill="none" stroke="url(#rlGrad)" stroke-width="2"/>
+    <ellipse cx="120" cy="60" rx="55" ry="30" fill="url(#rlGrad)" opacity="0.25"/>
+    <circle cx="120" cy="60" r="8" fill="url(#rlGrad)" opacity="0.9"/>
+  </g>
+</svg>

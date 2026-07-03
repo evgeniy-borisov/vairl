@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local LLM Hypothesis Synthesis for Agent Quality - VAIRL</title>
+    <meta name="description" content="A Colab pipeline to generate testable hypotheses for improving LLM agents with a local model, ChromaDB storage, and hypothesis-space visualization.">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Local LLM Hypothesis Synthesis for Agent Quality | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Local LLM Hypothesis Synthesis for Agent Quality" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="A Colab pipeline to generate testable hypotheses for improving LLM agents with a local model, ChromaDB storage, and hypothesis-space visualization." />
+<meta name="twitter:description" property="og:description" content="A Colab pipeline to generate testable hypotheses for improving LLM agents with a local model, ChromaDB storage, and hypothesis-space visualization." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/llm-hypothesis-synthesis-agents.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-26T17:44:30+00:00" />
+<meta property="article:modified_time" content="2026-06-26T17:44:30+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/llm-hypothesis-synthesis-agents.svg" />
+<meta name="twitter:title" content="Local LLM Hypothesis Synthesis for Agent Quality" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-26T17:44:30+00:00","datePublished":"2026-06-26T17:44:30+00:00","description":"A Colab pipeline to generate testable hypotheses for improving LLM agents with a local model, ChromaDB storage, and hypothesis-space visualization.","headline":"Local LLM Hypothesis Synthesis for Agent Quality","image":"https://evgeniy-borisov.github.io/vairl/assets/images/llm-hypothesis-synthesis-agents.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "en",
+  "urls": {
+    "en": "/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/",
+    "ru": "/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/llm-hypothesis-synthesis-agents.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Local LLM Hypothesis Synthesis for Agent Quality</h1>
+        <p class="post-date">June 26, 2026, 17:44 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Improving agents is not a single trick — it is a <strong>hypothesis space</strong>: changes to planning, tool use, memory, reflection, and error recovery. This post describes a practical pipeline you can run in <a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hypothesis-synthesis-agents.ipynb">Google Colab</a> without external APIs.</p>
+
+<p><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hypothesis-synthesis-agents.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" /></a></p>
+
+<h2 id="why-hypothesis-synthesis">Why hypothesis synthesis?</h2>
+
+<p>When tuning an agent, we often try isolated ideas: chain-of-thought, ReAct, a critic module, tool caching. Without an explicit <strong>hypothesis</strong> object, it is easy to:</p>
+
+<ul>
+  <li>repeat semantically similar ideas;</li>
+  <li>lose track of what is actually being tested;</li>
+  <li>disconnect configuration changes from metrics.</li>
+</ul>
+
+<p>In our pipeline, a hypothesis is a structured object: claim, mechanism, quality axis, experiment variables, metric, prediction, and falsification criterion.</p>
+
+<h2 id="pipeline-architecture">Pipeline architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Task context
+    → local LLM (Qwen2.5-7B GGUF on T4)
+    → JSON hypotheses along agent quality axes
+    → ChromaDB (embeddings + deduplication)
+    → fast scoring (heuristic / benchmark)
+    → iterative refine with top candidates
+    → space visualization (PCA / PaCMAP)
+</code></pre></div></div>
+
+<h3 id="agent-quality-axes">Agent quality axes</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Axis</th>
+      <th>What changes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tool_use</code></td>
+      <td>Tool call reliability and argument validity</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">planning</code></td>
+      <td>Goal decomposition and multi-step plans</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">memory</code></td>
+      <td>Context retention in long sessions</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">reflection</code></td>
+      <td>Self-check and critic passes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">error_recovery</code></td>
+      <td>Behavior after API/tool failures</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">latency_tradeoff</code></td>
+      <td>Speed vs. quality balance</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="local-llm-in-colab">Local LLM in Colab</h2>
+
+<p>The model runs <strong>on the Colab VM GPU</strong> — no data leaves to a third-party API. On a T4 (~16 GB VRAM), a quantized 7B model via <code class="language-plaintext highlighter-rouge">llama-cpp-python</code> is a practical default.</p>
+
+<p>Without a GPU, the notebook falls back to <strong>demo mode</strong> with template hypotheses so the full pipeline (ChromaDB, scoring, visualization) still runs end to end.</p>
+
+<h2 id="chromadb-and-deduplication">ChromaDB and deduplication</h2>
+
+<p>Each hypothesis is embedded (<code class="language-plaintext highlighter-rouge">multilingual-e5-small</code>). Before insertion we check cosine similarity against existing entries to avoid near-duplicate ideas in later rounds.</p>
+
+<h2 id="iterative-refine">Iterative refine</h2>
+
+<p>After the first batch, top hypotheses by score are injected into the next LLM prompt. The model sees what was already proposed and explores <strong>new</strong> directions — similar to guided search in NAS or evolutionary methods.</p>
+
+<h2 id="scoring-from-heuristic-to-benchmark">Scoring: from heuristic to benchmark</h2>
+
+<p>The notebook ships with a placeholder <code class="language-plaintext highlighter-rouge">score_hypothesis</code>. In production, replace it with:</p>
+
+<ul>
+  <li>agent runs using hypothesis <code class="language-plaintext highlighter-rouge">variables</code> on a fixed episode set;</li>
+  <li>metrics: <code class="language-plaintext highlighter-rouge">task_success_rate</code>, <code class="language-plaintext highlighter-rouge">tool_call_success_rate</code>, <code class="language-plaintext highlighter-rouge">recovery_rate</code>, <code class="language-plaintext highlighter-rouge">hallucination_rate</code>;</li>
+  <li>statistical thresholds for accept/reject.</li>
+</ul>
+
+<h2 id="link-to-hypothesis-spaces">Link to hypothesis spaces</h2>
+
+<p>This pipeline extends the idea from <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">Hypothesis Spaces and PaCMAP</a>: accumulate candidates first, then project to 2D to interpret clusters and unexplored regions.</p>
+
+<h2 id="limitations">Limitations</h2>
+
+<ul>
+  <li>A local 7B model is weaker than top cloud models — use strict JSON schema and a critic.</li>
+  <li>Heuristic scores do not replace real benchmarks.</li>
+  <li>Colab sessions are time-limited; mount Google Drive for long runs.</li>
+</ul>
+
+<h2 id="try-it">Try it</h2>
+
+<p>Open the notebook in Colab, set <strong>Runtime → T4 GPU</strong>, and run cells top to bottom:</p>
+
+<p><strong><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hypothesis-synthesis-agents.ipynb">hypothesis-synthesis-agents.ipynb</a></strong></p>
+
+<p>Source code lives in the VAIRL repo under <code class="language-plaintext highlighter-rouge">notebooks/</code>.</p>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

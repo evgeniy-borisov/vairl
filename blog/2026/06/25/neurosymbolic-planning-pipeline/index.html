@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neurosymbolic Planning: LLM/VLM → PDDL/STRIPS → Critic - VAIRL</title>
+    <meta name="description" content="A pipeline where neural modules translate observations into symbols, a classical planner builds verifiable plans, and a critic closes the loop with the real ...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Neurosymbolic Planning: LLM/VLM → PDDL/STRIPS → Critic | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Neurosymbolic Planning: LLM/VLM → PDDL/STRIPS → Critic" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="A pipeline where neural modules translate observations into symbols, a classical planner builds verifiable plans, and a critic closes the loop with the real world." />
+<meta name="twitter:description" property="og:description" content="A pipeline where neural modules translate observations into symbols, a classical planner builds verifiable plans, and a critic closes the loop with the real world." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/neurosymbolic-planning-pipeline.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-25T00:00:00+00:00" />
+<meta property="article:modified_time" content="2026-06-25T00:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/neurosymbolic-planning-pipeline.svg" />
+<meta name="twitter:title" content="Neurosymbolic Planning: LLM/VLM → PDDL/STRIPS → Critic" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-25T00:00:00+00:00","datePublished":"2026-06-25T00:00:00+00:00","description":"A pipeline where neural modules translate observations into symbols, a classical planner builds verifiable plans, and a critic closes the loop with the real world.","headline":"Neurosymbolic Planning: LLM/VLM → PDDL/STRIPS → Critic","image":"https://evgeniy-borisov.github.io/vairl/assets/images/neurosymbolic-planning-pipeline.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "en",
+  "urls": {
+    "en": "/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/",
+    "ru": "/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/neurosymbolic-planning-pipeline.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Neurosymbolic Planning: LLM/VLM → PDDL/STRIPS → Critic</h1>
+        <p class="post-date">June 25, 2026, 00:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p><em>Draft — work in progress. Tracked in PA workspace (<code class="language-plaintext highlighter-rouge">pub-neurosymbolic-planning-pipeline</code>).</em></p>
+
+<p>Modern agents often plan in free-form natural language. That is flexible, but hard to verify. This post outlines a neurosymbolic architecture where a neural module extracts predicates and goals, a classical planner produces a checkable action sequence, and a critic replans when the world diverges from expectations.</p>
+
+<h2 id="motivation">Motivation</h2>
+
+<p>Pure LLM planning struggles with:</p>
+
+<ul>
+  <li>Hallucinated preconditions and actions</li>
+  <li>No guarantee of logical consistency</li>
+  <li>Weak feedback when execution fails</li>
+</ul>
+
+<p>Neurosymbolic pipelines separate <strong>perception/grounding</strong> (neural) from <strong>reasoning over constraints</strong> (symbolic). The planner enforces what is physically and logically possible; the neural part only proposes structured state descriptions.</p>
+
+<h2 id="architecture">Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ Real world / Text / Task ]
+              │
+              ▼
+   1. NEURAL MODULE (LLM / VLM)
+   • Extract world-state predicates
+   • Formulate the goal
+              │
+              ▼
+   [ Symbolic representation ]
+   (objects, predicates, init, goal)
+              │
+              ▼
+   2. SYMBOLIC ENGINE (PDDL / STRIPS)
+   • Enforce physical and logical constraints
+   • Build a mathematically precise plan
+              │
+              ▼
+   3. CRITIC / NEURAL HEURISTIC
+   • Score cost and feasibility
+   • Replan on failure or world mismatch
+              │
+              ▼
+     [ Action plan ]
+</code></pre></div></div>
+
+<p><strong>Key idea:</strong> the neural network does not “plan in prose.” It translates observations into symbols. The planner returns a verifiable sequence; the critic closes the loop with reality.</p>
+
+<h2 id="demo-domain-tbd">Demo domain (TBD)</h2>
+
+<p>One concrete domain will anchor the post — e.g. tabletop robotics, office assistant, or Blocks World. The domain fixes the predicate vocabulary and action set.</p>
+
+<p>Planned deliverables:</p>
+
+<ol>
+  <li>Predicate schema and goal format — explicit contract between neural module and planner</li>
+  <li>Minimal <code class="language-plaintext highlighter-rouge">domain.pddl</code> + <code class="language-plaintext highlighter-rouge">problem.pddl</code> with a 3–5 step plan</li>
+  <li>Critic loop: when to replan vs. re-extract predicates (failed precondition, timeout, VLM mismatch)</li>
+</ol>
+
+<h2 id="claims-and-limits">Claims and limits</h2>
+
+<p>We will state clearly where neurosymbolic planning wins over pure LLM planning — and where it breaks (hallucinated predicates, scale, partial observability).</p>
+
+<h2 id="connection-to-multi-agent-analytics">Connection to multi-agent analytics</h2>
+
+<p>This pipeline is a conceptual backbone for a multi-disciplinary analytics agency: specialists as agents, symbolic constraints as governance, critics as quality gates. Optional follow-up: mapping solver output onto behavior trees as an execution layer.</p>
+
+<h2 id="next-steps">Next steps</h2>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Choose demo domain</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Fix predicate schema</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Run peer-review gate before publication (PubLens)</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

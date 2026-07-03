@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI model evolution is a tree, not a timeline - VAIRL</title>
+    <meta name="description" content="Neural network history branches and cross-pollinates—not a single line. Three Python visualizations: semicircular phylogeny, architectural influence graph, a...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>AI model evolution is a tree, not a timeline | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="AI model evolution is a tree, not a timeline" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Neural network history branches and cross-pollinates—not a single line. Three Python visualizations: semicircular phylogeny, architectural influence graph, and time-ordered clusters." />
+<meta name="twitter:description" property="og:description" content="Neural network history branches and cross-pollinates—not a single line. Three Python visualizations: semicircular phylogeny, architectural influence graph, and time-ordered clusters." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/neural-model-evolution-tree/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/neural-model-evolution-tree/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/neural-model-evolution-tree.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-02T06:00:00+00:00" />
+<meta property="article:modified_time" content="2026-07-02T06:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/neural-model-evolution-tree.svg" />
+<meta name="twitter:title" content="AI model evolution is a tree, not a timeline" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-02T06:00:00+00:00","datePublished":"2026-07-02T06:00:00+00:00","description":"Neural network history branches and cross-pollinates—not a single line. Three Python visualizations: semicircular phylogeny, architectural influence graph, and time-ordered clusters.","headline":"AI model evolution is a tree, not a timeline","image":"https://evgeniy-borisov.github.io/vairl/assets/images/neural-model-evolution-tree.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/neural-model-evolution-tree/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/neural-model-evolution-tree/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "en",
+  "urls": {
+    "en": "/vairl/blog/2026/07/02/neural-model-evolution-tree/",
+    "ru": "/vairl/blog/2026/07/02/neural-model-evolution-tree-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/neural-model-evolution-tree.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">AI model evolution is a tree, not a timeline</h1>
+        <p class="post-date">July 02, 2026, 06:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>The story “from Perceptron to GPT-4” is great for slides but <strong>misleading</strong>: ideas <strong>branch</strong>, <strong>merge</strong>, and get <strong>reused</strong>. ResNet informs ViT; LSTM leads to Transformer; DDPM leads to Stable Diffusion. That is closer to a <strong>phylogenetic tree</strong> than to one timeline.</p>
+
+<p>This post gives a conceptual frame plus <strong>three Python visualizations</strong> (matplotlib, networkx, sklearn):</p>
+
+<ol>
+  <li><strong>Semicircular circular tree</strong> of model families</li>
+  <li><strong>Influence graph</strong> — who borrowed architecture from whom</li>
+  <li><strong>Feature clustering</strong> with <strong>clusters ordered by mean year</strong></li>
+</ol>
+
+<p><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" /></a></p>
+
+<p>Related: <a href="/vairl/blog/2026/01/15/neural-architecture-search/">NAS introduction</a>, <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape/">agent fundamentals</a>, <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">hypothesis space / PaCMAP</a>.</p>
+
+<hr />
+
+<h2 id="why-not-a-single-line">Why not a single line</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Linear narrative</th>
+      <th>Tree model</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>One “main” branch of progress</td>
+      <td>Parallel families (CNN, RNN, Transformer, Diffusion)</td>
+    </tr>
+    <tr>
+      <td>Each model replaces the last</td>
+      <td>Models <strong>coexist</strong> (LSTM in production, CNN on edge)</td>
+    </tr>
+    <tr>
+      <td>Time is the only axis</td>
+      <td>Time + <strong>idea kinship</strong> + <strong>component reuse</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Biological evolution is not a chain from amoeba to human—it is a <strong>tree</strong> with extinct and parallel branches. Architectures behave similarly.</p>
+
+<hr />
+
+<h2 id="1-semicircle-phylogeny-circular-tree">1. Semicircle phylogeny (circular tree)</h2>
+
+<p>Root at the bottom of the arc; families as internal nodes; leaves are models with release year. Angles span a semicircle (polar θ ∈ [0°, 180°]).</p>
+
+<p><img src="/assets/images/nn-evolution-semicircle-tree.png" alt="Semicircular evolution tree" /></p>
+
+<p>Layout: uniform leaf angles, family angle = mean of children, radius increases toward leaves. Standard phylogenetic <strong>circular tree</strong> style (cf. icytree), on a <strong>semicircle</strong> for wide layouts.</p>
+
+<hr />
+
+<h2 id="2-architectural-influence-graph">2. Architectural influence graph</h2>
+
+<p>Directed edges: <code class="language-plaintext highlighter-rouge">A → B</code> means B explicitly builds on an idea from A.</p>
+
+<p><img src="/assets/images/nn-evolution-influence-graph.png" alt="Influence graph" /></p>
+
+<p>X-axis ≈ year; color = family. Transformer acts as a hub (BERT, GPT, ViT, MoE, …).</p>
+
+<hr />
+
+<h2 id="3-clustering--temporal-ordering">3. Clustering + temporal ordering</h2>
+
+<p>Each model → feature vector (year, architecture flags, branch depth). Pipeline: scale → PCA → Ward clustering → sort clusters by <strong>mean year</strong>.</p>
+
+<p><img src="/assets/images/nn-evolution-time-clusters.png" alt="Time-ordered clusters" /></p>
+
+<p>Left: similarity geometry. Right: same clusters ordered left-to-right by time—linking <strong>unsupervised structure</strong> to <strong>chronology</strong>.</p>
+
+<hr />
+
+<h2 id="run-the-code">Run the code</h2>
+
+<p><strong><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/nn-model-evolution-tree.ipynb">nn-model-evolution-tree.ipynb</a></strong></p>
+
+<p>Local:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>matplotlib networkx scikit-learn numpy
+python notebooks/nn_model_evolution_viz.py
+</code></pre></div></div>
+
+<p>Outputs: <code class="language-plaintext highlighter-rouge">assets/images/nn-evolution-*.png</code></p>
+
+<hr />
+
+<h2 id="summary">Summary</h2>
+
+<p>Model development is an <strong>evolutionary tree with cross-borrowing</strong>, not one line. One notebook, three complementary views: <strong>phylogeny</strong>, <strong>borrow graph</strong>, <strong>time-ordered clusters</strong>.</p>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

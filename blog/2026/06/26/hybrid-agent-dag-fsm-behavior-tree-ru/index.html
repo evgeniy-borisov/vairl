@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гибридный агент: DAG, конечный автомат и деревья поведения - VAIRL</title>
+    <meta name="description" content="Три классических способа описать логику агента — DAG, FSM и Behavior Tree — и как их комбинировать, переключать и визуализировать как графы. Когда возможна к...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Гибридный агент: DAG, конечный автомат и деревья поведения | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Гибридный агент: DAG, конечный автомат и деревья поведения" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Три классических способа описать логику агента — DAG, FSM и Behavior Tree — и как их комбинировать, переключать и визуализировать как графы. Когда возможна конвертация между форматами." />
+<meta name="twitter:description" property="og:description" content="Три классических способа описать логику агента — DAG, FSM и Behavior Tree — и как их комбинировать, переключать и визуализировать как графы. Когда возможна конвертация между форматами." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/hybrid-agent-dag-fsm-behavior-tree.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-26T17:46:08+00:00" />
+<meta property="article:modified_time" content="2026-06-26T17:46:08+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/hybrid-agent-dag-fsm-behavior-tree.svg" />
+<meta name="twitter:title" content="Гибридный агент: DAG, конечный автомат и деревья поведения" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-26T17:46:08+00:00","datePublished":"2026-06-26T17:46:08+00:00","description":"Три классических способа описать логику агента — DAG, FSM и Behavior Tree — и как их комбинировать, переключать и визуализировать как графы. Когда возможна конвертация между форматами.","headline":"Гибридный агент: DAG, конечный автомат и деревья поведения","image":"https://evgeniy-borisov.github.io/vairl/assets/images/hybrid-agent-dag-fsm-behavior-tree.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/",
+    "ru": "/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/hybrid-agent-dag-fsm-behavior-tree.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Гибридный агент: DAG, конечный автомат и деревья поведения</h1>
+        <p class="post-date">26 June 2026, 17:46 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Логику ИИ-агента можно описать по-разному: как <strong>направленный ациклический граф</strong> (DAG) шагов, как <strong>конечный автомат</strong> (FSM) с явными режимами или как <strong>дерево поведения</strong> (Behavior Tree, BT) с композиционными узлами. На практике редко выбирают «один навсегда» — чаще нужен <strong>гибридный оркестратор</strong>, который держит одно из представлений активным, переключается между ними и показывает структуру в виде графа для отладки.</p>
+
+<p><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hybrid-agent-dag-fsm-bt.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" /></a></p>
+
+<p>Базовый ноутбук с минимальными реализациями, визуализацией и примерами конвертации: <a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hybrid-agent-dag-fsm-bt.ipynb">hybrid-agent-dag-fsm-bt.ipynb</a>.</p>
+
+<h2 id="зачем-три-представления">Зачем три представления?</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Подход</th>
+      <th>Сильная сторона</th>
+      <th>Типичный контекст</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DAG</strong></td>
+      <td>Явные зависимости, параллельные ветки, идемпотентные пайплайны</td>
+      <td>ETL, LangGraph, CI/CD, batch-оркестрация</td>
+    </tr>
+    <tr>
+      <td><strong>FSM</strong></td>
+      <td>Чёткие режимы, события, guard-условия</td>
+      <td>Диалоги, робототехника, протоколы, UI-состояния</td>
+    </tr>
+    <tr>
+      <td><strong>Behavior Tree</strong></td>
+      <td>Иерархия, переоценка каждый тик, композиция политик</td>
+      <td>Игровой ИИ, runtime-агенты, reactive control</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Каждая модель — это <strong>граф</strong> (или дерево) с семантикой исполнения. Различие не в «красоте диаграммы», а в том, <strong>как часто пересчитывается структура</strong>, <strong>есть ли циклы</strong> и <strong>кто владеет состоянием</strong>.</p>
+
+<h2 id="dag--workflow-без-циклов">DAG — workflow без циклов</h2>
+
+<p>DAG задаёт частичный порядок задач: узел стартует, когда готовы все предшественники. Параллельные ветки — естественны; циклы <strong>запрещены</strong> (перепланирование выносится наружу, в отдельный контур).</p>
+
+<pre><code class="language-mermaid">flowchart LR
+  A[parse_intent] --&gt; B[retrieve]
+  A --&gt; C[validate_schema]
+  B --&gt; D[synthesize]
+  C --&gt; D
+  D --&gt; E[execute_tools]
+  E --&gt; F[critic]
+</code></pre>
+
+<p><strong>Плюсы:</strong> детерминированный topological sort, простой audit trail, удобная интеграция с планировщиками и очередями.</p>
+
+<p><strong>Минусы:</strong> слабая реактивность «на каждом тике»; для долгоживущих агентов цикл observe→act обычно моделируют <strong>вне</strong> DAG (supervisor FSM или внешний event loop).</p>
+
+<h2 id="fsm--режимы-и-переходы">FSM — режимы и переходы</h2>
+
+<p>Конечный автомат хранит <strong>текущее состояние</strong> и реагирует на <strong>события</strong> с guard-условиями. Граф переходов может содержать циклы — это нормально для долгоживущих сессий.</p>
+
+<pre><code class="language-mermaid">stateDiagram-v2
+  [*] --&gt; Idle
+  Idle --&gt; Planning : goal_received
+  Planning --&gt; Executing : plan_ready
+  Executing --&gt; Reflecting : step_done
+  Reflecting --&gt; Executing : continue
+  Reflecting --&gt; Idle : task_complete
+  Executing --&gt; Recovering : error
+  Recovering --&gt; Planning : replan
+</code></pre>
+
+<p><strong>Плюсы:</strong> явная модель «где мы сейчас», проще compliance и логирование, хорошо стыкуется с event-driven архитектурой.</p>
+
+<p><strong>Минусы:</strong> взрыв числа состояний при комбinatorics; иерархические FSM (HFSM) и history-псевдосостояния усложняют визуализацию.</p>
+
+<h2 id="behavior-tree--иерархия-и-тики">Behavior Tree — иерархия и тики</h2>
+
+<p>BT переоценивает дерево <strong>каждый тик</strong> (каждый цикл control loop). Композитные узлы — Sequence, Selector, Parallel — задают политику обхода; листья — Condition и Action.</p>
+
+<pre><code class="language-mermaid">flowchart TD
+  Root[Selector: main] --&gt; Seq[Sequence: handle_task]
+  Seq --&gt; C1[Condition: has_goal]
+  Seq --&gt; S1[Selector: strategy]
+  S1 --&gt; A1[Action: plan]
+  S1 --&gt; A2[Action: react]
+  Root --&gt; Idle[Action: wait]
+</code></pre>
+
+<p><strong>Плюсы:</strong> модульность, hot-swap поддеревьев, естественная реактивность без явной таблицы переходов.</p>
+
+<p><strong>Минусы:</strong> семантика «каждый тик с нуля» может быть избыточной для batch-pipeline; отладка требует трассировки tick-by-tick.</p>
+
+<h2 id="гибридный-агент-один-режим-или-композиция">Гибридный агент: один режим или композиция</h2>
+
+<p>Гибридный оркестратор не обязан «склеивать» все три модели в одну кашу. Практичная схема:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>                    ┌─────────────────┐
+                    │  Meta-controller │  ← FSM или BT-Selector
+                    │  (режим работы)  │
+                    └────────┬────────┘
+           ┌─────────────────┼─────────────────┐
+           ▼                 ▼                 ▼
+      ┌─────────┐      ┌──────────┐     ┌─────────────┐
+      │   DAG   │      │   FSM    │     │ Behavior    │
+      │ pipeline│      │ session  │     │ Tree runtime│
+      └─────────┘      └──────────┘     └─────────────┘
+</code></pre></div></div>
+
+<p><strong>Типичные паттерны:</strong></p>
+
+<ol>
+  <li><strong>FSM снаружи, BT/DAG внутри</strong> — автомат переключает фазы (<code class="language-plaintext highlighter-rouge">planning</code> / <code class="language-plaintext highlighter-rouge">executing</code> / <code class="language-plaintext highlighter-rouge">recovery</code>); внутри фазы активен BT или линейный DAG шагов.</li>
+  <li><strong>DAG для batch, BT для online</strong> — офлайн-обработка документов идёт по DAG; интерактивный ассистент — по BT с теми же листовыми Action.</li>
+  <li><strong>Единый реестр узлов</strong> — <code class="language-plaintext highlighter-rouge">Action</code>/<code class="language-plaintext highlighter-rouge">Condition</code> описаны один раз; экспортёры собирают из них FSM, DAG или BT для разных сред (simulation, prod, debug view).</li>
+</ol>
+
+<p>Meta-controller может быть простым словарём <code class="language-plaintext highlighter-rouge">{mode: executor}</code> или BT-Selector, который выбирает подорchestrator по предикату контекста.</p>
+
+<h2 id="визуализация-как-графов">Визуализация как графов</h2>
+
+<p>Для отладки полезно иметь <strong>единый слой отрисовки</strong>:</p>
+
+<ul>
+  <li><strong>DAG</strong> — layered layout (уровни по topological rank)</li>
+  <li><strong>FSM</strong> — state diagram (circles + labeled edges)</li>
+  <li><strong>BT</strong> — top-down tree (композиты — прямоугольники, листья — эллипсы)</li>
+</ul>
+
+<p>В ноутбуке все три рисуются через NetworkX + Matplotlib из одной структуры <code class="language-plaintext highlighter-rouge">GraphSpec(nodes, edges, layout)</code>. Это позволяет:</p>
+
+<ul>
+  <li>сравнивать «одну и ту же задачу» в трёх нотациях;</li>
+  <li>подсвечивать активный узел/состояние во время трассировки;</li>
+  <li>экспортировать PNG/SVG для документации.</li>
+</ul>
+
+<h2 id="конвертация-где-возможна-где-нет">Конвертация: где возможна, где нет</h2>
+
+<p>Полная биекция между моделями <strong>не существует</strong> — у каждой своя семантика. Но в <strong>ограниченных классах</strong> конвертация осмысленна:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Направление</th>
+      <th>Когда работает</th>
+      <th>Ограничение</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Линейный DAG → BT</strong></td>
+      <td>Цепочка <code class="language-plaintext highlighter-rouge">A→B→C→…</code> без параллелизма</td>
+      <td>Sequence из Action-листьев</td>
+    </tr>
+    <tr>
+      <td><strong>DAG с fork-join → BT</strong></td>
+      <td>Параллельные ветки с общим join</td>
+      <td>Нужен узел Parallel + Sequence на join</td>
+    </tr>
+    <tr>
+      <td><strong>Ацикличный FSM → DAG</strong></td>
+      <td>Нет циклов, конечный горизонт</td>
+      <td>Каждый путь — отдельная ветка DAG</td>
+    </tr>
+    <tr>
+      <td><strong>Плоский FSM → BT</strong></td>
+      <td>Мало состояний, без hierarchy</td>
+      <td>Selector с Condition «state==X» на ветку</td>
+    </tr>
+    <tr>
+      <td><strong>BT (без декораторов) → FSM</strong></td>
+      <td>Фиксированное дерево, один успешный путь за тик</td>
+      <td>Теряется tick-reactive семантика</td>
+    </tr>
+    <tr>
+      <td><strong>FSM ↔ DAG в workflow-движках</strong></td>
+      <td>Состояния = узлы, переходы = рёбра</td>
+      <td>Циклы в FSM ломают ацикличность DAG</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Правило большого пальца:</strong> конвертируйте <strong>структуру</strong> (топологию), но проверяйте <strong>семантику исполнения</strong> отдельными тестами. BT→FSM «в лоб» часто даёт автомат, который не эквивалентен исходному дереву при повторных тиках.</p>
+
+<h3 id="пример-линейный-pipeline">Пример: линейный pipeline</h3>
+
+<p>DAG <code class="language-plaintext highlighter-rouge">retrieve → plan → execute → critic</code> однозначно становится BT:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Sequence
+├── Action(retrieve)
+├── Action(plan)
+├── Action(execute)
+└── Action(critic)
+</code></pre></div></div>
+
+<p>Обратная конвертация BT→DAG возможна только если дерево <strong>не содержит Selector с альтернативами</strong> — иначе это уже ветвление, а не один workflow.</p>
+
+<h3 id="пример-session-fsm-внутри-dag-узла">Пример: session FSM внутри DAG-узла</h3>
+
+<p>Узел DAG <code class="language-plaintext highlighter-rouge">run_session</code> внутри запускает FSM диалога; при <code class="language-plaintext highlighter-rouge">task_complete</code> FSM возвращает управление DAG, который переходит к <code class="language-plaintext highlighter-rouge">finalize</code>. Здесь не конвертация, а <strong>вложенность исполнителей</strong> — самый устойчивый гибридный паттерн.</p>
+
+<h2 id="связь-с-другими-публикациями-vairl">Связь с другими публикациями VAIRL</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/06/22/agent-evolution-behavior-tree/">Эволюция агентов и Behavior Tree</a> — нарратив нарастания способностей поверх BT.</li>
+  <li><a href="/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/">Нейросимволическое планирование</a> — символьный план как DAG/Sequence поверх LLM.</li>
+  <li><a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents/">Синтез гипотез для агентов</a> — эксперименты с политиками оркестрации как осью качества.</li>
+</ul>
+
+<h2 id="попробовать">Попробовать</h2>
+
+<p>Откройте ноутбук в Colab и пройдите ячейки сверху вниз — установка зависимостей, три минимальных исполнителя, визуализация и функции конвертации для ограниченных случаев:</p>
+
+<p><strong><a href="https://colab.research.google.com/github/evgeniy-borisov/vairl/blob/main/notebooks/hybrid-agent-dag-fsm-bt.ipynb">hybrid-agent-dag-fsm-bt.ipynb</a></strong></p>
+
+<p>Исходники — в репозитории VAIRL, папка <code class="language-plaintext highlighter-rouge">notebooks/</code>.</p>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

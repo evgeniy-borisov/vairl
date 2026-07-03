@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ОГАС, КиберСин и наследие кибернетического планирования - VAIRL</title>
+    <meta name="description" content="Обзор советского ОГАС и чилийского Project Cybersyn: методология управления ресурсами и транспортом, библиография, связь с исследованием операций, современны...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>ОГАС, КиберСин и наследие кибернетического планирования | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="ОГАС, КиберСин и наследие кибернетического планирования" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Обзор советского ОГАС и чилийского Project Cybersyn: методология управления ресурсами и транспортом, библиография, связь с исследованием операций, современными агентными системами и роевым интеллектом в логистике." />
+<meta name="twitter:description" property="og:description" content="Обзор советского ОГАС и чилийского Project Cybersyn: методология управления ресурсами и транспортом, библиография, связь с исследованием операций, современными агентными системами и роевым интеллектом в логистике." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/cybernetic-planning-ogas-cybersyn.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-01T12:28:41+00:00" />
+<meta property="article:modified_time" content="2026-07-01T12:28:41+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/cybernetic-planning-ogas-cybersyn.svg" />
+<meta name="twitter:title" content="ОГАС, КиберСин и наследие кибернетического планирования" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-01T12:28:41+00:00","datePublished":"2026-07-01T12:28:41+00:00","description":"Обзор советского ОГАС и чилийского Project Cybersyn: методология управления ресурсами и транспортом, библиография, связь с исследованием операций, современными агентными системами и роевым интеллектом в логистике.","headline":"ОГАС, КиберСин и наследие кибернетического планирования","image":"https://evgeniy-borisov.github.io/vairl/assets/images/cybernetic-planning-ogas-cybersyn.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/cybernetic-planning-ogas-cybersyn.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">ОГАС, КиберСин и наследие кибернетического планирования</h1>
+        <p class="post-date">01 July 2026, 12:28 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>В 1960–70-х годах две амбициозные программы пытались <strong>автоматизировать управление экономикой</strong> с помощью вычислительных сетей и кибернетики: советский <strong>ОГАС</strong> (Виктор Глушков) и чилийский <strong>Project Cybersyn</strong> (Стаффорд Бир, правительство Альенде). Обе системы — не «утопический интернет», а инженерные ответы на вопрос: <strong>как собирать сигналы с предприятий и транспорта, принимать решения о ресурсах и не потерять устойчивость сети</strong>.</p>
+
+<p>Ниже — краткая история, <strong>методология</strong> управления, <strong>библиография со ссылками</strong>, современные аналоги, мост к <strong>исследованию операций (ИО)</strong> и к <strong>агентным / роевым</strong> системам. Связанные темы VAIRL: <a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">пайплайн агентов-ролей</a>, <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">гибридный оркестратор</a>, <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрия агентов</a>, <a href="/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/">Semantic Torrent</a>.</p>
+
+<h2 id="две-модели-одной-проблемы">Две модели одной проблемы</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th><strong>ОГАС (СССР)</strong></th>
+      <th><strong>Cybersyn (Чили, 1971–1973)</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Архитектор</strong></td>
+      <td>Виктор Глушков</td>
+      <td>Стаффорд Бир (Stafford Beer)</td>
+    </tr>
+    <tr>
+      <td><strong>Масштаб</strong></td>
+      <td>Вся плановая экономика</td>
+      <td>Национализированный промышленный сектор (~до 50% ВВП)</td>
+    </tr>
+    <tr>
+      <td><strong>Идеология</strong></td>
+      <td>Централизованное планирование + АСУ на предприятиях</td>
+      <td>«Дизайн свободы» — децентрализация внутри социализма</td>
+    </tr>
+    <tr>
+      <td><strong>Сеть</strong></td>
+      <td>Иерархия: Москва → регионы → ~20 000 узлов</td>
+      <td>Telex <strong>Cybernet</strong> + мейнфрейм IBM 360/50</td>
+    </tr>
+    <tr>
+      <td><strong>ПО</strong></td>
+      <td>Макроэкономические модели, ОКП, диспетчеризация</td>
+      <td><strong>Cyberstride</strong> (байесовский фильтр), <strong>CHECO</strong> (симулятор)</td>
+    </tr>
+    <tr>
+      <td><strong>Судьба</strong></td>
+      <td>Финансирование отклонено ~1970; фрагменты АСУ</td>
+      <td>Остановлен после переворота 1973 г.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Общее: <strong>замкнутый контур</strong> «датчики → модель → решение → исполнение», опора на <strong>кибернетику</strong> и <strong>операционные метрики</strong>, а не на интуицию плановика.</p>
+
+<pre><code class="language-mermaid">flowchart LR
+  subgraph sense [Сбор сигналов]
+    F[Фабрики / склады]
+    T[Транспорт / telex]
+    S[Статистика / АСУ]
+  end
+  subgraph decide [Модель и решение]
+    M[Макромодель / VSM]
+    P[План / алёрт]
+  end
+  subgraph act [Исполнение]
+    O[Операции / диспетчеризация]
+    R[Перераспределение ресурсов]
+  end
+  F --&gt; M
+  T --&gt; M
+  S --&gt; M
+  M --&gt; P --&gt; O --&gt; R
+  R --&gt; F
+</code></pre>
+
+<hr />
+
+<h2 id="огас-методология-управления-ресурсами">ОГАС: методология управления ресурсами</h2>
+
+<p><strong>ОГАС</strong> (Общегосударственная автоматизированная система сбора и обработки информации для учёта, планирования и управления народным хозяйством) — проект с <strong>1962 г.</strong>, формализованный после XXIV съезда КПСС (1971) как национальная программа.</p>
+
+<h3 id="архитектура-по-глушкову">Архитектура (по Глушкову)</h3>
+
+<ol>
+  <li><strong>Трёхуровневая сеть</strong>: вычислительный центр в Москве → ~200 региональных центров → терминалы на предприятиях (порядка 20 000 узлов), связь по телефонной инфраструктуре с возможностью peer-to-peer обмена.</li>
+  <li><strong>Иерархия моделей</strong>: макроэкономические балансы → отраслевые АСУ (АСУП) → оперативное планирование на уровне завода.</li>
+  <li><strong>Человеко-машинное звено</strong>: Глушков подчёркивал не только математику, но и <strong>организацию труда управленцев</strong> — ОГАС как социотехническая система, не «машина, заменяющая плановиков».</li>
+</ol>
+
+<h3 id="управление-ресурсами-и-транспортом">Управление ресурсами и транспортом</h3>
+
+<ul>
+  <li><strong>Материально-техническое снабжение (МТС)</strong>: учёт потоков сырья и комплектующих, увязка планов производства с логистикой — задачи <strong>балансов</strong> и <strong>транспортных потоков</strong> (родственники задач ИО о <strong>транспортной задаче</strong> и <strong>потоках в сетях</strong>).</li>
+  <li><strong>Оперативно-календарное планирование (ОКП)</strong>: диспетчеризация мощностей, сменные задания — по сути <strong>scheduling</strong> с ограничениями.</li>
+  <li><strong>Нормативы и тарифы</strong>: Глушков обсуждал переход к учёту через электронные взаиморасчёты — инженерный взгляд на <strong>цены как сигнал дефицита</strong> внутри плана.</li>
+</ul>
+
+<h3 id="почему-не-сложилось">Почему не сложилось</h3>
+
+<p>Бюрократическое соперничество (Госплан, Минфин, КГБ), страх монополии информации у одного ведомства, недостаток вычислительной мощности — разобрано в академической литературе. Фрагменты <strong>АСУП</strong> на отдельных заводах всё же внедрялись.</p>
+
+<hr />
+
+<h2 id="project-cybersyn-методология-и-транспорт">Project Cybersyn: методология и транспорт</h2>
+
+<p><strong>Cybersyn</strong> (сокращение от <em>cybernetics synergy</em>) — ответ Чили на стрессовую перегрузку экономики (блокада, инфляция) при сохранении <strong>демократических</strong> и <strong>профсоюзных</strong> институтов.</p>
+
+<h3 id="компоненты-системы">Компоненты системы</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Модуль</th>
+      <th>Функция</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Cybernet</strong></td>
+      <td>Сеть telex: двусторонний обмен текстовыми отчётами завод ↔ правительство за часы, не недели</td>
+    </tr>
+    <tr>
+      <td><strong>Cyberstride</strong></td>
+      <td>Статистика производства, <strong>байесовская фильтрация</strong> аномалий, ранние предупреждения</td>
+    </tr>
+    <tr>
+      <td><strong>CHECO</strong></td>
+      <td>Экономический симулятор «что если» для политик</td>
+    </tr>
+    <tr>
+      <td><strong>Operations room</strong></td>
+      <td>Зал с проекциями и кнопками — <strong>human-in-the-loop</strong> для алёртов, не автопилот</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="viable-system-model-vsm">Viable System Model (VSM)</h3>
+
+<p>Бир перенёс <strong>модель жизнеспособной системы</strong> из книги <em>Brain of the Firm</em> (1972): пять уровней рекурсии — операции, координация, контроль, разведка (внешняя среда), политика. Цель — <strong>баланс</strong> централизации и автономии цехов, избежать советского «единого мегамозга».</p>
+
+<hr />
+
+<h2 id="кейс-забастовка-перевозчиков-октябрь-1972">Кейс: забастовка перевозчиков (октябрь 1972)</h2>
+
+<p>Самый изученный <strong>реальный</strong> эпизод Cybersyn — не мониторинг заводов в штатном режиме, а <strong>логистический кризис</strong>: национальная <strong>забастовка владельцев грузовиков</strong> (<em>paro de camioneros</em>), начавшаяся в <strong>октябре 1972 г.</strong> Оппозиция (конфедерация владельцев грузового транспорта, при поддержке ЦРУ и блокады, по ряду источников) пыталась <strong>остановить экономику</strong>, перекрыть дороги и создать условия для переворота. Правительству Альенде нужно было удержать поставки <strong>продовольствия, топлива и сырья</strong> при резком падении доступного автотранспорта.</p>
+
+<p>По оценке <strong>Густаво Сильвы</strong> (исполнительный секретарь по энергетике в CORFO), сеть telex Cybersyn позволила организовать доставку ресурсов в города, опираясь примерно на <strong>200 грузовиков</strong>, тогда как у бастующих было порядка <strong>40 000</strong> машин, блокировавших подъезды (в т.ч. к Сантьяго). Цифры спорны и восходят к воспоминаниям участников, но направление эффекта подтверждается историографией: система <strong>не заменила</strong> парк транспорта, а <strong>сжала неопределённость</strong> — кто, где и куда может везти груз.</p>
+
+<h3 id="контекст-кризиса">Контекст кризиса</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Параметр</th>
+      <th>Значение</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Когда</strong></td>
+      <td>Октябрь 1972 г. (переломный момент правительства Альенде)</td>
+    </tr>
+    <tr>
+      <td><strong>Угроза</strong></td>
+      <td>Остановка распределения, дефицит продовольствия и топлива, эскалация к перевороту</td>
+    </tr>
+    <tr>
+      <td><strong>Масштаб сети</strong></td>
+      <td>Telex <strong>Cybernet</strong> расширен <strong>за пределы промышленного сектора</strong> — от Арики до Пунта-Аренас (~5 150 км)</td>
+    </tr>
+    <tr>
+      <td><strong>Интенсивность связи</strong></td>
+      <td>По оценке Бира — до <strong>~2 000 telex-сообщений в сутки</strong> в пик забастовки</td>
+    </tr>
+    <tr>
+      <td><strong>Командный центр</strong></td>
+      <td>CORFO, Сантьяго: ~<strong>20 telex-аппаратов</strong> работали одновременно («невыносимый шум», по воспоминанию Бира)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="задачи-логистики-и-как-их-решали">Задачи логистики и как их решали</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Задача</th>
+      <th>Метод / механизм</th>
+      <th>Инструмент Cybersyn</th>
+      <th>Роль человека</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Узнать, какой транспорт ещё доступен</strong></td>
+      <td>Опрос узлов по telex, сводка лояльных перевозчиков и гос. парка</td>
+      <td>Сеть <strong>Cybernet</strong> (не заводской контур, а расширенный национальный)</td>
+      <td>Диспетчеры CORFO агрегируют ответы</td>
+    </tr>
+    <tr>
+      <td><strong>Приоритизировать критические грузы</strong></td>
+      <td>Ручная диспетчеризация по типу груза: еда, топливо, сырьё для промышленности</td>
+      <td>Приоритетные маршруты в сообщениях telex</td>
+      <td>Министерства + CORFO задают приоритеты</td>
+    </tr>
+    <tr>
+      <td><strong>Направить сырьё и топливо туда, где дефицит</strong></td>
+      <td>«Куда ехать» — директивы из центра на основе сводок с мест</td>
+      <td>Двусторонний telex: запрос → ответ за часы, не недели</td>
+      <td>Энергетический блок (Сильва) и отраслевые штабы</td>
+    </tr>
+    <tr>
+      <td><strong>Обойти заблокированные дороги</strong></td>
+      <td>Сбор полевой информации о проходимости трасс</td>
+      <td>Сообщения о <strong>закрытых и открытых</strong> маршрутах по стране</td>
+      <td>Водители и региональные координаторы — датчики среды</td>
+    </tr>
+    <tr>
+      <td><strong>Синхронизировать регионы</strong></td>
+      <td>Вертикаль (правительство) + горизонталь (заводы, склады, транспорт)</td>
+      <td>Тот же Cybernet, изначально задуманный для заводов</td>
+      <td>VSM: координация без единого «автопилота»</td>
+    </tr>
+    <tr>
+      <td><strong>Реагировать на меняющуюся обстановку</strong></td>
+      <td>Итеративные циклы «данные → решение → новая директива»</td>
+      <td><strong>Real-time adaptive management</strong> (термин Medina)</td>
+      <td>Operations room / штаб CORFO — human-in-the-loop</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">sequenceDiagram
+  participant R as Регион / склад / завод
+  participant T as Telex Cybernet
+  participant C as Штаб CORFO (Сантьяго)
+  participant G as Правительство
+
+  R-&gt;&gt;T: Где груз, сколько топлива, какие дороги закрыты
+  T-&gt;&gt;C: Сводка за часы
+  C-&gt;&gt;C: Приоритет: еда / топливо / сырьё
+  C-&gt;&gt;T: Маршрут, назначение ~200 доступных грузовиков
+  T-&gt;&gt;R: Директива водителю / складу
+  R-&gt;&gt;T: Подтверждение доставки / новый дефицит
+  T-&gt;&gt;G: Эскалация, если контур не справляется
+</code></pre>
+
+<h3 id="что-система-не-делала">Что система <strong>не</strong> делала</h3>
+
+<p>Важно не романтизировать Cybersyn:</p>
+
+<ul>
+  <li><strong>Не</strong> решала транспортную задачу (VRP) оптимизатором на мейнфрейме — это была <strong>координация связью</strong>, не автоматический solver маршрутов.</li>
+  <li><strong>Не</strong> защищала грузовики от физических атак оппозиции (повторная забастовка <strong>август 1973</strong> снова использовала telex, но насилие на дорогах система не отменяла).</li>
+  <li><strong>Не</strong> устраняла макро-причины кризиса: инфляция, блокада, падение цен на медь — после октября 1972 правительство оказалось в <strong>постоянной обороне</strong> (<a href="https://thereader.mitpress.mit.edu/project-cybersyn-chiles-radical-experiment-in-cybernetic-socialism/">Medina, MIT Press Reader</a>).</li>
+</ul>
+
+<p>Историк <strong>Eden Medina</strong> (глава 5 <em>Cybernetic Revolutionaries</em>) трактует октябрь 1972 как доказательство: <strong>технология связи может изменить траекторию политики</strong>, сделав возможными действия, которые без сети были бы недостижимы — но не заменяет социальные конфликты.</p>
+
+<h3 id="урок-для-современной-логистики">Урок для современной логистики</h3>
+
+<p>Аналог 2020-х — не «один AI на весь склад», а <strong>control tower</strong> + телеметрия + диспетчер с полномочиями:</p>
+
+<ol>
+  <li><strong>Sense</strong> — где машины, грузы, закрытые рёбра графа (тогда telex, сейчас GPS/TMS/API).</li>
+  <li><strong>Decide</strong> — приоритеты критических потоков (еда, энергия, медицина).</li>
+  <li><strong>Act</strong> — короткий цикл директив; обратная связь с поля.</li>
+  <li><strong>Human</strong> — штаб принимает компромиссы, когда данных недостаточно.</li>
+</ol>
+
+<p>Это прямой мост к <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрии агентов</a> и разделу «Роевой интеллект в логистике» ниже: Cybersyn в 1972 — <strong>центральный координатор + распределённые датчики</strong>, не монолитный ОГАС.</p>
+
+<h3 id="источники-по-кейсу-1972">Источники по кейсу 1972</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Источник</th>
+      <th>Что подтверждает</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Eden Medina, <em>Cybernetic Revolutionaries</em> (гл. 5)</td>
+      <td>Кризис, расширение Cybernet, выживание правительства</td>
+      <td><a href="https://mitpress.mit.edu/9780262525961/cybernetic-revolutionaries/">MIT Press</a></td>
+    </tr>
+    <tr>
+      <td>Eden Medina, MIT Press Reader</td>
+      <td>~2 000 telex/сутки, 20 аппаратов в CORFO, топливо/сырьё/дороги</td>
+      <td><a href="https://thereader.mitpress.mit.edu/project-cybersyn-chiles-radical-experiment-in-cybernetic-socialism/">thereader.mitpress.mit.edu</a></td>
+    </tr>
+    <tr>
+      <td>Eden Medina, JLAS (2006)</td>
+      <td>История проекта, политический контекст</td>
+      <td><a href="https://www.cambridge.org/core/journals/journal-of-latin-american-studies/article/abs/designing-freedom-regulating-a-nation-socialist-cybernetics-in-allendes-chile/4CF75E30D22554152A5EFDC9740E3440">Cambridge Core</a> · <a href="https://web.mit.edu/esd.83/www/papers/Medina_Cybersyn.pdf">PDF</a></td>
+    </tr>
+    <tr>
+      <td>Wikipedia (цит. Gustavo Silva)</td>
+      <td>~200 грузовиков vs забастовка владельцев</td>
+      <td><a href="https://en.wikipedia.org/wiki/Project_Cybersyn">Project Cybersyn</a></td>
+    </tr>
+    <tr>
+      <td>Morozov, MDPI Humanities (2018)</td>
+      <td>~200 vs ~40 000, продовольствие в Сантьяго</td>
+      <td><a href="https://www.mdpi.com/2076-0760/7/4/65">mdpi.com</a></td>
+    </tr>
+    <tr>
+      <td>Andy Beckett, <em>The Guardian</em> (2003)</td>
+      <td>Обзор «социалистического интернета», контекст забастовки</td>
+      <td><a href="https://www.theguardian.com/technology/2003/sep/08/science.chile">theguardian.com</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Примечание:</em> точные числа грузовиков — из <strong>ретроспективных</strong> интервью (Сильва и др.); в академической литературе акцент на <strong>механизме</strong> (telex + диспетчеризация + приоритеты), а не на статистической точности парка.</p>
+
+<hr />
+
+<h2 id="библиография-огас">Библиография: ОГАС</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Публикация</th>
+      <th>Автор / источник</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><em>Макроэкономические модели и принципы построения ОГАС</em> (1975)</td>
+      <td>В. М. Глушков</td>
+      <td><a href="https://glushkov.su/eng/science/makroekonomicheskie-modeli-i-printsipy-postroeniia-ogas">Архив на glushkov.su</a></td>
+    </tr>
+    <tr>
+      <td>«Проблемы широкого внедрения вычислительной техники…» (1964)</td>
+      <td>Н. П. Федоренко, В. М. Глушков</td>
+      <td><em>Вопросы экономики</em>, № 7 — <a href="https://www.cambridge.org/core/journals/slavic-review/article/abs/technology-and-decision-making-some-aspects-of-the-development-of-ogas/FFEFA2B42F3F9EBB5556BF56DED43375">Cambridge Core (цит.)</a></td>
+    </tr>
+    <tr>
+      <td><em>Technology and Decision Making: Some Aspects of the Development of OGAS</em> (1975)</td>
+      <td>Joseph R. Filippi</td>
+      <td><a href="https://www.cambridge.org/core/journals/slavic-review/article/abs/technology-and-decision-making-some-aspects-of-the-development-of-ogas/FFEFA2B42F3F9EBB5556BF56DED43375">Slavic Review</a></td>
+    </tr>
+    <tr>
+      <td><em>How Not to Network a Nation</em> (2016)</td>
+      <td>Benjamin Peters</td>
+      <td><a href="https://direct.mit.edu/books/monograph/3470/How-Not-to-Network-a-NationThe-Uneasy-History-of">MIT Press</a></td>
+    </tr>
+    <tr>
+      <td><em>Общегосударственная автоматизированная система управления</em> (1972)</td>
+      <td>Д. Г. Жимерин</td>
+      <td>Упоминается в <a href="https://www.cambridge.org/core/journals/slavic-review/article/abs/technology-and-decision-making-some-aspects-of-the-development-of-ogas/FFEFA2B42F3F9EBB5556BF56DED43375">Slavic Review</a></td>
+    </tr>
+    <tr>
+      <td>Обзор идеи Глушкова</td>
+      <td>В. Пихорович</td>
+      <td><a href="https://cosmonautmag.com/2022/07/glushkov-and-his-ideas-cybernetics-of-the-future-by-vasiliy-pikhorovich/">Cosmonaut</a></td>
+    </tr>
+    <tr>
+      <td>Энциклопедическая справка</td>
+      <td>—</td>
+      <td><a href="https://en.wikipedia.org/wiki/OGAS">Wikipedia: OGAS</a></td>
+    </tr>
+    <tr>
+      <td>Предшественник: Китов, АСУ (1959)</td>
+      <td>—</td>
+      <td><a href="https://en.wikipedia.org/wiki/OGAS">Wikipedia: OGAS § Kitov</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="библиография-cybersyn">Библиография: Cybersyn</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Публикация</th>
+      <th>Автор</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><em>Designing Freedom, Regulating a Nation: Socialist Cybernetics in Allende’s Chile</em> (2006)</td>
+      <td>Eden Medina</td>
+      <td><a href="https://www.cambridge.org/core/journals/journal-of-latin-american-studies/article/abs/designing-freedom-regulating-a-nation-socialist-cybernetics-in-allendes-chile/4CF75E30D22554152A5EFDC9740E3440">Journal of Latin American Studies</a> · <a href="https://web.mit.edu/esd.83/www/papers/Medina_Cybersyn.pdf">PDF</a></td>
+    </tr>
+    <tr>
+      <td><em>Cybernetic Revolutionaries</em> (2011)</td>
+      <td>Eden Medina</td>
+      <td><a href="https://mitpress.mit.edu/9780262525961/cybernetic-revolutionaries/">MIT Press</a></td>
+    </tr>
+    <tr>
+      <td><em>Brain of the Firm</em> (1972)</td>
+      <td>Stafford Beer</td>
+      <td><a href="https://en.wikipedia.org/wiki/Viable_system_model">Wiley / обзор VSM</a></td>
+    </tr>
+    <tr>
+      <td><em>Platform for Change</em> (1975)</td>
+      <td>Stafford Beer</td>
+      <td>Кибернетика управления и демократия</td>
+    </tr>
+    <tr>
+      <td><em>Cybernetics of Governance: The Cybersyn Project 1971–1973</em> (2014)</td>
+      <td>Raúl Espejo</td>
+      <td>Участник проекта; цитируется в <a href="https://pdxscholar.library.pdx.edu/cgi/viewcontent.cgi?article=1069&amp;context=econ_workingpapers">PDX Working Paper 67</a></td>
+    </tr>
+    <tr>
+      <td><em>Insights into Project Cybersyn</em> (Working Paper 67)</td>
+      <td>Augustine</td>
+      <td><a href="https://pdxscholar.library.pdx.edu/cgi/viewcontent.cgi?article=1069&amp;context=econ_workingpapers">Portland State</a></td>
+    </tr>
+    <tr>
+      <td>Обзор для широкой аудитории</td>
+      <td>Eden Medina</td>
+      <td><a href="https://cabinetmagazine.org/issues/46/medina.php">Cabinet Magazine</a></td>
+    </tr>
+    <tr>
+      <td><em>The Cybernetic Brain</em> (2010)</td>
+      <td>Andrew Pickering</td>
+      <td>История Бира и кибернетики</td>
+    </tr>
+    <tr>
+      <td>Beyond Cybersyn в Латинской Америке (2025)</td>
+      <td>—</td>
+      <td><a href="https://link.springer.com/article/10.1007/s11213-025-09717-2">Systemic Practice and Action Research</a></td>
+    </tr>
+    <tr>
+      <td>Справка</td>
+      <td>—</td>
+      <td><a href="https://en.wikipedia.org/wiki/Project_Cybersyn">Wikipedia: Project Cybersyn</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="связь-с-исследованием-операций">Связь с исследованием операций</h2>
+
+<p>ОГАС и Cybersyn — <strong>инженерные воплощения ИО</strong>, даже если термин «operations research» не всегда звучал в советских документах:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Задача ИО</th>
+      <th>ОГАС</th>
+      <th>Cybersyn</th>
+      <th>Классические методы</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Баланс ресурсов</td>
+      <td>Межотраслевые балансы, МТС</td>
+      <td>Мониторинг нац. сектора</td>
+      <td>Линейное программирование (Данциг), input–output (Леонтьев)</td>
+    </tr>
+    <tr>
+      <td>Транспорт и потоки</td>
+      <td>Ж/д, автотранспорт в плане</td>
+      <td>Забастовка перевозчиков, окт. 1972: telex-диспетчеризация</td>
+      <td>Транспортная задача, max-flow, min-cost flow</td>
+    </tr>
+    <tr>
+      <td>Диспетчеризация</td>
+      <td>ОКП на заводах</td>
+      <td>Алёрты Cyberstride</td>
+      <td>Job shop scheduling, CP-SAT</td>
+    </tr>
+    <tr>
+      <td>Прогноз и аномалии</td>
+      <td>Макропрогнозы</td>
+      <td>Байесовские фильтры</td>
+      <td>Экспоненциальное сглаживание, Kalman, control charts</td>
+    </tr>
+    <tr>
+      <td>Симуляция политик</td>
+      <td>Сценарии плана</td>
+      <td>CHECO</td>
+      <td>Системная динамика (Форрестер), discrete-event simulation</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Ключевой урок ИО:</strong> оптимальность зависит от <strong>модели</strong> и <strong>данных</strong>. ОГАС упёрся в политику и вычисления; Cybersyn — в масштаб и переворот; оба показали, что <strong>контур управления</strong> важнее мощности одного мейнфрейма.</p>
+
+<hr />
+
+<h2 id="современные-аналоги">Современные аналоги</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Слой</th>
+      <th>Примеры сегодня</th>
+      <th>Наследие ОГАС / Cybersyn</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>ERP / планирование</strong></td>
+      <td>SAP S/4HANA, Oracle SCM, 1С</td>
+      <td>АСУП, учёт, MRP II</td>
+    </tr>
+    <tr>
+      <td><strong>Control tower</strong></td>
+      <td>Blue Yonder, Kinaxis, o9 Solutions</td>
+      <td>Единая картина цепочки + алёрты</td>
+    </tr>
+    <tr>
+      <td><strong>Цифровые двойники</strong></td>
+      <td>Siemens, Azure Digital Twins</td>
+      <td>CHECO-симуляции</td>
+    </tr>
+    <tr>
+      <td><strong>Real-time logistics</strong></td>
+      <td>WMS/TMS, GPS-трекинг, Amazon robotics</td>
+      <td>Cybernet + диспетчеризация</td>
+    </tr>
+    <tr>
+      <td><strong>Государственные платформы</strong></td>
+      <td>Единые реестры, таможенные EDI</td>
+      <td>ОГАС как «нац. шина данных»</td>
+    </tr>
+    <tr>
+      <td><strong>Децентрализованный обмен</strong></td>
+      <td>P2P, federated learning</td>
+      <td>Идея сети узлов без единого владельца — см. <a href="/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/">Semantic Torrent</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Отличие эпохи: данные <strong>потоковые</strong>, модели <strong>стохастические</strong>, решения часто <strong>локальные</strong> с глобальными ограничениями — но цикл sense → decide → act тот же.</p>
+
+<hr />
+
+<h2 id="переход-к-агентным-системам-ии">Переход к агентным системам ИИ</h2>
+
+<p>Современный стек — не один мейнфрейм, а <strong>рой специализированных агентов</strong> с tools:</p>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph agents [Агентный слой]
+    FA[Forecast agent]
+    DA[Dispatch agent]
+    NA[Negotiation agent]
+    CA[Critic / policy agent]
+  end
+  subgraph data [Данные]
+    TE[Телеметрия / traces]
+    KG[Граф поставок]
+    SIM[Симулятор]
+  end
+  TE --&gt; FA
+  KG --&gt; DA
+  SIM --&gt; FA
+  FA --&gt; DA
+  DA --&gt; NA
+  CA --&gt; DA
+  DA --&gt; TE
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Роль кибернетики</th>
+      <th>Агентный аналог</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Сбор telex / АСУ</td>
+      <td><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия</a>, OTel, event bus</td>
+    </tr>
+    <tr>
+      <td>Cyberstride (аномалии)</td>
+      <td>Агент-монитор + embedding-поиск похожих инцидентов</td>
+    </tr>
+    <tr>
+      <td>Operations room</td>
+      <td>Human-in-the-loop UI + алёрты</td>
+    </tr>
+    <tr>
+      <td>VSM уровни</td>
+      <td><a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">Пайплайн ролей</a>: Prototyper → Builder → Maintainer</td>
+    </tr>
+    <tr>
+      <td>Макромодель ОГАС</td>
+      <td>Planner-агент + симулятор + critic</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Риски те же, что у Cybersyn и ОГАС:</strong> положительная обратная связь (агенты усиливают ошибку), устаревшие наблюдения, «оптимизация метрики, не цели» — см. <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивость control loops</a>.</p>
+
+<hr />
+
+<h2 id="роевой-интеллект-в-логистике-и-распределении-ресурсов">Роевой интеллект в логистике и распределении ресурсов</h2>
+
+<p><strong>Роевой интеллект (swarm intelligence)</strong> — координация множества простых агентов <strong>локальными правилами</strong> без единого диктатора. Это ближе к <strong>VSM Бира</strong>, чем к монолитному ОГАС:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Метод</th>
+      <th>Идея</th>
+      <th>Логистика / ресурсы</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Ant Colony Optimization (ACO)</strong></td>
+      <td>Феромоны на рёбрах графа</td>
+      <td>Vehicle Routing Problem (VRP), маршруты доставки</td>
+    </tr>
+    <tr>
+      <td><strong>Particle Swarm (PSO)</strong></td>
+      <td>Частицы в пространстве решений</td>
+      <td>Распределение складов, load balancing</td>
+    </tr>
+    <tr>
+      <td><strong>Stigmergy</strong></td>
+      <td>Косвенная координация через среду</td>
+      <td>WMS: метки ячеек, приоритеты заказов</td>
+    </tr>
+    <tr>
+      <td><strong>Auction / market-based</strong></td>
+      <td>Локальные ставки на задачи</td>
+      <td>Распределение вычислений, drone fleet</td>
+    </tr>
+    <tr>
+      <td><strong>Consensus / gossip</strong></td>
+      <td>Согласование без центра</td>
+      <td><a href="/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/">Semantic Torrent</a>: поиск ресурсов в рое</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="гибрид-центр--рой">Гибрид: центр + рой</h3>
+
+<p>Практичная схема для 2020-х:</p>
+
+<ol>
+  <li><strong>Стратегический слой</strong> (OGAS-подобный): LP/MIP на агрегатах — квоты, балансы, контракты с поставщиками.</li>
+  <li><strong>Тактический слой</strong> (Cybersyn-подобный): control tower, алёрты, human approval на отклонениях.</li>
+  <li><strong>Операционный рой</strong>: тысячи агентов-исполнителей (склады, курьеры, роботы) решают <strong>локальный VRP</strong> с ограничениями сверху.</li>
+</ol>
+
+<p>Мультиагентное RL и LLM-агенты с tools — новая реализация среднего слоя: агент <strong>переговаривается</strong> с API склада, TMS и прогнозом спроса, но <strong>критик</strong> и <strong>Maintainer</strong> держат инварианты (SLO, бюджет, safety).</p>
+
+<p>Черновик VAIRL про рои и метасистемные переходы — в работе: <a href="/vairl/blog/2026/06/23/evolution-mind-mst-swarm/">эволюция разума и MST</a> (<em>draft</em>).</p>
+
+<hr />
+
+<h2 id="выводы-для-проектирования-систем">Выводы для проектирования систем</h2>
+
+<ol>
+  <li><strong>Сеть важнее монолита</strong> — ОГАС проиграл бюрократии; Cybersyn выиграл гибкость telex при скромных ресурсах.</li>
+  <li><strong>Модель + данные + человек</strong> — operations room и «человеко-машинное звено» Глушкова не устарели.</li>
+  <li><strong>ИО даёт язык</strong> для балансов, потоков и расписаний; кибернетика — язык <strong>устойчивости</strong> и <strong>рекурсии</strong> (VSM).</li>
+  <li><strong>Агенты</strong> — наследники АСУ и Cyberstride: непрерывный мониторинг, локальные решения, глобальные ограничения.</li>
+  <li><strong>Рой</strong> — для масштаба, где центральный solver не тянет; нужен <strong>мета-агент</strong> (policies, eval), иначе хаос.</li>
+</ol>
+
+<h2 id="further-reading">Further reading</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/">Пайплайн агентов: Prototyper → Maintainer</a> — роли в жизненном цикле автоматизированных систем</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия AI-агентов</a> — современный «Cybernet» трасс</li>
+  <li><a href="/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/">Нейросимволическое планирование</a> — LLM + символьный планировщик (<em>draft</em>)</li>
+  <li>Eden Medina, <a href="https://mitpress.mit.edu/9780262525961/cybernetic-revolutionaries/">Cybernetic Revolutionaries</a> — каноническая монография по Cybersyn</li>
+  <li>Benjamin Peters, <a href="https://direct.mit.edu/books/monograph/3470/How-Not-to-Network-a-NationThe-Uneasy-History-of">How Not to Network a Nation</a> — каноническая монография по ОГАС</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

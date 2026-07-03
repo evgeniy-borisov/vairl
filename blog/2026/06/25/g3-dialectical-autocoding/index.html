@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>g3: Dialectical Autocoding and Adversarial Cooperation - VAIRL</title>
+    <meta name="description" content="g3 is Block AI Research&#39;s reference implementation of dialectical autocoding — a coach/player agent loop that produces tested, requirements-compliant code be...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>g3: Dialectical Autocoding and Adversarial Cooperation | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="g3: Dialectical Autocoding and Adversarial Cooperation" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="g3 is Block AI Research’s reference implementation of dialectical autocoding — a coach/player agent loop that produces tested, requirements-compliant code beyond single-turn vibe coding." />
+<meta name="twitter:description" property="og:description" content="g3 is Block AI Research’s reference implementation of dialectical autocoding — a coach/player agent loop that produces tested, requirements-compliant code beyond single-turn vibe coding." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/g3-dialectical-autocoding/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/g3-dialectical-autocoding/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/g3-dialectical-autocoding.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-25T00:00:00+00:00" />
+<meta property="article:modified_time" content="2026-06-25T00:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/g3-dialectical-autocoding.svg" />
+<meta name="twitter:title" content="g3: Dialectical Autocoding and Adversarial Cooperation" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-25T00:00:00+00:00","datePublished":"2026-06-25T00:00:00+00:00","description":"g3 is Block AI Research’s reference implementation of dialectical autocoding — a coach/player agent loop that produces tested, requirements-compliant code beyond single-turn vibe coding.","headline":"g3: Dialectical Autocoding and Adversarial Cooperation","image":"https://evgeniy-borisov.github.io/vairl/assets/images/g3-dialectical-autocoding.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/g3-dialectical-autocoding/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/g3-dialectical-autocoding/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "en",
+  "urls": {
+    "en": "/vairl/blog/2026/06/25/g3-dialectical-autocoding/",
+    "ru": "/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/g3-dialectical-autocoding.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">g3: Dialectical Autocoding and Adversarial Cooperation</h1>
+        <p class="post-date">June 25, 2026, 00:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p><em>Draft — work in progress. Based on <a href="https://github.com/dhanji/g3">dhanji/g3</a> and Block AI Research paper.</em></p>
+
+<p><strong>g3</strong> is not a model — it is a <strong>Rust-based coding agent</strong> and the reference implementation of <strong>dialectical autocoding</strong>: structured cooperation between two specialized agents (Player + Coach) inside bounded turn limits.</p>
+
+<h2 id="primary-publication">Primary publication</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Resource</th>
+      <th>Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Paper (Block AI Research, Dec 2025)</strong></td>
+      <td><a href="https://block.xyz/documents/adversarial-cooperation-in-code-synthesis.pdf">Adversarial Cooperation in Code Synthesis (PDF)</a></td>
+    </tr>
+    <tr>
+      <td><strong>Reference implementation</strong></td>
+      <td><a href="https://github.com/dhanji/g3">github.com/dhanji/g3</a></td>
+    </tr>
+    <tr>
+      <td><strong>Author</strong></td>
+      <td><a href="https://github.com/dhanji">Dhananjay Nene (dhanji)</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The paper introduces <strong>dialectical autocoding</strong>: treating vibe-coding as a dialectical process — requirements, implementation, critique, refinement — but automating the human review role with a <strong>Coach</strong> agent.</p>
+
+<h2 id="core-method-coach--player-dyad">Core method: Coach / Player dyad</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────┐
+│  requirements.md  (shared, implementation-agnostic) │
+└───────────────────────┬─────────────────────────┘
+                        │
+         ┌──────────────┴──────────────┐
+         ▼                             ▼
+   PLAYER agent                   COACH agent
+   • implements code              • validates vs requirements
+   • runs tests / shell           • finds gaps &amp; edge cases
+   • responds to feedback         • gives actionable critique
+         │                             │
+         └──────────► turn loop ◄──────┘
+                    (bounded, ~10 turns)
+                        │
+                        ▼
+              COACH APPROVED → done
+</code></pre></div></div>
+
+<p><strong>Bounded adversarial process:</strong></p>
+
+<ul>
+  <li><strong>Turn limits</strong> — finite coach/player exchanges (typically ~10)</li>
+  <li><strong>Fresh context per turn</strong> — new agent instance each role per turn → less context pollution</li>
+  <li><strong>Shared requirements contract</strong> — both agents start from the same goal document</li>
+  <li><strong>Approval gate</strong> — explicit Coach sign-off terminates successful runs</li>
+  <li><strong>Discard player self-report</strong> — Coach independently checks compliance (catches “I’m done!” with HTTPS bugs still open)</li>
+</ul>
+
+<h2 id="how-g3-differs-from-vibe-coding--single-agent-tools">How g3 differs from vibe coding / single-agent tools</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Typical vibe coding</th>
+      <th>g3 (dialectical autocoding)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Review</td>
+      <td>Human must catch gaps</td>
+      <td>Coach agent reviews every turn</td>
+    </tr>
+    <tr>
+      <td>Context</td>
+      <td>One thread accumulates noise</td>
+      <td>Fresh instances + focused feedback</td>
+    </tr>
+    <tr>
+      <td>Success criteria</td>
+      <td>Open-ended</td>
+      <td>Requirements contract + Coach approval</td>
+    </tr>
+    <tr>
+      <td>Autonomy</td>
+      <td>~5 min median turns, human present</td>
+      <td>Designed for 30–60 min unattended loops</td>
+    </tr>
+    <tr>
+      <td>Overconfidence</td>
+      <td>Player declares success early</td>
+      <td>Coach catches missing HTTPS, auth, metrics</td>
+    </tr>
+    <tr>
+      <td>Model use</td>
+      <td>One model per session</td>
+      <td>Natural rotation: different models per role/turn</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Paper case study: <strong>Calculator API</strong> — goose made partial progress; g3 completed requirements in a few turns <strong>without stronger base model</strong>, via adversarial design (Coach caught HTTPS enforcement, rounding mode, metrics gaps).</p>
+
+<h2 id="unique-engineering-solutions-in-g3-implementation">Unique engineering solutions in g3 (implementation)</h2>
+
+<p>Beyond the paper’s paradigm, the Rust codebase adds:</p>
+
+<h3 id="1-context-window-management">1. Context window management</h3>
+<ul>
+  <li><strong>Context thinning</strong> at 50/60/70/80% — large tool outputs → file references</li>
+  <li><strong>Auto-compaction</strong> at 80% capacity</li>
+  <li>CLI: <code class="language-plaintext highlighter-rouge">/compact</code>, <code class="language-plaintext highlighter-rouge">/thinnify</code>, <code class="language-plaintext highlighter-rouge">/skinnify</code>, <code class="language-plaintext highlighter-rouge">/stats</code></li>
+</ul>
+
+<h3 id="2-modular-rust-workspace">2. Modular Rust workspace</h3>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">g3-core</code> — orchestration, tools, streaming parser</li>
+  <li><code class="language-plaintext highlighter-rouge">g3-providers</code> — Anthropic, Databricks, llama.cpp (Metal on macOS)</li>
+  <li><code class="language-plaintext highlighter-rouge">g3-execution</code> — planning, retries, progress</li>
+  <li><code class="language-plaintext highlighter-rouge">g3-computer-control</code> — mouse/keyboard, screenshots, OCR (for Coach evaluation)</li>
+  <li><code class="language-plaintext highlighter-rouge">g3-cli</code> — interactive + autonomous modes</li>
+</ul>
+
+<h3 id="3-agent-skills-agentskillsio">3. Agent Skills (<a href="https://agentskills.io">agentskills.io</a>)</h3>
+<p>Portable <code class="language-plaintext highlighter-rouge">SKILL.md</code> packages — workspace <code class="language-plaintext highlighter-rouge">.g3/skills/</code>, global <code class="language-plaintext highlighter-rouge">~/.g3/skills/</code>, embedded skills in binary.</p>
+
+<h3 id="4-syntax-aware-code-search">4. Syntax-aware code search</h3>
+<p>tree-sitter search across Rust, Python, JS/TS, Go, Java, C/C++.</p>
+
+<h3 id="5-operating-modes">5. Operating modes</h3>
+<ul>
+  <li><strong>Default: accumulative autonomous</strong> — each user requirement triggers coach/player loop</li>
+  <li><code class="language-plaintext highlighter-rouge">--autonomous</code> — reads <code class="language-plaintext highlighter-rouge">requirements.md</code></li>
+  <li><code class="language-plaintext highlighter-rouge">--planning</code> — requirements refinement + git commit workflow (<code class="language-plaintext highlighter-rouge">g3-plan/</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">--chat</code> — simple chat without autonomous loop</li>
+</ul>
+
+<h3 id="6-honest-local-model-evaluation">6. Honest local-model evaluation</h3>
+<p>README documents agentic benchmarks (comic repack task): dense local models vs MoE loops; cloud Opus/Gemini 3 Pro as baseline — rare transparency for coding agents.</p>
+
+<h2 id="empirical-case-studies-from-paper">Empirical case studies (from paper)</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Case</th>
+      <th>Outcome</th>
+      <th>Links</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Calculator API</td>
+      <td>g3 completes; goose partial</td>
+      <td>Paper § Empirical Results</td>
+    </tr>
+    <tr>
+      <td>Diff viewer (SwiftUI)</td>
+      <td>4 coach/player turns; Claude Code/goose needed more human help</td>
+      <td><a href="https://github.com/michaelneale/swifty-diff">swifty-diff</a></td>
+    </tr>
+    <tr>
+      <td>iOS goose client</td>
+      <td>Built from API spec; emulator control still weak</td>
+      <td><a href="https://github.com/dhanji/goose-ios">goose-ios</a></td>
+    </tr>
+    <tr>
+      <td>Git TUI explorer</td>
+      <td>5/5 completeness vs Cursor/Codex/OpenHands in paper table</td>
+      <td>Paper benchmark table</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="related-references">Related references</h2>
+
+<ul>
+  <li><a href="https://www.tbench.ai/leaderboard/terminal-bench/2.0">Terminal Bench 2.0 leaderboard</a> — multi-model agents on dev tasks</li>
+  <li><a href="https://dl.acm.org/doi/10.1145/1281700.1281702">ACM: cost of context switching</a> — cited for human-in-the-loop overhead</li>
+  <li><a href="https://github.com/kishb87/opencode-adversarial-cooperation">OpenCode adversarial cooperation plugin</a> — pattern ported to OpenCode</li>
+  <li>Paper note: adversarial cooperation proposed as <strong>goose</strong> enhancement</li>
+</ul>
+
+<h2 id="connection-to-vairl--agency-work">Connection to VAIRL / agency work</h2>
+
+<p>g3’s Coach/Player split rhymes with our neurosymbolic <strong>critic loop</strong> — implementation vs independent validation. Possible integrations:</p>
+
+<ul>
+  <li>Coach as <strong>PubLens / QA gate</strong> before merge</li>
+  <li>Player as tool-using coder; Coach as requirements + test oracle</li>
+  <li>Parallel experiment clusters (paper: “nights and weekends problem”)</li>
+</ul>
+
+<h2 id="limits-state-explicitly">Limits (state explicitly)</h2>
+
+<ul>
+  <li>Turn budget may be insufficient for very large tasks — failure mode is “task too complex for loop”, not necessarily “model incapable”</li>
+  <li>iOS emulator automation weaker than desktop/web for Coach evaluation</li>
+  <li>Local models still far behind top cloud models on complex agentic tasks</li>
+  <li>Pattern replicable on other agents — g3 is one reference implementation, not the only way</li>
+</ul>
+
+<h2 id="next-steps">Next steps</h2>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Reproduce minimal coach/player loop on a VAIRL-sized task</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Compare g3 vs single-agent on same <code class="language-plaintext highlighter-rouge">requirements.md</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Link to agency peer-review gate (PubLens) as Coach analogue</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

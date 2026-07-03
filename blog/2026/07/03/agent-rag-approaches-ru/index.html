@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG для агентов в 2026: от naive retrieval до agentic RAC, векторные БД и чанкинг - VAIRL</title>
+    <meta name="description" content="Обзор актуальных RAG-подходов для AI-агентов: Enhanced и Agentic RAG, RAC (Clarification и Correction), GraphRAG, гибридный поиск, reranking, влияние размера...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>RAG для агентов в 2026: от naive retrieval до agentic RAC, векторные БД и чанкинг | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="RAG для агентов в 2026: от naive retrieval до agentic RAC, векторные БД и чанкинг" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Обзор актуальных RAG-подходов для AI-агентов: Enhanced и Agentic RAG, RAC (Clarification и Correction), GraphRAG, гибридный поиск, reranking, влияние размера чанков, векторные БД и SOTA-решения с метриками." />
+<meta name="twitter:description" property="og:description" content="Обзор актуальных RAG-подходов для AI-агентов: Enhanced и Agentic RAG, RAC (Clarification и Correction), GraphRAG, гибридный поиск, reranking, влияние размера чанков, векторные БД и SOTA-решения с метриками." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/03/agent-rag-approaches-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/03/agent-rag-approaches-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-rag-approaches-2026.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-03T07:00:00+00:00" />
+<meta property="article:modified_time" content="2026-07-03T07:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-rag-approaches-2026.svg" />
+<meta name="twitter:title" content="RAG для агентов в 2026: от naive retrieval до agentic RAC, векторные БД и чанкинг" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-03T07:00:00+00:00","datePublished":"2026-07-03T07:00:00+00:00","description":"Обзор актуальных RAG-подходов для AI-агентов: Enhanced и Agentic RAG, RAC (Clarification и Correction), GraphRAG, гибридный поиск, reranking, влияние размера чанков, векторные БД и SOTA-решения с метриками.","headline":"RAG для агентов в 2026: от naive retrieval до agentic RAC, векторные БД и чанкинг","image":"https://evgeniy-borisov.github.io/vairl/assets/images/agent-rag-approaches-2026.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/03/agent-rag-approaches-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/03/agent-rag-approaches-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/03/agent-rag-approaches-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/agent-rag-approaches-2026.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">RAG для агентов в 2026: от naive retrieval до agentic RAC, векторные БД и чанкинг</h1>
+        <p class="post-date">03 July 2026, 07:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Для агента RAG — не «дополнительная фича», а <strong>инструмент в цикле plan → act → observe</strong>. Coding-агент ищет по репозиторию, support-бот — по базе знаний, research-агент — по корпусу статей. Разница между демо и продакшеном почти всегда в <strong>retrieval engineering</strong>: что индексировать, как резать документы, какие БД и ранжировщики использовать, когда повторять поиск, а когда признать, что ответа в корпусе нет.</p>
+
+<p>В 2026 году ландшафт устоялся в три слоя: <strong>статические пайплайны</strong> (naive / enhanced RAG), <strong>структурированное знание</strong> (GraphRAG, иерархические индексы) и <strong>агентное управление retrieval</strong> (agentic RAG, corrective / self-reflective схемы). Параллельно появились узкие расширения <strong>RAC</strong> — Retrieval-Augmented Clarification и Retrieval-Augmented Correction — которые решают не «найти и ответить», а <strong>уточнить запрос</strong> или <strong>проверить факты</strong> после генерации.</p>
+
+<p>Ниже — карта подходов, что даёт наибольший прирост метрик, нюансы векторных хранилищ, оптимизации поиска, влияние размера чанков и готовые SOTA-стеки. Связанные материалы VAIRL: <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/">фундамент RAG и MCP</a>, <a href="/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/">semantic torrent и P2P-поиск</a>, <a href="/vairl/blog/2026/07/02/agent-metacognition-phase-space-ru/">метакогниция и grounding_score</a>, <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">генерация бенчмарков (component-level RAG recall)</a>, <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрия и vector search</a>.</p>
+
+<hr />
+
+<h2 id="карта-статьи">Карта статьи</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Раздел</th>
+      <th>О чём</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="#эволюция-rag-от-naive-к-agentic">Эволюция RAG</a></td>
+      <td>Naive → Enhanced → Modular → Graph → Agentic</td>
+    </tr>
+    <tr>
+      <td><a href="#rac-два-разных-смысла-одной-аббревиатуры">RAC</a></td>
+      <td>Clarification и Correction</td>
+    </tr>
+    <tr>
+      <td><a href="#agentic-rag-когда-и-зачем">Agentic RAG</a></td>
+      <td>Итеративный поиск, tool use, trade-offs</td>
+    </tr>
+    <tr>
+      <td><a href="#базы-знаний-векторные-и-гибридные">Базы знаний</a></td>
+      <td>Vector DB, когда GraphRAG оправдан</td>
+    </tr>
+    <tr>
+      <td><a href="#оптимизации-retrieval-что-даёт-наибольший-прирост">Оптимизации retrieval</a></td>
+      <td>Hybrid, rerank, HyDE, contextual chunking</td>
+    </tr>
+    <tr>
+      <td><a href="#размер-чанков-и-стратегии-нарезки">Размер чанков</a></td>
+      <td>256–1024 токенов, multi-scale, QASC</td>
+    </tr>
+    <tr>
+      <td><a href="#интерактив-пайплайн-retrieval-и-размер-чанков">Интерактив</a></td>
+      <td>Демо naive / enhanced / agentic</td>
+    </tr>
+    <tr>
+      <td><a href="#метрики-и-бенчмарки">Метрики и бенчмарки</a></td>
+      <td>RAGAS, RAGSearch, BRIGHT</td>
+    </tr>
+    <tr>
+      <td><a href="#sota-решения-и-фреймворки-2026">SOTA-стеки</a></td>
+      <td>LangGraph, LlamaIndex, Cohere, Qdrant и др.</td>
+    </tr>
+    <tr>
+      <td><a href="#практический-чеклист-для-агентной-системы">Чеклист для агента</a></td>
+      <td>Что внедрять по порядку</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="эволюция-rag-от-naive-к-agentic">Эволюция RAG: от naive к agentic</h2>
+
+<pre><code class="language-mermaid">flowchart LR
+  N[Naive RAG] --&gt; A[Advanced / Enhanced]
+  A --&gt; M[Modular RAG]
+  M --&gt; G[GraphRAG]
+  M --&gt; AR[Agentic RAG]
+  AR --&gt; RAC[RAC layers]
+</code></pre>
+
+<h3 id="naive-rag">Naive RAG</h3>
+
+<p>Классика: <strong>один запрос → top-K чанков → один вызов LLM</strong>. Индексация — эмбеддинги в векторную БД; retrieval — cosine similarity.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Плюс</th>
+      <th>Минус</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Простота, низкая латентность</td>
+      <td>Нет семантики при плохом чанкинге</td>
+    </tr>
+    <tr>
+      <td>Быстрый MVP</td>
+      <td>«Правильный, но не тот» чанк → уверенная ошибка</td>
+    </tr>
+    <tr>
+      <td>Дешёвый runtime</td>
+      <td>Не работает на multi-hop и уточняющих вопросах</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Подходит для FAQ с короткими ответами и узким доменом. Для агентов — <strong>только как baseline</strong>, не как финальная архитектура.</p>
+
+<h3 id="enhanced--advanced-rag">Enhanced / Advanced RAG</h3>
+
+<p><strong>Enhanced RAG</strong> (термин из <a href="https://aclanthology.org/2026.acl-industry.5/">ACL Industry 2026</a>) — пайплайн с <strong>отдельными модулями</strong> под конкретные слабости naive-подхода:</p>
+
+<ul>
+  <li>query rewriting / multi-query expansion;</li>
+  <li>hybrid retrieval (dense + BM25);</li>
+  <li>cross-encoder reranking;</li>
+  <li>compression / filtering чанков перед LLM;</li>
+  <li>metadata filters (ACL, дата, tenant).</li>
+</ul>
+
+<p>Это <strong>де-факто production default</strong> 2025–2026: по обзорам, гибридный поиск + rerank даёт наибольший прирост <strong>до</strong> перехода к агентным циклам (<a href="https://atlan.com/know/advanced-rag-techniques/">Atlan Advanced RAG</a>, <a href="https://1337skills.com/blog/2026-06-12-production-rag-2026-hybrid-search-reranking-graphrag/">1337skills Production RAG 2026</a>).</p>
+
+<h3 id="modular-rag">Modular RAG</h3>
+
+<p>Компоненты retrieval, augmentation и generation <strong>собираются как конструктор</strong>: можно подменить retriever, добавить API-источник, вставить reranker, не трогая генератор. LangChain, LlamaIndex, Haystack — все позиционируются как modular RAG frameworks.</p>
+
+<p>Для агентов modular RAG важен тем, что <strong>retrieval становится tool’ом</strong> с чётким контрактом: <code class="language-plaintext highlighter-rouge">search_docs(query, filters) → chunks[]</code>.</p>
+
+<h3 id="graphrag">GraphRAG</h3>
+
+<p><a href="https://arxiv.org/abs/2404.16130">Microsoft GraphRAG</a> и родственные системы строят <strong>граф сущностей и связей</strong> поверх корпуса. Retrieval идёт не только по векторной близости, но и по <strong>multi-hop путям</strong> в графе.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Когда GraphRAG выигрывает</th>
+      <th>Когда не стоит усложнять</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Multi-hop QA («кто руководил X, когда Y произошло?»)</td>
+      <td>Простые factoid-вопросы</td>
+    </tr>
+    <tr>
+      <td>Корпус с явными связями (юриспруденция, биомед)</td>
+      <td>Мало связей, шумный граф</td>
+    </tr>
+    <tr>
+      <td>Offline-препроцессинг амортизирован</td>
+      <td>Нужен быстрый cold start</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Свежий бенчмарк <a href="https://arxiv.org/abs/2604.09666">RAGSearch</a> (2026): <strong>agentic search существенно сужает разрыв</strong> между dense RAG и GraphRAG, особенно в RL-based настройках, но <strong>GraphRAG остаётся стабильнее на сложном multi-hop reasoning</strong>, когда offline-стоимость построения графа уже оплачена.</p>
+
+<h3 id="agentic-rag">Agentic RAG</h3>
+
+<p><strong>Agentic RAG</strong> (<a href="https://arxiv.org/html/2501.09136v4">survey, arXiv:2501.09136</a>) встраивает <strong>автономных агентов</strong> в retrieval-пайплайн. LLM не пассивно получает чанки, а:</p>
+
+<ul>
+  <li>решает, <strong>нужен ли</strong> retrieval (vs ответ из памяти);</li>
+  <li><strong>декомпозирует</strong> сложный запрос на подзапросы;</li>
+  <li><strong>переформулирует</strong> query после неудачного поиска;</li>
+  <li>выбирает <strong>tools</strong> (vector search, SQL, web, MCP);</li>
+  <li><strong>верифицирует</strong> достаточность контекста и итерирует.</li>
+</ul>
+
+<pre><code class="language-mermaid">flowchart TB
+  Q[User query] --&gt; A[Agent planner]
+  A --&gt;|need context?| D{Decision}
+  D --&gt;|yes| R1[Retrieve v1]
+  R1 --&gt; E[Evaluate chunks]
+  E --&gt;|insufficient| R2[Rewrite query / retrieve v2]
+  E --&gt;|sufficient| G[Generate answer]
+  R2 --&gt; E
+  D --&gt;|no| G
+  G --&gt; V[Self-check / RAC correction]
+</code></pre>
+
+<p>Паттерны из agentic design (<a href="https://developer.nvidia.com/blog/traditional-rag-vs-agentic-rag-why-ai-agents-need-dynamic-knowledge-to-get-smarter/">NVIDIA blog</a>): reflection, planning, tool use, multi-agent collaboration (retriever-agent + writer-agent + verifier-agent).</p>
+
+<p><strong>Важный вывод из ACL 2026:</strong> agentic RAG <strong>не всегда</strong> лучше enhanced RAG по cost/latency. Выигрывает на multi-step задачах, research, code repair; проигрывает на простых Q&amp;A, где достаточно hybrid + rerank за один проход.</p>
+
+<hr />
+
+<h2 id="rac-два-разных-смысла-одной-аббревиатуры">RAC: два разных смысла одной аббревиатуры</h2>
+
+<p>В литературе 2025–2026 <strong>RAC</strong> — не опечатка RAG, а два разных расширения:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аббревиатура</th>
+      <th>Полное название</th>
+      <th>Роль в пайплайне</th>
+      <th>Типичный прирост</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>RAC</strong></td>
+      <td>Retrieval-Augmented <strong>Clarification</strong></td>
+      <td>Генерация <strong>уточняющих вопросов</strong>, заземлённых в корпусе</td>
+      <td>Faithfulness clarification ↑ на 4 бенчмарках (<a href="https://arxiv.org/abs/2601.11722">arXiv:2601.11722</a>)</td>
+    </tr>
+    <tr>
+      <td><strong>RAC</strong></td>
+      <td>Retrieval-Augmented <strong>Correction</strong></td>
+      <td>Post-hoc <strong>верификация атомарных фактов</strong> и правка ответа</td>
+      <td>До +30% factuality, −40× latency vs тяжёлые post-correction (<a href="https://doi.org/10.18653/v1/2025.findings-emnlp.1370">EMNLP 2025 Findings</a>)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="rac-clarification--для-агентов-с-диалогом">RAC Clarification — для агентов с диалогом</h3>
+
+<p>Когда запрос неоднозначен («настрой rate limit» — в API или в nginx?), naive-агент либо угадывает, либо задаёт <strong>незаземлённый</strong> вопрос. RAC Clarification обучает модель задавать вопросы, <strong>опираясь на retrieved passages</strong> (SFT + DPO с контрастными парами grounded / ungrounded).</p>
+
+<p>Для агентной системы это слой <strong>перед</strong> основным retrieval: уточнить intent → потом искать с правильными фильтрами.</p>
+
+<h3 id="rac-correction--для-faithfulness-после-генерации">RAC Correction — для faithfulness после генерации</h3>
+
+<p>Пайплайн:</p>
+
+<ol>
+  <li>LLM генерирует черновик (с RAG или без).</li>
+  <li>Декомпозиция на <strong>атомарные утверждения</strong>.</li>
+  <li>Верификация каждого по retrieved evidence.</li>
+  <li>Коррекция только несовпавших фактов.</li>
+</ol>
+
+<p>Работает как <strong>лёгкий verifier</strong> в meta-level контуре (<a href="/vairl/blog/2026/07/02/agent-metacognition-phase-space-ru/">метакогниция агента</a>): дешевле, чем полный re-generation, и совместим с любым instruction-tuned LLM (<a href="https://github.com/jlab-nlp/Retrieval-Augmented-Correction">GitHub: Retrieval-Augmented-Correction</a>).</p>
+
+<hr />
+
+<h2 id="agentic-rag-когда-и-зачем">Agentic RAG: когда и зачем</h2>
+
+<h3 id="архитектурные-варианты-taxonomy">Архитектурные варианты (taxonomy)</h3>
+
+<p>По <a href="https://arxiv.org/html/2501.09136v4">Agentic RAG Survey</a>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Тип</th>
+      <th>Описание</th>
+      <th>Пример</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Single-agent RAG</strong></td>
+      <td>Один агент управляет retrieve–reflect–generate</td>
+      <td>LangGraph ReAct + <code class="language-plaintext highlighter-rouge">retriever</code> tool</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-agent RAG</strong></td>
+      <td>Retriever, planner, writer, critic — разные роли</td>
+      <td>CrewAI, MAESTRO-подобные стеки</td>
+    </tr>
+    <tr>
+      <td><strong>Router-based</strong></td>
+      <td>Классификатор выбирает стратегию retrieval</td>
+      <td>Adaptive RAG</td>
+    </tr>
+    <tr>
+      <td><strong>Graph-agentic</strong></td>
+      <td>Агент ходит по GraphRAG + vector fallback</td>
+      <td>Enterprise knowledge graphs</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="сравнение-с-enhanced-rag-по-данным-acl-industry-2026">Сравнение с Enhanced RAG (по данным ACL Industry 2026)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Критерий</th>
+      <th>Enhanced RAG</th>
+      <th>Agentic RAG</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Латентность</td>
+      <td>Низкая (1–2 retrieval pass)</td>
+      <td>Выше (2–N итераций)</td>
+    </tr>
+    <tr>
+      <td>Стоимость токенов</td>
+      <td>Предсказуемая</td>
+      <td>Растёт с числом шагов</td>
+    </tr>
+    <tr>
+      <td>Multi-hop / research</td>
+      <td>Средне (нужен multi-query вручную)</td>
+      <td>Сильно (агент сам декомпозирует)</td>
+    </tr>
+    <tr>
+      <td>Out-of-scope detection</td>
+      <td>Слабо без отдельного модуля</td>
+      <td>Агент может отказать от retrieval</td>
+    </tr>
+    <tr>
+      <td>Отладка</td>
+      <td>Линейный пайплайн</td>
+      <td>Нужна <a href="/vairl/blog/2026/07/02/agent-trajectory-formats-ru/">телеметрия траекторий</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="связанные-агентные-rag-паттерны">Связанные «агентные» RAG-паттерны</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Паттерн</th>
+      <th>Суть</th>
+      <th>Когда использовать</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Self-RAG</strong></td>
+      <td>Модель решает retrieve / не retrieve; критикует релевантность чанков</td>
+      <td>Когда нужен единый fine-tuned policy</td>
+    </tr>
+    <tr>
+      <td><strong>Corrective RAG (CRAG)</strong></td>
+      <td>Оценка качества retrieval → web fallback или re-retrieve</td>
+      <td>Шумный корпус, высокий % irrelevant chunks</td>
+    </tr>
+    <tr>
+      <td><strong>Adaptive RAG</strong></td>
+      <td>Router: simple / multi-step / no-retrieval</td>
+      <td>Смешанный трафик запросов</td>
+    </tr>
+    <tr>
+      <td><strong>RAPTOR</strong></td>
+      <td>Иерархическое дерево summary поверх чанков</td>
+      <td>Длинные документы, «обзор + детали»</td>
+    </tr>
+    <tr>
+      <td><strong>Contextual Retrieval</strong> (Anthropic)</td>
+      <td>К каждому чанку — LLM-generated context prefix при индексации</td>
+      <td>+49% fewer failed retrievals (vendor benchmark)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="базы-знаний-векторные-и-гибридные">Базы знаний: векторные и гибридные</h2>
+
+<h3 id="векторная-бд--не-лучшая-одна-а-fit-под-нагрузку">Векторная БД — не «лучшая одна», а fit под нагрузку</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Система</th>
+      <th>Сильные стороны</th>
+      <th>Слабые / нюансы</th>
+      <th>Типичный use-case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Qdrant</strong></td>
+      <td>Hybrid native, HNSW, фильтры, on-prem</td>
+      <td>Экосистема меньше managed SaaS</td>
+      <td>Self-hosted prod, latency-sensitive</td>
+    </tr>
+    <tr>
+      <td><strong>Weaviate</strong></td>
+      <td>Hybrid BM25+vector, GraphQL, modules</td>
+      <td>Операционная сложность кластера</td>
+      <td>Multi-tenant KB</td>
+    </tr>
+    <tr>
+      <td><strong>Milvus / Zilliz</strong></td>
+      <td>Масштаб до миллиардов векторов</td>
+      <td>Тяжелее для малых проектов</td>
+      <td>Большие корпуса</td>
+    </tr>
+    <tr>
+      <td><strong>pgvector</strong></td>
+      <td>Один стек с Postgres, ACL в SQL</td>
+      <td>ANN на очень больших N хуже спец. DB</td>
+      <td>Корпоративные данные уже в PG</td>
+    </tr>
+    <tr>
+      <td><strong>Pinecone</strong></td>
+      <td>Managed, serverless, быстрый старт</td>
+      <td>Vendor lock-in, стоимость на scale</td>
+      <td>MVP → mid-scale SaaS</td>
+    </tr>
+    <tr>
+      <td><strong>LanceDB</strong></td>
+      <td>Embedded, локально, хорош для агентов на диске</td>
+      <td>Меньше enterprise-фич</td>
+      <td>Coding agents, edge</td>
+    </tr>
+    <tr>
+      <td><strong>Chroma</strong></td>
+      <td>Простота, dev-friendly</td>
+      <td>Ограничения на hard prod</td>
+      <td>Прототипы, notebooks</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Что реально влияет на метрики больше, чем выбор БД:</strong></p>
+
+<ol>
+  <li><strong>Качество эмбеддинга</strong> — одна модель на ingest и query; версия в метаданных индекса.</li>
+  <li><strong>Hybrid search</strong> — почти все production-системы 2026 хранят dense + sparse (BM25 или SPLADE).</li>
+  <li><strong>Metadata</strong> — фильтры по <code class="language-plaintext highlighter-rouge">source</code>, <code class="language-plaintext highlighter-rouge">date</code>, <code class="language-plaintext highlighter-rouge">acl_group</code> до ANN (pre-filter vs post-filter — влияет на recall).</li>
+  <li><strong>Reranker</strong> после ANN top-50…100, не top-5 напрямую в LLM.</li>
+</ol>
+
+<h3 id="embedding-модели-ориентиры-2026">Embedding-модели (ориентиры 2026)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Класс</th>
+      <th>Примеры</th>
+      <th>Заметки</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Proprietary API</td>
+      <td>OpenAI <code class="language-plaintext highlighter-rouge">text-embedding-3-large</code>, Cohere <code class="language-plaintext highlighter-rouge">embed-v4</code>, Voyage</td>
+      <td>Удобство, мультиязычность</td>
+    </tr>
+    <tr>
+      <td>Open weights</td>
+      <td>BGE-M3, E5, GTE, Jina embeddings v3</td>
+      <td>Self-hosted, GDPR</td>
+    </tr>
+    <tr>
+      <td>Multimodal</td>
+      <td>CLIP-подобные, Nomic</td>
+      <td>Документы с диаграммами</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Для русскоязычных корпусов проверяйте <strong>MTEB / ruMTEB</strong> на своём домене — лидер общего бенчмарка не гарантирует лидерство на ваших PDF.</p>
+
+<h3 id="когда-добавлять-graph--knowledge-graph">Когда добавлять Graph / knowledge graph</h3>
+
+<ul>
+  <li><strong>Да:</strong> юридические ссылки, org chart, dependency graph кода, биомед (gene–disease).</li>
+  <li><strong>Нет:</strong> 10k статей без явной структуры — достаточно hybrid RAG + agentic re-query.</li>
+  <li><strong>Компромисс:</strong> <a href="https://github.com/FanDongzhe123/RAGSearch">RAGSearch</a> показывает, что <strong>agentic dense RAG</strong> часто закрывает 80% кейсов GraphRAG при меньшем offline-cost.</li>
+</ul>
+
+<hr />
+
+<h2 id="оптимизации-retrieval-что-даёт-наибольший-прирост">Оптимизации retrieval: что даёт наибольший прирост</h2>
+
+<p>Упорядочено по типичному ROI (сверху — внедрять первым):</p>
+
+<h3 id="1-hybrid-search--rrf">1. Hybrid search + RRF</h3>
+
+<p>Параллельно: <strong>dense ANN</strong> + <strong>BM25</strong>. Слияние через <strong>Reciprocal Rank Fusion</strong> (k=60 — стандарт):</p>
+
+\[\text{score}(d) = \sum_i \frac{1}{k + \text{rank}_i(d)}\]
+
+<p>Dense ловит перефраз; BM25 — SKU, имена, редкие термины, код с точными идентификаторами. Это <strong>самый дешёвый скачок качества</strong> после смены эмбеддинга.</p>
+
+<h3 id="2-cross-encoder-reranking">2. Cross-encoder reranking</h3>
+
+<p>Bi-encoder (retrieval) быстрый, но грубый. <strong>Cross-encoder</strong> (query + document jointly) — медленный, но точный.</p>
+
+<p>Типичный funnel:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Query → hybrid top-100 → rerank → top-5…10 → LLM context
+</code></pre></div></div>
+
+<p>Модели 2025–2026: Cohere <code class="language-plaintext highlighter-rouge">rerank-v4</code>, Jina Reranker v2, <code class="language-plaintext highlighter-rouge">bge-reranker-v2-m3</code>, Qwen3-Reranker. Прирост precision <strong>+5–15%</strong> поверх hybrid — типичная оценка в продакшен-гайдах; измеряйте NDCG@10 на своих запросах.</p>
+
+<h3 id="3-query-transformation">3. Query transformation</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Техника</th>
+      <th>Механизм</th>
+      <th>Эффект</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Multi-query</strong></td>
+      <td>LLM генерирует 3–5 перефраз → union результатов</td>
+      <td>Recall ↑ на размытых вопросах</td>
+    </tr>
+    <tr>
+      <td><strong>HyDE</strong></td>
+      <td>LLM пишет гипотетический ответ → embed → search</td>
+      <td>Хорош для абстрактных запросов</td>
+    </tr>
+    <tr>
+      <td><strong>Step-back prompting</strong></td>
+      <td>Сначала общий вопрос, потом конкретный</td>
+      <td>Сложные аналитические задачи</td>
+    </tr>
+    <tr>
+      <td><strong>Decomposition</strong></td>
+      <td>Sub-questions для multi-hop</td>
+      <td>Обязательно в agentic RAG</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="4-contextual-retrieval-индексация">4. Contextual Retrieval (индексация)</h3>
+
+<p>При ingest к каждому чанку добавляется <strong>короткий context prefix</strong> («Этот фрагмент из раздела X документа Y про Z…»). Устраняет проблему чанков без заголовка. Стоит <strong>дополнительных LLM-вызовов при индексации</strong> — окупается на больших статичных корпусах.</p>
+
+<h3 id="5-parentchild--sentence-window">5. Parent–child / sentence window</h3>
+
+<p>Маленький чанк для <strong>поиска</strong>, большой parent для <strong>контекста LLM</strong>. LlamaIndex <code class="language-plaintext highlighter-rouge">SentenceWindowNodeParser</code> — классический паттерн: retrieval precision + generation context.</p>
+
+<h3 id="6-late-chunking-jina-и-др">6. Late chunking (Jina и др.)</h3>
+
+<p>Эмбеддинг считается <strong>после</strong> полного прохода transformer по документу, затем pooling по границам чанков — чанк «видит» соседний контекст в attention. Дороже при индексации, лучше на длинных связных текстах.</p>
+
+<h3 id="7-compression-перед-llm">7. Compression перед LLM</h3>
+
+<p>LongContextReorder, LLMLingua, selective context: если top-10 чанков не влезают в бюджет агента — <strong>сжимать evidence</strong>, не history tool calls (<a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/">контекстное окно</a>).</p>
+
+<h3 id="anti-patterns">Anti-patterns</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Проблема</th>
+      <th>Симптом</th>
+      <th>Лечение</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Top-K слишком мал</td>
+      <td>Miss relevant doc</td>
+      <td>Увеличить K до rerank, не до LLM</td>
+    </tr>
+    <tr>
+      <td>Один эмбеддинг на ingest/query разных моделей</td>
+      <td>Случайный recall</td>
+      <td>Версионировать index</td>
+    </tr>
+    <tr>
+      <td>Без metadata ACL</td>
+      <td>Утечка чужих документов</td>
+      <td>Pre-filter в vector DB</td>
+    </tr>
+    <tr>
+      <td>Игнор code structure</td>
+      <td>Чанки режут функции пополам</td>
+      <td>AST / repo-map (как у Aider, Cursor)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="размер-чанков-и-стратегии-нарезки">Размер чанков и стратегии нарезки</h2>
+
+<p><strong>Нет универсального размера.</strong> Оптимум зависит от типа запроса, структуры документа и метрики.</p>
+
+<h3 id="эмпирические-ориентиры-20252026">Эмпирические ориентиры (2025–2026)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Тип запроса</th>
+      <th>Рекомендуемый размер</th>
+      <th>Обоснование</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Factoid (имя, дата, код)</td>
+      <td><strong>256–512</strong> токенов</td>
+      <td>Высокая precision, меньше шума</td>
+    </tr>
+    <tr>
+      <td>Смешанный корпус (default)</td>
+      <td><strong>400–512</strong> recursive</td>
+      <td>Лучший компромисс в бенчмарках (<a href="https://www.firecrawl.dev/blog/best-chunking-strategies-rag">Firecrawl 2026</a>)</td>
+    </tr>
+    <tr>
+      <td>Аналитика, narrative</td>
+      <td><strong>512–1024</strong></td>
+      <td>Нужен локальный контекст</td>
+    </tr>
+    <tr>
+      <td>Обзор длинного документа</td>
+      <td>Иерархия (RAPTOR, parent-doc)</td>
+      <td>Small retrieve, large read</td>
+    </tr>
+    <tr>
+      <td>«Почти весь документ»</td>
+      <td>20–50 предложений</td>
+      <td>Recall растёт, faithfulness падает (~50–75% success в экспериментах <a href="https://www.researchgate.net/publication/394594247_The_Effect_of_Chunk_Size_on_the_RAG_Performance">NeuralBridge RAG Dataset</a>)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="context-cliff">Context cliff</h3>
+
+<p>Несколько независимых работ указывают на деградацию качества ответа, когда <strong>суммарный retrieved context</strong> подходит к <strong>~2500 токенам</strong> и выше — даже если окно LLM позволяет 128K. Для агента это значит: <strong>не заливать весь top-20 в промпт</strong>; rerank + compress.</p>
+
+<h3 id="overlap">Overlap</h3>
+
+<p>Классика — 10–20% overlap при recursive split. Свежие систематические обзоры (<a href="https://www.digitalapplied.com/blog/rag-chunking-strategies-2026-retrieval-quality-playbook">Digital Applied 2026</a>) отмечают: на части доменов overlap <strong>не даёт измеримого прироста</strong>, но увеличивает размер индекса. <strong>A/B на своих данных.</strong></p>
+
+<h3 id="multi-scale-indexing--rrf">Multi-scale indexing + RRF</h3>
+
+<p><a href="https://www.ai21.com/blog/query-dependent-chunking/">AI21 Query-Dependent Chunking</a>: индексировать корпус <strong>одновременно</strong> при 100, 200, 500 токенах; на query time — RRF по всем индексам.</p>
+
+<ul>
+  <li>Прирост recall <strong>+1–37%</strong> vs один размер (зависит от датасета).</li>
+  <li>Oracle (идеальный выбор размера на запрос) даёт <strong>+20–40%</strong> headroom — аргумент за adaptive / agentic chunk selection.</li>
+</ul>
+
+<h3 id="query-adaptive-semantic-chunking-qasc">Query-Adaptive Semantic Chunking (QASC)</h3>
+
+<p><a href="https://arxiv.org/abs/2605.22834">arXiv:2605.22834</a>: чанки строятся <strong>с учётом query</strong> — seed-предложения по cosine(query, sentence), расширение окна, агрегация score. F1 <strong>0.85</strong>, +18–27% к fixed chunking. Дороже offline, но релевантно для <strong>динамических агентных сессий</strong> с повторными запросами к одному корпусу.</p>
+
+<h3 id="стратегии-нарезки--сравнение">Стратегии нарезки — сравнение</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Стратегия</th>
+      <th>Скорость индекса</th>
+      <th>Качество retrieval</th>
+      <th>Когда</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Fixed token / recursive</td>
+      <td>Быстро</td>
+      <td>Baseline</td>
+      <td>Старт</td>
+    </tr>
+    <tr>
+      <td>Semantic (по embedding drift)</td>
+      <td>~14× медленнее token</td>
+      <td>+0–9% (зависит от корпуса)</td>
+      <td>Если метрики оправдывают</td>
+    </tr>
+    <tr>
+      <td>Page-level</td>
+      <td>Быстро</td>
+      <td>Лучше для PDF с layout</td>
+      <td>Документация, отчёты</td>
+    </tr>
+    <tr>
+      <td>Agentic chunking</td>
+      <td>LLM на каждый doc</td>
+      <td>Высокое на technical docs</td>
+      <td>Малый золотой корпус</td>
+    </tr>
+    <tr>
+      <td>Structure-aware (HTML, AST)</td>
+      <td>Средне</td>
+      <td>Код, API docs</td>
+      <td>Coding agents</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="интерактив-пайплайн-retrieval-и-размер-чанков">Интерактив: пайплайн retrieval и размер чанков</h3>
+
+<p>Упрощённая симуляция на мини-корпусе из 12 фрагментов документации про RAG. Переключайте <strong>режим</strong> (naive / enhanced / agentic), <strong>размер чанка</strong> и <strong>запрос</strong> — увидите, как меняются Recall@3, Precision@3 и шаги пайплайна. В режиме agentic нажимайте <strong>«Следующий шаг»</strong>: retrieve → оценка → rewrite → hybrid+rerank.</p>
+
+<div id="rag-pipeline-demo" class="rag-pipeline-widget">
+  <div class="rg-header">
+    <p>Звезда — запрос в embedding space; зелёные круги — top-3 после retrieval. Enhanced добавляет BM25 + RRF + rerank; agentic — итеративное переформулирование. Крупные чанки (1024) сливают соседние фрагменты — recall растёт, precision на factoid может падать.</p>
+  </div>
+  <div class="rg-controls rg-controls-query">
+    <span class="rg-ctrl-label">Запрос</span>
+    <button type="button" data-rg-query="0" class="active">hybrid search в Qdrant</button>
+    <button type="button" data-rg-query="1">agentic vs enhanced</button>
+    <button type="button" data-rg-query="2">chunk size и recall</button>
+    <button type="button" data-rg-query="3">RAC factuality</button>
+  </div>
+  <div class="rg-controls">
+    <span class="rg-ctrl-label">Режим</span>
+    <button type="button" data-rg-mode="naive">Naive RAG</button>
+    <button type="button" data-rg-mode="enhanced" class="active">Enhanced</button>
+    <button type="button" data-rg-mode="agentic">Agentic RAG</button>
+    <button type="button" class="rg-step-btn" data-rg-step="">Следующий шаг →</button>
+  </div>
+  <div class="rg-controls">
+    <span class="rg-ctrl-label">Chunk</span>
+    <button type="button" data-rg-chunk="128">128</button>
+    <button type="button" data-rg-chunk="512" class="active">512</button>
+    <button type="button" data-rg-chunk="1024">1024</button>
+  </div>
+  <p class="rg-formula"></p>
+  <div class="rg-metrics"></div>
+  <div class="rg-canvas-wrap">
+    <canvas id="rag-pipeline-canvas"></canvas>
+  </div>
+  <div class="rg-steps"></div>
+  <div class="rg-chunk-list"></div>
+  <div class="rg-legend">
+    <span class="rg-leg-item"><span class="rg-leg-dot" style="background: linear-gradient(135deg, #667eea, #764ba2);"></span> релевантный чанк</span>
+    <span class="rg-leg-item"><span class="rg-leg-dot" style="background: linear-gradient(135deg, #43e97b, #38d9c8);"></span> top-3 в контекст</span>
+    <span class="rg-leg-item"><span class="rg-leg-dot" style="background: #fa709a;"></span> запрос</span>
+  </div>
+</div>
+
+<script src="/vairl/assets/js/rag-pipeline-demo.js"></script>
+
+<hr />
+
+<h2 id="метрики-и-бенчмарки">Метрики и бенчмарки</h2>
+
+<h3 id="ragas-и-аналоги">RAGAS (и аналоги)</h3>
+
+<p>Фреймворк для <strong>component-level</strong> оценки:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Метрика</th>
+      <th>Что измеряет</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Context precision</strong></td>
+      <td>Доля релевантных чанков в top-K</td>
+    </tr>
+    <tr>
+      <td><strong>Context recall</strong></td>
+      <td>Нашли ли все нужные факты</td>
+    </tr>
+    <tr>
+      <td><strong>Faithfulness</strong></td>
+      <td>Ответ следует из context</td>
+    </tr>
+    <tr>
+      <td><strong>Answer relevancy</strong></td>
+      <td>Ответ на вопрос</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Для агентов добавляйте <strong>trajectory-level</strong>: сколько retrieval-шагов, был ли повторный поиск после tool error (<a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">agent benchmark generation</a>).</p>
+
+<h3 id="ключевые-бенчмарки-20252026">Ключевые бенчмарки 2025–2026</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Бенчмарк</th>
+      <th>Фокус</th>
+      <th>Зачем агенту</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>RAGSearch</strong></td>
+      <td>Dense vs GraphRAG под agentic search</td>
+      <td>Выбор инфраструктуры retrieval</td>
+    </tr>
+    <tr>
+      <td><strong>BRIGHT</strong></td>
+      <td>Reasoning-intensive retrieval</td>
+      <td>Сложные запросы, не keyword</td>
+    </tr>
+    <tr>
+      <td><strong>HotpotQA / MuSiQue</strong></td>
+      <td>Multi-hop</td>
+      <td>Agentic / GraphRAG</td>
+    </tr>
+    <tr>
+      <td><strong>RAGBench</strong></td>
+      <td>100k примеров, TRACe framework</td>
+      <td>Регрессии в CI</td>
+    </tr>
+    <tr>
+      <td><strong>MS MARCO</strong></td>
+      <td>Dense retrieval classic</td>
+      <td>Сравнение embedders</td>
+    </tr>
+    <tr>
+      <td><strong>AgentG</strong></td>
+      <td>Knowledge fusion в agentic setting</td>
+      <td>Multi-source агенты</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="offline-vs-online">Offline vs online</h3>
+
+<ul>
+  <li><strong>Offline:</strong> NDCG@10, Recall@K, MRR на размеченных query–doc парах.</li>
+  <li><strong>Online:</strong> faithfulness, task success агента, cost per resolved ticket, human thumbs.</li>
+</ul>
+
+<p>Правило: <strong>оптимизируйте retrieval offline, агентный цикл — online</strong> на end-to-end задачах.</p>
+
+<hr />
+
+<h2 id="sota-решения-и-фреймворки-2026">SOTA-решения и фреймворки 2026</h2>
+
+<h3 id="end-to-end-платформы">End-to-end платформы</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Решение</th>
+      <th>Что даёт</th>
+      <th>Акцент</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>LlamaIndex</strong></td>
+      <td>Индексы, agents, workflows, parse</td>
+      <td>Гибкий modular RAG</td>
+    </tr>
+    <tr>
+      <td><strong>LangChain / LangGraph</strong></td>
+      <td>Графы, tool calling, LangSmith eval</td>
+      <td>Agentic orchestration</td>
+    </tr>
+    <tr>
+      <td><strong>Haystack</strong></td>
+      <td>Pipelines, deepset rerankers</td>
+      <td>Enterprise NLP</td>
+    </tr>
+    <tr>
+      <td><strong>Cohere Compass + Rerank</strong></td>
+      <td>Managed embed + rerank</td>
+      <td>Мало ops, сильный rerank</td>
+    </tr>
+    <tr>
+      <td><strong>NVIDIA NeMo Retriever</strong></td>
+      <td>GPU-оптимизированный extract/embed/rerank</td>
+      <td>High-throughput on-prem</td>
+    </tr>
+    <tr>
+      <td><strong>Vectara</strong></td>
+      <td>Boomerang embed, grounded generation</td>
+      <td>Compliance, citations</td>
+    </tr>
+    <tr>
+      <td><strong>Contextual AI</strong></td>
+      <td>Enterprise RAG platform</td>
+      <td>Production SLAs</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="специализированные-компоненты">Специализированные компоненты</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Компонент</th>
+      <th>Примеры</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Parsing</td>
+      <td>Unstructured, LlamaParse, Docling</td>
+    </tr>
+    <tr>
+      <td>Rerank</td>
+      <td>Cohere rerank-v4, Jina, bge-reranker</td>
+    </tr>
+    <tr>
+      <td>Eval</td>
+      <td>RAGAS, Arize Phoenix, Langfuse datasets</td>
+    </tr>
+    <tr>
+      <td>GraphRAG</td>
+      <td>Microsoft GraphRAG, Neo4j + vector</td>
+    </tr>
+    <tr>
+      <td>Agentic</td>
+      <td>LangGraph prebuilt ReAct, CrewAI, OpenAI Agents SDK</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="coding-агенты-rag-из-коробки">Coding-агенты: RAG «из коробки»</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Агент</th>
+      <th>Retrieval-подход</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Cursor / Claude Code</strong></td>
+      <td>Repo map, semantic + grep, incremental index</td>
+    </tr>
+    <tr>
+      <td><strong>Aider</strong></td>
+      <td>Repo map, tags, без тяжёлого vector на малых repo</td>
+    </tr>
+    <tr>
+      <td><strong>OpenCode <code class="language-plaintext highlighter-rouge">explore</code></strong></td>
+      <td>Sub-agent для поиска</td>
+    </tr>
+    <tr>
+      <td><strong>Codex</strong></td>
+      <td>Sandboxed + tool-based file search</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Общий тренд: <strong>структурный поиск (grep, AST) + семантика</strong>, не чистый vector-only.</p>
+
+<h3 id="research-sota-направления-не-один-продукт">Research SOTA (направления, не один продукт)</h3>
+
+<ol>
+  <li><strong>Agentic search + RL</strong> — обучение политики when/what to retrieve (<a href="https://arxiv.org/abs/2604.09666">RAGSearch</a>).</li>
+  <li><strong>Multi-scale + query-adaptive chunking</strong> — убирает фиксированный chunk size как bottleneck.</li>
+  <li><strong>RAC layers</strong> — clarification до retrieval, correction после generation.</li>
+  <li><strong>Hybrid всегда</strong> — sparse + dense + rerank как минимальный production bar.</li>
+  <li><strong>P2P / federated</strong> — <a href="/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/">Semantic Torrent</a> для распределённых корпусов без центрального индекса.</li>
+</ol>
+
+<hr />
+
+<h2 id="практический-чеклист-для-агентной-системы">Практический чеклист для агентной системы</h2>
+
+<pre><code class="language-mermaid">flowchart TD
+  S1[1. Baseline: hybrid + rerank] --&gt; S2[2. RAGAS на 50–200 запросов]
+  S2 --&gt; S3[3. Chunk 512 recursive + metadata]
+  S3 --&gt; S4{Multi-hop?}
+  S4 --&gt;|да| S5[Agentic re-query или GraphRAG]
+  S4 --&gt;|нет| S6[Enhanced достаточно]
+  S5 --&gt; S7[RAC correction + telemetry]
+  S6 --&gt; S7
+</code></pre>
+
+<ol>
+  <li><strong>Зафиксируйте eval-набор</strong> из реальных user/agent трасс (не только synthetic QA).</li>
+  <li><strong>Hybrid + RRF + rerank</strong> — первый апгрейд после naive vector.</li>
+  <li><strong>Chunk 400–512</strong>, structure-aware для кода; <strong>multi-scale</strong>, если recall слабый на разнородных вопросах.</li>
+  <li><strong>Версионируйте</strong> embedding model и chunker в метаданных индекса.</li>
+  <li><strong>Agentic retrieval</strong> — когда enhanced plateau и есть multi-step задачи; логируйте каждый retrieval в <a href="/vairl/blog/2026/07/02/agent-trajectory-formats-ru/">trace</a>.</li>
+  <li><strong>GraphRAG</strong> — если agentic dense всё ещё проваливает multi-hop <strong>и</strong> есть структура для графа.</li>
+  <li><strong>RAC Correction</strong> на ответах с высоким риском галлюцинации; <strong>RAC Clarification</strong> — на ambiguous intents.</li>
+  <li><strong>grounding_score</strong> в meta-loop — если 2 шага без роста citation overlap → re-retrieve (<a href="/vairl/blog/2026/07/02/agent-metacognition-phase-space-ru/">метакогниция</a>).</li>
+</ol>
+
+<hr />
+
+<h2 id="итог">Итог</h2>
+
+<p>В 2026 году «лучший RAG» — не одна модель и не одна векторная БД, а <strong>слоёный стек</strong>:</p>
+
+<ul>
+  <li><strong>Enhanced RAG</strong> (hybrid + rerank + query rewrite) закрывает большинство продакшен-Q&amp;A с минимальной латентностью.</li>
+  <li><strong>Agentic RAG</strong> добавляет итерации, декомпозицию и tool choice — необходим для research, сложного code navigation и multi-hop; стоит дороже и требует телеметрии.</li>
+  <li><strong>GraphRAG</strong> остаётся сильным на relational reasoning, но <strong>agentic dense</strong> сужает разрыв; выбор — по RAGSearch-подобным eval на вашем корпусе.</li>
+  <li><strong>RAC</strong> дополняет оба: clarification до поиска, correction после ответа.</li>
+  <li><strong>Чанкинг</strong> — не гиперпараметр «на глаз»: multi-scale и query-adaptive дают измеримый headroom; default 512 токенов — разумная отправная точка.</li>
+</ul>
+
+<p>Инженерный принцип тот же, что у <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">control loops агента</a>: retrieval — <strong>замкнутый контур</strong> с измеримой обратной связью. Сначала метрики на корпусе, потом усложнение архитектуры — не наоборот.</p>
+
+<hr />
+
+<h2 id="источники-и-ссылки">Источники и ссылки</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Работа</th>
+      <th>Год</th>
+      <th>Тема</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://arxiv.org/html/2501.09136v4">Agentic RAG Survey</a></td>
+      <td>2025</td>
+      <td>Таксономия agentic RAG</td>
+    </tr>
+    <tr>
+      <td><a href="https://aclanthology.org/2026.acl-industry.5/">Is Agentic RAG worth it? (ACL Industry)</a></td>
+      <td>2026</td>
+      <td>Enhanced vs Agentic — trade-offs</td>
+    </tr>
+    <tr>
+      <td><a href="https://arxiv.org/abs/2604.09666">RAGSearch benchmark</a></td>
+      <td>2026</td>
+      <td>Dense vs GraphRAG под agentic search</td>
+    </tr>
+    <tr>
+      <td><a href="https://arxiv.org/abs/2601.11722">RAC Clarification</a></td>
+      <td>2026</td>
+      <td>Grounded clarification questions</td>
+    </tr>
+    <tr>
+      <td><a href="https://doi.org/10.18653/v1/2025.findings-emnlp.1370">RAC Correction (EMNLP)</a></td>
+      <td>2025</td>
+      <td>Post-hoc factuality</td>
+    </tr>
+    <tr>
+      <td><a href="https://arxiv.org/abs/2605.22834">QASC chunking</a></td>
+      <td>2026</td>
+      <td>Query-adaptive semantic chunks</td>
+    </tr>
+    <tr>
+      <td><a href="https://www.ai21.com/blog/query-dependent-chunking/">AI21 multi-scale chunking</a></td>
+      <td>2025</td>
+      <td>Multi-index + RRF</td>
+    </tr>
+    <tr>
+      <td><a href="https://www.anthropic.com/news/contextual-retrieval">Anthropic Contextual Retrieval</a></td>
+      <td>2024</td>
+      <td>Context prefixes at index time</td>
+    </tr>
+    <tr>
+      <td><a href="https://atlan.com/know/advanced-rag-techniques/">Atlan: 12 Advanced RAG Techniques</a></td>
+      <td>2026</td>
+      <td>Обзор техник</td>
+    </tr>
+    <tr>
+      <td><a href="https://developer.nvidia.com/blog/traditional-rag-vs-agentic-rag-why-ai-agents-need-dynamic-knowledge-to-get-smarter/">NVIDIA: Traditional vs Agentic RAG</a></td>
+      <td>2025</td>
+      <td>Agentic patterns</td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

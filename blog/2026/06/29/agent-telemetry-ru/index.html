@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Телеметрия AI-агентов: сбор запросов, хранение и поиск похожих задач - VAIRL</title>
+    <meta name="description" content="Обзор практик логирования коммуникации пользователя с агентом: трассы, задачи, хранилища, PII, embedding-поиск похожих сессий, связь с eval и бенчмарками, фу...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Телеметрия AI-агентов: сбор запросов, хранение и поиск похожих задач | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Телеметрия AI-агентов: сбор запросов, хранение и поиск похожих задач" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Обзор практик логирования коммуникации пользователя с агентом: трассы, задачи, хранилища, PII, embedding-поиск похожих сессий, связь с eval и бенчмарками, фундаментальная литература." />
+<meta name="twitter:description" property="og:description" content="Обзор практик логирования коммуникации пользователя с агентом: трассы, задачи, хранилища, PII, embedding-поиск похожих сессий, связь с eval и бенчмарками, фундаментальная литература." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-telemetry-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-telemetry-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-telemetry.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-29T15:36:39+00:00" />
+<meta property="article:modified_time" content="2026-06-29T15:36:39+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/agent-telemetry.svg" />
+<meta name="twitter:title" content="Телеметрия AI-агентов: сбор запросов, хранение и поиск похожих задач" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-29T15:36:39+00:00","datePublished":"2026-06-29T15:36:39+00:00","description":"Обзор практик логирования коммуникации пользователя с агентом: трассы, задачи, хранилища, PII, embedding-поиск похожих сессий, связь с eval и бенчмарками, фундаментальная литература.","headline":"Телеметрия AI-агентов: сбор запросов, хранение и поиск похожих задач","image":"https://evgeniy-borisov.github.io/vairl/assets/images/agent-telemetry.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-telemetry-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/29/agent-telemetry-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/06/29/agent-telemetry-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/agent-telemetry.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Телеметрия AI-агентов: сбор запросов, хранение и поиск похожих задач</h1>
+        <p class="post-date">29 June 2026, 15:36 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>Без телеметрии агент — чёрный ящик: вы не знаете, <strong>какие задачи</strong> приходят пользователям, где падает траектория и что превратить в тест для регрессии. Телеметрия — это не «логи ради логов», а <strong>контур обратной связи продукта</strong>: собрать запросы и диалоги, сохранить в базе, найти похожие кейсы, оценить качество и пополнить eval-набор.</p>
+
+<p>Ниже — обзор <strong>подходов и практик</strong>: что логировать, как хранить, как искать похожие задачи и связать телеметрию с <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">генерацией бенчмарков</a> и <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивостью control loop</a>. В конце — <strong>фундаментальная литература</strong> по теории агентов, eval LLM и смежным дисциплинам (RL, автоматизация тестирования).</p>
+
+<h2 id="зачем-телеметрия-агенту">Зачем телеметрия агенту</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Вопрос продукта</th>
+      <th>Что даёт телеметрия</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Какие задачи у пользователей?</td>
+      <td>Корпус <strong>intent / task</strong> с частотами</td>
+    </tr>
+    <tr>
+      <td>Где агент ломается?</td>
+      <td>Трассы с ошибками tools, escalation, abandon</td>
+    </tr>
+    <tr>
+      <td>Сколько стоит сессия?</td>
+      <td>Токены, latency, число шагов</td>
+    </tr>
+    <tr>
+      <td>Что добавить в eval?</td>
+      <td>Кандидаты из продакшена с outcome</td>
+    </tr>
+    <tr>
+      <td>Есть ли похожий прошлый кейс?</td>
+      <td><strong>Semantic search</strong> по embedding запроса</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart LR
+  U[Пользователь] --&gt; A[Агент]
+  A --&gt; T[Телеметрия: spans + events]
+  T --&gt; S[(Хранилище)]
+  S --&gt; E[Eval / бенчмарки]
+  S --&gt; Q[Поиск похожих]
+  S --&gt; D[Дашборды / алерты]
+</code></pre>
+
+<hr />
+
+<h2 id="уровни-наблюдаемости">Уровни наблюдаемости</h2>
+
+<p>По аналогии с классической observability (metrics / logs / traces):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Уровень</th>
+      <th>Содержимое</th>
+      <th>Пример</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Metrics</strong></td>
+      <td>Агрегаты</td>
+      <td>success rate, p95 latency, cost/session</td>
+    </tr>
+    <tr>
+      <td><strong>Logs</strong></td>
+      <td>Строковые события</td>
+      <td><code class="language-plaintext highlighter-rouge">tool_error</code>, <code class="language-plaintext highlighter-rouge">policy_violation</code></td>
+    </tr>
+    <tr>
+      <td><strong>Traces</strong></td>
+      <td>Иерархия span’ов</td>
+      <td>session → turn → LLM call → tool</td>
+    </tr>
+    <tr>
+      <td><strong>Trajectories</strong></td>
+      <td>Полная история агента</td>
+      <td>messages, tool I/O, state checkpoints</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Для action-агентов <strong>trajectory</strong> важнее одной строки лога: eval и replay требуют <strong>структурированной</strong> последовательности шагов.</p>
+
+<hr />
+
+<h2 id="что-собирать-минимальная-схема-сессии">Что собирать: минимальная схема сессии</h2>
+
+<h3 id="идентификаторы-и-контекст">Идентификаторы и контекст</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">session_id</code>, <code class="language-plaintext highlighter-rouge">trace_id</code> (W3C Trace Context)</li>
+  <li><code class="language-plaintext highlighter-rouge">user_id</code> / <code class="language-plaintext highlighter-rouge">anonymous_id</code> (хешированный)</li>
+  <li><code class="language-plaintext highlighter-rouge">tenant_id</code>, <code class="language-plaintext highlighter-rouge">agent_version</code>, <code class="language-plaintext highlighter-rouge">model_id</code>, <code class="language-plaintext highlighter-rouge">orchestrator_mode</code> (DAG / FSM / BT)</li>
+  <li><code class="language-plaintext highlighter-rouge">timestamp_start</code>, <code class="language-plaintext highlighter-rouge">timestamp_end</code>, <code class="language-plaintext highlighter-rouge">locale</code></li>
+</ul>
+
+<h3 id="запрос-пользователя-и-извлечённая-задача">Запрос пользователя и извлечённая задача</h3>
+
+<p>Разделяйте <strong>сырой utterance</strong> и <strong>нормализованный task</strong>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Поле</th>
+      <th>Назначение</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">user_message_raw</code></td>
+      <td>Текст как ввёл пользователь</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">task_label</code></td>
+      <td>Краткая формулировка (ручная или LLM-summary)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">intent_class</code></td>
+      <td>Классификатор: support / coding / search / …</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">goal_embedding</code></td>
+      <td>Вектор для поиска похожих</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">constraints</code></td>
+      <td>JSON: deadline, budget, policy tags</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Список задач пользователя — это <strong>не</strong> только первое сообщение. Задача может <strong>уточняться</strong> в диалоге; фиксируйте <code class="language-plaintext highlighter-rouge">task_revision</code> на каждый существенный pivot.</p>
+
+<h3 id="коммуникация-и-шаги-агента">Коммуникация и шаги агента</h3>
+
+<p>На каждый <strong>turn</strong> или <strong>step</strong> control loop:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Поле</th>
+      <th>Зачем</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">step_index</code>, <code class="language-plaintext highlighter-rouge">parent_span_id</code></td>
+      <td>Дерево трассы</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">role</code></td>
+      <td>user / assistant / tool / system</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">content</code> / <code class="language-plaintext highlighter-rouge">content_ref</code></td>
+      <td>Текст или ссылка на blob</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tool_name</code>, <code class="language-plaintext highlighter-rouge">tool_args</code>, <code class="language-plaintext highlighter-rouge">tool_result</code></td>
+      <td>Tool-calling</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">fsm_state</code></td>
+      <td>Planning / Executing / Recovering</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tokens_in</code>, <code class="language-plaintext highlighter-rouge">tokens_out</code>, <code class="language-plaintext highlighter-rouge">latency_ms</code></td>
+      <td>Экономика</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">error_proxy</code>, <code class="language-plaintext highlighter-rouge">grounding_score</code></td>
+      <td>Связь с <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">метриками устойчивости</a></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">outcome</code></td>
+      <td>success / fail / escalated / abandoned</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="итог-сессии">Итог сессии</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">task_success</code> (bool + причина)</li>
+  <li><code class="language-plaintext highlighter-rouge">user_feedback</code> (thumbs, rating, free text)</li>
+  <li><code class="language-plaintext highlighter-rouge">cost_total_usd</code>, <code class="language-plaintext highlighter-rouge">steps_count</code></li>
+  <li><code class="language-plaintext highlighter-rouge">final_artifact_ref</code> (ответ, patch, DB snapshot id)</li>
+</ul>
+
+<hr />
+
+<h2 id="где-и-как-собирать">Где и как собирать</h2>
+
+<h3 id="1-in-process-hooks-оркестратор">1. In-process hooks (оркестратор)</h3>
+
+<p>Перехват в LangGraph / custom event loop: before/after каждого узла, callback на tool.</p>
+
+<p><strong>Плюсы:</strong> полный контроль, низкая латентность.<br />
+<strong>Минусы:</strong> нужно поддерживать схему в коде.</p>
+
+<h3 id="2-opentelemetry-otel">2. OpenTelemetry (OTel)</h3>
+
+<p>Стандарт <strong>traces + spans + attributes</strong>. Экспорт в Jaeger, Tempo, Datadog, Honeycomb.</p>
+
+<p><strong>Практика:</strong> один <code class="language-plaintext highlighter-rouge">trace_id</code> на сессию; span на LLM-вызов и tool; attributes — <code class="language-plaintext highlighter-rouge">model</code>, <code class="language-plaintext highlighter-rouge">tokens</code>, <code class="language-plaintext highlighter-rouge">tool.status</code>.</p>
+
+<h3 id="3-специализированные-llm-платформы">3. Специализированные LLM-платформы</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Платформа</th>
+      <th>Фокус</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>LangSmith</strong></td>
+      <td>Трассы LangChain/LangGraph, datasets, eval</td>
+    </tr>
+    <tr>
+      <td><strong>Langfuse</strong></td>
+      <td>Open-source traces, scores, prompt management</td>
+    </tr>
+    <tr>
+      <td><strong>Arize Phoenix</strong></td>
+      <td>Traces + embeddings drift</td>
+    </tr>
+    <tr>
+      <td><strong>Weights &amp; Biases Weave</strong></td>
+      <td>Эксперименты + online traces</td>
+    </tr>
+    <tr>
+      <td><strong>Braintrust</strong></td>
+      <td>Logs → eval → regression</td>
+    </tr>
+    <tr>
+      <td><strong>Helicone</strong> / <strong>Portkey</strong></td>
+      <td>Gateway + логирование запросов</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Выбор: нужен <strong>open-source on-prem</strong> → Langfuse / OTel; tight LangGraph → LangSmith; eval-first → Braintrust.</p>
+
+<h3 id="4-gateway--proxy">4. Gateway / proxy</h3>
+
+<p>Прокси перед API провайдера логирует все completion’ы. Не видит tool side effects вне LLM — <strong>дополняйте</strong> application-level events.</p>
+
+<h3 id="5-event-bus-kafka--redis-streams">5. Event bus (Kafka / Redis Streams)</h3>
+
+<p>Асинхронная запись: агент публикует <code class="language-plaintext highlighter-rouge">AgentStepRecorded</code>, consumer пишет в DWH. Снижает риск потери при падении UI, масштабируется.</p>
+
+<pre><code class="language-mermaid">flowchart TB
+  A[Agent runtime] --&gt; H[Telemetry SDK]
+  H --&gt; B[Event bus]
+  H --&gt; O[OTel collector]
+  B --&gt; W[(Warehouse)]
+  O --&gt; T[Trace backend]
+  W --&gt; V[Vector index]
+  W --&gt; SQL[(PostgreSQL / ClickHouse)]
+</code></pre>
+
+<hr />
+
+<h2 id="хранение-какие-базы-и-слои">Хранение: какие базы и слои</h2>
+
+<p>Типичная <strong>медальонная</strong> архитектура:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Слой</th>
+      <th>Технология</th>
+      <th>Данные</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Hot</strong> (7–30 дней)</td>
+      <td>PostgreSQL, Redis</td>
+      <td>Сессии, быстрый lookup по id</td>
+    </tr>
+    <tr>
+      <td><strong>Warm</strong> (месяцы)</td>
+      <td>ClickHouse, BigQuery</td>
+      <td>Аналитика, агрегаты, funnel</td>
+    </tr>
+    <tr>
+      <td><strong>Cold</strong></td>
+      <td>S3 / GCS + Parquet</td>
+      <td>Полные trajectories, compliance archive</td>
+    </tr>
+    <tr>
+      <td><strong>Vector</strong></td>
+      <td>pgvector, Qdrant, Chroma, Pinecone</td>
+      <td><code class="language-plaintext highlighter-rouge">goal_embedding</code>, <code class="language-plaintext highlighter-rouge">task_embedding</code></td>
+    </tr>
+    <tr>
+      <td><strong>Search</strong></td>
+      <td>OpenSearch, Elasticsearch</td>
+      <td>Full-text по сообщениям (с PII filter)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>PostgreSQL + pgvector</strong> — разумный старт: одна БД для метаданных сессии и similarity search.</p>
+
+<h3 id="пример-реляционной-модели-упрощённо">Пример реляционной модели (упрощённо)</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sessions(session_id, user_hash, started_at, outcome, cost, ...)
+tasks(task_id, session_id, label, intent, embedding, ...)
+steps(step_id, session_id, idx, role, tool_name, latency, ...)
+message_blobs(blob_id, storage_uri, sha256, ...)
+</code></pre></div></div>
+
+<p>Большие payloads (полный контекст, tool JSON) — в <strong>object storage</strong>, в БД только ссылка и хеш.</p>
+
+<hr />
+
+<h2 id="список-задач-пользователя-task-mining">Список задач пользователя (task mining)</h2>
+
+<p>Цель: из потока диалогов получить <strong>каталог задач</strong> — что люди реально просят сделать.</p>
+
+<h3 id="подходы-извлечения-task">Подходы извлечения task</h3>
+
+<ol>
+  <li><strong>Первое сообщение</strong> — просто, но грубо (много уточнений потом).</li>
+  <li><strong>LLM-summarize</strong> в конце сессии — «какую задачу решал пользователь?»</li>
+  <li><strong>Классификатор intent</strong> на каждый turn — детект смены задачи.</li>
+  <li><strong>Structured output</strong> при входе — форма + agent; task = schema instance.</li>
+  <li><strong>Кластеризация</strong> embedding’ов всех opening messages — emergent taxonomy.</li>
+</ol>
+
+<h3 id="пайплайн-task-catalog">Пайплайн task catalog</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Сырые сессии → дедуп / PII scrub → extract task_label → embed → кластер → human review топ-кластеров → taxonomy v1
+</code></pre></div></div>
+
+<p>Каталог связывается с <strong>частотой</strong>, <strong>success rate</strong>, <strong>cost</strong> — приоритизация улучшений агента и <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">генерации бенчмарков</a> из частых failure-кластеров.</p>
+
+<hr />
+
+<h2 id="поиск-похожих-задач-и-сессий">Поиск похожих задач и сессий</h2>
+
+<p>Зачем: подсказать оператору прошлый кейс, найти regression twin, собрать few-shot, дедуплицировать eval.</p>
+
+<h3 id="методы">Методы</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Метод</th>
+      <th>Когда</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Cosine similarity</strong> embedding’ов запроса</td>
+      <td>Семантически близкие формулировки</td>
+    </tr>
+    <tr>
+      <td><strong>Hybrid</strong> (BM25 + dense)</td>
+      <td>Точные термины + смысл</td>
+    </tr>
+    <tr>
+      <td><strong>Reranker</strong> (cross-encoder)</td>
+      <td>Топ-50 → топ-5 для продакшена</td>
+    </tr>
+    <tr>
+      <td><strong>SimHash / MinHash</strong></td>
+      <td>Быстрый дедуп почти дубликатов</td>
+    </tr>
+    <tr>
+      <td><strong>Trajectory similarity</strong></td>
+      <td>DTW по последовательности tool calls</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="практический-api">Практический API</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /telemetry/similar-tasks
+{ "query": "...", "k": 10, "filters": { "outcome": "fail", "intent": "billing" } }
+→ [{ task_id, session_id, score, label, outcome }]
+</code></pre></div></div>
+
+<p>Фильтры критичны: искать похожие <strong>неуспешные</strong> кейсы для отладки, успешные — для few-shot.</p>
+
+<p>Связь с <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">пространством гипотез и PaCMAP</a>: кластеры задач в 2D — карта «белых пятен» продукта.</p>
+
+<hr />
+
+<h2 id="практики-и-политики">Практики и политики</h2>
+
+<h3 id="pii-и-compliance">PII и compliance</h3>
+
+<ul>
+  <li>Маскирование email, phone, card <strong>до</strong> записи (presidio, regex, LLM-redact).</li>
+  <li>Retention policy: 30 / 90 / 365 дней по классу данных.</li>
+  <li>Opt-out, GDPR erase по <code class="language-plaintext highlighter-rouge">user_hash</code>.</li>
+  <li>Разделение <strong>prod telemetry</strong> и <strong>eval corpus</strong> (анонимизированный экспорт).</li>
+</ul>
+
+<h3 id="sampling">Sampling</h3>
+
+<p>100% логирование дорого. Стратегии:</p>
+
+<ul>
+  <li>100% ошибок и escalation;</li>
+  <li>100% сессий с <code class="language-plaintext highlighter-rouge">user_feedback</code>;</li>
+  <li>random sample успешных (например 10%);</li>
+  <li><strong>headline</strong> sample новых intent’ов.</li>
+</ul>
+
+<h3 id="версионирование-агента">Версионирование агента</h3>
+
+<p>Каждая запись привязана к <code class="language-plaintext highlighter-rouge">agent_version</code> + <code class="language-plaintext highlighter-rouge">prompt_hash</code> + <code class="language-plaintext highlighter-rouge">model</code> — иначе невозможно сравнить регрессии.</p>
+
+<h3 id="идемпотентность-записи">Идемпотентность записи</h3>
+
+<p><code class="language-plaintext highlighter-rouge">step_id = hash(session_id, step_index, tool_call_id)</code> — защита от двойной доставки в bus.</p>
+
+<h3 id="связь-с-eval">Связь с eval</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Телеметрия</th>
+      <th>Eval</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Failed session + verifier</td>
+      <td>Кандидат в golden set</td>
+    </tr>
+    <tr>
+      <td>High-cost session</td>
+      <td>Кандидат на оптимизацию</td>
+    </tr>
+    <tr>
+      <td>Частый кластер</td>
+      <td>Приоритет для synthetic benchmark</td>
+    </tr>
+    <tr>
+      <td>pass^k на replay</td>
+      <td>Regression CI</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Пайплайн: <code class="language-plaintext highlighter-rouge">telemetry → human label → scenario pack → CI</code> (как AgentSynth / τ-bench packs).</p>
+
+<hr />
+
+<h2 id="антипаттерны">Антипаттерны</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Плохо</th>
+      <th>Почему</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Только plain-text логи без trace_id</td>
+      <td>Нельзя собрать trajectory</td>
+    </tr>
+    <tr>
+      <td>LLM-ответ целиком в БД без redaction</td>
+      <td>PII, раздувание storage</td>
+    </tr>
+    <tr>
+      <td>Поиск только по keyword</td>
+      <td>Пропуск парафразов</td>
+    </tr>
+    <tr>
+      <td>Нет outcome на сессии</td>
+      <td>Нельзя приоритизировать failures</td>
+    </tr>
+    <tr>
+      <td>Один embedding на весь диалог</td>
+      <td>Теряются pivot’ы задачи</td>
+    </tr>
+    <tr>
+      <td>Телеметрия без sampling budget</td>
+      <td>Неконтролируемые расходы</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="рекомендуемый-стек-для-старта">Рекомендуемый стек для старта</h2>
+
+<p>Минимум viable telemetry для action-агента:</p>
+
+<ol>
+  <li><strong>OTel SDK</strong> в оркестраторе + exporter в Langfuse или Jaeger</li>
+  <li><strong>PostgreSQL</strong>: <code class="language-plaintext highlighter-rouge">sessions</code>, <code class="language-plaintext highlighter-rouge">steps</code>, outcomes</li>
+  <li><strong>S3</strong>: blob tool I/O</li>
+  <li><strong>pgvector</strong>: <code class="language-plaintext highlighter-rouge">goal_embedding</code> на task</li>
+  <li><strong>Nightly job</strong>: extract tasks → update catalog → flag new clusters</li>
+  <li><strong>Weekly</strong>: экспорт failure-кластеров в eval backlog</li>
+</ol>
+
+<p>Расширение: ClickHouse для дашбордов, Braintrust/LangSmith для human review и A/B.</p>
+
+<hr />
+
+<h2 id="чеклист-внедрения">Чеклист внедрения</h2>
+
+<ol>
+  <li>Есть ли <strong>единый trace_id</strong> на всю сессию?</li>
+  <li>Логируются ли <strong>все tool calls</strong> с args/result (или ref)?</li>
+  <li>Фиксируется ли <strong>task_label</strong> отдельно от raw message?</li>
+  <li>Есть ли <strong>outcome</strong> и <strong>cost</strong> на сессию?</li>
+  <li>Работает ли <strong>поиск похожих</strong> по embedding + фильтрам?</li>
+  <li>Настроены <strong>retention</strong> и <strong>PII scrub</strong>?</li>
+  <li>Связана ли телеметрия с <strong>eval / regression</strong> pipeline?</li>
+  <li>Можно ли <strong>replay</strong> сессии в sandbox по сохранённой trajectory?</li>
+</ol>
+
+<hr />
+
+<h2 id="связанные-публикации-vairl">Связанные публикации VAIRL</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">Генерация бенчмарков для AI-агентов</a> — от телеметрии к eval-наборам</li>
+  <li><a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">Как готовить ведущего специалиста по AI-агентам</a> — observability в компетенциях</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость control loops</a> — метрики на каждом шаге</li>
+  <li><a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap/">Пространство гипотез и PaCMAP</a> — визуализация кластеров задач</li>
+  <li><a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">Синтез гипотез локальной LLM</a> — гипотезы из накопленных трасс</li>
+</ul>
+
+<hr />
+
+<h2 id="фундаментальная-литература">Фундаментальная литература</h2>
+
+<p>Поскольку направление AI-агентов (и тем более их <strong>тестирования и observability</strong>) развивается стремительно, классические бумажные книги часто не успевают за индустрией. Тем не менее существует фундаментальная академическая литература по архитектуре агентов, тестированию систем ИИ и методологиям оценки — она задаёт <strong>теоретическую базу</strong> для того, <em>что</em> логировать в телеметрии, <em>как</em> строить метрики и <em>как</em> превращать продакшен-трассы в eval-наборы.</p>
+
+<p>Ниже — три категории источников и их связь с практиками из этой статьи. Подробнее про eval и бенчмарки — в <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">обзоре генерации бенчмарков</a>.</p>
+
+<h3 id="1-фундаментальная-теория-ai-агентов-и-систем">1. Фундаментальная теория AI-агентов и систем</h3>
+
+<p>Эти книги объясняют, как агенты принимают решения, строят траектории и взаимодействуют со средой — то, что ложится в основу <strong>схемы span’ов</strong>, <strong>task mining</strong> и метрик надёжности.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Книга</th>
+      <th>Авторы</th>
+      <th>О чём</th>
+      <th>Связь с телеметрией</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><em>Artificial Intelligence: A Modern Approach</em> (4th ed.)</td>
+      <td>Stuart Russell, Peter Norvig</td>
+      <td>Главный учебник по ИИ. Главы про <strong>рационального агента</strong> (Rational Agent), архитектуру интеллектуальных агентов и <strong>среды</strong> (Task Environments), PEAS-описание</td>
+      <td>Без PEAS нельзя спроектировать <strong>таксономию событий</strong>: Performance → метрики success/cost; Environment → sandbox id; Actuators → tool calls; Sensors → user input и tool results</td>
+    </tr>
+    <tr>
+      <td><em>An Introduction to MultiAgent Systems</em> (2nd ed.)</td>
+      <td>Michael Wooldridge</td>
+      <td>Многоагентные системы (MAS): кооперация, конкуренция, протоколы общения</td>
+      <td>Критично для телеметрии <strong>мультиагентных</strong> стеков (AutoGen, CrewAI, <a href="/vairl/blog/2026/07/01/maestro-airi-stack-ru/">MAESTRO</a>): логировать <code class="language-plaintext highlighter-rouge">agent_id</code>, <code class="language-plaintext highlighter-rouge">message_protocol</code>, handoff между ролями, конфликты и дедлоки</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Практический вывод:</strong> при проектировании схемы <code class="language-plaintext highlighter-rouge">sessions</code> / <code class="language-plaintext highlighter-rouge">steps</code> задайте вопрос из Norvig: «какие <strong>перцепты</strong> и <strong>действия</strong> у агента в нашей среде?» — ответ определяет обязательные поля трассы.</p>
+
+<h3 id="2-тестирование-и-оценка-систем-ии-и-llm">2. Тестирование и оценка систем ИИ и LLM</h3>
+
+<p>Практические руководства по методологиям оценки качества генерации, надёжности и работы с кодом — мост от <strong>сырой телеметрии</strong> к <strong>continuous evaluation</strong>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Книга</th>
+      <th>Авторы / издатель</th>
+      <th>О чём</th>
+      <th>Связь с телеметрией</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><em>Evaluating LLMs and LLM-Based Applications</em></td>
+      <td>O’Reilly Media (сборник)</td>
+      <td>Практика оценки LLM в бизнес-сценариях: автоматические метрики, <strong>LLM-as-a-Judge</strong>, eval <strong>chains</strong> и <strong>tool calling</strong></td>
+      <td>Телеметрия — источник данных для offline eval: replay trajectory → scorer; judge только на выборке из <code class="language-plaintext highlighter-rouge">outcome = fail</code></td>
+    </tr>
+    <tr>
+      <td><em>Building Intelligent Systems: A Guide to Machine Learning Engineering</em></td>
+      <td>Geoff Hulten</td>
+      <td>Инженерия ИИ-систем: <strong>continuous evaluation</strong>, сбор телеметрии, edge cases, <strong>test suites</strong> в продакшене</td>
+      <td>Прямое попадание в nightly job «extract tasks → flag clusters → eval backlog»; Hulten формализует то, что в статье названо <strong>контуром обратной связи продукта</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Практический вывод:</strong> телеметрия без eval pipeline — дорогое хранилище логов. Книги этого блока описывают, как из потока трасс строить <strong>регрессионные наборы</strong> и не путать monitoring с validation.</p>
+
+<h3 id="3-смежные-дисциплины-тестирование-по-и-обучение-с-подкреплением">3. Смежные дисциплины: тестирование ПО и обучение с подкреплением</h3>
+
+<p>Агентные бенчмарки (WebArena, SWE-bench) и продакшен-телеметрия работают на стыке <strong>автоматизации тестирования</strong> и <strong>интерактивных сред RL</strong>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Книга</th>
+      <th>Авторы</th>
+      <th>О чём</th>
+      <th>Связь с телеметрией</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><em>Reinforcement Learning: An Introduction</em> (2nd ed.)</td>
+      <td>Richard S. Sutton, Andrew G. Barto</td>
+      <td>MDP, <strong>reward</strong>, оценка <strong>траекторий</strong></td>
+      <td>Язык для логирования <strong>trajectory-level</strong> метрик: state checkpoints, reward proxy (<code class="language-plaintext highlighter-rouge">task_success</code>, <code class="language-plaintext highlighter-rouge">user_feedback</code>), pass^k при replay; см. <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивость control loops</a></td>
+    </tr>
+    <tr>
+      <td><em>Software Test Automation</em></td>
+      <td>Mark Fewster, Dorothy Graham</td>
+      <td>Детерминированные проверки, изоляция тестовых сред (песочницы, Docker), ложноположительные</td>
+      <td>Replay сессии из телеметрии в <strong>sandbox</strong> с тем же <code class="language-plaintext highlighter-rouge">initial_state</code>; deterministic oracle на tool I/O; защита от false pass при flaky среде</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Практический вывод:</strong> каждая сохранённая trajectory — потенциальный <strong>тест-кейс</strong>; Sutton даёт метрики над траекторией, Fewster &amp; Graham — инженерию воспроизводимого прогона.</p>
+
+<h3 id="как-литература-стыкуется-с-пайплайном-телеметрии">Как литература стыкуется с пайплайном телеметрии</h3>
+
+<pre><code class="language-mermaid">flowchart LR
+  subgraph theory [Теория]
+    N[Russell &amp; Norvig: PEAS]
+    W[Wooldridge: MAS]
+  end
+  subgraph practice [Практика eval]
+    H[Hulten: continuous eval]
+    O[O'Reilly: LLM eval]
+  end
+  subgraph adjacent [Смежное]
+    S[Sutton &amp; Barto: trajectories]
+    F[Fewster &amp; Graham: test automation]
+  end
+  T[Телеметрия: spans + trajectories] --&gt; E[Eval / regression]
+  theory --&gt; T
+  practice --&gt; E
+  adjacent --&gt; E
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Этап пайплайна (см. выше)</th>
+      <th>Книга-ориентир</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Схема полей <code class="language-plaintext highlighter-rouge">session</code> / <code class="language-plaintext highlighter-rouge">step</code></td>
+      <td>Russell &amp; Norvig — PEAS, task environment</td>
+    </tr>
+    <tr>
+      <td>Логирование multi-agent handoff</td>
+      <td>Wooldridge — протоколы и роли</td>
+    </tr>
+    <tr>
+      <td>Nightly task catalog + sampling</td>
+      <td>Hulten — continuous evaluation</td>
+    </tr>
+    <tr>
+      <td>Scoring failed sessions</td>
+      <td>O’Reilly — LLM-as-a-Judge + детерминированные checks</td>
+    </tr>
+    <tr>
+      <td>Trajectory metrics, pass^k</td>
+      <td>Sutton &amp; Barto — оценка эпизодов</td>
+    </tr>
+    <tr>
+      <td>Replay в sandbox</td>
+      <td>Fewster &amp; Graham — изоляция и oracle</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="обзорные-работы-survey-papers">Обзорные работы (survey papers)</h2>
+
+<p>Академические обзоры по eval агентов дополняют книги актуальными бенчмарками и метриками — полезны при проектировании <strong>дашбордов</strong> и <strong>алертов</strong> поверх телеметрии:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Работа</th>
+      <th>Год</th>
+      <th>Фокус</th>
+      <th>Ссылка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Evaluation and Benchmarking of LLM Agents: A Survey</strong></td>
+      <td>2025</td>
+      <td>Таксономия: что оценивать и как; среды и метрики</td>
+      <td><a href="https://arxiv.org/abs/2507.21504">arXiv:2507.21504</a></td>
+    </tr>
+    <tr>
+      <td><strong>A Survey on Evaluation of LLM-based Agents</strong></td>
+      <td>2026</td>
+      <td>Эволюция бенчмарков; память; мультиагентные среды</td>
+      <td><a href="https://arxiv.org/html/2503.16416v2">arXiv:2503.16416</a></td>
+    </tr>
+    <tr>
+      <td><strong>Establishing Best Practices for Building Rigorous Agentic Benchmarks</strong></td>
+      <td>2025</td>
+      <td>Ложноположительные при auto-check; rigor eval</td>
+      <td><a href="https://arxiv.org/html/2507.02825v2">arXiv:2507.02825</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Полный каталог survey’ов, платформ и бенчмарков — в <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/#обзорные-работы-survey-papers">статье про генерацию бенчмарков</a>.</p>
+
+<hr />
+
+<h2 id="инструменты-и-стандарты">Инструменты и стандарты</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Категория</th>
+      <th>Инструмент</th>
+      <th>Роль в телеметрии</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Стандарт traces</td>
+      <td><strong>OpenTelemetry</strong></td>
+      <td>Spans, semantic conventions, экспорт в Jaeger / Tempo / Datadog</td>
+    </tr>
+    <tr>
+      <td>Propagation</td>
+      <td><strong>W3C Trace Context</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">traceparent</code> сквозь gateway и микросервисы</td>
+    </tr>
+    <tr>
+      <td>LLM observability</td>
+      <td><strong>LangSmith</strong>, <strong>Langfuse</strong>, <strong>Arize Phoenix</strong>, <strong>Braintrust</strong></td>
+      <td>Трассы, datasets, human review, regression</td>
+    </tr>
+    <tr>
+      <td>Gateway</td>
+      <td><strong>Helicone</strong>, <strong>Portkey</strong></td>
+      <td>Логирование completion’ов на границе API</td>
+    </tr>
+    <tr>
+      <td>Compliance</td>
+      <td>OpenAI / Anthropic logging policies</td>
+      <td>Retention, abuse monitoring, PII</td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

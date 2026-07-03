@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Нейросимволическое планирование: LLM/VLM → PDDL/STRIPS → критик - VAIRL</title>
+    <meta name="description" content="Пайплайн, где нейромодуль переводит наблюдение в символы, классический планировщик строит проверяемый план, а критик замыкает петлю с реальным миром.">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Нейросимволическое планирование: LLM/VLM → PDDL/STRIPS → критик | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Нейросимволическое планирование: LLM/VLM → PDDL/STRIPS → критик" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Пайплайн, где нейромодуль переводит наблюдение в символы, классический планировщик строит проверяемый план, а критик замыкает петлю с реальным миром." />
+<meta name="twitter:description" property="og:description" content="Пайплайн, где нейромодуль переводит наблюдение в символы, классический планировщик строит проверяемый план, а критик замыкает петлю с реальным миром." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/neurosymbolic-planning-pipeline.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-06-25T00:00:00+00:00" />
+<meta property="article:modified_time" content="2026-06-25T00:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/neurosymbolic-planning-pipeline.svg" />
+<meta name="twitter:title" content="Нейросимволическое планирование: LLM/VLM → PDDL/STRIPS → критик" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-06-25T00:00:00+00:00","datePublished":"2026-06-25T00:00:00+00:00","description":"Пайплайн, где нейромодуль переводит наблюдение в символы, классический планировщик строит проверяемый план, а критик замыкает петлю с реальным миром.","headline":"Нейросимволическое планирование: LLM/VLM → PDDL/STRIPS → критик","image":"https://evgeniy-borisov.github.io/vairl/assets/images/neurosymbolic-planning-pipeline.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline/",
+    "ru": "/vairl/blog/2026/06/25/neurosymbolic-planning-pipeline-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/neurosymbolic-planning-pipeline.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Нейросимволическое планирование: LLM/VLM → PDDL/STRIPS → критик</h1>
+        <p class="post-date">25 June 2026, 00:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p><em>Черновик — в работе. Учёт в воркспейсе PA (<code class="language-plaintext highlighter-rouge">pub-neurosymbolic-planning-pipeline</code>).</em></p>
+
+<p>Современные агенты часто планируют свободным текстом. Это гибко, но трудно проверить. В этой публикации — каркас нейросимволической архитектуры: нейромодуль извлекает предикаты и цель, классический планировщик выдаёт проверяемую последовательность действий, критик перепланирует при расхождении с миром.</p>
+
+<h2 id="мотивация">Мотивация</h2>
+
+<p>Чистое LLM-планирование слабо там, где нужны:</p>
+
+<ul>
+  <li>Отсутствие галлюцинированных предусловий и действий</li>
+  <li>Гарантия логической согласованности</li>
+  <li>Явная обратная связь при сбое исполнения</li>
+</ul>
+
+<p>Нейросимволика разделяет <strong>восприятие и заземление</strong> (нейро) и <strong>рассуждение об ограничениях</strong> (символы). Планировщик задаёт, что физически и логически возможно; нейросеть лишь предлагает структурированное описание состояния.</p>
+
+<h2 id="архитектура">Архитектура</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ Реальный мир / Текст / Задача ]
+              │
+              ▼
+   1. НЕЙРОМОДУЛЬ (LLM / VLM)
+   • Предикаты состояния мира
+   • Конечная цель (Goal)
+              │
+              ▼
+   [ Символьное представление ]
+   (объекты, предикаты, init, goal)
+              │
+              ▼
+   2. СИМВОЛЬНЫЙ ДВИЖОК (PDDL / STRIPS)
+   • Физические и логические ограничения
+   • Точный план шагов
+              │
+              ▼
+   3. КРИТИК / НЕЙРО-ЭВРИСТИКА
+   • Стоимость и реализуемость плана
+   • Перепланирование при ошибке или расхождении с миром
+              │
+              ▼
+     [ План действий ]
+</code></pre></div></div>
+
+<p><strong>Ключевое уточнение:</strong> нейросеть не «планирует прозой», а переводит наблюдение в символы. Планировщик даёт проверяемую последовательность; критик замыкает петлю с реальностью.</p>
+
+<h2 id="демо-домен-уточняется">Демо-домен (уточняется)</h2>
+
+<p>Один конкретный пример сильнее абстрактной схемы — бытовая робототехника, офисный ассистент или Blocks World. Домен задаёт словарь предикатов и набор действий.</p>
+
+<p>Планируемые артефакты:</p>
+
+<ol>
+  <li>Схема предикатов и формата Goal — явный контракт между нейромодулем и планировщиком</li>
+  <li>Минимальные <code class="language-plaintext highlighter-rouge">domain.pddl</code> + <code class="language-plaintext highlighter-rouge">problem.pddl</code> с планом из 3–5 шагов</li>
+  <li>Петля критика: когда перепланировать, а когда переизвлечь предикаты (failed precondition, timeout, расхождение VLM)</li>
+</ol>
+
+<h2 id="тезисы-и-ограничения">Тезисы и ограничения</h2>
+
+<p>Отдельно сформулируем, где нейросимволика выигрывает у чистого LLM-планирования — и где ломается (галлюцинированные предикаты, масштаб, неполная наблюдаемость).</p>
+
+<h2 id="связь-с-мультиагентным-агентством">Связь с мультиагентным агентством</h2>
+
+<p>Пайплайн — концептуальный каркас аналитического агентства: специалисты как агенты, символьные ограничения как governance, критики как контроль качества. Опционально: наложение плана из solver на behavior tree как исполнительный слой.</p>
+
+<h2 id="следующие-шаги">Следующие шаги</h2>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Выбрать демо-домен</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Зафиксировать схему предикатов</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Прогнать peer-review gate перед выкладкой (PubLens)</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

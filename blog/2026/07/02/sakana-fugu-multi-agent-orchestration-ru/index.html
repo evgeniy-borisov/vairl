@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakana Fugu: TRINITY, Conductor и мультиагентная оркестрация через один API - VAIRL</title>
+    <meta name="description" content="Как Sakana Fugu объединяет исследования TRINITY и Conductor в коммерческий продукт: выбор моделей, бенчмарки, цена, интеграция через OpenAI-compatible API и ...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Sakana Fugu: TRINITY, Conductor и мультиагентная оркестрация через один API | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Sakana Fugu: TRINITY, Conductor и мультиагентная оркестрация через один API" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Как Sakana Fugu объединяет исследования TRINITY и Conductor в коммерческий продукт: выбор моделей, бенчмарки, цена, интеграция через OpenAI-compatible API и практический гид для продакшена." />
+<meta name="twitter:description" property="og:description" content="Как Sakana Fugu объединяет исследования TRINITY и Conductor в коммерческий продукт: выбор моделей, бенчмарки, цена, интеграция через OpenAI-compatible API и практический гид для продакшена." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/sakana-fugu-multi-agent-orchestration-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/sakana-fugu-multi-agent-orchestration-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/sakana-fugu-orchestration.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-02T07:00:00+00:00" />
+<meta property="article:modified_time" content="2026-07-02T07:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/sakana-fugu-orchestration.svg" />
+<meta name="twitter:title" content="Sakana Fugu: TRINITY, Conductor и мультиагентная оркестрация через один API" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-02T07:00:00+00:00","datePublished":"2026-07-02T07:00:00+00:00","description":"Как Sakana Fugu объединяет исследования TRINITY и Conductor в коммерческий продукт: выбор моделей, бенчмарки, цена, интеграция через OpenAI-compatible API и практический гид для продакшена.","headline":"Sakana Fugu: TRINITY, Conductor и мультиагентная оркестрация через один API","image":"https://evgeniy-borisov.github.io/vairl/assets/images/sakana-fugu-orchestration.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/sakana-fugu-multi-agent-orchestration-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/sakana-fugu-multi-agent-orchestration-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/02/sakana-fugu-multi-agent-orchestration-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/sakana-fugu-orchestration.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Sakana Fugu: TRINITY, Conductor и мультиагентная оркестрация через один API</h1>
+        <p class="post-date">02 July 2026, 07:00 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p><a href="https://sakana.ai/fugu/">Sakana Fugu</a> — мультиагентная система, которая снаружи ведёт себя как <strong>одна LLM</strong>: один OpenAI-совместимый endpoint, внутри — динамическая оркестрация GPT-5.5, Claude Opus 4.8 и Gemini 3.1 Pro. Основа продукта — две статьи ICLR 2026: <strong><a href="https://arxiv.org/abs/2512.04695">TRINITY</a></strong> (быстрый роутер) и <strong><a href="https://arxiv.org/abs/2512.04388">The Conductor</a></strong> (глубокий оркестратор workflow).</p>
+
+<p>Эта статья — разбор архитектуры, бенчмарков, цены и <strong>практического внедрения в коммерческий проект</strong>. Связанные материалы VAIRL: <a href="/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/">фундамент агентных систем</a>, <a href="/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/">гибридный оркестратор DAG/FSM/BT</a>, <a href="/vairl/blog/2026/07/02/ai-automation-smb-ru/">ИИ для МСБ</a>.</p>
+
+<hr />
+
+<h2 id="карта-статьи">Карта статьи</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Раздел</th>
+      <th>О чём</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="#идея-один-api-вместо-трёх-провайдеров">Идея</a></td>
+      <td>Зачем оркестрация как отдельная ось масштабирования</td>
+    </tr>
+    <tr>
+      <td><a href="#trinity--fugu-быстрый-роутер">TRINITY → Fugu</a></td>
+      <td>Эволюционный координатор, один worker на шаг</td>
+    </tr>
+    <tr>
+      <td><a href="#conductor--fugu-ultra-глубокий-оркестратор">Conductor → Fugu Ultra</a></td>
+      <td>RL-workflow на естественном языке</td>
+    </tr>
+    <tr>
+      <td><a href="#как-происходит-выбор-моделей">Выбор моделей</a></td>
+      <td>Роутинг, стратегии, пул агентов</td>
+    </tr>
+    <tr>
+      <td><a href="#бенчмарки">Бенчмарки</a></td>
+      <td>Где опережает frontier-модели</td>
+    </tr>
+    <tr>
+      <td><a href="#цена-и-скрытый-overhead">Цена</a></td>
+      <td>Тарифы и orchestration tokens</td>
+    </tr>
+    <tr>
+      <td><a href="#как-использовать-в-коммерческом-проекте">Продакшен</a></td>
+      <td>API, compliance, checklist</td>
+    </tr>
+    <tr>
+      <td><a href="#источники">Ссылки</a></td>
+      <td>Papers, документация, консоль</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="идея-один-api-вместо-трёх-провайдеров">Идея: один API вместо трёх провайдеров</h2>
+
+<p>Frontier-модели <strong>специализируются</strong>: GPT силён в math и agentic coding, Opus — в debugging и security, Gemini — в science и factual recall. Вместо того чтобы ждать «следующую монолитную модель», Sakana предлагает <strong>обученный оркестратор</strong>, который:</p>
+
+<ul>
+  <li>выбирает, <strong>какую</strong> модель вызвать;</li>
+  <li><strong>делегирует</strong> подзадачи и <strong>верифицирует</strong> ответы;</li>
+  <li><strong>синтезирует</strong> финальный результат за один API-вызов.</li>
+</ul>
+
+<pre><code class="language-mermaid">flowchart TB
+    User[Запрос] --&gt; API[api.sakana.ai/v1]
+    API --&gt; Fugu["fugu ← TRINITY"]
+    API --&gt; Ultra["fugu-ultra ← Conductor"]
+    Fugu --&gt; Pool[GPT / Opus / Gemini]
+    Ultra --&gt; Pool
+    Pool --&gt; Answer[Единый ответ]
+</code></pre>
+
+<p>Пользователь <strong>не проектирует</strong> LangGraph-workflow вручную — это делает обученная модель. Подробности: <a href="https://arxiv.org/html/2606.21228">Technical Report</a>, <a href="https://sakana.ai/fugu-release/">релиз</a>.</p>
+
+<hr />
+
+<h2 id="trinity--fugu-быстрый-роутер">TRINITY → Fugu (быстрый роутер)</h2>
+
+<p><strong>Статья:</strong> <a href="https://arxiv.org/html/2512.04695">TRINITY: An Evolved LLM Coordinator</a></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аспект</th>
+      <th>TRINITY (исследование)</th>
+      <th>Fugu (продукт)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Координатор</td>
+      <td>~0.6B SLM + голова ~10K параметров</td>
+      <td>Production backbone + selection head</td>
+    </tr>
+    <tr>
+      <td>Роли</td>
+      <td>Thinker / Worker / Verifier</td>
+      <td><strong>Только Worker</strong> (упрощение)</td>
+    </tr>
+    <tr>
+      <td>Обучение</td>
+      <td>sep-CMA-ES</td>
+      <td>SFT → sep-CMA-ES на end-to-end траекториях</td>
+    </tr>
+    <tr>
+      <td>На шаг</td>
+      <td>1 модель из пула</td>
+      <td>1 worker, latency ≈ прямой вызов</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Механизм выбора:</strong> оркестратор читает <strong>hidden state</strong> (не генерирует текст), голова выдаёт logits по L моделям → softmax → dispatch. На multi-turn диалоге выбор <strong>пересчитывается каждый turn</strong> — например GPT строит код, Opus подключается в точке merge conflict.</p>
+
+<p><strong>Обучение Fugu:</strong></p>
+
+<ol>
+  <li><strong>SFT</strong> — на каждой задаче прогоняют всех workers, строят soft-распределение по наградам (KL-divergence).</li>
+  <li><strong>Evolution</strong> — на реальных траекториях из Claude Code, Codex, OpenCode; оптимизируют terminal reward (задача решена / нет).</li>
+</ol>
+
+<hr />
+
+<h2 id="conductor--fugu-ultra-глубокий-оркестратор">Conductor → Fugu Ultra (глубокий оркестратор)</h2>
+
+<p><strong>Статья:</strong> <a href="https://arxiv.org/abs/2512.04388">Learning to Orchestrate Agents in Natural Language with the Conductor</a> · <a href="https://sakana.ai/learning-to-orchestrate/">блог Sakana</a></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Аспект</th>
+      <th>Conductor (исследование)</th>
+      <th>Fugu Ultra (продукт)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Размер</td>
+      <td>7B LLM</td>
+      <td>Conductor + расширения</td>
+    </tr>
+    <tr>
+      <td>Обучение</td>
+      <td>GRPO</td>
+      <td>GRPO, до 5 шагов workflow</td>
+    </tr>
+    <tr>
+      <td>Выход</td>
+      <td>Workflow на NL</td>
+      <td>+ function calling, shared memory</td>
+    </tr>
+    <tr>
+      <td>Адаптация</td>
+      <td>1-shot для простых задач</td>
+      <td>planner–executor–verifier для сложных</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Формат workflow</strong> (каждый шаг):</p>
+
+<ul>
+  <li>подзадача (natural language);</li>
+  <li><code class="language-plaintext highlighter-rouge">worker_id</code> — какая модель;</li>
+  <li><code class="language-plaintext highlighter-rouge">access list</code> — какие предыдущие ответы видит агент.</li>
+</ul>
+
+<p>Топологии: best-of-N, цепочки, деревья debate, build+debug. <strong>Recursive test-time scaling:</strong> Conductor может выбрать <strong>себя</strong> как worker и перестроить pipeline при ошибке.</p>
+
+<p><strong>Расширения Ultra:</strong></p>
+
+<ul>
+  <li><strong>Intra-workflow isolation</strong> — агенты не видят чужие tool calls (иначе orchestration collapse).</li>
+  <li><strong>Persistent shared memory</strong> — между workflow сохраняется контекст инструментов.</li>
+</ul>
+
+<hr />
+
+<h2 id="как-происходит-выбор-моделей">Как происходит выбор моделей</h2>
+
+<h3 id="fugu-пошаговый-роутинг-trinity">Fugu (пошаговый роутинг TRINITY)</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>state_t → hidden state → logits[L models] → worker_t → environment feedback → state_{t+1}
+</code></pre></div></div>
+
+<p>Эмерджентное поведение из <a href="https://arxiv.org/html/2606.21228">technical report</a>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Домен</th>
+      <th>Кого чаще выбирают</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Terminal Bench</td>
+      <td>GPT-5.5</td>
+    </tr>
+    <tr>
+      <td>GPQA-Diamond</td>
+      <td>Gemini 3.1 Pro</td>
+    </tr>
+    <tr>
+      <td>Math в HLE</td>
+      <td>GPT-5.5</td>
+    </tr>
+    <tr>
+      <td>Chemistry / Biology</td>
+      <td>Gemini</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="fugu-ultra-workflow-conductor">Fugu Ultra (workflow Conductor)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Стратегия</th>
+      <th>Пример</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Debate + aggregation</td>
+      <td>Gemini агрегирует, GPT и Gemini независимо решают листья</td>
+    </tr>
+    <tr>
+      <td>Build + debug</td>
+      <td>GPT builder → Opus verifier → feedback GPT</td>
+    </tr>
+    <tr>
+      <td>Specialist call</td>
+      <td>Opus (security) + GPT (math) на криптоанализе</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Важно:</strong> конкретный routing <strong>не раскрывается</strong> в API (proprietary).</p>
+
+<h3 id="пул-агентов-production">Пул агентов (production)</h3>
+
+<ul>
+  <li><strong>Gemini 3.1 Pro</strong></li>
+  <li><strong>Claude Opus 4.8</strong></li>
+  <li><strong>GPT-5.5</strong></li>
+</ul>
+
+<p>Fable 5 и Mythos Preview <strong>не в пуле</strong> (нет публичного API), но сравниваются по бенчмаркам.</p>
+
+<hr />
+
+<h2 id="две-версии-когда-что-выбирать">Две версии: когда что выбирать</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th><strong>Fugu</strong></th>
+      <th><strong>Fugu Ultra</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Основа</td>
+      <td>TRINITY</td>
+      <td>Conductor</td>
+    </tr>
+    <tr>
+      <td>Latency</td>
+      <td>Низкая</td>
+      <td>Высокая (минуты на сложных задачах)</td>
+    </tr>
+    <tr>
+      <td>Качество</td>
+      <td>Сильное, «повседневное»</td>
+      <td>Максимум на hard tasks</td>
+    </tr>
+    <tr>
+      <td>Custom pool</td>
+      <td>✅ opt-out провайдеров</td>
+      <td>❌ фиксированный пул</td>
+    </tr>
+    <tr>
+      <td>Типичные кейсы</td>
+      <td>Codex, чат, code review</td>
+      <td>Security audit, paper reproduction, patent research</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="бенчмарки">Бенчмарки</h2>
+
+<p>По <a href="https://arxiv.org/html/2606.21228">technical report</a> (baseline scores — от провайдеров):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Бенчмарк</th>
+      <th style="text-align: right">Fugu Ultra</th>
+      <th style="text-align: right">Fugu</th>
+      <th style="text-align: right">Лучший baseline</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SWE-Bench Pro</strong></td>
+      <td style="text-align: right"><strong>73.7</strong></td>
+      <td style="text-align: right">59.0</td>
+      <td style="text-align: right">Opus 69.2</td>
+    </tr>
+    <tr>
+      <td><strong>Terminal Bench 2.1</strong></td>
+      <td style="text-align: right"><strong>82.1</strong></td>
+      <td style="text-align: right">80.2</td>
+      <td style="text-align: right">GPT 78.2</td>
+    </tr>
+    <tr>
+      <td><strong>LiveCodeBench</strong></td>
+      <td style="text-align: right"><strong>93.2</strong></td>
+      <td style="text-align: right">92.9</td>
+      <td style="text-align: right">Gemini 88.5</td>
+    </tr>
+    <tr>
+      <td><strong>LiveCodeBench Pro</strong></td>
+      <td style="text-align: right"><strong>90.8</strong></td>
+      <td style="text-align: right">87.8</td>
+      <td style="text-align: right">GPT 88.4</td>
+    </tr>
+    <tr>
+      <td><strong>Humanity’s Last Exam</strong></td>
+      <td style="text-align: right"><strong>50.0</strong></td>
+      <td style="text-align: right">47.2</td>
+      <td style="text-align: right">Opus 49.8</td>
+    </tr>
+    <tr>
+      <td><strong>CharXiv Reasoning</strong></td>
+      <td style="text-align: right"><strong>86.6</strong></td>
+      <td style="text-align: right">85.1</td>
+      <td style="text-align: right">Opus 84.2</td>
+    </tr>
+    <tr>
+      <td><strong>GPQA-Diamond</strong></td>
+      <td style="text-align: right"><strong>95.5</strong></td>
+      <td style="text-align: right"><strong>95.5</strong></td>
+      <td style="text-align: right">Gemini 94.3</td>
+    </tr>
+    <tr>
+      <td><strong>SciCode</strong></td>
+      <td style="text-align: right"><strong>60.1</strong></td>
+      <td style="text-align: right">58.7</td>
+      <td style="text-align: right">Gemini 58.9</td>
+    </tr>
+    <tr>
+      <td><strong>MRCRv2</strong></td>
+      <td style="text-align: right"><strong>94.8</strong></td>
+      <td style="text-align: right">93.6</td>
+      <td style="text-align: right">GPT 94.8*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>* GPT 94.8 на MRCRv2 — пограничное сравнение; Ultra лидирует на большинстве agentic/reasoning бенчмарков.</p>
+
+<p><strong>За пределами таблиц:</strong> AutoResearch (mean BPB 0.9774 vs 0.9781 у лучшего single-model), классическая японская каллиграфия (NED 0.776 vs 0.642).</p>
+
+<hr />
+
+<h2 id="цена-и-скрытый-overhead">Цена и скрытый overhead</h2>
+
+<h3 id="тарифы-pricing">Тарифы (<a href="https://sakana.ai/fugu/">pricing</a>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>План</th>
+      <th>Цена</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Standard / Pro / Max</td>
+      <td>$20 / $100 / $200 в месяц</td>
+    </tr>
+    <tr>
+      <td><strong>Fugu</strong> (pay-as-you-go)</td>
+      <td>Ставка <strong>top-tier</strong> модели в пуле, без stacking</td>
+    </tr>
+    <tr>
+      <td><strong>Fugu Ultra</strong></td>
+      <td>$5/M input, $30/M output, $0.50/M cached (≤272K)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="orchestration-tokens-только-ultra">Orchestration tokens (только Ultra)</h3>
+
+<p>Реальная стоимость включает скрытые поля в <code class="language-plaintext highlighter-rouge">usage</code>:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"input_tokens_details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"orchestration_input_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">5463</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"output_tokens_details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"orchestration_output_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">1053</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"total_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">7250</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>На сложных задачах <strong>total_tokens в 5–12× больше</strong> видимого output. Парсите <code class="language-plaintext highlighter-rouge">total_tokens</code>, не только <code class="language-plaintext highlighter-rouge">input_tokens</code> + <code class="language-plaintext highlighter-rouge">output_tokens</code>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сравнение</th>
+      <th style="text-align: right">Input</th>
+      <th style="text-align: right">Output</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Fugu Ultra</td>
+      <td style="text-align: right">$5/M</td>
+      <td style="text-align: right">$30/M</td>
+    </tr>
+    <tr>
+      <td>Claude Fable 5</td>
+      <td style="text-align: right">$10/M</td>
+      <td style="text-align: right">$60/M</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Номинально Ultra дешевле, но с overhead effective cost может быть выше ожиданий.</p>
+
+<hr />
+
+<h2 id="как-использовать-в-коммерческом-проекте">Как использовать в коммерческом проекте</h2>
+
+<p>TRINITY и Conductor <strong>не подключаются отдельно</strong> — только через <code class="language-plaintext highlighter-rouge">model="fugu"</code> и <code class="language-plaintext highlighter-rouge">model="fugu-ultra"</code>.</p>
+
+<h3 id="быстрый-старт">Быстрый старт</h3>
+
+<ol>
+  <li>Ключ: <a href="https://console.sakana.ai">console.sakana.ai</a></li>
+  <li>Endpoint: <code class="language-plaintext highlighter-rouge">https://api.sakana.ai/v1</code></li>
+  <li>Smoke test:</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST https://api.sakana.ai/v1/chat/completions <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"Authorization: Bearer </span><span class="nv">$SAKANA_API_KEY</span><span class="s2">"</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
+  <span class="nt">-d</span> <span class="s1">'{"model":"fugu","messages":[{"role":"user","content":"test"}]}'</span>
+</code></pre></div></div>
+
+<h3 id="python-responses-api--рекомендуется">Python (Responses API — рекомендуется)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">os</span>
+<span class="kn">from</span> <span class="n">openai</span> <span class="kn">import</span> <span class="n">OpenAI</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="nc">OpenAI</span><span class="p">(</span>
+    <span class="n">base_url</span><span class="o">=</span><span class="sh">"</span><span class="s">https://api.sakana.ai/v1</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="p">.</span><span class="n">environ</span><span class="p">[</span><span class="sh">"</span><span class="s">SAKANA_API_KEY</span><span class="sh">"</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">complete</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ultra</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="sh">"</span><span class="s">fugu-ultra</span><span class="sh">"</span> <span class="k">if</span> <span class="n">ultra</span> <span class="k">else</span> <span class="sh">"</span><span class="s">fugu</span><span class="sh">"</span>
+    <span class="k">return</span> <span class="n">client</span><span class="p">.</span><span class="n">responses</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="nb">input</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+        <span class="n">reasoning</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">effort</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">xhigh</span><span class="sh">"</span> <span class="k">if</span> <span class="n">ultra</span> <span class="k">else</span> <span class="sh">"</span><span class="s">high</span><span class="sh">"</span><span class="p">},</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span> <span class="k">if</span> <span class="n">ultra</span> <span class="k">else</span> <span class="mi">90</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="c1"># TRINITY: быстрый чат
+</span><span class="n">r</span> <span class="o">=</span> <span class="nf">complete</span><span class="p">(</span><span class="sh">"</span><span class="s">Объясни asyncio vs threading</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Conductor: глубокий анализ
+</span><span class="n">r</span> <span class="o">=</span> <span class="nf">complete</span><span class="p">(</span><span class="sh">"</span><span class="s">Security review API: ...</span><span class="sh">"</span><span class="p">,</span> <span class="n">ultra</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">reasoning.effort</code>: только <code class="language-plaintext highlighter-rouge">high</code> или <code class="language-plaintext highlighter-rouge">xhigh</code> (<code class="language-plaintext highlighter-rouge">max</code> — alias).</p>
+
+<h3 id="роутинг-в-приложении">Роутинг в приложении</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ULTRA_TASKS</span> <span class="o">=</span> <span class="p">{</span><span class="sh">"</span><span class="s">security_audit</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">paper_reproduction</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">deep_code_review</span><span class="sh">"</span><span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">pick_model</span><span class="p">(</span><span class="n">task_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sh">"</span><span class="s">fugu-ultra</span><span class="sh">"</span> <span class="k">if</span> <span class="n">task_type</span> <span class="ow">in</span> <span class="n">ULTRA_TASKS</span> <span class="k">else</span> <span class="sh">"</span><span class="s">fugu</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<h3 id="compliance-только-fugu">Compliance (только Fugu)</h3>
+
+<p>При создании API key: <strong>Fugu custom model pool</strong> → whitelist провайдеров. Для Ultra пул фиксирован. Opt-out обучения на ваших данных — в консоли.</p>
+
+<h3 id="codex-cli">Codex CLI</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-fsSL</span> https://sakana.ai/fugu/install | bash
+<span class="nv">SAKANA_API_KEY</span><span class="o">=</span>sk-... codex-fugu
+</code></pre></div></div>
+
+<p>Переключение <code class="language-plaintext highlighter-rouge">/model</code> между <code class="language-plaintext highlighter-rouge">fugu</code> и <code class="language-plaintext highlighter-rouge">fugu-ultra</code>. Для Ultra: <code class="language-plaintext highlighter-rouge">stream_idle_timeout_ms = 7200000</code> (2 часа).</p>
+
+<h3 id="production-checklist">Production checklist</h3>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Pay-as-you-go для prod</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Custom pool + opt-out training (если нужно)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Парсер <code class="language-plaintext highlighter-rouge">orchestration_*_tokens</code> для Ultra</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Timeout: 60–90s (<code class="language-plaintext highlighter-rouge">fugu</code>), 300–7200s (<code class="language-plaintext highlighter-rouge">ultra</code>)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><strong>EU/EEA недоступен</strong></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Rate limit на Ultra; fallback <code class="language-plaintext highlighter-rouge">fugu</code> при timeout</li>
+</ul>
+
+<h3 id="типовые-сценарии">Типовые сценарии</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сценарий</th>
+      <th>Model</th>
+      <th>Почему</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SaaS-чат</td>
+      <td><code class="language-plaintext highlighter-rouge">fugu</code></td>
+      <td>Latency</td>
+    </tr>
+    <tr>
+      <td>Premium «глубокий анализ»</td>
+      <td><code class="language-plaintext highlighter-rouge">fugu-ultra</code></td>
+      <td>Качество</td>
+    </tr>
+    <tr>
+      <td>CI code review</td>
+      <td><code class="language-plaintext highlighter-rouge">fugu-ultra</code></td>
+      <td>Больше находок</td>
+    </tr>
+    <tr>
+      <td>Vendor resilience</td>
+      <td>оба</td>
+      <td>Один API, сменяемый пул</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="чем-fugu-отличается-от-классических-роутеров">Чем Fugu отличается от классических роутеров</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Router / MoA</th>
+      <th>Fugu</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Workflow</td>
+      <td>Фиксированный или 1-shot</td>
+      <td>Multi-round, адаптивный</td>
+    </tr>
+    <tr>
+      <td>Обучение</td>
+      <td>Hand-designed</td>
+      <td>SFT + evolution + RL</td>
+    </tr>
+    <tr>
+      <td>Интерфейс</td>
+      <td>Собираете pipeline сами</td>
+      <td>Один endpoint</td>
+    </tr>
+    <tr>
+      <td>Агрегатор</td>
+      <td>Одна модель всегда</td>
+      <td>Выбор под задачу</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="источники">Источники</h2>
+
+<ul>
+  <li><a href="https://sakana.ai/fugu/">Sakana Fugu — продукт</a></li>
+  <li><a href="https://sakana.ai/fugu-release/">Релиз</a></li>
+  <li><a href="https://arxiv.org/html/2606.21228">Technical Report</a></li>
+  <li><a href="https://arxiv.org/abs/2512.04695">TRINITY (ICLR 2026)</a></li>
+  <li><a href="https://arxiv.org/abs/2512.04388">The Conductor (ICLR 2026)</a></li>
+  <li><a href="https://console.sakana.ai/get-started">Get Started</a></li>
+  <li><a href="https://console.sakana.ai/models">Models API</a></li>
+</ul>
+
+<hr />
+
+<p><em>Обновлено: июль 2026. Цены и model ID проверяйте в консоли Sakana перед продакшеном.</em></p>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Типы задач в теории систем: вход, система, выход - VAIRL</title>
+    <meta name="description" content="Классификация задач системного анализа по тому, что задано (U, S, Y) и что нужно найти: анализ, синтез, идентификация, управление и граничные случаи неопреде...">
+    
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark' && t !== 'light') {
+                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    <!-- p5.js for fish animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/vairl/assets/css/style.css">
+    
+    <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Типы задач в теории систем: вход, система, выход | VAIRL</title>
+<meta name="generator" content="Jekyll v4.3.4" />
+<meta property="og:title" content="Типы задач в теории систем: вход, система, выход" />
+<meta property="og:locale" content="ru" />
+<meta name="description" content="Классификация задач системного анализа по тому, что задано (U, S, Y) и что нужно найти: анализ, синтез, идентификация, управление и граничные случаи неопределенности - с примерами для AI-агентов и инженерии." />
+<meta name="twitter:description" property="og:description" content="Классификация задач системного анализа по тому, что задано (U, S, Y) и что нужно найти: анализ, синтез, идентификация, управление и граничные случаи неопределенности - с примерами для AI-агентов и инженерии." />
+<link rel="canonical" href="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/systems-theory-task-types-ru/" />
+<meta property="og:url" content="https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/systems-theory-task-types-ru/" />
+<meta property="og:site_name" content="VAIRL" />
+<meta property="og:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/systems-theory-task-types.svg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-07-02T00:30:00+00:00" />
+<meta property="article:modified_time" content="2026-07-02T00:30:00+00:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://evgeniy-borisov.github.io/vairl/assets/images/systems-theory-task-types.svg" />
+<meta name="twitter:title" content="Типы задач в теории систем: вход, система, выход" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2026-07-02T00:30:00+00:00","datePublished":"2026-07-02T00:30:00+00:00","description":"Классификация задач системного анализа по тому, что задано (U, S, Y) и что нужно найти: анализ, синтез, идентификация, управление и граничные случаи неопределенности - с примерами для AI-агентов и инженерии.","headline":"Типы задач в теории систем: вход, система, выход","image":"https://evgeniy-borisov.github.io/vairl/assets/images/systems-theory-task-types.svg","mainEntityOfPage":{"@type":"WebPage","@id":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/systems-theory-task-types-ru/"},"url":"https://evgeniy-borisov.github.io/vairl/blog/2026/07/02/systems-theory-task-types-ru/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+    <!-- Canvas for fish animation (background) -->
+    <div id="fish-canvas"></div>
+    
+    <!-- Main content -->
+    <div class="container">
+        <header>
+            <div>
+                <h1 class="site-title"><a href="/vairl/">VAIRL</a></h1>
+            </div>
+            <div class="header-controls">
+                <div class="language-switcher">
+                    <button class="lang-switch" data-lang="en" onclick="switchLanguage('en')">EN</button>
+                    <button class="lang-switch" data-lang="ru" onclick="switchLanguage('ru')">RU</button>
+                </div>
+                <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark theme" title="Toggle theme">
+                    <span class="theme-toggle-label">Dark</span>
+                </button>
+            </div>
+        </header>
+        
+        <main>
+            
+
+
+
+
+
+
+<script type="application/json" id="post-i18n-data">
+{
+  "currentLang": "ru",
+  "urls": {
+    "en": "/vairl/blog/",
+    "ru": "/vairl/blog/2026/07/02/systems-theory-task-types-ru/"
+  }
+}
+</script>
+
+<article class="post">
+    <header class="post-header">
+        
+        <div class="post-image">
+            <img src="/vairl/assets/images/systems-theory-task-types.svg" alt="" />
+        </div>
+        
+        <h1 class="post-title">Типы задач в теории систем: вход, система, выход</h1>
+        <p class="post-date">02 July 2026, 00:30 MSK</p>
+    </header>
+    
+    <div class="post-content">
+        <p>В <strong>теории систем</strong> и <strong>системном анализе</strong> почти любую постановку можно свести к трём элементам:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Обозначение</th>
+      <th>Элемент</th>
+      <th>Примеры</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>U</strong></td>
+      <td><strong>Вход</strong> (воздействие, ресурс, perturbation)</td>
+      <td>Prompt, API-запрос, управляющий сигнал, бюджет</td>
+    </tr>
+    <tr>
+      <td><strong>S</strong></td>
+      <td><strong>Система</strong> (оператор, структура, «чёрный ящик»)</td>
+      <td>LLM + оркестратор, завод, алгоритм, организация</td>
+    </tr>
+    <tr>
+      <td><strong>Y</strong></td>
+      <td><strong>Выход</strong> (результат, реакция, состояние)</td>
+      <td>Ответ агента, метрика KPI, траектория, patch в репо</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Задача классифицируется по тому, <strong>какие два (или три) элемента известны</strong> и <strong>какой один (или несколько) нужно найти</strong>. Это не академическая схема ради схемы — от выбора типа задачи зависит, нужен вам <strong>simulator</strong>, <strong>optimizer</strong>, <strong>inverse design</strong> или <strong>exploratory research</strong>.</p>
+
+<p>Связанные материалы VAIRL: <a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">устойчивость control loops</a>, <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">генерация бенчмарков</a>, <a href="/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/">ОГАС и КиберСин</a>, <a href="/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/">Маргарет Гамильтон и USL</a>.</p>
+
+<h2 id="базовая-модель">Базовая модель</h2>
+
+<pre><code class="language-mermaid">flowchart LR
+  U[U - Input] --&gt; S[S - System]
+  S --&gt; Y[Y - Output]
+</code></pre>
+
+<p>В линейной аппроксимации: $Y = S(U)$. В динамике: $y(t) = S[u(\tau), t]$. В агентном мире: <strong>trajectory</strong> = последовательность $(u_k, s_k, y_k)$ на шагах control loop.</p>
+
+<p>Ключевой вопрос инженера: <strong>что зафиксировано в постановке, а что — неизвестно?</strong></p>
+
+<hr />
+
+<h2 id="классическая-триада-три-элемента-одно-неизвестно">Классическая триада: три элемента, одно неизвестно</h2>
+
+<p>Когда известны <strong>ровно два</strong> из трёх, получаем три «полных» типа задач — основу курсов системного анализа и кибернетики.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Тип</th>
+      <th>Задано</th>
+      <th>Найти</th>
+      <th>Суть</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Анализ</strong> (прямая задача)</td>
+      <td><strong>U + S</strong></td>
+      <td><strong>Y</strong></td>
+      <td>Реакция известной системы на известное воздействие</td>
+    </tr>
+    <tr>
+      <td><strong>Синтез</strong> (проектирование)</td>
+      <td><strong>U + Y</strong></td>
+      <td><strong>S</strong></td>
+      <td>Построить систему, которая переводит данный вход в требуемый выход</td>
+    </tr>
+    <tr>
+      <td><strong>Идентификация / обратная по входу</strong></td>
+      <td><strong>S + Y</strong></td>
+      <td><strong>U</strong></td>
+      <td>Какое воздействие (причина, начальное условие) дало известный результат</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph analysis [Analysis U+S to Y]
+    A1[Known input] --&gt; A2[Known system]
+    A2 --&gt; A3[Find output]
+  end
+  subgraph synthesis [Synthesis U+Y to S]
+    B1[Known input] --&gt; B3[Design system]
+    B2[Desired output] --&gt; B3
+  end
+  subgraph inverse_u [Inverse U S+Y to U]
+    C1[Known system] --&gt; C3[Find input]
+    C2[Observed output] --&gt; C3
+  end
+</code></pre>
+
+<h3 id="1-задача-анализа-прямая--моделирование">1. Задача анализа (прямая / моделирование)</h3>
+
+<p><strong>Дано:</strong> вход и система. <strong>Найти:</strong> выход.</p>
+
+<p>Классический <strong>forward pass</strong>: симуляция, прогноз, «что будет, если». В программировании — unit test с фиксированным input и известной функцией. У AI-агента — <strong>replay</strong> траектории в sandbox: известны prompt + версия оркестратора → ожидаемый tool trace (до стохастики LLM).</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сфера</th>
+      <th>Пример</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Математика</td>
+      <td>$y = Ax$, найти $y$</td>
+    </tr>
+    <tr>
+      <td>Кибернетика</td>
+      <td>Модель объекта + управление → траектория</td>
+    </tr>
+    <tr>
+      <td>Менеджмент</td>
+      <td>Бюджет + процесс → прогноз KPI</td>
+    </tr>
+    <tr>
+      <td>AI-агент</td>
+      <td>Prompt + политика → ответ; <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">deterministic eval</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="2-задача-синтеза-проектирование--обратная-по-системе">2. Задача синтеза (проектирование / обратная по системе)</h3>
+
+<p><strong>Дано:</strong> вход и желаемый выход. <strong>Найти:</strong> систему (структуру, алгоритм, параметры).</p>
+
+<p>Это <strong>inverse design</strong>: не «как отреагирует», а «что построить, чтобы получить». В инженерии — подбор контроллера, архитектуры, материала. В ML — обучение модели по парам $(U, Y)$. У агентов — <strong>prompt engineering</strong>, выбор FSM/DAG, fine-tuning под целевой outcome.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сфера</th>
+      <th>Пример</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Программирование</td>
+      <td>Спецификация API in/out → реализация</td>
+    </tr>
+    <tr>
+      <td>Кибернетика</td>
+      <td>Целевая передаточная функция → структура регулятора</td>
+    </tr>
+    <tr>
+      <td>AI-агент</td>
+      <td>Task success criteria → оркестратор + tools (<a href="/vairl/blog/2026/07/01/margaret-hamilton-software-reliability-ru/">USL / DBTF</a>)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Важно:</strong> в литературе термин <em>«идентификация системы»</em> часто означает другую постановку (см. ниже): <strong>U + Y → S</strong>, когда внутреннее устройство недоступно. Её иногда выделяют отдельно как <strong>идентификацию чёрного ящика</strong>, а <strong>U + Y → S</strong> (проектирование) называют синтезом. Оба ищут $S$, но методы разные: <strong>fit по данным</strong> vs <strong>constructive design</strong>.</p>
+
+<h3 id="3-задача-идентификации-входа-s--y--u">3. Задача идентификации входа (S + Y → U)</h3>
+
+<p><strong>Дано:</strong> система и наблюдаемый выход. <strong>Найти:</strong> вход (причину, возмущение, начальные условия).</p>
+
+<p><strong>Пассивная</strong> постановка: «что подали на вход, если знаем устройство и видим реакцию?» — inverse problem по $U$. В диагностике — root cause analysis. В агентной <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">телеметрии</a> — по failed session и известному orchestrator: какой user turn / tool args привели к ошибке?</p>
+
+<hr />
+
+<h2 id="четвёртый-полный-тип-управление-и-оптимизация">Четвёртый «полный» тип: управление и оптимизация</h2>
+
+<p>Отдельно выделяют постановку, близкую к S + Y → U, но с <strong>целевым</strong> (желаемым) выходом:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Тип</th>
+      <th>Задано</th>
+      <th>Найти</th>
+      <th>Суть</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Управление / оптимизация</strong></td>
+      <td><strong>S + Y</strong>*</td>
+      <td><strong>U</strong></td>
+      <td>Найти <strong>оптимальное</strong> воздействие, переводящее систему в целевое состояние</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Здесь $Y^<em>$ — не просто «наблюдаемый факт», а <strong>setpoint</strong>, критерий или ограничение. Это основа <strong>optimal control</strong>, MPC, RL: система фиксирована, цель задана — ищем policy $\pi: Y^</em> \mapsto U$.</p>
+
+<pre><code class="language-mermaid">flowchart LR
+  Ystar[Y* desired] --&gt; C[Controller]
+  S[System S] --&gt; C
+  C --&gt; U[Optimal U]
+  U --&gt; S
+  S --&gt; Y[Actual Y]
+  Y -.-&gt;|error| C
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Сфера</th>
+      <th>Пример</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Кибернетика</td>
+      <td>Cruise control, термостат</td>
+    </tr>
+    <tr>
+      <td>Менеджмент</td>
+      <td>Целевой ROI → распределение ресурсов</td>
+    </tr>
+    <tr>
+      <td>AI-агент</td>
+      <td>Task success + budget cap → plan / tool sequence (<a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">control loop</a>)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Различие <strong>диагностики</strong> (S + Y_observed → U_past) и <strong>управления</strong> (S + Y_desired → U_future) — в <strong>временной направленности</strong> и <strong>оптимальности</strong>, хотя математически обе ищут $U$.</p>
+
+<hr />
+
+<h2 id="идентификация-чёрного-ящика-u--y--s">Идентификация чёрного ящика (U + Y → S)</h2>
+
+<p>Когда <strong>внутреннее устройство недоступно</strong>, но есть <strong>партии</strong> пар «вход–выход», ищут <strong>модель</strong> $S$:</p>
+
+<p><strong>Дано:</strong> вход и выход (много наблюдений). <strong>Найти:</strong> законы работы системы (оператор, параметры, структуру).</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Метод</th>
+      <th>Пример</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>System ID (MATLAB, grey-box)</td>
+      <td>Step response → transfer function</td>
+    </tr>
+    <tr>
+      <td>ML</td>
+      <td>Dataset $(u_i, y_i)$ → нейросеть</td>
+    </tr>
+    <tr>
+      <td>LLM eval mining</td>
+      <td><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия</a> → кластеры failure → гипотеза о «скрытом S»</td>
+    </tr>
+    <tr>
+      <td>Black-box probing</td>
+      <td>SWE-bench: issue in → patch out → infer agent capability</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Это <strong>не синтез</strong> в смысле «нарисовать схему с нуля», а <strong>восстановление</strong> $S$ из данных — фундамент <a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">бенчмарков</a> и A/B-тестов.</p>
+
+<hr />
+
+<h2 id="граничные-и-недоопределённые-постановки">Граничные и недоопределённые постановки</h2>
+
+<p>Когда известен <strong>только один</strong> элемент или <strong>ничего</strong> — задача <strong>недоопределена</strong>; нужны дополнительные ограничения, гипотезы или exploratory phase.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Задано</th>
+      <th>Тип задачи</th>
+      <th>Что искать</th>
+      <th>Суть</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Только U</strong></td>
+      <td>Прогноз / гипотеза без модели</td>
+      <td><strong>S</strong> и <strong>Y</strong></td>
+      <td>Одновременно предположить систему и предсказать реакцию</td>
+    </tr>
+    <tr>
+      <td><strong>Только Y</strong></td>
+      <td>Целеполагание</td>
+      <td><strong>S</strong> и <strong>U</strong></td>
+      <td>Желаемый результат → придумать среду и ресурсы</td>
+    </tr>
+    <tr>
+      <td><strong>Только S</strong></td>
+      <td>Изучение потенциала</td>
+      <td><strong>U</strong>, <strong>Y</strong> (или класс возможных)</td>
+      <td>Инвентаризация: «что умеет объект» без текущей цели</td>
+    </tr>
+    <tr>
+      <td><strong>Ничего</strong></td>
+      <td>Поисковое исследование</td>
+      <td><strong>U, S, Y</strong> и связи</td>
+      <td>Выделить объект из среды, «белые пятна», первичная онтология</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code class="language-mermaid">flowchart TB
+  none[Nothing given] --&gt; explore[Exploratory research]
+  onlyU[Only U] --&gt; forecast[Hypothesize S and Y]
+  onlyY[Only Y] --&gt; goal[Goal setting S and U]
+  onlyS[Only S] --&gt; inventory[Potential inventory]
+</code></pre>
+
+<h3 id="только-вход-u">Только вход (U)</h3>
+
+<p>Нет модели и нет эталона выхода — типичный <strong>ранний R&amp;D</strong>: «пользователи шлют такие запросы — что построить и что они получат?» Методы: кластеризация intent’ов, <a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">task mining из телеметрии</a>, generative hypothesis (<a href="/vairl/blog/2026/06/26/llm-hypothesis-synthesis-agents-ru/">синтез гипотез</a>).</p>
+
+<h3 id="только-выход-y">Только выход (Y)</h3>
+
+<p><strong>Целеполагание</strong> в чистом виде: «нужен task success rate 95%» — ещё не выбраны ни стек (S), ни промпт/данные (U). Product discovery, <a href="/vairl/blog/2026/06/29/best-ai-agent-specialist-ru/">карта компетенций</a> → выбор архитектуры.</p>
+
+<h3 id="только-система-s">Только система (S)</h3>
+
+<p><strong>Инвентаризация потенциала:</strong> есть LLM и tools, но нет ни задачи, ни метрики. Полезно для capability matrix, red teaming «что вообще может сломаться». Без (U, Y) нельзя приоритизировать — только catalog.</p>
+
+<h3 id="полная-неопределённость">Полная неопределённость</h3>
+
+<p><strong>Исследовательский тупик</strong> или <strong>green field</strong>: объект не выделен, нет языка описания. В науке — постановка проблемы; в продукте — «нужен AI» без домена. Выход — <strong>генерация гипотез</strong>, ethnography, <a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap-ru/">пространство гипотез / PaCMAP</a>.</p>
+
+<hr />
+
+<h2 id="сводная-таблица-все-комбинации">Сводная таблица: все комбинации</h2>
+
+<p>Обозначения: <strong>+</strong> = элемент задан, <strong>?</strong> = ищем.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>U</th>
+      <th>S</th>
+      <th>Y</th>
+      <th>Название</th>
+      <th>Найти</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>+</td>
+      <td>+</td>
+      <td>?</td>
+      <td><strong>Анализ / моделирование</strong></td>
+      <td>Y</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>+</td>
+      <td>?</td>
+      <td>+</td>
+      <td><strong>Синтез / проектирование</strong></td>
+      <td>S</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>+</td>
+      <td>?</td>
+      <td>+</td>
+      <td><strong>Идентификация (black box)</strong></td>
+      <td>S (модель)</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>?</td>
+      <td>+</td>
+      <td>+</td>
+      <td><strong>Идентификация входа / диагностика</strong></td>
+      <td>U</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>+</td>
+      <td>+</td>
+      <td>?*</td>
+      <td><strong>Прогноз траектории</strong></td>
+      <td>Y(t)</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>?</td>
+      <td>+</td>
+      <td>Y*</td>
+      <td><strong>Управление / оптимизация</strong></td>
+      <td>U (optimal)</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>+</td>
+      <td>?</td>
+      <td>?</td>
+      <td><strong>Прогноз без модели</strong></td>
+      <td>S, Y</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>?</td>
+      <td>?</td>
+      <td>+</td>
+      <td><strong>Целеполагание</strong></td>
+      <td>S, U</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>?</td>
+      <td>+</td>
+      <td>?</td>
+      <td><strong>Потенциал системы</strong></td>
+      <td>U, Y</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>?</td>
+      <td>?</td>
+      <td>?</td>
+      <td><strong>Exploratory research</strong></td>
+      <td>U, S, Y, структура</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Строки 2 и 3 формально совпадают по «знаем U и Y», но <strong>методология разная</strong>: constructive synthesis vs statistical identification.</p>
+
+<hr />
+
+<h2 id="как-выбрать-тип-задачи-на-практике">Как выбрать тип задачи на практике</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Если вы…</th>
+      <th>Скорее всего это…</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Пишете eval и sandbox</td>
+      <td><strong>Анализ</strong> (U+S→Y)</td>
+    </tr>
+    <tr>
+      <td>Проектируете нового агента под KPI</td>
+      <td><strong>Синтез</strong> (U+Y→S)</td>
+    </tr>
+    <tr>
+      <td>Копаете prod failures</td>
+      <td><strong>Диагностика</strong> (S+Y→U)</td>
+    </tr>
+    <tr>
+      <td>Тюните planner под cost/latency</td>
+      <td><strong>Управление</strong> (S+Y*→U)</td>
+    </tr>
+    <tr>
+      <td>Строите dataset из логов</td>
+      <td><strong>Идентификация</strong> (U+Y→S)</td>
+    </tr>
+    <tr>
+      <td>Не знаете, что пользователю нужно</td>
+      <td><strong>Exploratory</strong> или <strong>только U</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Ошибка продукта — <strong>решать синтез</strong>, когда данных хватает только на <strong>exploratory</strong>, или <strong>анализировать</strong> (eval), когда на самом деле нужен <strong>синтез</strong> архитектуры.</p>
+
+<hr />
+
+<h2 id="связь-с-ai-агентами-один-control-loop-разные-постановки">Связь с AI-агентами: один control loop, разные постановки</h2>
+
+<pre><code class="language-mermaid">flowchart TB
+  subgraph loop [Agent as system S]
+    u[U prompt tools budget] --&gt; s[Orchestrator LLM memory]
+    s --&gt; y[Y answer state metrics]
+  end
+  analysis[Analysis: replay eval] -.-&gt; loop
+  synth[Synthesis: design orchestrator] -.-&gt; loop
+  ctrl[Control: replan for Y star] -.-&gt; loop
+  ident[Identification: learn S from logs] -.-&gt; loop
+</code></pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Элемент агента</th>
+      <th>U</th>
+      <th>S</th>
+      <th>Y</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Prompt + context</td>
+      <td>✓</td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>LangGraph / FSM / tools</td>
+      <td> </td>
+      <td>✓</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>Answer + DB state + metrics</td>
+      <td> </td>
+      <td> </td>
+      <td>✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия</a> фиксирует тройки $(u_k, s_k, y_k)$ — без этого нельзя ни идентифицировать, ни диагностировать, ни строить regression (анализ).</p>
+
+<hr />
+
+<h2 id="литература-и-смежные-понятия">Литература и смежные понятия</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Источник</th>
+      <th>Тема</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>А. И. Бerg, «Теория систем» (Лекторий)</td>
+      <td>Классификация задач системного анализа</td>
+    </tr>
+    <tr>
+      <td>W. Ross Ashby, <em>Introduction to Cybernetics</em></td>
+      <td>Чёрный ящик, variety</td>
+    </tr>
+    <tr>
+      <td>R. Rosen, <em>Anticipatory Systems</em></td>
+      <td>Моделирование и синтез</td>
+    </tr>
+    <tr>
+      <td>Stafford Beer, <em>Brain of the Firm</em></td>
+      <td>VSM, управление по целям</td>
+    </tr>
+    <tr>
+      <td><a href="/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/">ОГАС / Cybersyn</a></td>
+      <td>Замкнутый контур U–S–Y на уровне экономики</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="краткий-чеклист-постановки">Краткий чеклист постановки</h2>
+
+<ol>
+  <li>Что <strong>фиксировано</strong> в задаче: U, S или Y?</li>
+  <li>Что <strong>ищем</strong> — один элемент или несколько?</li>
+  <li>Y — <strong>наблюдённый</strong> (диагностика) или <strong>желаемый</strong> (управление)?</li>
+  <li>S — <strong>white box</strong> (анализ) или <strong>black box</strong> (идентификация)?</li>
+  <li>Достаточно ли данных, или нужна <strong>exploratory</strong> фаза?</li>
+</ol>
+
+<hr />
+
+<h2 id="связанные-публикации-vairl">Связанные публикации VAIRL</h2>
+
+<ul>
+  <li><a href="/vairl/blog/2026/06/29/agent-control-loop-stability-ru/">Устойчивость agent control loops</a> — управление S + Y* → U</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-benchmark-generation-ru/">Генерация бенчмарков</a> — анализ и идентификация способностей агента</li>
+  <li><a href="/vairl/blog/2026/06/29/agent-telemetry-ru/">Телеметрия агентов</a> — данные для U, S, Y</li>
+  <li><a href="/vairl/blog/2026/06/24/hypothesis-space-pacmap-ru/">Пространство гипотез и PaCMAP</a> — exploratory и «только U»</li>
+  <li><a href="/vairl/blog/2026/07/01/cybernetic-planning-ogas-cybersyn-ru/">Кибернетическое планирование</a> — макро-контур U–S–Y</li>
+</ul>
+
+    </div>
+    
+    <footer class="post-footer">
+        <a href="/vairl/blog/" class="back-link" data-i18n="back_to_blog">← back to blog</a>
+    </footer>
+</article>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<script defer src="/vairl/assets/js/katex-render.js"></script>
+
+
+        </main>
+        
+        <footer>
+            <nav>
+                <a href="/vairl/" data-i18n="home">home</a>
+                <a href="/vairl/blog/" data-i18n="blog">blog</a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Fish animation script -->
+    <script src="/vairl/assets/js/fish-animation.js"></script>
+    
+    <!-- Theme & language switcher scripts -->
+    <script src="/vairl/assets/js/theme-switcher.js"></script>
+    <script src="/vairl/assets/js/language-switcher.js"></script>
+</body>
+</html>
