@@ -1,17 +1,17 @@
 ---
 layout: post
-title: "Фундамент агентных систем: RAG, контекст, skills, MCP и обзор агентов"
+title: "Фундамент агентных систем: RAG, контекст, skills и MCP"
 date: 2026-07-02 12:00:00 +0300
-excerpt: "RAG, контекст, skills, MCP и обзор агентов: Pi, Aider, Codex, OpenCode, Hermes, Claude Code и другие — с отдельным сравнением TUI-интерфейсов и таблицами функций."
+excerpt: "RAG, контекстное окно, skills и MCP для AI-агентов: базовые понятия, типовая архитектура agent loop и связь с внешними знаниями. Обзор конкретных агентов — в отдельной статье."
 lang: ru
 image: /assets/images/agent-fundamentals-rag-mcp.svg
 ---
 
 Чтобы проектировать или оценивать **ИИ-агентов**, недостаточно знать название модели. Нужно понимать четыре слоя, которые повторяются почти везде: **знания** (RAG), **память сессии** (контекстное окно), **навыки** (skills) и **инструменты** (часто через **MCP**). Поверх этого — **агентный цикл**: план → действие → наблюдение → повтор.
 
-В этой статье — базовые понятия с примерами, типовая архитектура агентной системы и **сравнительный обзор** шести актуальных агентных программ плюс **g3** как особый случай (диалектическое автокодирование).
+В этой статье — базовые понятия с примерами и типовая архитектура агентной системы. **Сравнительный обзор** Pi, Aider, Codex, OpenCode, Claude Code, g3 и других — с акцентом на **управление памятью** — вынесен в [отдельную статью](/vairl/blog/2026/07/03/agent-landscape-memory-ru/).
 
-Связанные материалы VAIRL: [g3 и диалектическое автокодирование](/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/), [гибридный оркестратор DAG/FSM/BT](/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/), [жизненный цикл агента](/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/), [телеметрия агентов](/vairl/blog/2026/06/29/agent-telemetry-ru/).
+Связанные материалы VAIRL: [обзор агентов и память](/vairl/blog/2026/07/03/agent-landscape-memory-ru/), [RAG для агентов](/vairl/blog/2026/07/03/agent-rag-approaches-ru/), [g3 и диалектическое автокодирование](/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/), [гибридный оркестратор DAG/FSM/BT](/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree-ru/), [жизненный цикл агента](/vairl/blog/2026/07/01/agent-lifecycle-pipeline-ru/), [телеметрия агентов](/vairl/blog/2026/06/29/agent-telemetry-ru/).
 
 ---
 
@@ -24,9 +24,7 @@ image: /assets/images/agent-fundamentals-rag-mcp.svg
 | [Skills](#что-такое-skill) | Переносимые пакеты инструкций |
 | [MCP](#зачем-нужен-mcp) | Стандарт подключения инструментов |
 | [Базовые элементы](#базовые-элементы-агентной-системы) | Цикл, tools, память, оркестрация |
-| [Обзор агентов](#обзор-актуальных-агентных-программ) | Pi, Aider, Codex, OpenCode и другие |
-| [TUI-интерфейсы](#сравнение-tui-терминальных-интерфейсов) | Как устроен терминальный UX |
-| [Таблицы](#сравнительная-таблица-агентов) | Сравнение и перечень функций |
+| [Обзор агентов](/vairl/blog/2026/07/03/agent-landscape-memory-ru/) | Pi, Aider, Codex… — отдельная статья |
 
 ---
 
@@ -242,316 +240,19 @@ Action:   respond(...)
 
 ---
 
-## Обзор актуальных агентных программ
+## Дальше: обзор конкретных агентов
 
-Ниже — агенты, которые чаще всего встречаются в терминальной разработке 2026 года. Для **Pi, Aider, Codex и OpenCode** отдельно разобран [TUI](#сравнение-tui-терминальных-интерфейсов).
+Сравнение **Pi, Aider, Codex, OpenCode, Claude Code, g3**, Hermes, IDAD и других — TUI, таблицы функций и **управление памятью у каждого агента** (сессии, compaction, repo map, `CLAUDE.md`, lineage compression) — в статье:
 
-> **Примечание:** «агент Idar» из ранней версии статьи — это **IDAD** ([idad.io](https://idad.io/)).
-
----
-
-### Pi coding agent (pi-mono)
-
-| | |
-|---|---|
-| **Тип** | Open-source минималистичный coding agent |
-| **Репозиторий** | [badlogic/pi-mono](https://github.com/badlogic/pi-mono) (форк/линия [earendil-works/pi](https://github.com/earendil-works/pi)) |
-| **Стек** | TypeScript monorepo: `pi-ai` → `pi-agent-core` → `pi-tui` → `pi-coding-agent` |
-| **Архитектура** | Event-driven agent loop, provider-neutral messages, tools: `read` / `write` / `edit` / `bash` |
-| **Особенности** | Skills, extensions, prompt templates, sub-agents, сессии, multi-provider (Claude, GPT, Ollama…) |
-
-**Принцип:** «весь core помещается в голове» — прозрачный tool-use loop без лишних слоёв. Каждый слой можно использовать отдельно: только LLM API, только agent runtime, или полный CLI.
-
-**Режимы CLI:** интерактивный TUI (default), `--json` (события в stdout), RPC/JSONL для встраивания в другие процессы.
-
----
-
-### Aider
-
-| | |
-|---|---|
-| **Тип** | Open-source **pair programmer** в терминале (Python) |
-| **Репозиторий** | [Aider-AI/aider](https://github.com/Aider-AI/aider) |
-| **Архитектура** | `Coder` orchestrator + LiteLLM (100+ моделей) + git auto-commit |
-| **Контекст** | **Repo map** — граф символов + PageRank вместо дампа всего репо |
-| **Edit formats** | whole/diff/udiff и др. — подбираются под возможности модели |
-
-**Принцип:** не «автономный демон на час», а **быстрый цикл чат → diff → commit**. Сильная сторона — работа с уже открытыми файлами и умный отбор контекста из кодовой базы.
-
-**Интерфейс:** scrollback-чат (не full-screen TUI) — `prompt_toolkit` + **Rich** markdown stream. Slash-команды (`/add`, `/commit`, `/model`), голос (Whisper), file watcher для IDE.
-
----
-
-### OpenAI Codex (CLI)
-
-| | |
-|---|---|
-| **Тип** | Terminal coding agent от OpenAI (open source, Rust) |
-| **Репозиторий** | [openai/codex](https://github.com/openai/codex) |
-| **Запуск** | `codex` → интерактивный TUI; `codex exec` — скриптуемый режим |
-| **Архитектура** | Локальный агент: читает/меняет/запускает код в выбранной директории |
-| **Особенности** | Sandbox, approval modes, MCP (`codex mcp`), sub-agents, web search, Codex Cloud tasks |
-
-**Принцип:** **terminal-native** агент с подпиской ChatGPT Plus/Pro/Business или API key. Отдельные поверхности: CLI, Desktop (`codex app`), IDE-плагины, облако [chatgpt.com/codex](https://chatgpt.com/codex).
-
-**TUI:** полноценная сессия с `/model`, вложениями изображений, narration шагов, переключением режимов одобрения (`--sandbox`, `--ask-for-approval`).
-
----
-
-### OpenCode
-
-| | |
-|---|---|
-| **Тип** | Open-source coding agent (MIT) |
-| **Сайт** | [opencode.ai](https://opencode.ai) |
-| **Архитектура** | **Client/server**: фоновый сервер (SQLite, SSE), TUI/CLI/Desktop/IDE — клиенты |
-| **Агенты** | `build` (полный доступ), `plan` (read-only), `explore` (sub-agent) |
-| **Особенности** | 75+ LLM providers, ACP для IDE, doom-loop detection, context compaction |
-
-**Принцип:** агент = **декларативная конфигурация** (permissions + prompt), единый `SessionPrompt.loop()` для всех ролей. Plan-агент **не видит** write-tools — безопасность через отсутствие инструмента.
-
-**TUI:** клавиатурный full-screen интерфейс; **Tab** переключает `build` ↔ `plan`; сессия **переживает** обрыв терминала (сервер остаётся в фоне). Worker thread для LLM/MCP, main thread — рендер (как в зрелых TUI-приложениях).
-
----
-
-### py-code-agent (Agent Py)
-
-| | |
-|---|---|
-| **Тип** | Open-source CLI coding agent (Python) |
-| **Репозиторий** | [bonashen/py-code-agent](https://github.com/bonashen/py-code-agent) |
-| **Архитектура** | ReAct loop + pluggy plugins + LiteLLM (100+ провайдеров) |
-| **Особенности** | MCP gateway, A2A protocol, session tree (fork/branch), 5-layer self-healing |
-| **Модель работы** | `Thought → Action → Observation` до `task_done` с верификацией файлов |
-
-**Принцип:** максимальная **расширяемость** через плагины и hooks; skills совместимы с форматом Claude Code (`SKILL.md`). TUI — обычный REPL-стиль CLI, без full-screen панелей.
-
----
-
-### Hermes Agent
-
-| | |
-|---|---|
-| **Тип** | Open-source **personal** agent (не только код) |
-| **Автор** | [Nous Research](https://github.com/NousResearch/hermes-agent) |
-| **Архитектура** | Монолитный Python: `AIAgent` + `conversation_loop.py` + SQLite sessions |
-| **Интерфейсы** | CLI, **gateway** (Telegram, Discord, Slack, 20+ платформ), cron |
-| **Особенности** | 70+ tools, lineage-based compression, profiles, `delegate_task`, MCP |
-
-**Принцип:** агент как **долгоживущий сервис** на сервере. CLI — интерактивный TUI с slash-командами и streaming; основная ценность — gateway в мессенджеры.
-
----
-
-### IDAD (Issue Driven Agentic Development)
-
-| | |
-|---|---|
-| **Тип** | GitHub-native **multi-agent pipeline** |
-| **Сайт** | [idad.io](https://idad.io/) |
-| **Архитектура** | 9 специализированных агентов + 2 human gates |
-| **Движок** | Claude Code, Cursor Agent или OpenAI Codex (на выбор) |
-| **Триггер** | Label `idad:issue-review` на GitHub issue |
-
-**Поток:**
-
-```
-Issue → Review → Planner → [human: approve plan] → Implementer
-  → Security → Reviewer → Documenter → [human: merge PR] → Self-improve
-```
-
-**Принцип:** агентность на уровне **организации**, не одного чата. Человек контролирует **план** и **merge**; между ними — автоматизация.
-
----
-
-### ChatGPT Agent (Agent Mode)
-
-| | |
-|---|---|
-| **Тип** | Облачный consumer/enterprise agent |
-| **Доступ** | Plus / Pro / Team / Enterprise |
-| **Архитектура** | Виртуальный компьютер: visual browser + text browser + terminal + connectors |
-| **Инструменты** | Gmail, GitHub, Google Drive, M365, Slack (Workspace Agents) |
-| **Особенности** | Прерывание и takeover браузера, подтверждение перед покупками/письмами |
-
-**Принцип:** **chat-first orchestration** — одна нить диалога управляет многошаговой задачей; пользователь видит narration действий. Для разработчиков параллельно существует **AgentKit** (Agent Builder, Connector Registry, ChatKit, Agents SDK).
-
----
-
-### Claude Code (Cloud Code)
-
-| | |
-|---|---|
-| **Тип** | Terminal + IDE agent от Anthropic |
-| **Архитектура** | Agent loop + layered extensions |
-| **Расширения** | `CLAUDE.md`, **Skills**, **Hooks** (25+ events), **Subagents**, **MCP** |
-| **Особенности** | Hooks типа `mcp_tool` (v2.1.118+), sandbox, permission prompts |
-| **Модель** | Обычно Claude Sonnet/Opus; сильная интеграция с экосистемой MCP |
-
-**Принцип:** **закрытые по умолчанию** permissions + hooks. TUI — REPL в терминале (не панельный fullscreen); rich output через streaming markdown.
-
----
-
-## Сравнение TUI: терминальные интерфейсы
-
-Не все «терминальные агенты» рисуют UI одинаково. Есть три семейства:
-
-| Семейство | Как выглядит | Примеры |
-|-----------|--------------|---------|
-| **Full-screen TUI** | Весь экран — панели, списки, оверлеи; CSI 2026 / differential render | **Pi**, **Codex**, **OpenCode** |
-| **Scrollback chat** | Лента сообщений вниз; ввод внизу; без «рамки» на весь терминал | **Aider**, **Claude Code**, py-code-agent |
-| **Не-TUI** | Web, IDE, GitHub | ChatGPT Agent, IDAD |
-
-### Детальное сравнение TUI
-
-| Агент | Тип UI | Технология | Навигация и UX | Сильные стороны TUI | Ограничения |
-|-------|--------|------------|----------------|---------------------|-------------|
-| **Pi** | Full-screen TUI | `@earendil-works/pi-tui`: differential rendering, CSI 2026, компоненты | Slash-команды, autocomplete путей, streaming tool calls, overlays | Без мерцания на медленных SSH; IME/CJK; inline-изображения (Kitty/iTerm2) | Нужен нормальный терминал с synchronized output |
-| **Aider** | Scrollback REPL | `prompt_toolkit` + **Rich** | Enter / Alt+Enter, vi-mode, автодополнение файлов и `/commands` | Привычный «чат в терминале»; markdown stream + spinner при ожидании LLM | Нет панелей diff side-by-side в TUI (diff в git/IDE) |
-| **Codex** | Full-screen TUI | Rust, встроенный TUI | `/model`, вложения картинок, narration, approval prompts | Sandbox + режимы одобрения в одном экране; `codex resume` | Привязка к экосистеме OpenAI |
-| **OpenCode** | Full-screen TUI | TUI-клиент + **фоновый сервер** | **Tab**: `build` ↔ `plan`; `@general` для sub-agent | Сессия живёт после закрытия терминала; event bus → live updates | Нужен запущенный server process |
-| **Claude Code** | Scrollback REPL | Собственный terminal UI | Slash, permissions inline, subagent status | Глубокая интеграция hooks/skills/MCP | Не classic fullscreen TUI |
-| **g3** | Scrollback + статус | Rust CLI | `/compact`, `/stats`, `/thinnify` | Прозрачность coach/player ходов | Нет отдельного UI-фреймворка как у Pi |
-
-### Схема: два подхода к терминалу
-
-```mermaid
-flowchart TB
-  subgraph fullscreen [Full-screen TUI]
-    P[Pi pi-tui]
-    C[Codex TUI]
-    O[OpenCode TUI]
-  end
-  subgraph scroll [Scrollback chat]
-    A[Aider prompt_toolkit]
-    CC[Claude Code REPL]
-  end
-  fullscreen --> R1[Панели, overlays, diff render]
-  scroll --> R2[Лента + streaming markdown]
-```
-
-### Когда какой TUI удобнее
-
-| Сценарий | Лучше подходит |
-|----------|----------------|
-| Долгая сессия по SSH, нестабильная сеть | **OpenCode** (persistent server) или **Pi** (differential TUI) |
-| Быстрые правки в 2–3 файлах, pair programming | **Aider** |
-| Единый стек OpenAI + sandbox + скрипты `codex exec` | **Codex** |
-| Минимализм, свой fork agent runtime | **Pi** (pi-agent-core отдельно от TUI) |
-| Enterprise governance, hooks | **Claude Code** |
-
----
-
-## Сравнительная таблица агентов
-
-### Terminal-first агенты (фокус статьи)
-
-| Критерий | **Pi** | **Aider** | **Codex** | **OpenCode** | Claude Code | **g3** |
-|----------|:------:|:---------:|:---------:|:------------:|:-----------:|:------:|
-| **Open source** | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| **Язык** | TypeScript | Python | Rust | TypeScript | — | Rust |
-| **TUI** | Full-screen | Scrollback | Full-screen | Full-screen | Scrollback | Scrollback |
-| **Пара программист** | ✅ | ✅ **core** | ✅ | ✅ | ✅ | Coach/Player |
-| **Repo map / RAG** | extensions | ✅ PageRank | web search | LSP | MCP | tree-sitter |
-| **Git auto-commit** | — | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **MCP** | extensions | — | ✅ | ✅ | ✅ native | partial |
-| **Skills** | ✅ | — | — | AGENTS.md | ✅ | ✅ .g3/skills |
-| **Sub-agents** | ✅ | — | ✅ | explore | ✅ | Coach+Player |
-| **Мульти-модель** | ✅ | LiteLLM 100+ | OpenAI | 75+ | Claude | several |
-| **Уникальность** | Минимальный stack | Repo map | OpenAI sandbox | Persistent server | Hooks depth | Adversarial loop |
-
-### Расширенный ландшафт
-
-| Критерий | py-code-agent | Hermes | IDAD | ChatGPT Agent |
-|----------|:-------------:|:------:|:----:|:-------------:|
-| **Фокус** | Код | Personal + код | GitHub workflow | Универсальные задачи |
-| **Интерфейс** | CLI REPL | CLI + мессенджеры | GitHub Issues | Web |
-| **MCP** | Gateway | ✅ | Через CLI | Connectors |
-| **Human gates** | Опционально | Allowlists | **2 обязательных** | Confirm actions |
-
----
-
-## Перечень функций (детально)
-
-| Функция | Pi | Aider | Codex | OpenCode | py-code-agent | Hermes | Claude Code | g3 |
-|---------|:--:|:-----:|:-----:|:--------:|:-------------:|:------:|:-----------:|:--:|
-| Full-screen TUI | ✅ | — | ✅ | ✅ | — | partial | — | — |
-| Scrollback REPL | — | ✅ | — | — | ✅ | ✅ | ✅ | ✅ |
-| Чтение/запись файлов | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Shell / bash | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Git operations | — | ✅ auto | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Repo map / smart context | ext | ✅ | search | LSP | — | memory | MCP | tree-sitter |
-| ReAct / tool loop | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Edit formats (diff/whole) | edit tool | ✅ many | patch | patch | ✅ | — | patch | patch |
-| Code review | self-review | — | ✅ agent | — | plugins | background | subagent | **Coach** |
-| MCP | ext | — | ✅ | ✅ | gateway | ✅ | ✅ | partial |
-| Context compaction | sessions | history | internal | ✅ | — | lineage | /compact | thinning |
-| Persistent session | ✅ | — | resume | **server** | tree | SQLite | resume | per-turn |
-| Локальные модели | Ollama | ✅ | — | llama.cpp | Ollama | ✅ | — | Metal |
-| Диалектика 2 агентов | sub | — | sub | explore | — | delegate | subagents | **core** |
-
----
-
-## Как g3 можно считать агентом
-
-**g3** ([dhanji/g3](https://github.com/dhanji/g3)) — полноценный **coding agent**, но с нестандартной **оркестрацией**:
-
-| Обычный single-agent | g3 |
-|---------------------|-----|
-| Один LLM + tools в длинном треде | **Player** (код) + **Coach** (ревью) |
-| Self-report «готово» | Coach **независимо** проверяет требования |
-| Контекст накапливается | **Свежий инстанс** на ход + thinning |
-| Один проход ревью в конце | Adversarial цикл **на каждом шаге** (~10 ходов) |
-
-### Чем g3 похож на других
-
-- **Как Claude Code / OpenCode:** terminal agent, tools, skills, автономный режим по `requirements.md`
-- **Как IDAD:** разделение ролей (implementer vs reviewer), human/agent gates
-- **Как OpenCode plan/build:** разные **permission sets** для разных ролей — у g3 это Player vs Coach
-
-### Чем g3 отличается
-
-1. **Adversarial cooperation** — ревью не опциональный subagent, а **обязательный** второй участник петли ([статья Block AI Research](https://block.xyz/documents/adversarial-cooperation-in-code-synthesis.pdf))
-2. **Контракт требований** — общий `requirements.md` как source of truth для обоих агентов
-3. **Coach APPROVED** — явный критерий завершения, а не stop token модели
-4. **Rust-workspace** — `g3-core`, providers, execution, computer-control как отдельные крейты
-
-### g3 в сравнительной матрице «тип агента»
-
-| Тип | Примеры | g3 |
-|-----|---------|-----|
-| Interactive pair programmer | **Aider**, Pi chat, Cursor | частично (`--chat`) |
-| Autonomous coder | Codex, OpenCode build, Claude Code | ✅ default |
-| Full-screen TUI coding | **Pi, Codex, OpenCode** | — (scrollback CLI) |
-| Multi-agent orchestrator | IDAD, Hermes delegate | ✅ Coach/Player |
-| Personal assistant | Hermes gateway, ChatGPT | ❌ |
-| CI/CD bot | IDAD | ❌ (локальный CLI) |
-
----
-
-## Как выбрать агента (практически)
-
-| Задача | Разумный выбор |
-|--------|----------------|
-| Pair programming в терминале, repo map | **Aider** |
-| Full-screen TUI, минимальный код агента | **Pi** |
-| OpenAI-стек, sandbox, `codex exec` | **Codex** |
-| Persistent server, Tab build/plan | **OpenCode** |
-| Локальный open-source + BYOK | OpenCode, Pi, py-code-agent, g3 |
-| 24/7 бот в Telegram/Slack | Hermes |
-| Issue → PR на GitHub с ревью | IDAD |
-| Enterprise IDE + governance | Claude Code |
-| Нетехнический пользователь, web-задачи | ChatGPT Agent |
-| Максимальная проверка кода adversarial-петлёй | **g3** |
-| Свой стек, BYOK, persistent sessions | OpenCode |
+**[Обзор агентов 2026 и управление памятью](/vairl/blog/2026/07/03/agent-landscape-memory-ru/)**
 
 ---
 
 ## Резюме
 
-1. **RAG** даёт знания извне; **контекстное окно** — ограниченную память; **skills** — процедуры; **MCP** — стандарт для tools.
+1. **RAG** даёт знания извне; **контекстное окно** — ограниченную память одного вызова; **skills** — процедуры; **MCP** — стандарт для tools.
 2. Любая агентная система = **loop + tools + memory + (опционально) critic**.
-3. Ландшафт 2026: **Pi / Aider / Codex / OpenCode** — главные terminal-first агенты; TUI бывает fullscreen (Pi, Codex, OpenCode) и scrollback (Aider, Claude Code).
-4. **g3** — агент с уникальной **диалектической** архитектурой: не «больше tools», а **структурированное противоречие** Player/Coach.
+3. Память — не один буфер: контекст, сессия, проектные файлы и внешние источники; детали по продуктам — в [обзоре агентов](/vairl/blog/2026/07/03/agent-landscape-memory-ru/).
 
 ---
 
@@ -559,13 +260,5 @@ flowchart TB
 
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [Agent Skills (agentskills.io)](https://agentskills.io/)
-- [Pi mono](https://github.com/badlogic/pi-mono) · [pi-tui](https://github.com/badlogic/pi-mono/tree/main/packages/tui)
-- [Aider](https://aider.chat/) · [GitHub](https://github.com/Aider-AI/aider)
-- [OpenAI Codex CLI](https://developers.openai.com/codex/cli) · [GitHub](https://github.com/openai/codex)
-- [OpenCode](https://opencode.ai) · [GitHub](https://github.com/anomalyco/opencode)
-- [Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/developer-guide/architecture)
-- [py-code-agent](https://github.com/bonashen/py-code-agent)
-- [IDAD](https://idad.io/)
-- [ChatGPT agent (OpenAI)](https://openai.com/index/introducing-chatgpt-agent/)
-- [Claude Code docs](https://code.claude.com/docs)
-- [g3 — VAIRL черновик](/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/) · [Block AI Research PDF](https://block.xyz/documents/adversarial-cooperation-in-code-synthesis.pdf)
+- [Обзор агентов 2026 и управление памятью](/vairl/blog/2026/07/03/agent-landscape-memory-ru/)
+- [g3 — VAIRL](/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/)

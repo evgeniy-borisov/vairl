@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="alm1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="alm2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbff"/>
+  <rect x="1" y="1" width="1198" height="628" rx="4" fill="none" stroke="#e4e6f0" stroke-width="2"/>
+  <circle cx="150" cy="130" r="90" fill="url(#alm1)" opacity="0.12"/>
+  <circle cx="1050" cy="500" r="100" fill="url(#alm2)" opacity="0.10"/>
+  <text x="600" y="72" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif" font-size="30" font-weight="700">Agent Landscape 2026</text>
+  <text x="600" y="108" text-anchor="middle" fill="#666" font-family="system-ui,sans-serif" font-size="16">Pi · Aider · Codex · OpenCode · Claude Code · g3 · Memory</text>
+  <rect x="80" y="160" width="1040" height="380" rx="16" fill="#fff" stroke="url(#alm1)" stroke-width="2"/>
+  <text x="600" y="200" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="18" font-weight="700">#?@02;5=85 ?0<OBLN</text>
+  <rect x="120" y="230" width="200" height="70" rx="10" fill="#f0f4ff" stroke="#667eea" stroke-width="1.5"/>
+  <text x="220" y="262" text-anchor="middle" fill="#444" font-family="system-ui,sans-serif" font-size="13" font-weight="600">>=B5:AB</text>
+  <text x="220" y="282" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">A:>;L7OI55 >:=></text>
+  <text x="360" y="268" text-anchor="middle" fill="#667eea" font-size="20">’</text>
+  <rect x="400" y="230" width="200" height="70" rx="10" fill="#f0fff8" stroke="#43e97b" stroke-width="1.5"/>
+  <text x="500" y="262" text-anchor="middle" fill="#444" font-family="system-ui,sans-serif" font-size="13" font-weight="600">!5AA8O</text>
+  <text x="500" y="282" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">SQLite / resume</text>
+  <text x="640" y="268" text-anchor="middle" fill="#667eea" font-size="20">’</text>
+  <rect x="680" y="230" width="200" height="70" rx="10" fill="#fff5f8" stroke="#fa709a" stroke-width="1.5"/>
+  <text x="780" y="262" text-anchor="middle" fill="#444" font-family="system-ui,sans-serif" font-size="13" font-weight="600">@>5:B</text>
+  <text x="780" y="282" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">CLAUDE.md / repo map</text>
+  <text x="920" y="268" text-anchor="middle" fill="#667eea" font-size="20">’</text>
+  <rect x="960" y="230" width="120" height="70" rx="10" fill="#f8f0ff" stroke="#764ba2" stroke-width="1.5"/>
+  <text x="1020" y="262" text-anchor="middle" fill="#444" font-family="system-ui,sans-serif" font-size="13" font-weight="600">RAG</text>
+  <text x="1020" y="282" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">2=5H=55</text>
+  <text x="600" y="360" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="14">TUI: fullscreen (Pi, Codex, OpenCode) vs scrollback (Aider, Claude Code)</text>
+  <text x="600" y="390" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="13">Compaction · thinning · sub-agents · adversarial fresh-instance (g3)</text>
+  <text x="600" y="500" text-anchor="middle" fill="#999" font-family="system-ui,sans-serif" font-size="12">VAIRL · 2026</text>
+</svg>

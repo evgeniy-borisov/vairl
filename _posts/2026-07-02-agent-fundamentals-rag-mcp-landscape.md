@@ -1,17 +1,17 @@
 ---
 layout: post
-title: "Agent fundamentals: RAG, context window, skills, MCP, and the 2026 agent landscape"
+title: "Agent fundamentals: RAG, context window, skills, and MCP"
 date: 2026-07-02 12:00:00 +0300
-excerpt: "RAG, context, skills, MCP, and agent landscape: Pi, Aider, Codex, OpenCode, Hermes, Claude Code, and more—with a dedicated TUI comparison and feature tables."
+excerpt: "RAG, context window, skills, and MCP for AI agents: basics, typical agent-loop architecture, and external knowledge. Agent product comparison lives in a separate post."
 lang: en
 image: /assets/images/agent-fundamentals-rag-mcp.svg
 ---
 
 To design or evaluate **AI agents**, knowing the model name is not enough. Almost every system repeats four layers: **knowledge** (RAG), **session memory** (context window), **procedures** (skills), and **capabilities** (often via **MCP**). On top sits the **agent loop**: plan → act → observe → repeat.
 
-This article explains the basics with examples, sketches a typical agent architecture, and provides a **comparative survey** of six current agent programs plus **g3** as a special case (dialectical autocoding).
+This article covers basics and architecture. A **detailed agent survey with memory management** (Pi, Aider, Codex, OpenCode, Claude Code, g3, …) is in the Russian post: [Agent landscape 2026 and memory](/vairl/blog/2026/07/03/agent-landscape-memory-ru/).
 
-Related VAIRL posts: [g3 dialectical autocoding](/vairl/blog/2026/06/25/g3-dialectical-autocoding/), [hybrid DAG/FSM/BT orchestrator](/vairl/blog/2026/06/26/hybrid-agent-dag-fsm-behavior-tree/), [agent lifecycle](/vairl/blog/2026/07/01/agent-lifecycle-pipeline/), [agent telemetry](/vairl/blog/2026/06/29/agent-telemetry/).
+Related: [RAG for agents](/vairl/blog/2026/07/03/agent-rag-approaches-ru/), [g3 dialectical autocoding](/vairl/blog/2026/06/25/g3-dialectical-autocoding/), [agent lifecycle](/vairl/blog/2026/07/01/agent-lifecycle-pipeline/), [telemetry](/vairl/blog/2026/06/29/agent-telemetry/).
 
 ---
 
@@ -156,162 +156,19 @@ Classic **ReAct** cycle: Thought → Action → Observation until done.
 
 ---
 
-## Survey of current agent programs
+## Agent survey (separate post)
 
-Focus on **Pi, Aider, Codex, and OpenCode** as terminal-first agents; see [TUI comparison](#tui-comparison-terminal-interfaces) below.
+Product comparison—TUI, feature tables, and **memory management per agent**—is in:
 
-### Pi coding agent (pi-mono)
-
-Open-source minimal coding agent ([badlogic/pi-mono](https://github.com/badlogic/pi-mono)): TypeScript stack `pi-ai` → `pi-agent-core` → `pi-tui` → `pi-coding-agent`. Provider-neutral agent loop, tools `read`/`write`/`edit`/`bash`, skills, extensions, sub-agents. Modes: interactive **full-screen TUI** (default), `--json`, RPC/JSONL for embedding.
-
-### Aider
-
-Python pair programmer ([Aider-AI/aider](https://github.com/Aider-AI/aider)). `Coder` + LiteLLM + **repo map** (symbol graph + PageRank). Chat → diff → git auto-commit. **Scrollback REPL** (not fullscreen): `prompt_toolkit` + Rich markdown stream, slash commands, file/voice input.
-
-### OpenAI Codex (CLI)
-
-Rust terminal agent ([openai/codex](https://github.com/openai/codex)). `codex` launches **interactive TUI**; `codex exec` for scripts. Sandbox, approval modes, MCP, sub-agents, web search. ChatGPT plan or API key.
-
-### OpenCode
-
-MIT client/server agent ([opencode.ai](https://opencode.ai)). Background server + TUI/Desktop/IDE clients. `build` / `plan` / `explore` agents, 75+ providers, ACP. **Tab** switches build↔plan; sessions survive terminal disconnect.
-
-### py-code-agent
-
-Python ReAct agent, LiteLLM, pluggy plugins, MCP gateway, session tree. Scrollback CLI. [GitHub](https://github.com/bonashen/py-code-agent)
-
-### Hermes Agent
-
-Nous Research personal agent: CLI TUI + messaging gateway (20+ platforms), SQLite lineage sessions, `delegate_task`, MCP. [Docs](https://hermes-agent.nousresearch.com/docs/developer-guide/architecture)
-
-### IDAD
-
-GitHub pipeline: Issue → agents → human plan gate → implement → human PR gate. Backend: Claude Code, Cursor, or Codex. [idad.io](https://idad.io/)
-
-### ChatGPT Agent (Agent Mode)
-
-Cloud virtual computer: browsers, terminal, connectors. Web UI, not terminal TUI.
-
-### Claude Code
-
-Anthropic terminal/IDE agent: CLAUDE.md, Skills, Hooks, Subagents, MCP. **Scrollback REPL** with permission prompts.
+**[Agent landscape 2026 and memory (RU)](/vairl/blog/2026/07/03/agent-landscape-memory-ru/)**
 
 ---
 
-## TUI comparison: terminal interfaces
+## Summary
 
-| Family | Look & feel | Examples |
-|--------|-------------|----------|
-| **Full-screen TUI** | Panels, overlays, keyboard-driven | **Pi**, **Codex**, **OpenCode** |
-| **Scrollback chat** | Message log, input at bottom | **Aider**, **Claude Code**, py-code-agent |
-| **Non-TUI** | Web, IDE, GitHub | ChatGPT Agent, IDAD |
-
-### Detailed TUI table
-
-| Agent | UI type | Stack | UX highlights | Strengths | Limits |
-|-------|---------|-------|---------------|-----------|--------|
-| **Pi** | Full-screen | `pi-tui`: differential render, CSI 2026 | Slash cmds, path autocomplete, streaming tools | Flicker-free on SSH; IME/CJK; inline images | Needs modern terminal |
-| **Aider** | Scrollback | prompt_toolkit + Rich | Enter/Alt+Enter, vi-mode, `/commands` | Familiar chat UX; markdown stream + spinner | No side-by-side diff panel in TUI |
-| **Codex** | Full-screen | Rust built-in | `/model`, images, narration, approvals | Sandbox modes; `codex resume` | OpenAI ecosystem |
-| **OpenCode** | Full-screen | TUI + background server | Tab: build/plan; `@general` sub-agent | Session survives terminal close | Requires server process |
-| **Claude Code** | Scrollback | Custom REPL | Slash, inline permissions | Hooks/skills/MCP depth | Not classic fullscreen |
-| **g3** | Scrollback | Rust CLI | `/compact`, `/stats`, coach/player turns | Transparent adversarial loop | No dedicated TUI framework |
-
-```mermaid
-flowchart TB
-  subgraph fullscreen [Full-screen TUI]
-    P[Pi]
-    C[Codex]
-    O[OpenCode]
-  end
-  subgraph scroll [Scrollback chat]
-    A[Aider]
-    CC[Claude Code]
-  end
-```
-
-| Scenario | Best fit |
-|----------|----------|
-| Long SSH sessions | **OpenCode** (persistent server) or **Pi** (differential TUI) |
-| Quick pair edits | **Aider** |
-| OpenAI + sandbox + scripting | **Codex** |
-| Minimal hackable stack | **Pi** |
-
----
-
-## Comparison table
-
-### Terminal-first agents
-
-| Criterion | **Pi** | **Aider** | **Codex** | **OpenCode** | Claude Code | **g3** |
-|-----------|:------:|:---------:|:---------:|:------------:|:-----------:|:------:|
-| Open source | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| TUI | Full-screen | Scrollback | Full-screen | Full-screen | Scrollback | Scrollback |
-| Pair programming | ✅ | ✅ **core** | ✅ | ✅ | ✅ | Coach/Player |
-| Smart context | extensions | ✅ repo map | web search | LSP | MCP | tree-sitter |
-| Git auto-commit | — | ✅ | ✅ | ✅ | ✅ | ✅ |
-| MCP | extensions | — | ✅ | ✅ | ✅ | partial |
-| Skills | ✅ | — | — | AGENTS.md | ✅ | ✅ |
-| Standout | Minimal stack | Repo map | OpenAI sandbox | Persistent server | Hooks | Adversarial loop |
-
-### Extended landscape
-
-| Criterion | py-code-agent | Hermes | IDAD | ChatGPT Agent |
-|-----------|:-------------:|:------:|:----:|:-------------:|
-| Focus | Code | Personal | GitHub | General tasks |
-| Interface | CLI | CLI + chat | GitHub | Web |
-| MCP | Gateway | ✅ | Via CLI | Connectors |
-
----
-
-## Feature checklist
-
-| Feature | Pi | Aider | Codex | OpenCode | py-code-agent | Hermes | Claude Code | g3 |
-|---------|:--:|:-----:|:-----:|:--------:|:-------------:|:------:|:-----------:|:--:|
-| Full-screen TUI | ✅ | — | ✅ | ✅ | — | partial | — | — |
-| Scrollback REPL | — | ✅ | — | — | ✅ | ✅ | ✅ | ✅ |
-| File R/W | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Shell | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Git | — | ✅ auto | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| ReAct loop | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Code review | self | — | ✅ agent | — | plugins | background | subagent | **Coach** |
-| MCP | ext | — | ✅ | ✅ | gateway | ✅ | ✅ | partial |
-| Persistent session | ✅ | — | resume | **server** | tree | SQLite | resume | per-turn |
-| Dialectical 2-agent | sub | — | sub | explore | — | delegate | subagents | **core** |
-
----
-
-## g3 as an agent
-
-[g3](https://github.com/dhanji/g3) is a full **coding agent** with non-standard orchestration:
-
-| Typical single-agent | g3 |
-|---------------------|-----|
-| One LLM + tools in a long thread | **Player** (code) + **Coach** (review) |
-| Self-report "done" | Coach independently checks requirements |
-| Growing context | Fresh instance per turn + thinning |
-| Review at the end | Adversarial cycle **every step** (~10 turns) |
-
-**Similar to:** Claude Code/OpenCode (terminal tools, skills); IDAD (implementer vs reviewer); OpenCode plan/build (different permission sets per role).
-
-**Different because:** adversarial cooperation is **mandatory** ([Block AI Research paper](https://block.xyz/documents/adversarial-cooperation-in-code-synthesis.pdf)); shared `requirements.md` contract; explicit **Coach APPROVED** termination; Rust workspace (`g3-core`, providers, execution, computer-control).
-
----
-
-## Practical selection guide
-
-| Goal | Reasonable choice |
-|------|-------------------|
-| Terminal pair programming + repo map | **Aider** |
-| Full-screen TUI, minimal agent core | **Pi** |
-| OpenAI stack, sandbox, `codex exec` | **Codex** |
-| Persistent server, Tab build/plan | **OpenCode** |
-| Local OSS + BYOK | OpenCode, Pi, py-code-agent, g3 |
-| 24/7 Telegram/Slack bot | Hermes |
-| GitHub issue → PR | IDAD |
-| Enterprise IDE + governance | Claude Code |
-| Non-technical web tasks | ChatGPT Agent |
-| Adversarial code verification loop | **g3** |
+1. **RAG** brings external knowledge; **context window** is bounded short-term memory; **skills** are procedures; **MCP** standardizes tools.
+2. Any agent system = **loop + tools + memory + (optional) critic**.
+3. Per-product memory details: [landscape post](/vairl/blog/2026/07/03/agent-landscape-memory-ru/).
 
 ---
 
@@ -319,7 +176,5 @@ flowchart TB
 
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [Agent Skills](https://agentskills.io/)
-- [Pi mono](https://github.com/badlogic/pi-mono) · [Aider](https://aider.chat/) · [Codex CLI](https://developers.openai.com/codex/cli)
-- [OpenCode](https://opencode.ai) · [Hermes](https://hermes-agent.nousresearch.com/) · [IDAD](https://idad.io/)
-- [ChatGPT agent](https://openai.com/index/introducing-chatgpt-agent/) · [Claude Code](https://code.claude.com/docs)
+- [Agent landscape 2026 and memory](/vairl/blog/2026/07/03/agent-landscape-memory-ru/)
 - [g3 on VAIRL](/vairl/blog/2026/06/25/g3-dialectical-autocoding/)
