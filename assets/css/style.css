@@ -808,6 +808,225 @@ nav a {
     flex-shrink: 0;
 }
 
+.rag-pipeline-widget {
+    margin: 32px 0 28px;
+    border: 1px solid #e8e8ec;
+    border-radius: 10px;
+    background: #fcfcfd;
+    overflow: hidden;
+}
+
+.rag-pipeline-widget .rg-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.rag-pipeline-widget .rg-header p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #666;
+}
+
+.rag-pipeline-widget .rg-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #fafafb;
+}
+
+.rag-pipeline-widget .rg-controls-query {
+    background: #f5f6fa;
+}
+
+.rag-pipeline-widget .rg-ctrl-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+.rag-pipeline-widget .rg-controls button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 14px;
+    border: 1px solid #d8d8e0;
+    border-radius: 6px;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.rag-pipeline-widget .rg-controls button:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.rag-pipeline-widget .rg-controls button.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.1));
+    color: #5a4d9e;
+    font-weight: 600;
+}
+
+.rag-pipeline-widget .rg-step-btn {
+    margin-left: auto;
+    border-color: #43c98a !important;
+    color: #2a7d5a !important;
+}
+
+.rag-pipeline-widget .rg-formula {
+    margin: 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #555;
+    border-bottom: 1px solid #ececf0;
+    background: #fff;
+}
+
+.rag-pipeline-widget .rg-formula code {
+    font-size: 12px;
+    background: #f0f0f4;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.rag-pipeline-widget .rg-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #555;
+    border-bottom: 1px solid #ececf0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.04), rgba(67, 233, 123, 0.04));
+}
+
+.rag-pipeline-widget .rg-metric strong {
+    color: #444;
+    margin-right: 4px;
+}
+
+.rag-pipeline-widget .rg-canvas-wrap {
+    padding: 12px 14px;
+    background: #fafbfd;
+}
+
+.rag-pipeline-widget #rag-pipeline-canvas {
+    display: block;
+    width: 100%;
+    height: 280px;
+    border-radius: 6px;
+    border: 1px solid #e4e6ec;
+    box-shadow: 0 1px 3px rgba(102, 126, 234, 0.06);
+}
+
+.rag-pipeline-widget .rg-steps {
+    padding: 10px 14px;
+    border-top: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.rag-pipeline-widget .rg-step {
+    font-size: 12px;
+    line-height: 1.55;
+    color: #666;
+    padding: 5px 8px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.rag-pipeline-widget .rg-step.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.06));
+    color: #444;
+}
+
+.rag-pipeline-widget .rg-step.dim {
+    opacity: 0.45;
+}
+
+.rag-pipeline-widget .rg-step-num {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 50%;
+    background: #667eea;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    margin-right: 4px;
+}
+
+.rag-pipeline-widget .rg-chunk-list {
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 10px 14px 14px;
+    border-top: 1px solid #ececf0;
+    background: #fff;
+}
+
+.rag-pipeline-widget .rg-chunk-item {
+    font-size: 12px;
+    line-height: 1.55;
+    color: #666;
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    border-left: 3px solid transparent;
+}
+
+.rag-pipeline-widget .rg-chunk-item.relevant {
+    border-left-color: rgba(102, 126, 234, 0.35);
+}
+
+.rag-pipeline-widget .rg-chunk-item.active {
+    background: linear-gradient(135deg, rgba(67, 233, 123, 0.12), rgba(56, 217, 200, 0.08));
+    color: #1a4d3a;
+    border-left-color: #43e97b;
+}
+
+.rag-pipeline-widget .rg-chunk-meta {
+    font-size: 10px;
+    font-weight: 600;
+    color: #888;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.rag-pipeline-widget .rg-legend {
+    display: flex;
+    gap: 16px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #777;
+    border-top: 1px solid #ececf0;
+}
+
+.rag-pipeline-widget .rg-leg-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rag-pipeline-widget .rg-leg-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
 .grpo-ppo-widget {
     margin: 32px 0 28px;
     border: 1px solid #e8e8ec;
@@ -1213,6 +1432,7 @@ footer {
 [data-theme="dark"] .criticality-widget,
 [data-theme="dark"] .semantic-torrent-widget,
 [data-theme="dark"] .grpo-ppo-widget,
+[data-theme="dark"] .rag-pipeline-widget,
 [data-theme="dark"] .rl-policy-credit-widget,
 [data-theme="dark"] .edge-nn-widget {
     background: var(--widget-bg);
@@ -1227,6 +1447,9 @@ footer {
 [data-theme="dark"] .semantic-torrent-widget .st-chunk-list,
 [data-theme="dark"] .grpo-ppo-widget .rl-header,
 [data-theme="dark"] .grpo-ppo-widget .rl-caption,
+[data-theme="dark"] .rag-pipeline-widget .rg-header,
+[data-theme="dark"] .rag-pipeline-widget .rg-steps,
+[data-theme="dark"] .rag-pipeline-widget .rg-chunk-list,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-header,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-caption,
 [data-theme="dark"] .edge-nn-widget .edge-nn-status {
@@ -1243,6 +1466,9 @@ footer {
 [data-theme="dark"] .semantic-torrent-widget .st-header p,
 [data-theme="dark"] .semantic-torrent-widget .st-chunk-item,
 [data-theme="dark"] .grpo-ppo-widget .rl-header p,
+[data-theme="dark"] .rag-pipeline-widget .rg-header p,
+[data-theme="dark"] .rag-pipeline-widget .rg-chunk-item,
+[data-theme="dark"] .rag-pipeline-widget .rg-step,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-header p,
 [data-theme="dark"] .edge-nn-widget .edge-nn-header p,
 [data-theme="dark"] .edge-nn-widget .edge-nn-side {
@@ -1253,6 +1479,7 @@ footer {
 [data-theme="dark"] .criticality-widget .criticality-controls,
 [data-theme="dark"] .semantic-torrent-widget .st-controls,
 [data-theme="dark"] .grpo-ppo-widget .rl-controls,
+[data-theme="dark"] .rag-pipeline-widget .rg-controls,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-controls {
     background: var(--widget-controls);
 }
@@ -1261,6 +1488,7 @@ footer {
 [data-theme="dark"] .criticality-widget .crit-state-btn,
 [data-theme="dark"] .semantic-torrent-widget .st-controls button,
 [data-theme="dark"] .grpo-ppo-widget .rl-controls button,
+[data-theme="dark"] .rag-pipeline-widget .rg-controls button,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-controls button,
 [data-theme="dark"] .edge-nn-widget .edge-nn-controls button {
     background: var(--widget-btn-bg);
@@ -1271,6 +1499,7 @@ footer {
 [data-theme="dark"] .phase-portrait-widget .phase-portrait-controls button.active,
 [data-theme="dark"] .semantic-torrent-widget .st-controls button.active,
 [data-theme="dark"] .grpo-ppo-widget .rl-controls button.active,
+[data-theme="dark"] .rag-pipeline-widget .rg-controls button.active,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-controls button.active {
     background: var(--gradient-accent);
     color: #a0b0ff;
@@ -1279,6 +1508,7 @@ footer {
 [data-theme="dark"] .criticality-widget .criticality-canvas-wrap,
 [data-theme="dark"] .semantic-torrent-widget .st-canvas-wrap,
 [data-theme="dark"] .grpo-ppo-widget .rl-canvas-wrap,
+[data-theme="dark"] .rag-pipeline-widget .rg-canvas-wrap,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-canvas-wrap {
     background: var(--widget-canvas-bg);
 }
@@ -1286,6 +1516,7 @@ footer {
 [data-theme="dark"] .criticality-widget #criticality-grid-canvas,
 [data-theme="dark"] .semantic-torrent-widget #semantic-torrent-canvas,
 [data-theme="dark"] .grpo-ppo-widget #grpo-ppo-canvas,
+[data-theme="dark"] .rag-pipeline-widget #rag-pipeline-canvas,
 [data-theme="dark"] .rl-policy-credit-widget #rl-policy-credit-canvas,
 [data-theme="dark"] .edge-nn-widget .edge-nn-canvas-mount canvas,
 [data-theme="dark"] .edge-nn-widget .edge-nn-preview {
@@ -1293,7 +1524,9 @@ footer {
 }
 
 [data-theme="dark"] .semantic-torrent-widget .st-result,
-[data-theme="dark"] .grpo-ppo-widget .rl-formula {
+[data-theme="dark"] .grpo-ppo-widget .rl-formula,
+[data-theme="dark"] .rag-pipeline-widget .rg-formula,
+[data-theme="dark"] .rag-pipeline-widget .rg-metrics {
     background: var(--widget-bg);
     color: var(--text-secondary);
     border-color: var(--border-light);
@@ -1304,7 +1537,8 @@ footer {
     color: var(--text-muted);
 }
 
-[data-theme="dark"] .grpo-ppo-widget .rl-formula code {
+[data-theme="dark"] .grpo-ppo-widget .rl-formula code,
+[data-theme="dark"] .rag-pipeline-widget .rg-formula code {
     background: var(--bg-code);
 }
 
