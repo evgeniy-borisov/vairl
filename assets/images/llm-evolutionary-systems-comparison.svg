@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fafbff"/>
+      <stop offset="100%" style="stop-color:#f0f4ff"/>
+    </linearGradient>
+    <linearGradient id="sakana" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b6b"/>
+      <stop offset="100%" style="stop-color:#feca57"/>
+    </linearGradient>
+    <linearGradient id="google" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4285f4"/>
+      <stop offset="100%" style="stop-color:#34a853"/>
+    </linearGradient>
+    <linearGradient id="airi" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5f27cd"/>
+      <stop offset="100%" style="stop-color:#341f97"/>
+    </linearGradient>
+    <marker id="arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#636e72"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1198" height="628" rx="4" fill="none" stroke="#e4e6f0" stroke-width="2"/>
+  <text x="60" y="70" font-family="system-ui,sans-serif" font-size="36" font-weight="700" fill="#2d3436">LLM + Evolution</text>
+  <text x="60" y="108" font-family="system-ui,sans-serif" font-size="20" fill="#636e72">ShinkaEvolve · AlphaEvolve · GigaEvo</text>
+
+  <!-- Shared pipeline -->
+  <rect x="420" y="140" width="360" height="52" rx="10" fill="#dfe6e9" stroke="#b2bec3"/>
+  <text x="600" y="172" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#2d3436">1I89 F8:;: LLM-<CB0F8O ’ evaluator ’ 0@E82</text>
+
+  <!-- Three systems -->
+  <rect x="60" y="230" width="320" height="300" rx="14" fill="#fff" stroke="#ff6b6b" stroke-width="2"/>
+  <rect x="60" y="230" width="320" height="44" rx="14" fill="url(#sakana)"/>
+  <text x="220" y="260" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" font-weight="700" fill="#fff">ShinkaEvolve</text>
+  <text x="80" y="300" font-family="system-ui,sans-serif" font-size="13" fill="#2d3436">Sakana AI · Apache 2.0</text>
+  <text x="80" y="328" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">AB@>20 + <83@0F8O</text>
+  <text x="80" y="352" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">Weighted parent + novelty reject</text>
+  <text x="80" y="376" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">UCB1 ensemble LLM</text>
+  <text x="80" y="400" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">Meta-scratchpad</text>
+  <text x="80" y="440" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#d63031">~150 eval ’ circle pack 2.636</text>
+  <text x="80" y="468" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">AIME · ALE-Bench · MoE LBL</text>
+  <text x="80" y="508" font-family="system-ui,sans-serif" font-size="11" fill="#b2bec3">sample-efficient</text>
+
+  <rect x="440" y="230" width="320" height="300" rx="14" fill="#fff" stroke="#4285f4" stroke-width="2"/>
+  <rect x="440" y="230" width="320" height="44" rx="14" fill="url(#google)"/>
+  <text x="600" y="260" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" font-weight="700" fill="#fff">AlphaEvolve</text>
+  <text x="460" y="300" font-family="system-ui,sans-serif" font-size="13" fill="#2d3436">Google DeepMind · 70:@KBK9</text>
+  <text x="460" y="328" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">MAP-Elites + >AB@>20</text>
+  <text x="460" y="352" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">Gemini Flash + Pro</text>
+  <text x="460" y="376" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">Async pipeline, throughput</text>
+  <text x="460" y="400" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">Meta-prompt co-evolution</text>
+  <text x="460" y="440" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#0984e3">BKAOG8 eval · 2.635 (n=26)</text>
+  <text x="460" y="468" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">Heilbronn · kissing · matmul</text>
+  <text x="460" y="492" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">Borg · TPU · Gemini kernel</text>
+  <text x="460" y="508" font-family="system-ui,sans-serif" font-size="11" fill="#b2bec3">50+ <0B. 7040G</text>
+
+  <rect x="820" y="230" width="320" height="300" rx="14" fill="#fff" stroke="#5f27cd" stroke-width="2"/>
+  <rect x="820" y="230" width="320" height="44" rx="14" fill="url(#airi)"/>
+  <text x="980" y="260" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" font-weight="700" fill="#fff">GigaEvo</text>
+  <text x="840" y="300" font-family="system-ui,sans-serif" font-size="13" fill="#2d3436">AIRI · open source</text>
+  <text x="840" y="328" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">MAP-Elites (fitness × validity)</text>
+  <text x="840" y="352" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">Multi-island: fitness / simplicity</text>
+  <text x="840" y="376" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">DAG eval · Redis · Hydra</text>
+  <text x="840" y="400" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">Lineage + insights (LangGraph)</text>
+  <text x="840" y="440" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#6c5ce7">20 gen Heilbronn · 2.636 n=26</text>
+  <text x="840" y="468" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">kissing · prompt evolution</text>
+  <text x="840" y="492" font-family="system-ui,sans-serif" font-size="12" fill="#636e72">MAESTRO CARE · gigaevo-platform</text>
+  <text x="840" y="508" font-family="system-ui,sans-serif" font-size="11" fill="#b2bec3">@5?@>4C:F8O AlphaEvolve</text>
+
+  <!-- Arrows to shared pipeline -->
+  <line x1="220" y1="230" x2="480" y2="192" stroke="#636e72" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="600" y1="230" x2="600" y2="192" stroke="#636e72" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="980" y1="230" x2="720" y2="192" stroke="#636e72" stroke-width="2" marker-end="url(#arr)"/>
+
+  <text x="60" y="580" font-family="system-ui,sans-serif" font-size="16" fill="#636e72">Verifier >1O70B5;5=: ?@>3@0<<0 ’ <5B@8:0 ’ >B1>@ M;8B</text>
+</svg>
