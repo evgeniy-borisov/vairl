@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="symG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="symG2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e94560"/>
+      <stop offset="100%" style="stop-color:#ff6b6b"/>
+    </linearGradient>
+    <linearGradient id="symG3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f3460"/>
+      <stop offset="100%" style="stop-color:#533483"/>
+    </linearGradient>
+    <marker id="symArrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#e94560"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="630" fill="#f8f9fc"/>
+  <rect x="1" y="1" width="1198" height="628" rx="4" fill="none" stroke="#e4e6f0" stroke-width="2"/>
+  <text x="60" y="72" font-family="system-ui,sans-serif" font-size="40" font-weight="700" fill="#1a1a2e">Symbolica</text>
+  <text x="60" y="112" font-family="system-ui,sans-serif" font-size="22" fill="#636e72">Agentica · ARC-AGI-3 · 36%</text>
+
+  <rect x="60" y="160" width="320" height="380" rx="16" fill="url(#symG1)" opacity="0.92"/>
+  <text x="220" y="210" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="700" fill="#fff">Research Lab</text>
+  <text x="220" y="245" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" fill="#a8b2d1">category theory</text>
+  <text x="220" y="270" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" fill="#a8b2d1">program synthesis</text>
+  <text x="220" y="295" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" fill="#a8b2d1">symbolic reasoning</text>
+
+  <rect x="440" y="200" width="320" height="120" rx="14" fill="url(#symG2)"/>
+  <text x="600" y="248" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="700" fill="#fff">Agentica SDK</text>
+  <text x="600" y="278" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" fill="#ffe0e6">REPL · spawn · Warp RPC</text>
+
+  <rect x="440" y="360" width="320" height="180" rx="14" fill="url(#symG3)"/>
+  <text x="600" y="410" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="700" fill="#fff">ARC-AGI-3</text>
+  <text x="600" y="450" text-anchor="middle" font-family="monospace" font-size="36" font-weight="700" fill="#e94560">36.08%</text>
+  <text x="600" y="490" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="#c4b5fd">113/182 levels · 7/25 games</text>
+  <text x="600" y="515" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#a8b2d1">~1.68× human action budget</text>
+
+  <rect x="820" y="160" width="320" height="110" rx="12" fill="#fff" stroke="#e94560" stroke-width="2"/>
+  <text x="980" y="200" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#1a1a2e">CoT baseline</text>
+  <text x="980" y="230" text-anchor="middle" font-family="monospace" font-size="22" fill="#636e72">&lt;1%</text>
+  <text x="980" y="255" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#888">Opus 4.6 / GPT 5.4</text>
+
+  <rect x="820" y="290" width="320" height="110" rx="12" fill="#fff" stroke="#533483" stroke-width="2"/>
+  <text x="980" y="330" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#1a1a2e">ARC-AGI-2 SOTA</text>
+  <text x="980" y="360" text-anchor="middle" font-family="monospace" font-size="22" fill="#533483">85.28%</text>
+  <text x="980" y="385" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#888">Arcgentica + Opus 4.6</text>
+
+  <rect x="820" y="420" width="320" height="120" rx="12" fill="#fff" stroke="#0f3460" stroke-width="2"/>
+  <text x="980" y="460" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#1a1a2e">Cost / public eval</text>
+  <text x="980" y="495" text-anchor="middle" font-family="monospace" font-size="18" fill="#0f3460">$1,005 vs $8,900</text>
+  <text x="980" y="520" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#888">Agentica vs CoT Opus</text>
+
+  <line x1="380" y1="260" x2="440" y2="260" stroke="#e94560" stroke-width="3" marker-end="url(#symArrow)"/>
+  <line x1="600" y1="320" x2="600" y2="360" stroke="#e94560" stroke-width="3" marker-end="url(#symArrow)"/>
+  <line x1="760" y1="420" x2="820" y2="215" stroke="#636e72" stroke-width="2" stroke-dasharray="6 4" opacity="0.5"/>
+  <line x1="760" y1="450" x2="820" y2="345" stroke="#636e72" stroke-width="2" stroke-dasharray="6 4" opacity="0.5"/>
+
+  <text x="60" y="580" font-family="system-ui,sans-serif" font-size="16" fill="#636e72">59@>A8<2>;8:0 · code-as-reasoning · agentic benchmarks</text>
+</svg>
