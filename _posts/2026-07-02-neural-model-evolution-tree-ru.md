@@ -61,7 +61,7 @@ flowchart TB
 
 ### Интерактив: fan tree и заимствования (p5.js)
 
-Переключите режим и (в режиме заимствований) фильтр по **механизму** — подсветятся узлы и дуги. Наведите на модель: объём обучающих ресурсов и относительная точность показаны шкалой ●●●○○ (учебная оценка, не leaderboard).
+Переключите режим и (в режиме заимствований) фильтр по **механизму** — подсветятся узлы и дуги. **Клик по узлу** делит область пополам: слева дерево, справа — сводка и лаконичные **PyTorch-примеры** того, что было изобретено в этой архитектуре.
 
 <div class="nn-phylogeny-widget phase-portrait-widget" id="nn-phylogeny-demo">
   <div class="nn-toolbar">
@@ -78,19 +78,31 @@ flowchart TB
     <button type="button" data-nn-trait="year">Год</button>
   </div>
   <div class="nn-mech-bar" data-nn-mech-wrap id="nn-phylogeny-mechs"></div>
-  <div id="nn-phylogeny-canvas" class="nn-canvas phase-portrait-canvas"></div>
-  <p class="nn-hint" id="nn-phylogeny-hint">Классическая полукруглая филогения: корень внизу, семейства — промежуточные узлы, листья — модели.</p>
-  <p class="nn-detail" id="nn-phylogeny-detail">Наведите на модель или дугу заимствования. Выберите механизм — подсветятся связанные узлы.</p>
-  <p class="phase-portrait-caption">Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a>; ~27 кураторских моделей. Дуги заимствований — экспертная разметка, не citation graph.</p>
+  <div class="nn-split-wrap" id="nn-phylogeny-split">
+    <div class="nn-tree-pane">
+      <div id="nn-phylogeny-canvas" class="nn-canvas phase-portrait-canvas"></div>
+    </div>
+    <aside class="nn-code-pane" id="nn-phylogeny-panel" hidden>
+      <header class="nn-panel-head">
+        <h4 class="nn-panel-title">Архитектура</h4>
+        <button type="button" class="nn-panel-close" data-nn-close aria-label="Закрыть">×</button>
+      </header>
+      <div class="nn-panel-body"></div>
+    </aside>
+  </div>
+  <p class="nn-hint" id="nn-phylogeny-hint">Клик по узлу — split-панель с PyTorch-примерами ключевых идей.</p>
+  <p class="nn-detail" id="nn-phylogeny-detail">Кликните по узлу модели — справа появятся PyTorch-примеры ключевых идей.</p>
+  <p class="phase-portrait-caption">Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a>; подсветка — <a href="https://highlightjs.org/" target="_blank" rel="noopener">highlight.js</a>. ~27 кураторских моделей.</p>
 </div>
 
+<script src="{{ '/assets/js/nn-phylogeny-snippets.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/nn-phylogeny-demo.js' | relative_url }}"></script>
 
 | Режим | Что показывает |
 |-------|----------------|
-| **Fan tree** | Таксономия семейств на полукруге (phylogeny layout) |
-| **Заимствования** | Межветочные дуги: Transformer → ViT, ResNet → ViT, LSTM → Transformer… |
-| **Признаки** | Размер узла ∝ compute/данные; яркость ∝ относительная точность |
+| **Fan tree** | Таксономия семейств; клик — PyTorch-код |
+| **Заимствования** | Межветочные дуги + код уникальных добавлений |
+| **Признаки** | Размер ∝ compute; яркость ∝ точность |
 
 ---
 

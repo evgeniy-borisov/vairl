@@ -1,10 +1,12 @@
 /**
- * Neural architecture phylogeny — p5.js demo for evolution tree article.
- * Modes: semicircle fan tree, cross-borrow arcs, trait coloring.
+ * Neural architecture phylogeny — p5.js demo.
+ * Fan tree, borrow arcs, traits; split panel with PyTorch snippets on click.
  */
 (function () {
   const ROOT_ID = 'nn-phylogeny-demo';
   const CANVAS_ID = 'nn-phylogeny-canvas';
+  const PANEL_ID = 'nn-phylogeny-panel';
+  const SPLIT_ID = 'nn-phylogeny-split';
 
   const FAMILY_COLORS = {
     Foundations: [102, 126, 234],
@@ -98,15 +100,15 @@
   const MODES = {
     tree: {
       title: 'Fan tree (полукруг)',
-      hint: 'Классическая полукруглая филогения (fan tree / semicircle phylogeny): корень внизу, семейства — промежуточные узлы, листья — модели.',
+      hint: 'Клик по узлу — split-панель с PyTorch-примерами ключевых идей. Узлы разведены по дуге без наложений.',
     },
     borrow: {
       title: 'Заимствования',
-      hint: 'Дуги между ветвями — явные архитектурные заимствования (не родство по семейству). Наведите на дугу или выберите механизм.',
+      hint: 'Дуги между ветвями — архитектурные заимствования. Клик по узлу — код уникальных добавлений.',
     },
     traits: {
       title: 'Признаки',
-      hint: 'Размер узла ∝ объём обучающих ресурсов; яркость ∝ относительная точность/SOTA. Цвет — семейство.',
+      hint: 'Размер ∝ данные/compute; яркость ∝ точность. Клик — детали и PyTorch.',
     },
   };
 
@@ -116,38 +118,79 @@
     year: { label: 'Год', key: 'year' },
   };
 
-  function buildTree() {
-    const families = {};
-    MODELS.forEach((m) => {
-      if (!families[m.family]) families[m.family] = [];
-      families[m.family].push(m);
+  const ARC_START = Math.PI * 0.05;
+  const ARC_END = Math.PI * 0.95;
+  const FAMILY_GAP = 0.035;
+
+  let hljsReady = null;
+
+  function loadHighlight() {
+    if (hljsReady) return hljsReady;
+    hljsReady = new Promise((resolve) => {
+      if (window.hljs) {
+        resolve(window.hljs);
+        return;
+      }
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = dark
+        ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+        : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+      document.head.appendChild(link);
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+      script.onload = () => {
+        const py = document.createElement('script');
+        py.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js';
+        py.onload = () => resolve(window.hljs);
+        document.head.appendChild(py);
+      };
+      document.head.appendChild(script);
     });
-    Object.values(families).forEach((list) => list.sort((a, b) => a.year - b.year));
-    return families;
+    return hljsReady;
   }
 
-  function buildLayout(p, pad) {
-    const tree = buildTree();
-    const families = Object.keys(tree);
-    const allLeaves = MODELS.slice().sort((a, b) => {
-      const fa = families.indexOf(a.family);
-      const fb = families.indexOf(b.family);
-      return fa - fb || a.year - b.year;
+  function buildTree() {
+    const families = {};
+    const order = [];
+    MODELS.forEach((m) => {
+      if (!families[m.family]) {
+        families[m.family] = [];
+        order.push(m.family);
+      }
+      families[m.family].push(m);
     });
-    const n = allLeaves.length;
-    const cx = p.width / 2;
-    const cy = p.height - pad.bottom;
-    const maxR = Math.min(p.width * 0.44, p.height - pad.top - pad.bottom - 20);
+    order.forEach((fam) => families[fam].sort((a, b) => a.year - b.year));
+    return { families, order };
+  }
+
+  function buildLayout(p, pad, treePaneW, treePaneH) {
+    const { families, order } = buildTree();
+    const cx = treePaneW / 2;
+    const cy = treePaneH - pad.bottom;
+    const maxR = Math.min(treePaneW * 0.46, treePaneH - pad.top - pad.bottom - 24);
+
+    const totalLeaves = MODELS.length;
+    const nGaps = Math.max(0, order.length - 1);
+    const leafArc = ARC_END - ARC_START - nGaps * FAMILY_GAP;
 
     const leafAngles = {};
-    allLeaves.forEach((m, i) => {
-      const t = (i + 0.5) / n;
-      leafAngles[m.id] = Math.PI * (0.08 + 0.84 * t);
+    let cursor = ARC_START;
+
+    order.forEach((fam, fi) => {
+      const members = families[fam];
+      const sector = (members.length / totalLeaves) * leafArc;
+      const step = members.length ? sector / members.length : 0;
+      members.forEach((m, i) => {
+        leafAngles[m.id] = cursor + step * (i + 0.5);
+      });
+      cursor += sector + (fi < order.length - 1 ? FAMILY_GAP : 0);
     });
 
     const familyAngles = {};
-    families.forEach((fam) => {
-      const ids = tree[fam].map((m) => m.id);
+    order.forEach((fam) => {
+      const ids = families[fam].map((m) => m.id);
       familyAngles[fam] = ids.reduce((s, id) => s + leafAngles[id], 0) / ids.length;
     });
 
@@ -161,18 +204,22 @@
     }
 
     const nodes = { root: polar(rootAngle, 0) };
-    families.forEach((fam) => {
-      nodes[`fam:${fam}`] = polar(familyAngles[fam], 0.35);
+    order.forEach((fam) => {
+      nodes[`fam:${fam}`] = polar(familyAngles[fam], 0.34);
     });
-    allLeaves.forEach((m) => {
-      nodes[m.id] = polar(leafAngles[m.id], 0.82);
+    MODELS.forEach((m) => {
+      nodes[m.id] = polar(leafAngles[m.id], 0.84);
     });
 
-    return { tree, families, nodes, cx, cy, maxR, rootAngle, familyAngles, leafAngles, polar };
+    return { families, order, nodes, cx, cy, maxR, rootAngle, familyAngles, leafAngles, polar };
   }
 
   function nameById(id) {
     return MODELS.find((m) => m.id === id);
+  }
+
+  function stars(n) {
+    return '●'.repeat(n) + '○'.repeat(5 - n);
   }
 
   function init() {
@@ -185,26 +232,112 @@
     const hintEl = document.getElementById('nn-phylogeny-hint');
     const detailEl = document.getElementById('nn-phylogeny-detail');
     const mechBar = document.getElementById('nn-phylogeny-mechs');
+    const panelEl = document.getElementById(PANEL_ID);
+    const splitEl = document.getElementById(SPLIT_ID);
 
     let mode = 'tree';
     let traitMode = 'train';
     let activeMech = null;
     let hoverId = null;
     let hoverEdge = null;
+    let selectedId = null;
+    let p5Instance = null;
+
+    loadHighlight();
+
+    function setSelection(id) {
+      selectedId = id === selectedId ? null : id;
+      root.classList.toggle('nn-has-selection', !!selectedId);
+      if (panelEl) panelEl.hidden = !selectedId;
+      renderPanel();
+      resizeCanvas();
+      if (detailEl && !selectedId) {
+        detailEl.textContent = 'Кликните по узлу модели — справа появятся PyTorch-примеры ключевых идей.';
+      }
+    }
+
+    function renderPanel() {
+      if (!panelEl) return;
+      const body = panelEl.querySelector('.nn-panel-body');
+      if (!body) return;
+
+      if (!selectedId) {
+        body.innerHTML = '';
+        return;
+      }
+
+      const m = nameById(selectedId);
+      if (!m) return;
+
+      const meta = window.NN_PHYLOGENY_SNIPPETS?.[selectedId];
+      const mechStr = m.mechs.map((k) => MECH_LABELS[k] || k).join(', ');
+
+      const titleEl = panelEl.querySelector('.nn-panel-title');
+      if (titleEl) titleEl.textContent = m.name;
+
+      let html = `
+        <span class="nn-panel-meta">${m.year} · ${m.family}</span>
+        <dl class="nn-panel-stats">
+          <dt>Задача</dt><dd>${m.task}</dd>
+          <dt>Данные</dt><dd>${stars(m.train)}</dd>
+          <dt>Точность</dt><dd>${stars(m.acc)}</dd>
+          <dt>Механизмы</dt><dd>${mechStr}</dd>
+        </dl>`;
+
+      if (meta?.blurb) {
+        html += `<p class="nn-panel-blurb">${meta.blurb}</p>`;
+      }
+
+      (meta?.snippets || []).forEach((sn) => {
+        html += `
+          <div class="nn-snippet-block">
+            <p class="nn-snippet-title">${sn.title}</p>
+            <pre><code class="language-python">${escapeHtml(sn.code)}</code></pre>
+          </div>`;
+      });
+
+      if (!meta?.snippets?.length) {
+        html += '<p class="nn-panel-blurb">Пример кода для этой модели скоро добавим.</p>';
+      }
+
+      body.innerHTML = html;
+
+      loadHighlight().then((hljs) => {
+        body.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
+      });
+    }
+
+    function escapeHtml(s) {
+      return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function canvasSize() {
+      const pane = document.querySelector('.nn-tree-pane');
+      const w = pane ? Math.max(280, pane.clientWidth) : Math.min(920, root.clientWidth);
+      const h = selectedId ? 520 : 540;
+      return { w, h };
+    }
+
+    function resizeCanvas() {
+      if (!p5Instance) return;
+      const { w, h } = canvasSize();
+      p5Instance.resizeCanvas(w, h);
+    }
 
     const sketch = (p) => {
       let colors = {};
       let layout = null;
-      const pad = { top: 36, bottom: 48, side: 16 };
+      const pad = { top: 32, bottom: 44, side: 12 };
 
       p.setup = function () {
-        const wrap = document.getElementById(CANVAS_ID);
-        const w = Math.min(920, wrap?.clientWidth || 920);
-        const cnv = p.createCanvas(w, 480);
+        const { w, h } = canvasSize();
+        const cnv = p.createCanvas(w, h);
         cnv.parent(CANVAS_ID);
         p.textFont('system-ui, -apple-system, sans-serif');
         updateColors();
-        layout = buildLayout(p, pad);
       };
 
       function updateColors() {
@@ -218,6 +351,7 @@
               borrow: [250, 180, 80],
               borrowDim: [90, 75, 55],
               highlight: [255, 220, 120],
+              select: [102, 126, 234],
             }
           : {
               bg: [252, 252, 253],
@@ -227,6 +361,7 @@
               borrow: [230, 126, 34],
               borrowDim: [220, 215, 200],
               highlight: [102, 126, 234],
+              select: [108, 92, 231],
             };
       }
 
@@ -236,17 +371,20 @@
       }
 
       function nodeRadius(m) {
-        if (mode !== 'traits') return 7;
+        if (mode !== 'traits') return 8;
         const key = TRAIT_MODES[traitMode].key;
         const v = m[key];
-        if (key === 'year') return p.map(v, 1957, 2023, 5, 11);
-        return 5 + v * 1.8;
+        if (key === 'year') return p.map(v, 1957, 2023, 6, 12);
+        return 6 + v * 1.6;
       }
 
       function nodeAlpha(m) {
         if (mode !== 'traits') return 255;
-        const key = traitMode === 'train' ? 'acc' : traitMode === 'acc' ? 'acc' : 'acc';
-        return 80 + m[key] * 35;
+        return 80 + m.acc * 35;
+      }
+
+      function activeId() {
+        return selectedId || hoverId;
       }
 
       function hitTest(mx, my) {
@@ -256,7 +394,7 @@
         MODELS.forEach((m) => {
           const pt = layout.nodes[m.id];
           if (!pt) return;
-          const r = nodeRadius(m) + 4;
+          const r = nodeRadius(m) + 6;
           const d = p.dist(mx, my, pt.x, pt.y);
           if (d < r && d < bestD) {
             bestD = d;
@@ -269,8 +407,8 @@
       function edgeHitTest(mx, my) {
         if (mode !== 'borrow' || !layout) return null;
         let best = null;
-        let bestD = 18;
-        INFLUENCE.forEach(([src, dst, label], idx) => {
+        let bestD = 16;
+        INFLUENCE.forEach(([src, dst], idx) => {
           const a = layout.nodes[src];
           const b = layout.nodes[dst];
           if (!a || !b) return;
@@ -289,9 +427,7 @@
         const len2 = dx * dx + dy * dy || 1e-6;
         let t = ((px - x1) * dx + (py - y1) * dy) / len2;
         t = p.constrain(t, 0, 1);
-        const nx = x1 + t * dx;
-        const ny = y1 + t * dy;
-        return Math.hypot(px - nx, py - ny);
+        return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
       }
 
       function mechMatch(m) {
@@ -307,23 +443,24 @@
       }
 
       function drawTreeEdges() {
-        const { tree, families, nodes, rootAngle, familyAngles } = layout;
-        p.stroke(...colors.edge);
-        p.strokeWeight(1.4);
+        const { families, order, nodes, familyAngles } = layout;
 
-        families.forEach((fam) => {
+        order.forEach((fam) => {
           const fa = familyAngles[fam];
-          const fc = familyColor(fam, 180);
-          const dim = activeMech && !tree[fam].some((m) => mechMatch(m));
-          p.stroke(...(dim ? colors.edge : fc));
+          const fc = familyColor(fam, 190);
+          const dimFam = activeMech && !families[fam].some((m) => mechMatch(m));
+
+          p.stroke(...(dimFam ? colors.edge : fc));
+          p.strokeWeight(2);
           p.line(nodes.root.x, nodes.root.y, nodes[`fam:${fam}`].x, nodes[`fam:${fam}`].y);
 
-          tree[fam].forEach((m) => {
+          families[fam].forEach((m) => {
             const la = layout.leafAngles[m.id];
             const pt = nodes[m.id];
-            const mid = layout.polar((fa + la) / 2, 0.54);
+            const mid = layout.polar((fa + la) / 2, 0.52);
             const dimLeaf = activeMech && !mechMatch(m);
             p.stroke(...(dimLeaf ? colors.edge : fc));
+            p.strokeWeight(1.3);
             p.noFill();
             p.beginShape();
             p.vertex(nodes[`fam:${fam}`].x, nodes[`fam:${fam}`].y);
@@ -334,29 +471,33 @@
       }
 
       function drawBorrowArcs() {
-        INFLUENCE.forEach(([src, dst, label], idx) => {
+        INFLUENCE.forEach(([src, dst], idx) => {
           const a = layout.nodes[src];
           const b = layout.nodes[dst];
           if (!a || !b) return;
 
+          const aid = activeId();
           const highlighted =
             hoverEdge === idx ||
-            hoverId === src ||
-            hoverId === dst ||
+            aid === src ||
+            aid === dst ||
+            selectedId === src ||
+            selectedId === dst ||
             (activeMech && edgeMechMatch(src, dst));
 
           const dim = activeMech && !edgeMechMatch(src, dst) && hoverEdge !== idx;
 
+          const lift = layout.maxR * (0.06 + (idx % 6) * 0.022);
           const mx = (a.x + b.x) / 2;
-          const my = Math.min(a.y, b.y) - layout.maxR * (0.08 + (idx % 5) * 0.025);
+          const my = Math.min(a.y, b.y) - lift;
 
           p.noFill();
-          p.strokeWeight(highlighted ? 2.4 : 1.1);
-          if (dim) p.stroke(...colors.borrowDim, 90);
+          p.strokeWeight(highlighted ? 2.2 : 1);
+          if (dim) p.stroke(...colors.borrowDim, 80);
           else if (highlighted) p.stroke(...colors.borrow);
-          else p.stroke(...colors.borrow, 140);
+          else p.stroke(...colors.borrow, 120);
 
-          p.drawingContext.setLineDash(highlighted ? [] : [5, 5]);
+          p.drawingContext.setLineDash(highlighted ? [] : [4, 4]);
           p.beginShape();
           p.vertex(a.x, a.y);
           p.quadraticVertex(mx, my, b.x, b.y);
@@ -366,32 +507,39 @@
       }
 
       function drawNodes() {
+        const aid = activeId();
+
         MODELS.forEach((m) => {
           const pt = layout.nodes[m.id];
           if (!pt) return;
           const r = nodeRadius(m);
-          const dim = activeMech && !mechMatch(m) && hoverId !== m.id;
-          const fc = familyColor(m.family, dim ? 60 : nodeAlpha(m));
-          const selected = hoverId === m.id;
+          const dim = activeMech && !mechMatch(m) && selectedId !== m.id && hoverId !== m.id;
+          const isSelected = selectedId === m.id;
+          const isHover = hoverId === m.id && !isSelected;
+          const fc = familyColor(m.family, dim ? 50 : nodeAlpha(m));
 
-          if (selected) {
+          if (isSelected) {
+            p.noFill();
+            p.stroke(...colors.select);
+            p.strokeWeight(3);
+            p.circle(pt.x, pt.y, r * 3.6);
+          } else if (isHover) {
             p.noFill();
             p.stroke(...colors.highlight);
-            p.strokeWeight(2.5);
-            p.circle(pt.x, pt.y, r * 3.2);
+            p.strokeWeight(2);
+            p.circle(pt.x, pt.y, r * 3);
           }
 
           p.noStroke();
           p.fill(...fc);
           p.circle(pt.x, pt.y, r * 2);
 
-          if (mode === 'tree' || selected) {
+          if (isSelected || isHover) {
             p.fill(...(dim ? colors.muted : colors.text));
             p.noStroke();
-            p.textSize(selected ? 11 : 9);
+            p.textSize(isSelected ? 11 : 10);
             p.textAlign(p.CENTER, p.BOTTOM);
-            const label = selected ? `${m.name} (${m.year})` : m.name.split(' ')[0];
-            p.text(label, pt.x, pt.y - r - 3);
+            p.text(`${m.name} (${m.year})`, pt.x, pt.y - r - 4);
           }
         });
 
@@ -400,13 +548,15 @@
         p.noStroke();
         p.textSize(10);
         p.textAlign(p.CENTER, p.TOP);
-        p.text('Neural architectures', nodes.root.x, nodes.root.y + 6);
+        p.text('Neural architectures', nodes.root.x, nodes.root.y + 4);
 
-        Object.keys(buildTree()).forEach((fam) => {
+        layout.order.forEach((fam) => {
           const pt = nodes[`fam:${fam}`];
           p.fill(...familyColor(fam));
-          p.textSize(9);
-          p.text(fam, pt.x, pt.y - 14);
+          p.textSize(8);
+          p.textAlign(p.CENTER, p.CENTER);
+          const label = fam.length > 14 ? fam.slice(0, 12) + '…' : fam;
+          p.text(label, pt.x, pt.y - 10);
         });
       }
 
@@ -415,68 +565,62 @@
         p.noStroke();
         p.textSize(11);
         p.textAlign(p.LEFT, p.TOP);
-        p.text(MODES[mode].title, pad.side, 10);
+        p.text(MODES[mode].title, pad.side, 8);
         if (mode === 'traits') {
           p.textSize(10);
-          p.text(`Ось: ${TRAIT_MODES[traitMode].label}`, pad.side, 26);
+          p.text(`Ось: ${TRAIT_MODES[traitMode].label}`, pad.side, 24);
         }
       }
 
       function syncDetail() {
-        if (!detailEl) return;
+        if (!detailEl || selectedId) return;
         if (hoverEdge != null && mode === 'borrow') {
           const [src, dst, label] = INFLUENCE[hoverEdge];
           const a = nameById(src);
           const b = nameById(dst);
-          detailEl.innerHTML = `<strong>${a?.name} → ${b?.name}</strong> — ${label}`;
+          detailEl.innerHTML = `<strong>${a?.name} → ${b?.name}</strong> — ${label}. Клик по узлу — PyTorch.`;
           return;
         }
         const m = hoverId ? nameById(hoverId) : null;
-        if (!m) {
-          detailEl.textContent = 'Наведите на модель или дугу заимствования. Выберите механизм — подсветятся связанные узлы.';
-          return;
-        }
-        const stars = (n) => '●'.repeat(n) + '○'.repeat(5 - n);
+        if (!m) return;
         detailEl.innerHTML =
-          `<strong>${m.name}</strong> (${m.year}, ${m.family}) · ` +
-          `задача: ${m.task} · данные: ${stars(m.train)} · точность: ${stars(m.acc)} · ` +
-          `механизмы: ${m.mechs.map((k) => MECH_LABELS[k] || k).join(', ')}`;
+          `<strong>${m.name}</strong> (${m.year}) · ${m.task} · клик — открыть код`;
       }
 
       p.draw = function () {
         updateColors();
-        layout = buildLayout(p, pad);
+        layout = buildLayout(p, pad, p.width, p.height);
         p.background(...colors.bg);
         drawLegend();
 
         if (mode === 'borrow') drawBorrowArcs();
         drawTreeEdges();
         drawNodes();
-
         syncDetail();
       };
 
       p.mouseMoved = function () {
+        if (p.mouseX < 0 || p.mouseY < 0 || p.mouseX > p.width || p.mouseY > p.height) return;
         hoverId = hitTest(p.mouseX, p.mouseY);
         hoverEdge = mode === 'borrow' ? edgeHitTest(p.mouseX, p.mouseY) : null;
-        if (hoverId || hoverEdge != null) p.cursor(p.HAND);
-        else p.cursor(p.ARROW);
+        p.cursor(hoverId || hoverEdge != null ? 'pointer' : 'default');
       };
 
       p.mousePressed = function () {
+        if (p.mouseX < 0 || p.mouseY < 0 || p.mouseX > p.width || p.mouseY > p.height) return;
         const id = hitTest(p.mouseX, p.mouseY);
-        if (id) hoverId = id;
+        if (id) setSelection(id);
       };
 
       p.windowResized = function () {
-        const wrap = document.getElementById(CANVAS_ID);
-        if (!wrap) return;
-        const w = Math.min(920, wrap.clientWidth || 920);
-        p.resizeCanvas(w, 480);
+        resizeCanvas();
       };
     };
 
-    new p5(sketch);
+    p5Instance = new p5(sketch);
+    window.__nnPhylogenyResize = resizeCanvas;
+
+    panelEl?.querySelector('[data-nn-close]')?.addEventListener('click', () => setSelection(null));
 
     function setMode(next) {
       mode = next;
@@ -532,7 +676,15 @@
       });
     }
 
+    if (splitEl && typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => resizeCanvas());
+      ro.observe(splitEl);
+    }
+
     setMode('tree');
+    if (detailEl) {
+      detailEl.textContent = 'Кликните по узлу модели — справа появятся PyTorch-примеры ключевых идей.';
+    }
   }
 
   if (document.readyState === 'loading') {

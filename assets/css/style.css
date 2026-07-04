@@ -570,6 +570,161 @@ nav a {
     color: #333;
 }
 
+.nn-phylogeny-widget .nn-split-wrap {
+    display: block;
+}
+
+.nn-phylogeny-widget.nn-has-selection .nn-split-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    min-height: 520px;
+    border-top: 1px solid #ececf0;
+}
+
+.nn-phylogeny-widget .nn-tree-pane {
+    flex: 1 1 58%;
+    min-width: 0;
+}
+
+.nn-phylogeny-widget.nn-has-selection .nn-tree-pane {
+    border-right: 1px solid #ececf0;
+}
+
+.nn-phylogeny-widget .nn-code-pane {
+    flex: 1 1 42%;
+    min-width: 0;
+    max-height: 560px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #fafafb;
+}
+
+.nn-phylogeny-widget .nn-code-pane[hidden] {
+    display: none !important;
+}
+
+.nn-phylogeny-widget .nn-panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.nn-phylogeny-widget .nn-panel-head h4 {
+    margin: 0;
+    flex: 1 1 auto;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+.nn-phylogeny-widget .nn-panel-body .nn-panel-meta {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: #888;
+}
+
+.nn-phylogeny-widget .nn-panel-close {
+    margin-left: auto;
+    font-family: inherit;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 8px;
+    border: 1px solid #d8d8e0;
+    border-radius: 6px;
+    background: #fff;
+    color: #666;
+    cursor: pointer;
+}
+
+.nn-phylogeny-widget .nn-panel-close:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.nn-phylogeny-widget .nn-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 14px 14px;
+}
+
+.nn-phylogeny-widget .nn-panel-stats {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+    margin: 0 0 10px;
+    font-size: 12px;
+}
+
+.nn-phylogeny-widget .nn-panel-stats dt {
+    margin: 0;
+    color: #888;
+    font-weight: 500;
+}
+
+.nn-phylogeny-widget .nn-panel-stats dd {
+    margin: 0;
+    color: #444;
+}
+
+.nn-phylogeny-widget .nn-panel-blurb {
+    margin: 0 0 12px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #555;
+}
+
+.nn-phylogeny-widget .nn-snippet-block {
+    margin-bottom: 12px;
+}
+
+.nn-phylogeny-widget .nn-snippet-title {
+    margin: 0 0 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #667eea;
+}
+
+.nn-phylogeny-widget .nn-snippet-block pre {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #e8e8ec;
+    background: #fff;
+    overflow-x: auto;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.nn-phylogeny-widget .nn-snippet-block pre code {
+    font-family: ui-monospace, "Cascadia Code", "Courier New", monospace;
+    background: transparent;
+    padding: 0;
+}
+
+@media (max-width: 720px) {
+    .nn-phylogeny-widget.nn-has-selection .nn-split-wrap {
+        flex-direction: column;
+    }
+
+    .nn-phylogeny-widget.nn-has-selection .nn-tree-pane {
+        border-right: none;
+        border-bottom: 1px solid #ececf0;
+    }
+
+    .nn-phylogeny-widget .nn-code-pane {
+        max-height: 420px;
+    }
+}
+
 /* Evolution islands demo (p5.js) — reuses phase-portrait chrome */
 .evolution-islands-widget {
     margin: 32px 0 28px;
@@ -1648,6 +1803,9 @@ footer {
 [data-theme="dark"] .nn-phylogeny-widget .nn-mech-bar,
 [data-theme="dark"] .nn-phylogeny-widget .nn-trait-bar,
 [data-theme="dark"] .nn-phylogeny-widget .nn-detail,
+[data-theme="dark"] .nn-phylogeny-widget .nn-code-pane,
+[data-theme="dark"] .nn-phylogeny-widget .nn-panel-head,
+[data-theme="dark"] .nn-phylogeny-widget .nn-panel-body,
 [data-theme="dark"] .evolution-islands-widget .evo-toolbar,
 [data-theme="dark"] .evolution-islands-log,
 [data-theme="dark"] .criticality-widget .criticality-header,
@@ -1665,6 +1823,18 @@ footer {
 [data-theme="dark"] .edge-nn-widget .edge-nn-status {
     background: var(--widget-header);
     border-color: var(--border-light);
+}
+
+[data-theme="dark"] .nn-phylogeny-widget .nn-snippet-block pre {
+    background: var(--bg-code);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .nn-phylogeny-widget .nn-panel-head h4,
+[data-theme="dark"] .nn-phylogeny-widget .nn-panel-stats dd,
+[data-theme="dark"] .nn-phylogeny-widget .nn-panel-blurb,
+[data-theme="dark"] .nn-phylogeny-widget .nn-panel-body .nn-panel-meta {
+    color: var(--text);
 }
 
 [data-theme="dark"] .phase-portrait-widget .phase-portrait-caption,
