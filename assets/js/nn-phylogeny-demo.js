@@ -122,7 +122,14 @@
   const ARC_END = Math.PI * 0.95;
   const FAMILY_GAP = 0.035;
 
+  const HLJS_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/';
+  const HLJS_THEMES = {
+    light: { file: 'github.min.css', label: 'GitHub Light' },
+    dark: { file: 'github-dark.min.css', label: 'GitHub Dark' },
+  };
+
   let hljsReady = null;
+  let hljsThemeLink = null;
 
   function loadHighlight() {
     if (hljsReady) return hljsReady;
@@ -131,13 +138,6 @@
         resolve(window.hljs);
         return;
       }
-      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = dark
-        ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
-        : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
-      document.head.appendChild(link);
       const script = document.createElement('script');
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
       script.onload = () => {
@@ -149,6 +149,32 @@
       document.head.appendChild(script);
     });
     return hljsReady;
+  }
+
+  function ensureHljsThemeLink() {
+    if (hljsThemeLink) return hljsThemeLink;
+    hljsThemeLink = document.getElementById('nn-phylogeny-hljs-theme');
+    if (!hljsThemeLink) {
+      hljsThemeLink = document.createElement('link');
+      hljsThemeLink.id = 'nn-phylogeny-hljs-theme';
+      hljsThemeLink.rel = 'stylesheet';
+      document.head.appendChild(hljsThemeLink);
+    }
+    return hljsThemeLink;
+  }
+
+  function applyHljsTheme(theme) {
+    const cfg = HLJS_THEMES[theme] || HLJS_THEMES.light;
+    ensureHljsThemeLink().href = HLJS_BASE + cfg.file;
+    return loadHighlight().then((hljs) => {
+      const body = document.querySelector(`#${PANEL_ID} .nn-panel-body`);
+      if (!body) return;
+      body.querySelectorAll('pre code').forEach((el) => {
+        el.removeAttribute('data-highlighted');
+        el.className = 'language-python';
+        hljs.highlightElement(el);
+      });
+    });
   }
 
   function buildTree() {
@@ -242,7 +268,52 @@
     let hoverEdge = null;
     let selectedId = null;
     let p5Instance = null;
+    let widgetTheme = localStorage.getItem('nn-phylogeny-theme')
+      || (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
 
+    function isFullscreen() {
+      return document.fullscreenElement === root;
+    }
+
+    function isDarkWidget() {
+      return widgetTheme === 'dark';
+    }
+
+    function setWidgetTheme(theme) {
+      widgetTheme = theme === 'dark' ? 'dark' : 'light';
+      root.classList.remove('nn-theme-light', 'nn-theme-dark');
+      root.classList.add(`nn-theme-${widgetTheme}`);
+      localStorage.setItem('nn-phylogeny-theme', widgetTheme);
+      root.querySelectorAll('[data-nn-theme]').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.nnTheme === widgetTheme);
+      });
+      const hljsLabel = root.querySelector('.nn-hljs-theme-label');
+      if (hljsLabel) hljsLabel.textContent = HLJS_THEMES[widgetTheme].label;
+      applyHljsTheme(widgetTheme);
+    }
+
+    function toggleFullscreen() {
+      if (isFullscreen()) {
+        document.exitFullscreen?.();
+      } else {
+        (root.requestFullscreen || root.webkitRequestFullscreen)?.call(root);
+      }
+    }
+
+    function onFullscreenChange() {
+      const on = isFullscreen();
+      root.classList.toggle('nn-is-fullscreen', on);
+      const btn = root.querySelector('[data-nn-fullscreen]');
+      if (btn) {
+        btn.textContent = on ? '⛶' : '⛶';
+        btn.title = on ? 'Выйти из полноэкранного режима' : 'Полный экран';
+        btn.setAttribute('aria-label', btn.title);
+        btn.classList.toggle('active', on);
+      }
+      resizeCanvas();
+    }
+
+    setWidgetTheme(widgetTheme);
     loadHighlight();
 
     function setSelection(id) {
@@ -301,10 +372,7 @@
       }
 
       body.innerHTML = html;
-
-      loadHighlight().then((hljs) => {
-        body.querySelectorAll('pre code').forEach((el) => hljs.highlightElement(el));
-      });
+      applyHljsTheme(widgetTheme);
     }
 
     function escapeHtml(s) {
@@ -315,8 +383,12 @@
     }
 
     function canvasSize() {
-      const pane = document.querySelector('.nn-tree-pane');
+      const pane = root.querySelector('.nn-tree-pane');
       const w = pane ? Math.max(280, pane.clientWidth) : Math.min(920, root.clientWidth);
+      if (isFullscreen()) {
+        const splitH = splitEl?.clientHeight || window.innerHeight - 160;
+        return { w, h: Math.max(420, splitH - 4) };
+      }
       const h = selectedId ? 520 : 540;
       return { w, h };
     }
@@ -341,7 +413,7 @@
       };
 
       function updateColors() {
-        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const dark = isDarkWidget();
         colors = dark
           ? {
               bg: [22, 24, 32],
@@ -675,6 +747,13 @@
         mechBar.appendChild(btn);
       });
     }
+
+    root.querySelectorAll('[data-nn-theme]').forEach((btn) => {
+      btn.addEventListener('click', () => setWidgetTheme(btn.dataset.nnTheme));
+    });
+
+    root.querySelector('[data-nn-fullscreen]')?.addEventListener('click', toggleFullscreen);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
 
     if (splitEl && typeof ResizeObserver !== 'undefined') {
       const ro = new ResizeObserver(() => resizeCanvas());

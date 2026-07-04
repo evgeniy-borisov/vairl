@@ -70,6 +70,13 @@ flowchart TB
       <button type="button" data-nn-mode="borrow">Заимствования</button>
       <button type="button" data-nn-mode="traits">Признаки</button>
     </div>
+    <div class="nn-toolbar-actions">
+      <span class="nn-theme-label">Тема</span>
+      <button type="button" data-nn-theme="light" class="active" title="GitHub Light">Светлая</button>
+      <button type="button" data-nn-theme="dark" title="GitHub Dark">Тёмная</button>
+      <button type="button" data-nn-fullscreen title="Полный экран" aria-label="Полный экран">⛶</button>
+      <span class="nn-hljs-theme-label"></span>
+    </div>
   </div>
   <div class="nn-trait-bar" data-nn-trait-wrap hidden>
     <span style="font-size:11px;color:#666;align-self:center">Размер / яркость:</span>
@@ -92,7 +99,7 @@ flowchart TB
   </div>
   <p class="nn-hint" id="nn-phylogeny-hint">Клик по узлу — split-панель с PyTorch-примерами ключевых идей.</p>
   <p class="nn-detail" id="nn-phylogeny-detail">Кликните по узлу модели — справа появятся PyTorch-примеры ключевых идей.</p>
-  <p class="phase-portrait-caption">Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a>; подсветка — <a href="https://highlightjs.org/" target="_blank" rel="noopener">highlight.js</a>. ~27 кураторских моделей.</p>
+  <p class="phase-portrait-caption">Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a>; подсветка — <a href="https://highlightjs.org/" target="_blank" rel="noopener">highlight.js</a> (GitHub Light / GitHub Dark). Кнопка ⛶ — полноэкранный режим.</p>
 </div>
 
 <script src="{{ '/assets/js/nn-phylogeny-snippets.js' | relative_url }}"></script>
