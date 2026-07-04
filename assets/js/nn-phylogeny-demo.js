@@ -270,6 +270,9 @@
     let p5Instance = null;
     let widgetTheme = localStorage.getItem('nn-phylogeny-theme')
       || (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+    let lastCanvasW = 0;
+    let lastCanvasH = 0;
+    let resizeScheduled = false;
 
     function isFullscreen() {
       return document.fullscreenElement === root;
@@ -310,7 +313,11 @@
         btn.setAttribute('aria-label', btn.title);
         btn.classList.toggle('active', on);
       }
-      resizeCanvas();
+      lastCanvasW = 0;
+      lastCanvasH = 0;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => scheduleResize());
+      });
     }
 
     setWidgetTheme(widgetTheme);
@@ -382,13 +389,28 @@
         .replace(/>/g, '&gt;');
     }
 
+    function chromeHeight() {
+      let h = 0;
+      root.querySelectorAll(
+        '.nn-toolbar, .nn-mech-bar, .nn-trait-bar, .nn-hint, .nn-detail, .phase-portrait-caption',
+      ).forEach((el) => {
+        if (el.hidden || el.offsetParent === null) return;
+        h += el.offsetHeight;
+      });
+      return h + 12;
+    }
+
     function canvasSize() {
       const pane = root.querySelector('.nn-tree-pane');
       const w = pane ? Math.max(280, pane.clientWidth) : Math.min(920, root.clientWidth);
+
       if (isFullscreen()) {
-        const splitH = splitEl?.clientHeight || window.innerHeight - 160;
-        return { w, h: Math.max(420, splitH - 4) };
+        // Размер от viewport/root, не от split/canvas — иначе feedback loop (canvas → pane → split → canvas…)
+        const available = root.clientHeight - chromeHeight();
+        const h = Math.max(320, Math.min(available, window.innerHeight - chromeHeight()));
+        return { w, h };
       }
+
       const h = selectedId ? 520 : 540;
       return { w, h };
     }
@@ -396,7 +418,19 @@
     function resizeCanvas() {
       if (!p5Instance) return;
       const { w, h } = canvasSize();
+      if (Math.abs(w - lastCanvasW) < 2 && Math.abs(h - lastCanvasH) < 2) return;
+      lastCanvasW = w;
+      lastCanvasH = h;
       p5Instance.resizeCanvas(w, h);
+    }
+
+    function scheduleResize() {
+      if (resizeScheduled) return;
+      resizeScheduled = true;
+      requestAnimationFrame(() => {
+        resizeScheduled = false;
+        resizeCanvas();
+      });
     }
 
     const sketch = (p) => {
@@ -685,7 +719,7 @@
       };
 
       p.windowResized = function () {
-        resizeCanvas();
+        scheduleResize();
       };
     };
 
@@ -755,9 +789,9 @@
     root.querySelector('[data-nn-fullscreen]')?.addEventListener('click', toggleFullscreen);
     document.addEventListener('fullscreenchange', onFullscreenChange);
 
-    if (splitEl && typeof ResizeObserver !== 'undefined') {
-      const ro = new ResizeObserver(() => resizeCanvas());
-      ro.observe(splitEl);
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => scheduleResize());
+      ro.observe(root);
     }
 
     setMode('tree');
