@@ -2,16 +2,16 @@
 layout: post
 title: "Эволюция моделей ИИ: не линия времени, а дерево"
 date: 2026-07-02 09:00:00 +0300
-excerpt: "Развитие нейросетей — ветвящееся дерево, а не прямая ось. Три Python-визуализации: полукруглое phylogenetic tree, граф архитектурных заимствований и кластеры, упорядоченные по времени."
+excerpt: "Развитие нейросетей — ветвящееся дерево, а не прямая ось. Интерактивная fan tree на p5.js, переключение заимствований и признаков; плюс Python-визуализации для статей и Colab."
 lang: ru
 image: /assets/images/neural-model-evolution-tree.svg
 ---
 
 Линейный рассказ «от Perceptron к GPT-4» удобен для слайдов, но **плохо отражает реальность**: идеи **ветвятся**, **сходятся** и **переиспользуются**. ResNet влияет на ViT, LSTM — на Transformer, diffusion — на Stable Diffusion. Это ближе к **филогенетическому дереву**, чем к одной временной оси.
 
-В статье — концептуальная рамка и **три визуализации на Python** (matplotlib + networkx + sklearn):
+В статье — концептуальная рамка, **интерактив на p5.js** (полукруглая филогения + дуги заимствований) и **три статических визуализации на Python** (matplotlib + networkx + sklearn):
 
-1. **Полукруглое circular / semicircle tree** семейств моделей  
+1. **Fan tree / semicircle phylogeny** — полукруглое филогенетическое дерево семейств  
 2. **Граф заимствований** — кто у кого взял архитектурную идею  
 3. **Кластеризация** в пространстве признаков + **упорядочивание кластеров по времени**
 
@@ -47,6 +47,51 @@ flowchart TB
 
 **Метафора:** эволюция биологических видов — не одна цепочка от амёбы к человеку, а **дерево** с отмиранием и параллельными ветками. То же с архитектурами.
 
+### Как это называется в биологии и визуализации
+
+| Термин | Смысл |
+|--------|--------|
+| **Phylogenetic tree** (филогенетическое дерево) | Древовидная схема родства; корень — общий предок |
+| **Fan tree** (веерное дерево) | Ветви расходятся по дуге, часто на **полукруге** |
+| **Circular / radial phylogeny** | То же в полярных координатах (icytree, FigTree) |
+| **Cladogram** | Дерево без длины ветвей ∝ время; только топология |
+| **Horizontal gene transfer** | Аналог **перекрёстных заимствований** между ветками (attention, residual, diffusion…) |
+
+Ниже — интерактив в стиле **fan tree на полудуге**: корень «Neural architectures» внизу, семейства — промежуточные узлы, листья — конкретные модели. Режим **«Заимствования»** рисует горизонтальные (межветочные) дуги, как перенос генов между несродственными линиями.
+
+### Интерактив: fan tree и заимствования (p5.js)
+
+Переключите режим и (в режиме заимствований) фильтр по **механизму** — подсветятся узлы и дуги. Наведите на модель: объём обучающих ресурсов и относительная точность показаны шкалой ●●●○○ (учебная оценка, не leaderboard).
+
+<div class="nn-phylogeny-widget phase-portrait-widget" id="nn-phylogeny-demo">
+  <div class="nn-toolbar">
+    <div class="phase-portrait-controls">
+      <button type="button" data-nn-mode="tree" class="active">Fan tree</button>
+      <button type="button" data-nn-mode="borrow">Заимствования</button>
+      <button type="button" data-nn-mode="traits">Признаки</button>
+    </div>
+  </div>
+  <div class="nn-trait-bar" data-nn-trait-wrap hidden>
+    <span style="font-size:11px;color:#666;align-self:center">Размер / яркость:</span>
+    <button type="button" data-nn-trait="train" class="active">Данные / compute</button>
+    <button type="button" data-nn-trait="acc">Точность</button>
+    <button type="button" data-nn-trait="year">Год</button>
+  </div>
+  <div class="nn-mech-bar" data-nn-mech-wrap id="nn-phylogeny-mechs"></div>
+  <div id="nn-phylogeny-canvas" class="nn-canvas phase-portrait-canvas"></div>
+  <p class="nn-hint" id="nn-phylogeny-hint">Классическая полукруглая филогения: корень внизу, семейства — промежуточные узлы, листья — модели.</p>
+  <p class="nn-detail" id="nn-phylogeny-detail">Наведите на модель или дугу заимствования. Выберите механизм — подсветятся связанные узлы.</p>
+  <p class="phase-portrait-caption">Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a>; ~27 кураторских моделей. Дуги заимствований — экспертная разметка, не citation graph.</p>
+</div>
+
+<script src="{{ '/assets/js/nn-phylogeny-demo.js' | relative_url }}"></script>
+
+| Режим | Что показывает |
+|-------|----------------|
+| **Fan tree** | Таксономия семейств на полукруге (phylogeny layout) |
+| **Заимствования** | Межветочные дуги: Transformer → ViT, ResNet → ViT, LSTM → Transformer… |
+| **Признаки** | Размер узла ∝ compute/данные; яркость ∝ относительная точность |
+
 ---
 
 ## Данные для визуализаций
@@ -70,9 +115,9 @@ Model("Transformer", 2017, "Attention")
 
 ---
 
-## 1. Полукруглое дерево (semicircle phylogeny)
+## 1. Полукруглое дерево (fan tree / semicircle phylogeny)
 
-**Идея:** корень внизу дуги; семейства — промежуточные узлы; листья — конкретные модели с годом. Углы распределяются по полуокружности (polar plot, θ ∈ [0°, 180°]).
+**Идея:** корень внизу дуги; семейства — промежуточные узлы; листья — конкретные модели с годом. Углы распределяются по полуокружности (polar plot, θ ∈ [0°, 180°]). В биологии такой layout часто называют **fan tree** или **circular phylogeny** на полудуге; интерактив выше построен по тому же принципу.
 
 ![Полукруглое дерево эволюции нейросетевых моделей](/assets/images/nn-evolution-semicircle-tree.png)
 
@@ -192,7 +237,7 @@ PNG сохраняются в `assets/images/`.
 
 ## Резюме
 
-Развитие ИИ-моделей — **эволюционное дерево с перекрёстным опылением**, а не одна линия. Python позволяет за один ноутбук показать три дополняющих друг друга вида: **phylogeny**, **borrow graph**, **time-ordered clusters**.
+Развитие ИИ-моделей — **эволюционное дерево с перекрёстным опылением**, а не одна линия. **p5.js** даёт интерактивную fan tree и фильтр по заимствованным механизмам; **Python** — три дополняющих статических вида: **phylogeny**, **borrow graph**, **time-ordered clusters**.
 
 ---
 
