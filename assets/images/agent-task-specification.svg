@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ats1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="ats2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#667eea"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbff"/>
+  <rect x="1" y="1" width="1198" height="628" rx="4" fill="none" stroke="#e4e6f0" stroke-width="2"/>
+  <circle cx="140" cy="120" r="80" fill="url(#ats1)" opacity="0.12"/>
+  <circle cx="1060" cy="510" r="90" fill="url(#ats2)" opacity="0.10"/>
+  <text x="600" y="68" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif" font-size="30" font-weight="700">>AB0=>2:0 7040G8 035=BC</text>
+  <text x="600" y="104" text-anchor="middle" fill="#666" font-family="system-ui,sans-serif" font-size="16">#B>G=5=85 ’ :>=B@0:B ’ 8A?>;=5=85 ’ ?@>25@:0</text>
+  <rect x="100" y="150" width="1000" height="380" rx="16" fill="#fff" stroke="url(#ats1)" stroke-width="2"/>
+  <!-- User -->
+  <ellipse cx="180" cy="290" rx="70" ry="44" fill="#f0f4ff" stroke="#667eea" stroke-width="2"/>
+  <text x="180" y="286" text-anchor="middle" fill="#444" font-family="system-ui,sans-serif" font-size="14" font-weight="600">>;L7>20B5;L</text>
+  <text x="180" y="306" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">U, :@8B5@88 Y</text>
+  <!-- Agent -->
+  <ellipse cx="600" cy="290" rx="90" ry="50" fill="#f0fff8" stroke="#43e97b" stroke-width="2"/>
+  <text x="600" y="286" text-anchor="middle" fill="#444" font-family="system-ui,sans-serif" font-size="14" font-weight="600">35=B</text>
+  <text x="600" y="306" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">?;0=, tools, S</text>
+  <!-- Contract -->
+  <rect x="880" y="250" width="160" height="80" rx="10" fill="#fff5f8" stroke="#fa709a" stroke-width="1.5"/>
+  <text x="960" y="282" text-anchor="middle" fill="#444" font-family="system-ui,sans-serif" font-size="13" font-weight="600">>=B@0:B</text>
+  <text x="960" y="302" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">spec · AC · plan</text>
+  <!-- Arrows -->
+  <path d="M255 275 Q420 200 505 275" fill="none" stroke="#667eea" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="380" y="218" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="12">70?@>A</text>
+  <path d="M505 305 Q420 380 255 305" fill="none" stroke="#43e97b" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="380" y="398" text-anchor="middle" fill="#43e97b" font-family="system-ui,sans-serif" font-size="12">CB>G=5=8O</text>
+  <path d="M690 290 L870 290" fill="none" stroke="#fa709a" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="780" y="278" text-anchor="middle" fill="#fa709a" font-family="system-ui,sans-serif" font-size="12">A>3;0A>20=85</text>
+  <!-- Phases -->
+  <rect x="140" y="380" width="140" height="44" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1"/>
+  <text x="210" y="408" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="12">1. Intake</text>
+  <rect x="310" y="380" width="140" height="44" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1"/>
+  <text x="380" y="408" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="12">2. Clarify</text>
+  <rect x="480" y="380" width="140" height="44" rx="8" fill="#f0fff8" stroke="#43e97b" stroke-width="1"/>
+  <text x="550" y="408" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="12">3. Contract</text>
+  <rect x="650" y="380" width="140" height="44" rx="8" fill="#f0fff8" stroke="#43e97b" stroke-width="1"/>
+  <text x="720" y="408" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="12">4. Execute</text>
+  <rect x="820" y="380" width="140" height="44" rx="8" fill="#fff5f8" stroke="#fa709a" stroke-width="1"/>
+  <text x="890" y="408" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="12">5. Verify</text>
+  <text x="600" y="500" text-anchor="middle" fill="#999" font-family="system-ui,sans-serif" font-size="12">VAIRL · 2026</text>
+</svg>
