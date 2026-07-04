@@ -27,6 +27,7 @@ image: /assets/images/symbolica-agentica-arc-agi-3.svg
 | [Agentica SDK](#agentica-sdk-code-as-reasoning) | REPL, Warp, spawn |
 | [ARC-AGI-3](#arc-agi-3-3608-за-один-день) | Цифры, сравнение с baseline |
 | [Архитектура harness](#архитектура-arc-agi-3-harness) | Координатор, бюджет действий |
+| [Принцип действия](#принцип-действия-механика-агента) | REPL, Warp, фазы, почему 36% |
 | [George Morgan](#george-morgan-основатель-и-ceo) | Основатель, Tesla, fundraising |
 | [Эффективность](#эффективность-168×-от-человека) | Формула scoring, 1.68× |
 | [Таблица игр](#таблица-результатов-по-играм) | Top / bottom public eval |
@@ -206,6 +207,237 @@ flowchart TB
 
 **Action budget:** счётчик привязан к **`submit_action`**, не к агенту — sub-agents **делят** один counter. NOOP/RESET — бесплатны. При нехватке actions sub-agent возвращается к coordinator за fresh budget — context intact.
 
+Ниже — **механика одного шага**, отличие от CoT/tool-calling и чертёж, как собрать аналог.
+
+---
+
+## Принцип действия: механика агента
+
+### Слои системы
+
+Harness ARC-AGI-3 — это **три слоя**, а не один промпт:
+
+| Слой | Что делает | Где в коде |
+|------|------------|------------|
+| **1. Agentica Server** | Sandbox REPL + вызов LLM + протокол **Warp** (RPC к объектам harness) | `agentica-server` |
+| **2. Agentica SDK** | `spawn` / `spawn_agent`, `call(T, task, **scope)`, persistent REPL между turn'ами | `agentica-python-sdk` |
+| **3. ARC harness** | Coordinator + роли + `memories` + `GAME_REFERENCE` + action budget | `ARC-AGI-3-Agents` / `prompts.py` |
+
+CoT baseline — **один слой**: модель получает описание игры в тексте и «воображает» ходы. Agentica — **runtime + оркестрация + внешняя память**, поверх той же модели.
+
+### Один цикл Agentica (механически)
+
+Когда coordinator (или sub-agent) вызывает `await agent.call(str, task, submit_action=sa, frame=f, memories=mem, ...)`:
+
+```mermaid
+sequenceDiagram
+    participant H as Harness (ваш процесс)
+    participant S as Agentica Server
+    participant L as LLM (Opus)
+    participant R as Sandbox REPL
+    H->>S: call(task, scope objects)
+    S->>L: промпт + сигнатуры scope + история REPL
+    L->>R: сгенерированный Python
+    R->>R: локальные вычисления (арифметика, list comp)
+    R->>H: RPC через Warp (submit_action, frame.render, ...)
+    H-->>R: proxy-объекты / результаты
+    R->>S: return value или следующая итерация
+    S->>L: stdout REPL, ошибки, partial result
+    Note over L,R: цикл повторяется, пока call не завершён
+    S-->>H: typed result (str, Frame, ...)
+```
+
+**Шаг за шагом:**
+
+1. **Scope injection** — `submit_action`, `Frame`, `memories`, `history`, `spawn_agent`, `make_bounded_submit_action` передаются в sandbox как **callable-stubs**. Агент видит обычный Python API; реальное исполнение — в harness через **Warp** (RPC + proxy, без полной сериализации grid в контекст).
+
+2. **REPL-рассуждение** — модель пишет код, а не JSON tool call:
+   ```python
+   old = frame
+   new = submit_action("ACTION1")  # Up
+   summary = new.change_summary(old)
+   regions = new.diff(old)
+   ```
+   Grid 64×64 остаётся **объектом** `Frame`; в контекст попадают **render/diff/summary**, а не сырые 4096 чисел на каждый ход.
+
+3. **Interleaved execution** — как в [Runtime as Context](https://www.symbolica.ai/blog/runtime-as-context): промежуточные переменные (`old`, `regions`, фильтрованные подмножества) **живут в REPL** между sub-turn'ами внутри одного `call`. Tool-calling агент каждый раз **пересобирает** состояние из текстовых ответов tools — отсюда drift на шаге 4–6 многошагового анализа (Symbolica: 6/6 vs 3–5/6 у Deep Agents).
+
+4. **Typed return** — `call(str, ...)` заставляет sub-agent вернуть **структурированный отчёт** (гипотеза, что пробовали, что не сработало). Coordinator принимает решение по типизированному результату, а не парсит свободный текст.
+
+5. **Spawn = новый REPL + новый system prompt** — `spawn_agent(system_prompt)` создаёт **изолированный** агент с чистым REPL, но общими `memories` и `history`. Это «modify own behavior»: coordinator **меняет архитектуру** (кого вызвать, какой budget, fresh vs reuse), не weights модели.
+
+### Почему CoT на ARC-AGI-3 ≈ 0%, а harness ≈ 36%
+
+| Проблема ARC-AGI-3 | CoT в контексте | Agentica harness |
+|--------------------|-----------------|------------------|
+| **Interactive exploration** | Модель не исполняет действия; нет ground truth после хода | `submit_action` → реальный `Frame` из API игры |
+| **Partial observability** | Текстовое описание grid теряет spatial structure | `render`, `diff`, `find`, `change_summary` — код над объектом |
+| **Action budget** | Нет shared counter; модель не видит `.remaining` | `submit_action.remaining`, bounded sub-agents |
+| **Multi-level games** | Длинный контекст «забывает» level 1 | `memories` + `history(wins_only=True)` между агентами |
+| **Efficiency scoring** | Нет pressure на экономию ходов | Промпт + coordinator: theorist **без** submit_action |
+| **Novel mechanics** | Одна monolithic chain | Фазы Explore → Hypothesize → Test → Solve |
+
+CoT пытается **симулировать игру в голове**. Harness **играет** и обрабатывает **observation programmatically** — ближе к program synthesis + RL environment, чем к chat.
+
+### Фазы orchestrator (конечный автомат)
+
+Coordinator **не имеет** `submit_action` — только `make_bounded_submit_action(limit)`. Его job — **manager, not player** ([prompts.py](https://github.com/symbolica-ai/ARC-AGI-3-Agents/blob/symbolica/arcgentica/agents/templates/agentica/prompts.py)):
+
+```mermaid
+stateDiagram-v2
+    [*] --> Explore: новый level / игра
+    Explore --> Hypothesize: отчёт explorer
+    Hypothesize --> Test: гипотеза без координат
+    Test --> Hypothesize: refute / refine
+    Test --> Solve: гипотеза держится
+    Solve --> NextLevel: levels_completed++
+    NextLevel --> Explore: новый grid
+    Solve --> Explore: GAME_OVER / retry
+    Hypothesize --> Explore: нужны данные
+```
+
+| Фаза | Sub-agent | `submit_action`? | Задача |
+|------|-----------|------------------|--------|
+| **Explore** | explorer | да, bounded | Попробовать actions, `change_summary`, карта сцены |
+| **Hypothesize** | theorist | **нет** | Правила и win condition **без траты ходов** |
+| **Test** | explorer/tester | да, **малый** budget | Проверка гипотезы с другого состояния |
+| **Iterate** | тот же или fresh theorist | — | Refine vs сброс якоря на неверной теории |
+| **Solve** | solver | да | Исполнение стратегии; при near-miss — **ещё budget**, не reset |
+| **Next level** | fresh explorer | да | Новый grid — **не** assume transfer |
+
+**Ключевое ограничение промпта:** гипотезы только **relational** («A must reach B»), не абсolute coordinates — иначе ложные теории на grid-совпадениях.
+
+### Shared state: что живёт вне контекста LLM
+
+| Объект | Механизм | Зачем |
+|--------|----------|-------|
+| **`memories`** | `add(summary, details)` + `await query(T, question)` | Cross-level знания; все агенты пишут/читают одну DB |
+| **`history(n)`** | sync список `(action, Frame)` **всех** агентов | Post-hoc разбор «где реальность разошлась с теорией» |
+| **`Frame` helpers** | `render`, `diff`, `find`, `winning_frame` | Programmatic perception вместо «опиши grid словами» |
+| **Action counter** | на функции `submit_action`, не на agent id | Sub-subagent **не сбрасывает** budget при spawn |
+
+Explorer перед сдачей: «2–3 неудачные попытки → report back» — coordinator **spawn fresh** вместо grind. Это **explicit control loop** ([устойчивость agent loops](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/)): не даёт σ → ∞ по бесполезным tool calls.
+
+### Action budget как first-class object
+
+Механика, которой **нет** у типичного ReAct:
+
+```python
+# Coordinator (в REPL агента):
+bounded_sa = make_bounded_submit_action(15)  # новый counter каждый call
+report = await explorer.call(
+    str,
+    "Test hypothesis H on current level; report pass/fail",
+    submit_action=bounded_sa,
+    frame=current_frame,
+    memories=memories,
+    history=history,
+    GAME_REFERENCE=GAME_REFERENCE,
+)
+# bounded_sa.remaining — сколько ходов осталось
+# NOOP, RESET — free (не decrement)
+```
+
+- **Shared counter:** передать **тот же** `submit_action` двум sub-agents — они делят лимит (spawn не создаёт «новую жизнь»).
+- **Fresh budget, same agent:** context explorer сохранён → `make_bounded_submit_action(30)` и **повторный** `call` — дешевле, чем spawn с нуля.
+- **Near-solution:** промпт требует **немедленно** дать ещё actions, не бросать на 1–2 хода от WIN.
+
+Отсюда **~1.68× human**: theorist не жжёт ходы; explorer не делает exhaustive grid sweep; memories снижают повторное exploration — aggregate actions близки к human при том же coverage.
+
+### ARC-AGI-2 vs ARC-AGI-3 (тот же SDK, другой harness)
+
+| | Arcgentica (ARC-AGI-2) | ARC-AGI-3 harness |
+|---|------------------------|-------------------|
+| Задача | Статические grid puzzles → **Python transform** | **Interactive** game, unknown rules |
+| Цикл | propose code → run on train → fix mismatches | explore → hypothesize → act → observe |
+| Feedback | Cell-level diffs vs expected output | `Frame.diff`, `change_summary`, GAME_OVER |
+| Sub-agents | Анализ примеров + codegen | Explorer / theorist / solver roles |
+| Метрика | pass@2 на test grids | **Efficiency** × levels passed |
+
+Общее: **LLM пишет код в REPL**, качество верифицирует **исполнение**, не self-report модели.
+
+### Почему именно такой дизайн даёт SOTA
+
+1. **Separation of concerns** — inference rules (theorist, 0 actions) отделён от acting (explorer). CoT смешивает «думаю» и «хожу» в одном контексте и платит tokens + actions за оба.
+
+2. **Runtime-as-context** — `Frame` не сериализуется целиком; код выбирает **crop**, `find(red)`, `bounding_box`. Это **active perception**, как vision pipeline, а не passive caption.
+
+3. **Compositional agents** — coordinator **переписывает граф** sub-agents под level (fresh explorer на level 2, reuse solver если стратегия переносится). «Modify own behavior» = re-spawn с новым prompt и scope.
+
+4. **External memory = O(1) lookup** vs O(context) re-discovery. `memories.query("What does ACTION3 do?")` дешевле, чем заново explore level 0.
+
+5. **Alignment с scoring** — квадратичный штраф за лишние actions **встроен в orchestration** (bounded budgets, no theorist actions, anti-reset prompts). CoT оптимизирует «ответить правильно в тексте», не **efficiency in environment**.
+
+### Как построить аналог (чертеж)
+
+Минимальный рецепт **без Symbolica**, с теми же идеями:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Orchestrator LLM (NO direct env.write)                 │
+│  • spawn_worker(role, budget)                           │
+│  • read typed reports                                   │
+│  • write/read MemoryStore                               │
+└───────────────┬─────────────────────────────────────────┘
+                │ spawn + call(T, task, scope=...)
+                ▼
+┌─────────────────────────────────────────────────────────┐
+│  Worker LLM + persistent REPL (sandbox)                 │
+│  scope: env.step, env.observe, memory, spawn_worker     │
+└───────────────┬─────────────────────────────────────────┘
+                │ RPC / warp
+                ▼
+┌─────────────────────────────────────────────────────────┐
+│  Your environment adapter                             │
+│  • step(action) → Observation (typed object)          │
+│  • observe helpers: render, diff, summary             │
+│  • BudgetedStep = callable with .remaining            │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Checklist реализации:**
+
+| # | Компонент | Минимальная реализация |
+|---|-----------|------------------------|
+| 1 | **Sandbox REPL** | Agentica Server, или `jupyter` kernel, или `e2b` / Docker exec loop |
+| 2 | **Scope / Warp** | Любой RPC: stubs в REPL → ваш API; возвращайте **proxy id**, не JSON grid |
+| 3 | **Observation object** | Класс с методами `diff`, `render`, `summary` — не raw dict в prompt |
+| 4 | **Orchestrator без write** | Отдельный system prompt: «you cannot call env.step» |
+| 5 | **Role split** | ≥2 роли: actor (with budget) + analyst (read-only) |
+| 6 | **Memory store** | SQLite / vector DB + `query(question)` для sub-agents |
+| 7 | **Shared history** | Append-only log всех steps всех workers |
+| 8 | **Budget object** | Callable action с `.remaining`; free actions не decrement |
+| 9 | **Phase prompts** | Явный FSM в orchestrator prompt (как 6 фаз выше) |
+| 10 | **Telemetry** | Log generated code, spawn tree, actions/level — см. [agent telemetry](/vairl/blog/2026/06/29/agent-telemetry-ru/) |
+
+**Упрощённый псевдокод orchestrator:**
+
+```python
+mem = MemoryStore()
+hist = ActionLog()
+
+async def run_game(env):
+    coord = await spawn(ORCHESTRATOR_PROMPT, scope={
+        "spawn_worker": spawn_worker,
+        "make_budget": make_budget,
+        "memories": mem,
+        "history": hist.read,
+    })
+    frame = env.initial_frame()
+
+    while not env.done():
+        exploration = await coord.call(str, f"Explore level {frame.level}; available: {frame.actions}", ...)
+        hypothesis = await coord.call(str, f"Hypothesize from: {exploration}", ...)  # no budget passed
+        budget = make_budget(20)
+        test = await coord.call(str, f"Test: {hypothesis}", submit_action=budget, frame=frame, ...)
+        if test.passed:
+            solve_budget = make_budget(50)
+            frame = await coord.call(Frame, "Execute strategy", submit_action=solve_budget, frame=frame, ...)
+    return env.score()
+```
+
+Готовый reference implementation — open-source [ARC-AGI-3-Agents](https://github.com/symbolica-ai/ARC-AGI-3-Agents) (ветка `symbolica`) и [arcgentica](https://github.com/symbolica-ai/arcgentica) для static ARC-AGI-2.
+
 ---
 
 ## Эффективность: ~1.68× от человека
@@ -339,7 +571,7 @@ uv run python main.py --model anthropic/claude-opus-4-6 --num-problems 10
 - **Paul Lessard** — categorical deep learning, теоретический мост constraints ↔ implementations;
 - **Taliesin Beynon** — operational research lead Agentica и ARC harness.
 
-Для практики: **harness и runtime важнее следующего промпта**. Если ваш агент решает novel tasks через tool JSON — попробуйте **REPL + spawn + budget**; ARC-AGI-3 показывает, что разрыв между 0.2% и 36% лежит там, а не в смене модели на +0.1 версии.
+Для практики: **harness и runtime важнее следующего промпта**. Механика — в разделе [Принцип действия](#принцип-действия-механика-агента): REPL + role split + budget + memories. ARC-AGI-3 показывает, что разрыв между 0.2% и 36% лежит там, а не в смене модели на +0.1 версии.
 
 ---
 
