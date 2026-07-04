@@ -1,0 +1,77 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tc1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <linearGradient id="tc2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbff"/>
+  <rect x="1" y="1" width="1198" height="628" rx="4" fill="none" stroke="#e4e6f0" stroke-width="2"/>
+  <circle cx="140" cy="520" r="80" fill="url(#tc1)" opacity="0.12"/>
+  <circle cx="1060" cy="110" r="90" fill="url(#tc2)" opacity="0.10"/>
+  <text x="600" y="68" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif" font-size="28" font-weight="700">Agent Telemetry Comparison</text>
+  <text x="600" y="102" text-anchor="middle" fill="#666" font-family="system-ui,sans-serif" font-size="15">!1>@ 2708<>459AB28O: A>>1I5=8O · tools · outcomes</text>
+
+  <!-- User -->
+  <rect x="60" y="200" width="100" height="56" rx="10" fill="url(#tc2)" opacity="0.85"/>
+  <text x="110" y="234" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="13" font-weight="600">User</text>
+
+  <!-- Agents row -->
+  <g font-family="system-ui,sans-serif" font-size="11" fill="#444">
+    <rect x="220" y="160" width="88" height="40" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1.2"/>
+    <text x="264" y="185" text-anchor="middle">Claude</text>
+    <rect x="320" y="160" width="72" height="40" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1.2"/>
+    <text x="356" y="185" text-anchor="middle">Codex</text>
+    <rect x="404" y="160" width="72" height="40" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1.2"/>
+    <text x="440" y="185" text-anchor="middle">Cursor</text>
+    <rect x="488" y="160" width="88" height="40" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1.2"/>
+    <text x="532" y="185" text-anchor="middle">LangGraph</text>
+    <rect x="588" y="160" width="72" height="40" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1.2"/>
+    <text x="624" y="185" text-anchor="middle">Hermes</text>
+    <rect x="672" y="160" width="56" height="40" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1.2"/>
+    <text x="700" y="185" text-anchor="middle">g3</text>
+    <rect x="740" y="160" width="56" height="40" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1.2"/>
+    <text x="768" y="185" text-anchor="middle">Pi</text>
+    <rect x="808" y="160" width="88" height="40" rx="8" fill="#f0f4ff" stroke="#667eea" stroke-width="1.2"/>
+    <text x="852" y="185" text-anchor="middle">OpenCode</text>
+  </g>
+
+  <!-- Arrows to collection layers -->
+  <g stroke="#667eea" stroke-width="1.5" opacity="0.35" fill="none">
+    <line x1="110" y1="256" x2="110" y2="300"/>
+    <line x1="110" y1="300" x2="600" y2="300"/>
+    <line x1="264" y1="200" x2="264" y2="300"/>
+    <line x1="440" y1="200" x2="440" y2="300"/>
+    <line x1="624" y1="200" x2="624" y2="300"/>
+    <line x1="852" y1="200" x2="852" y2="300"/>
+  </g>
+
+  <!-- Collection approaches -->
+  <text x="600" y="340" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="16" font-weight="700">>4E>4K A1>@0</text>
+
+  <rect x="80" y="360" width="200" height="72" rx="10" fill="#fff" stroke="url(#tc1)" stroke-width="2"/>
+  <text x="180" y="388" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif" font-size="13" font-weight="600">>:0;L=K9 audit</text>
+  <text x="180" y="410" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">JSONL · SQLite · hooks</text>
+
+  <rect x="310" y="360" width="200" height="72" rx="10" fill="#fff" stroke="url(#tc2)" stroke-width="2"/>
+  <text x="410" y="388" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif" font-size="13" font-weight="600">Observability SaaS</text>
+  <text x="410" y="410" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">LangSmith · Langfuse · Braintrust</text>
+
+  <rect x="540" y="360" width="200" height="72" rx="10" fill="#fff" stroke="url(#tc1)" stroke-width="2"/>
+  <text x="640" y="388" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif" font-size="13" font-weight="600">OpenTelemetry</text>
+  <text x="640" y="410" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">GenAI spans · Jaeger · Tempo</text>
+
+  <rect x="770" y="360" width="200" height="72" rx="10" fill="#fff" stroke="url(#tc2)" stroke-width="2"/>
+  <text x="870" y="388" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif" font-size="13" font-weight="600">>@<0;870F8O</text>
+  <text x="870" y="410" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="11">agent-traces · minitrace · Trajex</text>
+
+  <!-- Outcomes -->
+  <rect x="180" y="470" width="840" height="100" rx="12" fill="#f8f9ff" stroke="#e4e6f0" stroke-width="1.5"/>
+  <text x="600" y="502" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="14" font-weight="600">'B> D8:A8@C5BAO ?@8 2708<>459AB288 A ?>;L7>20B5;5<</text>
+  <text x="600" y="530" text-anchor="middle" fill="#777" font-family="system-ui,sans-serif" font-size="12">messages · tool I/O · approvals · feedback · cost · outcome · handoffs</text>
+  <text x="600" y="552" text-anchor="middle" fill="#999" font-family="system-ui,sans-serif" font-size="11">VAIRL · 2026</text>
+</svg>
