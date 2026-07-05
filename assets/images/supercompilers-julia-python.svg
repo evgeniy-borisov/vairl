@@ -1,0 +1,71 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="scG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="scG2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <linearGradient id="scG3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a"/>
+      <stop offset="100%" style="stop-color:#fee140"/>
+    </linearGradient>
+    <linearGradient id="scG4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4facfe"/>
+      <stop offset="100%" style="stop-color:#00f2fe"/>
+    </linearGradient>
+    <filter id="scGlow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbff"/>
+
+  <g transform="translate(80, 200)">
+    <rect x="0" y="0" width="180" height="200" fill="url(#scG1)" opacity="0.18" rx="16" stroke="url(#scG1)" stroke-width="2"/>
+    <text x="90" y="42" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Source program</text>
+    <rect x="24" y="80" width="132" height="14" fill="#667eea" opacity="0.35" rx="4"/>
+    <rect x="24" y="104" width="100" height="14" fill="#667eea" opacity="0.28" rx="4"/>
+    <rect x="24" y="128" width="116" height="14" fill="#667eea" opacity="0.32" rx="4"/>
+    <text x="90" y="190" text-anchor="middle" fill="#888" font-family="monospace" font-size="12">f(x, d)</text>
+  </g>
+
+  <path d="M 280 300 L 340 300" stroke="#667eea" stroke-width="2.5"/>
+
+  <g transform="translate(350, 160)" filter="url(#scGlow)">
+    <ellipse cx="120" cy="140" rx="115" ry="95" fill="url(#scG2)" opacity="0.25"/>
+    <rect x="20" y="60" width="200" height="160" fill="url(#scG2)" opacity="0.85" rx="14"/>
+    <text x="120" y="100" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="17" font-weight="700">Supercompiler</text>
+    <text x="120" y="128" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="12" opacity="0.9">driving + generalization</text>
+    <text x="120" y="152" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="12" opacity="0.9">LLVM / PGO / fusion</text>
+  </g>
+
+  <path d="M 580 300 L 640 300" stroke="#43e97b" stroke-width="2.5"/>
+
+  <g transform="translate(650, 200)">
+    <rect x="0" y="0" width="180" height="200" fill="url(#scG3)" opacity="0.18" rx="16" stroke="url(#scG3)" stroke-width="2"/>
+    <text x="90" y="42" text-anchor="middle" fill="#fa709a" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Residual program</text>
+    <rect x="24" y="100" width="132" height="14" fill="#fa709a" opacity="0.45" rx="4"/>
+    <rect x="24" y="130" width="72" height="14" fill="#fa709a" opacity="0.35" rx="4"/>
+    <text x="90" y="190" text-anchor="middle" fill="#888" font-family="monospace" font-size="12">f'(x)</text>
+  </g>
+
+  <g transform="translate(880, 180)">
+    <rect x="0" y="0" width="240" height="90" fill="url(#scG4)" opacity="0.2" rx="12" stroke="url(#scG4)" stroke-width="2"/>
+    <text x="120" y="38" text-anchor="middle" fill="#4facfe" font-family="system-ui,sans-serif" font-size="22" font-weight="700">Julia</text>
+    <text x="120" y="62" text-anchor="middle" fill="#666" font-family="monospace" font-size="13">@generated / LLVM / GPU</text>
+    <rect x="0" y="110" width="240" height="90" fill="url(#scG1)" opacity="0.2" rx="12" stroke="url(#scG1)" stroke-width="2"/>
+    <text x="120" y="148" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="22" font-weight="700">Python</text>
+    <text x="120" y="172" text-anchor="middle" fill="#666" font-family="monospace" font-size="13">Numba / JAX / torch.compile</text>
+  </g>
+
+  <rect x="80" y="480" width="1040" height="100" rx="12" fill="#1e1e2e" opacity="0.92"/>
+  <text x="160" y="525" fill="#43e97b" font-family="monospace" font-size="17">Part 1: theory</text>
+  <text x="420" y="525" fill="#667eea" font-family="monospace" font-size="17">Part 2: optimizers</text>
+  <text x="760" y="525" fill="#fa709a" font-family="monospace" font-size="17">Part 3: Julia / Python</text>
+  <text x="600" y="560" text-anchor="middle" fill="#aaa" font-family="system-ui,sans-serif" font-size="14">supercompilation, LLVM, PGO, e-graphs, domain-specific JIT</text>
+
+  <title>Supercompilers: theory, optimizers, Julia and Python</title>
+</svg>
