@@ -23,6 +23,7 @@ image: /assets/images/agent-rag-approaches-2026.svg
 | [RAC](#rac-два-разных-смысла-одной-аббревиатуры) | Clarification и Correction |
 | [Agentic RAG](#agentic-rag-когда-и-зачем) | Итеративный поиск, tool use, trade-offs |
 | [Базы знаний](#базы-знаний-векторные-и-гибридные) | Vector DB, когда GraphRAG оправдан |
+| [Эмбеддинг текстов](#эмбеддинг-текстов-как-работает-процесс-и-модели) | Пошаговый pipeline, bi-encoder, open-source модели |
 | [Оптимизации retrieval](#оптимизации-retrieval-что-даёт-наибольший-прирост) | Hybrid, rerank, HyDE, contextual chunking |
 | [Размер чанков](#размер-чанков-и-стратегии-нарезки) | 256–1024 токенов, multi-scale, QASC |
 | [Интерактив](#интерактив-пайплайн-retrieval-и-размер-чанков) | Демо naive / enhanced / agentic |
@@ -203,8 +204,8 @@ flowchart TB
 | Класс | Примеры | Заметки |
 |-------|---------|---------|
 | Proprietary API | OpenAI `text-embedding-3-large`, Cohere `embed-v4`, Voyage | Удобство, мультиязычность |
-| Open weights | BGE-M3, E5, GTE, Jina embeddings v3 | Self-hosted, GDPR |
-| Multimodal | CLIP-подобные, Nomic | Документы с диаграммами |
+| Open weights | BGE-M3, Qwen3-Embedding-8B, Jina v3 | Self-hosted, GDPR — [подробнее](#эмбеддинг-текстов-как-работает-процесс-и-модели) |
+| Multimodal | CLIP-подобные, Cohere embed-v4 | Документы с диаграммами |
 
 Для русскоязычных корпусов проверяйте **MTEB / ruMTEB** на своём домене — лидер общего бенчмарка не гарантирует лидерство на ваших PDF.
 
@@ -213,6 +214,153 @@ flowchart TB
 - **Да:** юридические ссылки, org chart, dependency graph кода, биомед (gene–disease).
 - **Нет:** 10k статей без явной структуры — достаточно hybrid RAG + agentic re-query.
 - **Компромисс:** [RAGSearch](https://github.com/FanDongzhe123/RAGSearch) показывает, что **agentic dense RAG** часто закрывает 80% кейсов GraphRAG при меньшем offline-cost.
+
+---
+
+## Эмбеддинг текстов: как работает процесс и модели
+
+Перед тем как чанки попадают в векторную БД, их нужно превратить в **dense vectors** — плотные числовые векторы фиксированной длины. Этот этап — центральная часть **индексации** RAG; на этапе запроса тот же процесс применяется к **query**.
+
+### Как называется процесс
+
+В литературе и инженерной практике встречаются синонимы — все описывают одно и то же:
+
+| Термин | Контекст |
+|--------|----------|
+| **Embedding** (эмбеддинг) | Общий термин: текст → вектор в $\mathbb{R}^d$ |
+| **Semantic encoding** | Акцент на смысловом представлении, не на символах |
+| **Vectorization** / **vector encoding** | Инженерный жаргон в ML-пайплайнах |
+| **Dense retrieval encoding** | Когда вектор идёт сразу в ANN-поиск (vs sparse BM25) |
+| **Bi-encoding** | Query и document кодируются **отдельно** (vs cross-encoder) |
+
+Полный offline-контур называют **embedding pipeline** или **vector index build**; runtime-часть — **query embedding** + **similarity search**.
+
+```mermaid
+flowchart LR
+  T[Текст chunk / query] --> Tok[Токенизация]
+  Tok --> Enc[Transformer encoder]
+  Enc --> Pool[Pooling]
+  Pool --> Norm[L2-нормализация]
+  Norm --> V[Вектор dim d]
+  V --> ANN[Cosine search в vector DB]
+```
+
+### Что делает embedding-модель
+
+Современные модели для RAG — это **bi-encoder**: один и тот же encoder (или два с общими весами) превращает query и document **независимо** в векторы. Сходство документов с запросом потом считается **cosine similarity** или dot product — без повторного прогона transformer на паре «query + doc».
+
+Внутри encoder'а происходит следующее:
+
+1. **Токенизация** — текст режется на subword-токены (BPE, SentencePiece). «Гибридный поиск в Qdrant» → `[«гибрид», «ный», « поиск», « в», « Q», «dr», «ant»]`.
+2. **Token embeddings + positional encoding** — каждый токен получает начальный вектор + позицию в последовательности.
+3. **Transformer layers** (self-attention) — токены «видят» друг друга; модель собирает контекстное представление всего фрагмента. Именно здесь фиксируется семантика: синонимы, тема абзаца, технические термины.
+4. **Pooling** — из матрицы `[num_tokens × hidden_dim]` получают **один** вектор длины $d$:
+   - **CLS token** — берёт специальный токен `[CLS]`;
+   - **Mean pooling** — среднее по всем token-vectors (дефолт у BGE, E5, Qwen3-Embedding);
+   - **Last-token pooling** — последний токен (часто у decoder-only, напр. NV-Embed на Llama).
+5. **L2-normalization** — вектор делят на $\|v\|_2$, чтобы cosine similarity совпадал с dot product и ANN-индексы работали стабильнее.
+6. **(Опционально) Matryoshka / MRL** — модель обучена так, что **первые** $k$ компонент ($k < d$) уже несут большую часть информации; можно хранить 256 или 1024 dim вместо полных 4096 без переобучения.
+
+Модель **не генерирует текст** — только сжимает смысл в компактный вектор. Для reranking после retrieval используют **cross-encoder**: query и doc подаются **вместе** в один forward pass; это точнее, но в ~100× медленнее на большом корпусе.
+
+### Пошаговый pipeline эмбеддинга в RAG
+
+#### A. Индексация (offline, один раз на chunk)
+
+| Шаг | Действие | Выход |
+|-----|----------|-------|
+| 1 | Chunking — нарезка документа на фрагменты 256–1024 токенов | `chunk_text`, metadata |
+| 2 | **Preprocessing** — trim, unicode norm, опционально prefix | чистая строка |
+| 3 | **Instruction prefix** (если модель instruction-tuned) | `"passage: …"` или `"Represent this document: …"` |
+| 4 | **Batch encode** — GPU/API, batch 32–512 | `float[d]` на chunk |
+| 5 | **Upsert** в vector DB: vector + id + metadata | запись в HNSW / IVF |
+| 6 | **(Опционально) Sparse encode** — BGE-M3, SPLADE | sparse weights для hybrid |
+
+#### B. Запрос (online, каждый user query)
+
+| Шаг | Действие | Отличие от ingest |
+|-----|----------|-------------------|
+| 1 | Query preprocessing | Короче, без chunking |
+| 2 | **Query prefix** | `"query: …"` — **другой** prefix, чем у passage |
+| 3 | Encode query → `q ∈ ℝ^d` | Та же модель, те же веса |
+| 4 | ANN search: top-K по cosine($q$, $v_i$) | HNSW в Qdrant / pgvector |
+| 5 | (Опционально) rerank top-100 cross-encoder'ом | Отдельная модель |
+
+**Критично:** на ingest и query должна быть **одна и та же** модель и версия; prefix для query и passage — как в документации модели. Смена модели = **полный re-embed** корпуса.
+
+Минимальный пример (self-host, [sentence-transformers](https://www.sbert.net/)):
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("BAAI/bge-m3", device="cuda")
+
+# ingest: batch passages
+passages = ["passage: " + c for c in chunks]
+doc_vectors = model.encode(
+    passages,
+    batch_size=64,
+    normalize_embeddings=True,  # L2 → cosine = dot
+    show_progress_bar=True,
+)
+
+# query time
+query_vec = model.encode(
+    ["query: hybrid search в Qdrant"],
+    normalize_embeddings=True,
+)[0]
+
+# дальше: upsert doc_vectors в Qdrant / cosine search query_vec
+```
+
+Для API (OpenAI, Cohere, Voyage) шаги те же: HTTP `embeddings.create(input=[...])` → массив float → upsert / search. Batch API снижает стоимость при массовой индексации.
+
+### Open-source модели: сравнение для RAG
+
+Модели ниже — **bi-encoder'ы** для dense: (1) индексации корпуса, (2) embedding запроса, (3) cosine/BM25+hybrid retrieval. Все поддерживают multilingual, если не указано иное.
+
+| Модель | Параметры | Dim | Context | Лицензия | Сильная сторона |
+|--------|-----------|-----|---------|----------|-----------------|
+| **Qwen3-Embedding-8B** | 8B | 1024–4096 (MRL) | 32K | Apache 2.0 | Лидер MTEB 2026; self-host при наличии GPU (≈16 GB VRAM fp16) |
+| **BGE-M3** | 568M | 1024 dense + sparse | 8K | MIT | **Hybrid dense+sparse** из коробки; практичный дефолт для on-prem |
+| **NV-Embed-v2** | ~8B (Llama 3.1) | 4096 | 32K | NVIDIA license | Высокое качество; last-token pooling; нужен мощный GPU |
+| **Jina Embeddings v3** | ~570M | 32–8192 (Matryoshka) | 8K+ | Apache 2.0 / API | Гибкая размерность; late chunking в экосистеме Jina |
+| **mxbai-embed-large-v1** | 335M | 1024 | 512 | MIT | Баланс качество/скорость; хорош на CPU/single GPU |
+| **nomic-embed-text-v1.5** | 137M | 768 | 8K | Apache 2.0 | Лёгкий; тысячи doc/sec на CPU; Ollama / edge |
+| **E5-mistral-7b-instruct** | 7B | 4096 | 32K | MIT | Instruct-tuned; prefix `query:` / `passage:` обязателен |
+| **gte-Qwen3-8B** | 8B | 1024–4096 | 32K | Apache 2.0 | Альтернатива Qwen3-Embedding; близко по MTEB |
+
+#### Как выбрать между ними
+
+| Сценарий | Модель |
+|----------|--------|
+| Максимум качества, есть A100/H100 | Qwen3-Embedding-8B или NV-Embed |
+| Hybrid BM25+dense **без** отдельного sparse pipeline | BGE-M3 |
+| Один GPU 24 GB, умеренный корпус | mxbai-embed-large-v1 или BGE-M3 |
+| Laptop / CPU / embedded agent | nomic-embed-text-v1.5 |
+| Нужна dim 512 vs 2048 без двух индексов | Jina v3 или Qwen3 (MRL) |
+| Длинные документы, late chunking | Jina v3 + их late-chunking API |
+
+### Нюансы, которые ломают recall
+
+| Ошибка | Симптом | Исправление |
+|--------|---------|-------------|
+| Разные модели на ingest и query | Случайный recall | Одна модель + версия в metadata индекса |
+| Нет query/passage prefix у instruct-моделей | −5…15% NDCG | Читать model card (E5, BGE, Qwen3) |
+| Не normalized embeddings при cosine index | Смещение ранжирования | `normalize_embeddings=True` |
+| Chunk длиннее context window модели | Truncation, потеря хвоста | Уменьшить chunk или модель с 32K context |
+| Re-embed без удаления старых vectors | Дубликаты, смешение dim | Versioned collection / full rebuild |
+| fp16 на CPU без поддержки | Fallback или crash | fp32 или ONNX Runtime |
+
+### Связь с остальным RAG-стеком
+
+Эмбеддинг — **не поиск**, а только **кодирование**. Качество retrieval складывается из:
+
+$$\text{Recall@K} \approx f(\text{embedder},\ \text{chunking},\ \text{hybrid},\ \text{reranker})$$
+
+На практике порядок ROI: **chunking + hybrid + rerank** часто дают больше, чем смена Qwen3-Embedding-8B на NV-Embed. Но embedder задаёт **верхнюю границу** semantic recall — плохой bi-encoder не компенсируется HNSW.
+
+Подробнее про хранение векторов и ANN-индексы: [сравнение vector DB](/vairl/blog/2026/07/05/vector-search-databases-comparison-ru/). Про P2P-индексацию без центрального сервера: [semantic torrent](/vairl/blog/2026/07/01/semantic-torrent-vector-search-ru/).
 
 ---
 
