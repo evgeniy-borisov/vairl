@@ -1,0 +1,97 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="neuroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="jamGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb"/>
+      <stop offset="100%" style="stop-color:#f5576c"/>
+    </linearGradient>
+    <linearGradient id="phaseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Neural network cluster -->
+  <g transform="translate(120, 100)">
+    <text x="100" y="0" fill="#a0aec0" font-family="system-ui,sans-serif" font-size="14" text-anchor="middle">59@>A5BL</text>
+    <g opacity="0.85">
+      <circle cx="60" cy="80" r="12" fill="url(#neuroGrad)"/>
+      <circle cx="140" cy="60" r="12" fill="url(#neuroGrad)"/>
+      <circle cx="100" cy="140" r="14" fill="url(#neuroGrad)" filter="url(#glow)"/>
+      <circle cx="180" cy="120" r="12" fill="url(#neuroGrad)"/>
+      <circle cx="40" cy="160" r="10" fill="url(#neuroGrad)" opacity="0.6"/>
+      <line x1="60" y1="80" x2="100" y2="140" stroke="#667eea" stroke-width="2" opacity="0.5"/>
+      <line x1="140" y1="60" x2="100" y2="140" stroke="#667eea" stroke-width="2" opacity="0.5"/>
+      <line x1="100" y1="140" x2="180" y2="120" stroke="#667eea" stroke-width="2" opacity="0.5"/>
+      <line x1="60" y1="80" x2="40" y2="160" stroke="#667eea" stroke-width="1.5" opacity="0.3"/>
+    </g>
+    <text x="100" y="200" fill="#718096" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">;028=K ÃH1</text>
+  </g>
+
+  <!-- Jamming particles -->
+  <g transform="translate(480, 90)">
+    <text x="100" y="0" fill="#a0aec0" font-family="system-ui,sans-serif" font-size="14" text-anchor="middle">65<<8=3</text>
+    <g opacity="0.9">
+      <circle cx="50" cy="70" r="18" fill="url(#jamGrad)" opacity="0.7"/>
+      <circle cx="95" cy="55" r="16" fill="url(#jamGrad)" opacity="0.8"/>
+      <circle cx="140" cy="75" r="17" fill="url(#jamGrad)" opacity="0.75"/>
+      <circle cx="75" cy="110" r="19" fill="url(#jamGrad)" opacity="0.85"/>
+      <circle cx="125" cy="115" r="15" fill="url(#jamGrad)" opacity="0.7"/>
+      <circle cx="100" cy="90" r="14" fill="url(#jamGrad)" filter="url(#glow)"/>
+      <circle cx="55" cy="130" r="16" fill="url(#jamGrad)" opacity="0.65"/>
+      <circle cx="150" cy="125" r="14" fill="url(#jamGrad)" opacity="0.6"/>
+    </g>
+    <text x="100" y="200" fill="#718096" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">Æ ’ Æ_c</text>
+  </g>
+
+  <!-- Phase transition curve -->
+  <g transform="translate(820, 100)">
+    <text x="100" y="0" fill="#a0aec0" font-family="system-ui,sans-serif" font-size="14" text-anchor="middle">$07>2K9 ?5@5E>4</text>
+    <line x1="30" y1="150" x2="170" y2="150" stroke="#4a5568" stroke-width="1.5"/>
+    <line x1="30" y1="50" x2="30" y2="150" stroke="#4a5568" stroke-width="1.5"/>
+    <path d="M 30 145 L 85 145 L 85 55 L 170 55" stroke="url(#phaseGrad)" stroke-width="3" fill="none" opacity="0.9"/>
+    <circle cx="85" cy="100" r="8" fill="url(#phaseGrad)" filter="url(#glow)"/>
+    <text x="85" y="175" fill="#718096" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">T_c</text>
+    <text x="10" y="55" fill="#718096" font-family="system-ui,sans-serif" font-size="10">?0@0<5B@</text>
+    <text x="10" y="65" fill="#718096" font-family="system-ui,sans-serif" font-size="10">?>@O4:0</text>
+  </g>
+
+  <!-- Central critical point -->
+  <g transform="translate(600, 320)">
+    <circle cx="0" cy="0" r="55" fill="none" stroke="url(#phaseGrad)" stroke-width="2" opacity="0.4"/>
+    <circle cx="0" cy="0" r="35" fill="url(#phaseGrad)" opacity="0.25" filter="url(#glow)"/>
+    <text x="0" y="-5" fill="#e2e8f0" font-family="system-ui,sans-serif" font-size="16" font-weight="600" text-anchor="middle">:@8B8G5A:0O</text>
+    <text x="0" y="18" fill="#e2e8f0" font-family="system-ui,sans-serif" font-size="16" font-weight="600" text-anchor="middle">B>G:0</text>
+  </g>
+
+  <!-- Arrows to center -->
+  <path d="M 220 250 Q 380 300 545 320" stroke="#667eea" stroke-width="2" fill="none" opacity="0.5" marker-end="url(#arrow)"/>
+  <path d="M 580 250 Q 590 290 600 265" stroke="#f5576c" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M 920 250 Q 760 300 655 320" stroke="#38f9d7" stroke-width="2" fill="none" opacity="0.5"/>
+
+  <!-- Power law tail -->
+  <g transform="translate(200, 400)">
+    <text x="200" y="0" fill="#a0aec0" font-family="system-ui,sans-serif" font-size="13" text-anchor="middle">1I85 <5B@8:8: P(s) ~ s^(-Ä), ¾ ’ , Ç ’ </text>
+    <path d="M 40 120 L 80 95 L 120 78 L 160 68 L 200 62 L 240 58 L 280 55 L 320 53 L 360 52"
+          stroke="url(#phaseGrad)" stroke-width="3" fill="none" opacity="0.8"/>
+    <line x1="40" y1="130" x2="380" y2="130" stroke="#4a5568" stroke-width="1"/>
+    <line x1="40" y1="40" x2="40" y2="130" stroke="#4a5568" stroke-width="1"/>
+    <text x="210" y="155" fill="#718096" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">@07<5@ ;028=K / :;0AB5@0 s</text>
+  </g>
+</svg>

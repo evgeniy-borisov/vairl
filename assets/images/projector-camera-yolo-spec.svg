@@ -1,0 +1,49 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="phone" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="proj" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <linearGradient id="yolo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a"/>
+      <stop offset="100%" style="stop-color:#fee140"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- phone -->
+  <g transform="translate(120, 180)">
+    <rect x="0" y="0" width="90" height="160" rx="12" fill="url(#phone)" opacity="0.9"/>
+    <circle cx="45" cy="130" r="10" fill="#fff" opacity="0.3"/>
+    <rect x="20" y="30" width="50" height="70" fill="#fff" opacity="0.15" rx="4"/>
+    <text x="45" y="195" text-anchor="middle" fill="#a0aec0" font-family="system-ui,sans-serif" font-size="14">0<5@0</text>
+  </g>
+  <!-- arrow video -->
+  <path d="M230 260 H380" stroke="#667eea" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="305" y="245" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="13">WebRTC</text>
+  <!-- laptop -->
+  <g transform="translate(400, 200)">
+    <rect x="0" y="0" width="200" height="130" rx="8" fill="#2d3748"/>
+    <rect x="10" y="10" width="180" height="100" fill="url(#yolo)" opacity="0.4" rx="4"/>
+    <rect x="-30" y="130" width="260" height="12" rx="4" fill="#4a5568"/>
+    <text x="100" y="175" text-anchor="middle" fill="#a0aec0" font-family="system-ui,sans-serif" font-size="14">YOLO + p5.js</text>
+  </g>
+  <!-- arrow projection -->
+  <path d="M620 260 H770" stroke="#43e97b" stroke-width="3" fill="none"/>
+  <text x="695" y="245" text-anchor="middle" fill="#43e97b" font-family="system-ui,sans-serif" font-size="13">@>5:B>@</text>
+  <!-- wall with contour -->
+  <g transform="translate(800, 120)">
+    <rect x="0" y="0" width="280" height="320" fill="#2d3748" opacity="0.6" rx="4"/>
+    <rect x="80" y="100" width="120" height="100" fill="none" stroke="url(#proj)" stroke-width="4" rx="8"/>
+    <text x="140" y="360" text-anchor="middle" fill="#a0aec0" font-family="system-ui,sans-serif" font-size="14">>=BC@ =0 >1J5:B5</text>
+  </g>
+  <text x="600" y="80" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="36" font-weight="600">Projector AR Loop</text>
+  <text x="600" y="120" text-anchor="middle" fill="#718096" font-family="system-ui,sans-serif" font-size="18">": :0<5@0 B5;5D>=0 ’ 45B5:F8O ’ ?@>5:F8O :>=BC@0</text>
+</svg>

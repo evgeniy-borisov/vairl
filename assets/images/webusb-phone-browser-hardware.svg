@@ -1,0 +1,62 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#06b6d4"/>
+      <stop offset="100%" style="stop-color:#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#ef4444"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <!-- Phone -->
+  <g transform="translate(80,120)">
+    <rect x="0" y="0" width="200" height="360" rx="24" fill="url(#g1)" opacity="0.25"/>
+    <rect x="16" y="40" width="168" height="280" rx="8" fill="#1e293b"/>
+    <rect x="28" y="60" width="144" height="200" rx="4" fill="url(#g2)" opacity="0.35"/>
+    <text x="100" y="290" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="14">Chrome / PWA</text>
+    <text x="100" y="310" text-anchor="middle" fill="#cbd5e1" font-family="system-ui,sans-serif" font-size="13">navigator.usb</text>
+  </g>
+  <!-- OTG cable -->
+  <g transform="translate(300,280)">
+    <line x1="0" y1="20" x2="120" y2="20" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+    <text x="60" y="55" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="13">USB OTG</text>
+  </g>
+  <!-- M.2 carrier -->
+  <g transform="translate(440,160)" filter="url(#glow)">
+    <rect x="0" y="0" width="280" height="200" rx="12" fill="url(#g3)" opacity="0.2"/>
+    <rect x="24" y="40" width="180" height="48" rx="6" fill="#334155"/>
+    <rect x="32" y="48" width="164" height="32" rx="4" fill="url(#g3)" opacity="0.6"/>
+    <text x="140" y="72" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="12">M.2 LTE / LoRa</text>
+    <rect x="24" y="110" width="80" height="50" rx="6" fill="#475569"/>
+    <text x="64" y="140" text-anchor="middle" fill="#e2e8f0" font-family="system-ui,sans-serif" font-size="11">USB</text>
+    <text x="64" y="155" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10">CDC-ACM</text>
+    <circle cx="220" cy="135" r="28" fill="url(#g2)" opacity="0.5"/>
+    <text x="220" y="140" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="11">AT / QMI</text>
+  </g>
+  <!-- APIs -->
+  <g transform="translate(780,100)">
+    <rect x="0" y="0" width="340" height="420" rx="16" fill="#1e293b" opacity="0.8"/>
+    <text x="24" y="40" fill="#f8fafc" font-family="system-ui,sans-serif" font-size="20" font-weight="600">Web Platform USB</text>
+    <rect x="24" y="60" width="292" height="44" rx="8" fill="url(#g1)" opacity="0.5"/>
+    <text x="40" y="88" fill="#fff" font-family="system-ui,sans-serif" font-size="14">WebUSB  vendor-specific</text>
+    <rect x="24" y="116" width="292" height="44" rx="8" fill="url(#g2)" opacity="0.45"/>
+    <text x="40" y="144" fill="#fff" font-family="system-ui,sans-serif" font-size="14">Web Serial  CDC-ACM / UART</text>
+    <rect x="24" y="172" width="292" height="44" rx="8" fill="#6366f1" opacity="0.4"/>
+    <text x="40" y="200" fill="#fff" font-family="system-ui,sans-serif" font-size="14">WebHID  :;0280BC@K, 46>9AB8:8</text>
+    <rect x="24" y="228" width="292" height="44" rx="8" fill="#8b5cf6" opacity="0.35"/>
+    <text x="40" y="256" fill="#fff" font-family="system-ui,sans-serif" font-size="14">WebBluetooth  157 ?@>2>40</text>
+    <text x="24" y="310" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="13">HTTPS · user gesture · permission</text>
+    <text x="24" y="335" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="13">Android: Chromium, =5 Safari iOS</text>
+  </g>
+  <text x="600" y="580" text-anchor="middle" fill="#64748b" font-family="system-ui,sans-serif" font-size="22">@0C75@ ” USB-?5@8D5@8O =0 B5;5D>=5</text>
+</svg>

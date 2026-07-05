@@ -1,0 +1,70 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="metaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="metaGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5576c;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="metaGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+    </linearGradient>
+    <filter id="metaGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="#0d1117"/>
+
+  <!-- Agent phase space -->
+  <g transform="translate(80, 90)">
+    <text x="200" y="-20" fill="#8b949e" font-family="system-ui, sans-serif" font-size="18" text-anchor="middle">35=B: object-level</text>
+    <line x1="60" y1="380" x2="60" y2="60" stroke="url(#metaGrad)" stroke-width="2" opacity="0.3"/>
+    <line x1="60" y1="380" x2="380" y2="380" stroke="url(#metaGrad)" stroke-width="2" opacity="0.3"/>
+    <ellipse cx="200" cy="220" rx="90" ry="70" fill="none" stroke="url(#metaGrad3)" stroke-width="2" opacity="0.5" stroke-dasharray="6,4"/>
+    <path d="M 120 300 Q 160 180 220 160 Q 280 140 300 200 Q 320 260 240 290 Q 180 310 120 300"
+          fill="none" stroke="url(#metaGrad3)" stroke-width="3" opacity="0.9"/>
+    <circle cx="220" cy="160" r="8" fill="url(#metaGrad3)" filter="url(#metaGlow)"/>
+    <circle cx="300" cy="200" r="6" fill="#4facfe" opacity="0.8"/>
+    <circle cx="240" cy="290" r="6" fill="#4facfe" opacity="0.8"/>
+    <text x="200" y="420" fill="#6e7681" font-family="system-ui, sans-serif" font-size="14" text-anchor="middle">embedding / A<KA;</text>
+  </g>
+
+  <!-- Meta layer (observer) -->
+  <g transform="translate(420, 70)">
+    <rect x="0" y="0" width="360" height="120" rx="12" fill="none" stroke="url(#metaGrad2)" stroke-width="2" opacity="0.6"/>
+    <text x="180" y="35" fill="#f5576c" font-family="system-ui, sans-serif" font-size="18" text-anchor="middle" font-weight="600">5B0:>3=8F8O</text>
+    <text x="180" y="65" fill="#c9d1d9" font-family="system-ui, sans-serif" font-size="14" text-anchor="middle">>F5=:0 ?@>F5AA0 · :@8B8: · <>=8B>@8=3 B@05:B>@88</text>
+    <path d="M 180 120 L 180 200" stroke="url(#metaGrad2)" stroke-width="2" stroke-dasharray="5,5" opacity="0.7" marker-end="url(#arrow)"/>
+    <path d="M 100 200 Q 180 250 260 200" fill="none" stroke="url(#metaGrad2)" stroke-width="2" opacity="0.5"/>
+  </g>
+
+  <!-- Human parallel -->
+  <g transform="translate(680, 90)">
+    <text x="200" y="-20" fill="#8b949e" font-family="system-ui, sans-serif" font-size="18" text-anchor="middle">'5;>25:: «2B>@0O G0ABL»</text>
+    <rect x="80" y="60" width="240" height="300" rx="16" fill="none" stroke="url(#metaGrad)" stroke-width="2" opacity="0.4"/>
+    <g opacity="0.85">
+      <rect x="110" y="90" width="180" height="50" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+      <text x="200" y="122" fill="#8b949e" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">459AB285 / @5GL</text>
+      <rect x="110" y="160" width="180" height="50" rx="8" fill="#161b22" stroke="#667eea" stroke-width="1.5"/>
+      <text x="200" y="192" fill="#a5b4fc" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">2=CB@5==89 <>=>;>3</text>
+      <rect x="110" y="230" width="180" height="50" rx="8" fill="#161b22" stroke="#f5576c" stroke-width="1.5"/>
+      <text x="200" y="262" fill="#fda4af" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">=01;N40B5;L 70 A>1>9</text>
+    </g>
+    <path d="M 200 140 L 200 160 M 200 210 L 200 230" stroke="#484f58" stroke-width="1.5"/>
+    <text x="200" y="400" fill="#6e7681" font-family="system-ui, sans-serif" font-size="14" text-anchor="middle">B>B 65 D07>2K9 A;>9 A<KA;>2</text>
+  </g>
+
+  <!-- Bridge -->
+  <path d="M 460 320 Q 600 280 680 320" fill="none" stroke="url(#metaGrad)" stroke-width="2" opacity="0.5" stroke-dasharray="8,6"/>
+  <text x="570" y="270" fill="#6e7681" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">0=0;>38O</text>
+
+  <text x="600" y="580" fill="#484f58" font-family="system-ui, sans-serif" font-size="16" text-anchor="middle">5B0:>3=8F8O 035=B0 8 2=CB@5==OO @5D;5:A8O G5;>25:0</text>
+</svg>

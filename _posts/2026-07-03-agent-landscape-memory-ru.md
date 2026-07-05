@@ -20,7 +20,8 @@ image: /assets/images/agent-landscape-memory.svg
 | Раздел | О чём |
 |--------|--------|
 | [Слои памяти](#слои-памяти-у-агента) | Контекст, сессия, проект, RAG |
-| [Обзор агентов](#обзор-актуальных-агентных-программ) | Pi, Aider, Codex… с блоком **Память** |
+| [Обзор агентов](#обзор-актуальных-агентных-программ) | Pi, Aider, Codex… с блоком **Память**; Claude Code — [зеркала утечки](#утечка-исходников-март-2026-зеркала-на-github) |
+| [Open-source на GitHub](#open-source-агенты-репозитории-на-github) | Ссылки и краткое содержание репозиториев |
 | [TUI](#сравнение-tui-терминальных-интерфейсов) | Full-screen vs scrollback |
 | [Таблицы](#сравнительная-таблица-агентов) | Функции и **память** |
 | [g3](#как-g3-считать-агентом) | Adversarial + fresh instance |
@@ -156,6 +157,7 @@ flowchart TB
 | | |
 |---|---|
 | **Тип** | Open-source coding agent (MIT), [opencode.ai](https://opencode.ai) |
+| **Репозиторий** | [anomalyco/opencode](https://github.com/anomalyco/opencode) |
 | **Архитектура** | **Client/server**: SQLite + SSE; TUI/Desktop/IDE — клиенты |
 | **Агенты** | `build`, `plan` (read-only), `explore` (sub-agent) |
 
@@ -202,7 +204,8 @@ flowchart TB
 
 | | |
 |---|---|
-| **Тип** | Personal agent (Nous Research), не только код |
+| **Тип** | Open-source personal agent (Nous Research), не только код |
+| **Репозиторий** | [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
 | **Интерфейсы** | CLI, gateway (Telegram, Discord, Slack…), cron |
 | **Особенности** | 70+ tools, **lineage-based compression**, profiles, `delegate_task` |
 
@@ -225,7 +228,8 @@ flowchart TB
 
 | | |
 |---|---|
-| **Тип** | GitHub-native multi-agent pipeline, [idad.io](https://idad.io/) |
+| **Тип** | Open-source GitHub-native multi-agent pipeline, [idad.io](https://idad.io/) |
+| **Репозиторий** | [kidrecursive/IDAD](https://github.com/kidrecursive/IDAD) |
 | **Движок** | Claude Code, Cursor или Codex |
 | **Поток** | Issue → Review → Planner → Implementer → … → PR |
 
@@ -269,7 +273,8 @@ flowchart TB
 
 | | |
 |---|---|
-| **Тип** | Terminal + IDE agent (Anthropic) |
+| **Тип** | Terminal + IDE agent (Anthropic), proprietary |
+| **Официально** | [code.claude.com/docs](https://code.claude.com/docs) · npm [`@anthropic-ai/claude-code`](https://www.npmjs.com/package/@anthropic-ai/claude-code) |
 | **Расширения** | `CLAUDE.md`, Skills, Hooks, Subagents, MCP |
 
 #### Память
@@ -286,13 +291,30 @@ flowchart TB
 
 **Вывод:** лучший баланс **файловой проектной памяти** (`CLAUDE.md`) и **управляемой compaction** для coding.
 
+#### Утечка исходников (март 2026): зеркала на GitHub
+
+31 марта 2026 в npm-пакете `@anthropic-ai/claude-code` **v2.1.88** случайно оказался source map (`cli.js.map`, ~60 MB) с полным unobfuscated TypeScript — ~1 900 файлов, 512 000+ строк client-side harness (Bun + React/Ink TUI). Обнаружил [Chaofan Shou (@Fried_rice)](https://x.com/Fried_rice/status/2038894956459290963); за часы код разошёлся по сотням зеркал на GitHub. Anthropic отправляла DMCA на часть форков; **код остаётся proprietary** — это не open source.
+
+> **Безопасность:** часть «leaked Claude Code» репозиториев раздаёт **троянские бинарники** (Vidar, GhostSocks) через Releases. Не скачивайте `.exe`/`.7z` из неофициальных форков; для продакшена — только signed npm/официальные каналы Anthropic. Исследовательский аудит — **только исходники**, без сборки чужих артефактов.
+
+Три наиболее популярных зеркала/производных (по звёздам на GitHub, июль 2026):
+
+| Зеркало | ⭐ | Содержание |
+|---------|---|------------|
+| [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) | ~195k | **Rust-порт** agent harness, написанный по мотивам утечки (не byte-for-byte копия TS). Самый разрекламированный форк события; community-driven rewrite с parity-roadmap. |
+| [yasasbanukaofficial/claude-code](https://github.com/yasasbanukaofficial/claude-code) | ~3.6k | **Прямое зеркало** утёкшего TypeScript v2.1.88: backup исходников + разбор архитектуры, tool-calling, agentic loop. «Skeleton, not the brain» — без API-ключей Anthropic не работает как продукт. |
+| [777genius/claude-code-source-code](https://github.com/777genius/claude-code-source-code) | ~900 | Exploratory mirror: raw snapshot в ветке `backup`, на `main` — документация, MCP-explorer, метаданные. Связанный полный снимок — [claude-code-source-code-full](https://github.com/777genius/claude-code-source-code-full). |
+
+Для **сборки из утёкшего TS** (research-only) упоминают также [beita6969/claude-code](https://github.com/beita6969/claude-code) (~320 ⭐): исправленные зависимости, `bun install && bun src/main.tsx`.
+
 ---
 
 ### g3 (диалектический агент)
 
 | | |
 |---|---|
-| **Тип** | Coding agent, [dhanji/g3](https://github.com/dhanji/g3) |
+| **Тип** | Open-source coding agent |
+| **Репозиторий** | [dhanji/g3](https://github.com/dhanji/g3) |
 | **Архитектура** | **Player** (код) + **Coach** (ревью), adversarial loop |
 
 См. [статью VAIRL про g3](/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/).
@@ -310,6 +332,32 @@ flowchart TB
 | **Git** | Состояние кода в репозитории — истина сильнее контекста LLM |
 
 **Вывод:** g3 жертвует «одним длинным чатом» ради **adversarial проверки**; память вынесена в файлы, git и requirements.
+
+---
+
+## Open-source агенты: репозитории на GitHub
+
+Восемь агентов из обзора выше — **open source** с публичным кодом на GitHub. Ниже — сводная таблица: ссылка на репозиторий, лицензия и краткое содержание (что именно лежит в репо и зачем его смотреть).
+
+| Агент | GitHub | Лицензия | Содержание репозитория |
+|-------|--------|----------|------------------------|
+| **Pi** | [badlogic/pi-mono](https://github.com/badlogic/pi-mono) | MIT | TypeScript-monorepo: `pi-ai` (провайдеры LLM) → `pi-agent-core` (event-driven loop) → `pi-tui` (full-screen терминал) → `pi-coding-agent` (CLI). Skills, extensions, sub-agents, RPC/JSONL для встраивания. Минималистичный runtime без лишних слоёв. |
+| **Aider** | [Aider-AI/aider](https://github.com/Aider-AI/aider) | Apache 2.0 | Python pair programmer: **repo map** (PageRank по символам), форматы правок whole/diff/udiff, auto-commit. Scrollback-чат на `prompt_toolkit` + Rich. Хорошая точка входа для «чат → diff → git». |
+| **Codex** | [openai/codex](https://github.com/openai/codex) | Apache 2.0 | Rust terminal agent: sandbox, MCP, sub-agents, web search, **`codex resume`**. Full-screen TUI, non-interactive `codex exec` для скриптов. Официальный CLI OpenAI для agentic coding в терминале. |
+| **OpenCode** | [anomalyco/opencode](https://github.com/anomalyco/opencode) | MIT | TypeScript client/server: **SQLite** + SSE, агенты `build` / `plan` / `explore`, TUI + desktop + IDE-расширения. Provider-agnostic (75+ моделей). Один из самых активных OSS coding-agent репозиториев 2026. |
+| **py-code-agent** | [bonashen/py-code-agent](https://github.com/bonashen/py-code-agent) | MIT | Python CLI: ReAct-loop, **session tree** (fork/branch), MCP gateway, A2A, pluggy-плагины. Совместимость `SKILL.md` с Claude Code. Для экспериментов с ветвлением траекторий. |
+| **Hermes** | [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) | MIT | Python personal agent: gateway (Telegram, Discord, Slack, WhatsApp…), **lineage compression**, SQLite-сессии, profiles, 70+ tools, self-improving skills. Экспорт траекторий для RL (`trajectory_samples.jsonl`). Не только код — 24/7 бот на VPS. |
+| **g3** | [dhanji/g3](https://github.com/dhanji/g3) | Apache 2.0 | Rust adversarial coding agent: **Player** (код) + **Coach** (ревью), fresh instance на ход, `requirements.md`, `/compact` / `/thinnify`. Диалектический loop вместо одного длинного треда. |
+| **IDAD** | [kidrecursive/IDAD](https://github.com/kidrecursive/IDAD) | MIT | GitHub Actions + `.idad/`: 9 специализированных агентов (Issue Review → Planner → Implementer → Security → Reviewer → Documenter → IDAD). Label-based FSM (`idad:planning`, `idad:human-plan-review`…). Движок — Claude Code, Cursor или Codex. Память workflow = issue + PR, не контекст LLM. |
+
+### Закрытые продукты из обзора
+
+| Агент | Код | Где смотреть |
+|-------|-----|--------------|
+| **Claude Code** | ❌ proprietary | [code.claude.com/docs](https://code.claude.com/docs); [зеркала утечки v2.1.88](#утечка-исходников-март-2026-зеркала-на-github) (исследование, не OSS) |
+| **ChatGPT Agent** | ❌ proprietary | [OpenAI Agent Mode](https://openai.com/index/introducing-chatgpt-agent/) |
+
+**Практика:** если нужен **fork или audit** — берите строку из таблицы выше; если нужны hooks + `CLAUDE.md` без self-hosting — Claude Code; если web-first для нетехнического пользователя — ChatGPT Agent.
 
 ---
 
@@ -435,14 +483,15 @@ flowchart TB
 2. **OpenCode** и **Hermes** сильнее всего в автоматической **персистентности + compression**.
 3. **Aider** и **Claude Code** — в **проектной памяти** (repo map vs CLAUDE.md).
 4. **g3** и **IDAD** сознательно **не копят** длинный тред — память в артефактах.
-5. Базовые понятия RAG/MCP/skills — в [отдельной статье-фундаменте](/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/).
+5. **Open-source** агенты — [сводная таблица репозиториев](#open-source-агенты-репозитории-на-github) с GitHub-ссылками и кратким содержанием.
+6. Базовые понятия RAG/MCP/skills — в [отдельной статье-фундаменте](/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/).
 
 ---
 
 ## Источники
 
-- [Pi mono](https://github.com/badlogic/pi-mono) · [Aider](https://aider.chat/) · [Codex CLI](https://developers.openai.com/codex/cli)
-- [OpenCode](https://opencode.ai) · [Hermes architecture](https://hermes-agent.nousresearch.com/docs/developer-guide/architecture)
-- [py-code-agent](https://github.com/bonashen/py-code-agent) · [IDAD](https://idad.io/)
-- [Claude Code docs](https://code.claude.com/docs) · [g3 — VAIRL](/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/)
+- [Pi mono](https://github.com/badlogic/pi-mono) · [Aider](https://github.com/Aider-AI/aider) · [Codex CLI](https://github.com/openai/codex)
+- [OpenCode](https://github.com/anomalyco/opencode) · [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+- [py-code-agent](https://github.com/bonashen/py-code-agent) · [IDAD](https://github.com/kidrecursive/IDAD) · [g3](https://github.com/dhanji/g3)
+- [Claude Code docs](https://code.claude.com/docs) · [утечка v2.1.88 — claw-code](https://github.com/ultraworkers/claw-code) · [g3 — VAIRL](/vairl/blog/2026/06/25/g3-dialectical-autocoding-ru/)
 - [Фундамент: RAG, MCP, skills](/vairl/blog/2026/07/02/agent-fundamentals-rag-mcp-landscape-ru/) · [RAG для агентов](/vairl/blog/2026/07/03/agent-rag-approaches-ru/)

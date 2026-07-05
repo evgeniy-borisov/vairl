@@ -28,6 +28,7 @@ image: /assets/images/llm-evolutionary-systems-comparison.svg
 | Раздел | О чём |
 |--------|--------|
 | [Общий цикл](#общий-эволюционный-цикл) | Что общего у всех трёх |
+| [Схема поиска](#схема-эволюционного-поиска) | Пошаговый пайплайн: данные и действия |
 | [Архитектура](#архитектура-трёх-систем) | ShinkaEvolve · AlphaEvolve · GigaEvo |
 | [Острова и отбор](#острова-отбор-и-разнообразие) | Island model, MAP-Elites, parent sampling |
 | [Интерактив](#интерактив-острова-и-дерево-эволюции) | p5.js: три острова, филогения, цикл шагов |
@@ -61,6 +62,106 @@ flowchart LR
 - `initial.py` — стартовая программа;
 - `evaluate.py` — запуск кандидата, возврат fitness + публичные метрики + текстовый feedback;
 - опционально: `task_sys_msg` с описанием ограниченной области (unit square, треугольник, гиперкуб).
+
+---
+
+## Схема эволюционного поиска
+
+Ниже — **единая последовательность**, которую реализуют ShinkaEvolve, AlphaEvolve и GigaEvo. Отличия — в деталях каждого шага (таблица в конце раздела), а не в общей топологии цикла.
+
+```
+[ initial.py + evaluate.py + task spec ]
+              │
+              ▼
+   0. SEED — стартовая программа(ы) в архив
+              │
+              ▼
+   1. SELECT — выбор родителя(ей) из архива / острова
+              │
+              ▼
+   2. CONTEXT — сбор промпта: родитель + inspiration + feedback + meta
+              │
+              ▼
+   3. MUTATE — LLM: diff / rewrite → кандидат (новый код)
+              │
+              ▼
+   4. FILTER — novelty reject, syntax check (опционально)
+              │
+              ▼
+   5. EVAL — запуск кандидата, verifier → fitness + metrics + текст
+              │
+              ▼
+   6. UPDATE — MAP-Elites / elite archive / island population
+              │
+              ▼
+   7. MIGRATE — обмен элитой между островами (периодически)
+              │
+              ▼
+   8. LOOP — шаги 1–7, пока не исчерпан бюджет eval
+              │
+              ▼
+   9. RETURN — лучшая программа по целевой метрике
+```
+
+```mermaid
+sequenceDiagram
+    participant A as Архив / острова
+    participant S as Selector
+    participant L as LLM
+    participant E as Evaluator
+    A->>S: родители + inspiration
+    S->>L: промпт (код + feedback + meta)
+    L->>E: кандидат
+    E->>E: run + verifier
+    E-->>A: fitness, metrics, текст
+    Note over A: UPDATE + MIGRATE
+    A->>S: следующее поколение
+```
+
+### Шаги по данным
+
+| # | Действие | Вход | Выход | Критерий перехода |
+|---|----------|------|-------|-------------------|
+| **0** | **Seed** | `initial.py`, контракт задачи | Программа P₀ в архиве | fitness(P₀) определён |
+| **1** | **Select** | Архив, политика отбора, номер поколения | Родитель P_parent, опционально inspiration {P₁…Pₖ} | родитель выбран |
+| **2** | **Context** | P_parent, топ архива, meta-scratchpad, прошлый feedback | Промпт мутации | контекст уложился в budget |
+| **3** | **Mutate** | Промпт + LLM (одна или ensemble) | Кандидат P′ (patch или rewrite) | P′ синтаксически валиден |
+| **4** | **Filter** | P′, embedding / judge | P′ или reject | не дубликат / прошёл novelty |
+| **5** | **Eval** | P′, `evaluate.py`, seeds | fitness f, constraint flags, публичные метрики, текст feedback | eval завершён (timeout → reject) |
+| **6** | **Update** | (P′, f, behavior descriptors) | Обновлённый архив / ячейки MAP-Elites | P′ принят или отброшен |
+| **7** | **Migrate** | Элиты островов, интервал T_m | Смешанные популяции | каждые T_m поколений |
+| **8** | **Loop** | Счётчик eval / wall-clock | — | eval < budget |
+| **9** | **Return** | Архив | P_best, lineage, метрики | budget = 0 |
+
+**Замкнутый контур:** шаги **1–7** повторяются асинхронно — proposal (1–4) и eval (5–6) идут параллельно, пока не исчерпан лимит **program evaluations**. Verifier на шаге 5 — единственный источник истины о качестве; LLM не оценивает fitness сама.
+
+### Что происходит на одном «поколении»
+
+Одно поколение — не обязательно один eval. Типичный микроцикл:
+
+1. **N параллельных proposal** — каждый: select → context → mutate → (filter).
+2. **N параллельных eval** — sandbox-запуск, возврат скалярной метрики.
+3. **Batch update** — архив и острова обновляются пакетом; миграция — реже (раз в T_m batch).
+
+ShinkaEvolve и AlphaEvolve явно разделяют **async proposal pool** и **eval workers**; GigaEvo делает то же через asyncio-DAG (execute → validate → complexity → insights).
+
+### Отличия трёх систем по шагам
+
+| Шаг | ShinkaEvolve | AlphaEvolve | GigaEvo |
+|-----|--------------|-------------|---------|
+| **0 Seed** | `initial.py` + islands из одного seed | Internal task template | Hydra preset + `initial.py` |
+| **1 Select** | Weighted (fitness + offspring count); power-law ablation | MAP-Elites + island sampling (закрыто) | Fitness-proportional; `MigrantSelector` |
+| **2 Context** | Parent + inspiration + **meta-scratchpad** каждые T gen | Multi-metric programs + **co-evolved meta-prompts** | Parent + **lineage insights** из DAG |
+| **3 Mutate** | diff / rewrite; **ensemble LLM** | Gemini Flash (широта) + Pro (сложное) | LangGraph-agent; **rewrite** (не diff) |
+| **3′ LLM select** | **UCB1 bandit** по моделям | Flash vs Pro routing | Qwen / Gemini / gpt-oss routing |
+| **4 Filter** | **Novelty rejection** (embedding + LLM-judge) | Не раскрыто | Validity pre-check в pipeline |
+| **5 Eval** | `evaluate.py` → fitness + **text feedback** | Каскад eval, до ~100 compute-h; multi-seed | DAG: execute → validate → complexity → LLM insights |
+| **6 Update** | Elite archive + **island subpopulations** | MAP-Elites + islands | **MAP-Elites** (fitness × validity); Redis units |
+| **7 Migrate** | Да; **лучший острова не уходит** | Да (детали закрыты) | `MigrantSelector`; multi-island: fitness / simplicity / speed |
+| **8 Budget** | **~150 eval** на circle pack (целевой минимум) | **~10³ eval** (throughput-first) | Настраивается; single-island на геометрии |
+| **9 Return** | WebUI lineage; exact postprocess | Production deploy в Google infra | Master API + MinIO artifacts |
+
+**Сводка:** все три системы — **LLM-guided evolutionary program search**: код мутирует языковой моделью, качество верифицирует детерминированный evaluator, разнообразие поддерживают архив + острова + (частично) MAP-Elites. ShinkaEvolve смещает баланс к **sample efficiency** (UCB1, novelty, weighted parents); AlphaEvolve — к **throughput и масштабу**; GigaEvo — к **воспроизводимости и модульности** open-source стека.
 
 ---
 
