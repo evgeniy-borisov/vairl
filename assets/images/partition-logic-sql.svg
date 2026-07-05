@@ -1,0 +1,47 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="plG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="plG2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <linearGradient id="plG3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a"/>
+      <stop offset="100%" style="stop-color:#fee140"/>
+    </linearGradient>
+    <linearGradient id="plG4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4facfe"/>
+      <stop offset="100%" style="stop-color:#00f2fe"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbff"/>
+  <!-- Universe set -->
+  <ellipse cx="600" cy="310" rx="520" ry="220" fill="none" stroke="#667eea" stroke-width="2" stroke-dasharray="8 6" opacity="0.4"/>
+  <text x="600" y="80" text-anchor="middle" fill="#667eea" font-family="system-ui,sans-serif" font-size="18" font-weight="600">U  <=>65AB2> AB@>:</text>
+  <!-- Partition blocks -->
+  <rect x="180" y="180" width="200" height="120" rx="14" fill="url(#plG2)" opacity="0.22" stroke="url(#plG2)" stroke-width="2"/>
+  <text x="280" y="235" text-anchor="middle" fill="#38f9d7" font-family="monospace" font-size="16">PÅ</text>
+  <text x="280" y="260" text-anchor="middle" fill="#666" font-family="system-ui,sans-serif" font-size="12">region=EU</text>
+  <rect x="420" y="160" width="200" height="140" rx="14" fill="url(#plG1)" opacity="0.22" stroke="url(#plG1)" stroke-width="2"/>
+  <text x="520" y="225" text-anchor="middle" fill="#667eea" font-family="monospace" font-size="16">PÇ</text>
+  <text x="520" y="250" text-anchor="middle" fill="#666" font-family="system-ui,sans-serif" font-size="12">region=US</text>
+  <rect x="660" y="190" width="200" height="110" rx="14" fill="url(#plG3)" opacity="0.22" stroke="url(#plG3)" stroke-width="2"/>
+  <text x="760" y="240" text-anchor="middle" fill="#fa709a" font-family="monospace" font-size="16">PÉ</text>
+  <text x="760" y="265" text-anchor="middle" fill="#666" font-family="system-ui,sans-serif" font-size="12">region=APAC</text>
+  <rect x="320" y="340" width="240" height="130" rx="14" fill="url(#plG4)" opacity="0.22" stroke="url(#plG4)" stroke-width="2"/>
+  <text x="440" y="400" text-anchor="middle" fill="#4facfe" font-family="monospace" font-size="16">PÑ</text>
+  <text x="440" y="425" text-anchor="middle" fill="#666" font-family="system-ui,sans-serif" font-size="12">region=OTHER</text>
+  <rect x="620" y="350" width="220" height="110" rx="14" fill="#e8e8f0" stroke="#999" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="730" y="405" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="13">* Pb = U</text>
+  <text x="730" y="430" text-anchor="middle" fill="#888" font-family="system-ui,sans-serif" font-size="13">Pb ) P| = </text>
+  <!-- SQL badge -->
+  <rect x="80" y="480" width="1040" height="100" rx="12" fill="#1e1e2e" opacity="0.92"/>
+  <text x="120" y="525" fill="#43e97b" font-family="monospace" font-size="20">GROUP BY</text>
+  <text x="320" y="525" fill="#667eea" font-family="monospace" font-size="20">PARTITION BY</text>
+  <text x="560" y="525" fill="#fa709a" font-family="monospace" font-size="20">PARTITION (DDL)</text>
+  <text x="860" y="525" fill="#4facfe" font-family="monospace" font-size="20">SHARD KEY</text>
+  <text x="600" y="560" text-anchor="middle" fill="#aaa" font-family="system-ui,sans-serif" font-size="14">>38:0 @07185=89: >B M:2820;5=B=>AB8 4> SQL</text>
+</svg>

@@ -1705,6 +1705,136 @@ nav a {
     background: #f7f7f9;
 }
 
+.partition-logic-widget {
+    margin: 32px 0 28px;
+    border: 1px solid #e8e8ec;
+    border-radius: 10px;
+    background: #fcfcfd;
+    overflow: hidden;
+}
+
+.partition-logic-widget .pl-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.partition-logic-widget .pl-header p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #666;
+}
+
+.partition-logic-widget .pl-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #fafafb;
+    align-items: center;
+}
+
+.partition-logic-widget .pl-controls-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+    margin-right: 4px;
+}
+
+.partition-logic-widget .pl-controls button {
+    font-family: inherit;
+    font-size: 12px;
+    padding: 6px 12px;
+    border: 1px solid #d8d8e0;
+    border-radius: 6px;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.partition-logic-widget .pl-controls button:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.partition-logic-widget .pl-controls button.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.1));
+    color: #5a4d9e;
+    font-weight: 600;
+}
+
+.partition-logic-widget .pl-controls .pl-sep {
+    width: 1px;
+    height: 22px;
+    background: #e0e0e8;
+    margin: 0 4px;
+}
+
+.partition-logic-widget .pl-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: #666;
+    border-bottom: 1px solid #ececf0;
+    background: #fff;
+}
+
+.partition-logic-widget .pl-metrics strong {
+    color: #5a4d9e;
+}
+
+.partition-logic-widget .pl-canvas-wrap {
+    padding: 12px 14px;
+    background: #fafbfd;
+}
+
+.partition-logic-widget #partition-logic-canvas {
+    display: block;
+    width: 100%;
+    height: 340px;
+    border-radius: 6px;
+    border: 1px solid #e4e6ec;
+    box-shadow: 0 1px 3px rgba(102, 126, 234, 0.06);
+}
+
+.partition-logic-widget .pl-sql-wrap {
+    padding: 10px 14px;
+    border-top: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.partition-logic-widget .pl-sql {
+    margin: 0;
+    padding: 10px 12px;
+    font-size: 11px;
+    line-height: 1.55;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: #444;
+    background: #fff;
+    border: 1px solid #e4e6ec;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+.partition-logic-widget .pl-caption {
+    margin: 0;
+    padding: 10px 14px 14px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #777;
+    border-top: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
 .rl-policy-credit-widget {
     margin: 32px 0 28px;
     border: 1px solid #e8e8ec;
@@ -2010,6 +2140,7 @@ footer {
 [data-theme="dark"] .criticality-widget,
 [data-theme="dark"] .semantic-torrent-widget,
 [data-theme="dark"] .grpo-ppo-widget,
+[data-theme="dark"] .partition-logic-widget,
 [data-theme="dark"] .rag-pipeline-widget,
 [data-theme="dark"] .rl-policy-credit-widget,
 [data-theme="dark"] .edge-nn-widget {
@@ -2027,6 +2158,9 @@ footer {
 [data-theme="dark"] .semantic-torrent-widget .st-chunk-list,
 [data-theme="dark"] .grpo-ppo-widget .rl-header,
 [data-theme="dark"] .grpo-ppo-widget .rl-caption,
+[data-theme="dark"] .partition-logic-widget .pl-header,
+[data-theme="dark"] .partition-logic-widget .pl-caption,
+[data-theme="dark"] .partition-logic-widget .pl-sql-wrap,
 [data-theme="dark"] .rag-pipeline-widget .rg-header,
 [data-theme="dark"] .rag-pipeline-widget .rg-steps,
 [data-theme="dark"] .rag-pipeline-widget .rg-chunk-list,
@@ -2046,6 +2180,8 @@ footer {
 [data-theme="dark"] .semantic-torrent-widget .st-header p,
 [data-theme="dark"] .semantic-torrent-widget .st-chunk-item,
 [data-theme="dark"] .grpo-ppo-widget .rl-header p,
+[data-theme="dark"] .partition-logic-widget .pl-header p,
+[data-theme="dark"] .partition-logic-widget .pl-metrics,
 [data-theme="dark"] .rag-pipeline-widget .rg-header p,
 [data-theme="dark"] .rag-pipeline-widget .rg-chunk-item,
 [data-theme="dark"] .rag-pipeline-widget .rg-step,
@@ -2059,6 +2195,7 @@ footer {
 [data-theme="dark"] .criticality-widget .criticality-controls,
 [data-theme="dark"] .semantic-torrent-widget .st-controls,
 [data-theme="dark"] .grpo-ppo-widget .rl-controls,
+[data-theme="dark"] .partition-logic-widget .pl-controls,
 [data-theme="dark"] .rag-pipeline-widget .rg-controls,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-controls {
     background: var(--widget-controls);
@@ -2068,6 +2205,7 @@ footer {
 [data-theme="dark"] .criticality-widget .crit-state-btn,
 [data-theme="dark"] .semantic-torrent-widget .st-controls button,
 [data-theme="dark"] .grpo-ppo-widget .rl-controls button,
+[data-theme="dark"] .partition-logic-widget .pl-controls button,
 [data-theme="dark"] .rag-pipeline-widget .rg-controls button,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-controls button,
 [data-theme="dark"] .edge-nn-widget .edge-nn-controls button {
@@ -2079,6 +2217,7 @@ footer {
 [data-theme="dark"] .phase-portrait-widget .phase-portrait-controls button.active,
 [data-theme="dark"] .semantic-torrent-widget .st-controls button.active,
 [data-theme="dark"] .grpo-ppo-widget .rl-controls button.active,
+[data-theme="dark"] .partition-logic-widget .pl-controls button.active,
 [data-theme="dark"] .rag-pipeline-widget .rg-controls button.active,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-controls button.active {
     background: var(--gradient-accent);
@@ -2088,6 +2227,7 @@ footer {
 [data-theme="dark"] .criticality-widget .criticality-canvas-wrap,
 [data-theme="dark"] .semantic-torrent-widget .st-canvas-wrap,
 [data-theme="dark"] .grpo-ppo-widget .rl-canvas-wrap,
+[data-theme="dark"] .partition-logic-widget .pl-canvas-wrap,
 [data-theme="dark"] .rag-pipeline-widget .rg-canvas-wrap,
 [data-theme="dark"] .rl-policy-credit-widget .rl-credit-canvas-wrap {
     background: var(--widget-canvas-bg);
@@ -2096,6 +2236,7 @@ footer {
 [data-theme="dark"] .criticality-widget #criticality-grid-canvas,
 [data-theme="dark"] .semantic-torrent-widget #semantic-torrent-canvas,
 [data-theme="dark"] .grpo-ppo-widget #grpo-ppo-canvas,
+[data-theme="dark"] .partition-logic-widget #partition-logic-canvas,
 [data-theme="dark"] .rag-pipeline-widget #rag-pipeline-canvas,
 [data-theme="dark"] .rl-policy-credit-widget #rl-policy-credit-canvas,
 [data-theme="dark"] .edge-nn-widget .edge-nn-canvas-mount canvas,
@@ -2105,6 +2246,7 @@ footer {
 
 [data-theme="dark"] .semantic-torrent-widget .st-result,
 [data-theme="dark"] .grpo-ppo-widget .rl-formula,
+[data-theme="dark"] .partition-logic-widget .pl-metrics,
 [data-theme="dark"] .rag-pipeline-widget .rg-formula,
 [data-theme="dark"] .rag-pipeline-widget .rg-metrics {
     background: var(--widget-bg);
@@ -2118,6 +2260,8 @@ footer {
 }
 
 [data-theme="dark"] .grpo-ppo-widget .rl-formula code,
+[data-theme="dark"] .partition-logic-widget .pl-sql,
+[data-theme="dark"] .partition-logic-widget .pl-metrics strong,
 [data-theme="dark"] .rag-pipeline-widget .rg-formula code {
     background: var(--bg-code);
 }
