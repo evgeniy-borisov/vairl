@@ -21,6 +21,7 @@ image: /assets/images/yacy-decentralized-search-engine.svg
 |--------|--------|
 | [Что такое YaCy](#что-такое-yacy) | Три режима, сеть freeworld |
 | [Архитектура](#архитектура) | Пиры, Senior/Junior, два индекса |
+| [DHT + RWI + P2P](#dht--rwi--p2p-три-слоя-децентрализованного-поиска) | Как связаны сеть, индекс и маршрутизация |
 | [Индексация](#индексация) | Краулинг → Solr + RWI → DHT |
 | [Поиск](#поиск) | DHT lookup, слияние, ранжирование |
 | [Преимущества](#преимущества-перед-другими-системами) | Vs Google, SearXNG, Solr |
@@ -52,24 +53,24 @@ YaCy — **свободное ПО (GPL-2+)** для собственного п
 flowchart TB
     subgraph peer [Ваш YaCy-пир]
         C[Crawler] --> P[Parser]
-        P --> S[Solr/Lucene]
+        P --> S[Solr Lucene]
         P --> R[RWI Kelondro]
-        R -->|DHT Distribution| OUT[Отправка фрагментов]
-        IN[Приём фрагментов] --> R
-        Q[Запрос] --> S
+        R -->|DHT out| OUT[Send RWI chunks]
+        IN[Receive chunks] --> R
+        Q[Query] --> S
         Q --> R
-        Q -->|DHT Lookup| NET
-        S --> MERGE[Слияние]
+        Q -->|DHT lookup| REM[Remote peers]
+        S --> MERGE[Merge results]
         R --> MERGE
-        NET --> MERGE
-        MERGE --> UI[Web UI :8090]
+        REM --> MERGE
+        MERGE --> UI[Web UI 8090]
     end
 
     subgraph network [P2P freeworld]
-        NET[Senior-пиры]
+        SEN[Senior peers]
     end
 
-    OUT --> NET
+    OUT --> SEN
 ```
 
 ### Статусы пира
@@ -94,7 +95,198 @@ flowchart TB
 
 ---
 
-## Индексация
+## DHT + RWI + P2P: три слоя децентрализованного поиска
+
+YaCy — не «просто P2P-краулер». Три механизма работают **вместе**, и путаница между ними — главная причина, почему архитектуру трудно понять с первого раза.
+
+| Слой | Вопрос, на который отвечает | Аналогия |
+|------|-----------------------------|----------|
+| **P2P** | *Кто* участвует в сети и *как* обменивается данными? | Дорожная сеть: пиры, маршруты, правила приёма/отдачи |
+| **RWI** | *Что* именно хранится и передаётся? | Каталог: «слово → список URL» |
+| **DHT** | *Где* лежит каждый фрагмент каталога? | Адресная книга: хеш слова → конкретный пир |
+
+```mermaid
+flowchart TB
+    subgraph p2p [P2P — сеть пиров]
+        J[Junior peer]
+        S[Senior peer]
+        P[Principal + seed list]
+        J -->|push RWI| S
+        S <-->|query RWI| S
+    end
+
+    subgraph rwi [RWI — данные индекса]
+        W[word hash]
+        U[URL list + rank]
+        W --> U
+    end
+
+    subgraph dht [DHT — маршрутизация]
+        H[hash ring]
+        T[target peer for hash range]
+        H --> T
+    end
+
+    Crawl[Краулинг страницы] --> rwi
+    rwi -->|distribute| dht
+    dht -->|transmit| p2p
+    Query[Поисковый запрос] --> dht
+    dht -->|fetch from| p2p
+```
+
+### P2P: сеть равноправных узлов
+
+**Peer-to-peer** в YaCy — это не BitTorrent и не «flooding» запросов по всей сети. Каждый узел — полноценный поисковый сервер (краулер + индекс + UI). Пиры обмениваются **только фрагментами индекса** (RWI) и **ответами на поиск**, а не сырыми HTML-страницами.
+
+**Роли пиров:**
+
+| Роль | Сеть | Что делает |
+|------|------|------------|
+| **Virgin** | Изолирован | Только локальный Solr |
+| **Junior** | За NAT | **Активно отправляет** RWI senior-пирам; **не принимает** входящие запросы |
+| **Senior** | Порт 8090 открыт | **Принимает** RWI, **хранит** свою долю DHT, **отвечает** на удалённые поиски |
+| **Principal** | Senior + FTP seed | Публикует список пиров для bootstrap новых участников |
+
+Протокол YaCy поверх HTTP (порт 8090): `hello`, `query`, `transferRWI`, `transferURL`, distributed crawl. Центрального сервера **нет** — только несколько hard-coded **seed-list** серверов для первого подключения к freeworld.
+
+**Почему Junior ≠ «халявщик»:** узел за файрволом не может принять входящее соединение, но **обязан отдавать** свой индекс активно (push), тогда как Senior принимает пассивно. Обе стороны вносят равный вклад — просто разными способами.
+
+### RWI: Reverse Word Index
+
+**RWI** — вертикальный индекс: для каждого **слова** (точнее, хеша слова) хранится список **URL**, где оно встречается, плюс ранговые метаданные.
+
+```
+Страница "Machine learning is fun"
+    → токены: machine, learning, fun
+    → RWI записи:
+        hash(machine)   → [https://example.com/ml, ...]
+        hash(learning)  → [https://example.com/ml, ...]
+        hash(fun)       → [https://example.com/ml, ...]
+```
+
+**Kelondro** — движок хранения RWI в YaCy. Файлы `DATA/INDEX/freeworld/SEGMENTS/default/text.index.*` — blob-сегменты, в RAM держится **бинарное дерево** для быстрого доступа. Отсюда жажда к памяти: большой RWI = гигабайты RAM и долгий старт.
+
+**«Растворяемый» индекс:** в P2P-режиме RWI на вашем пире — **временный буфер**. Вы краулите → RWI растёт → dispatcher забирает чанки → отправляет по DHT → **удаляет локально**. Solr при этом **не трогается** — ваши полные документы остаются.
+
+**Два потока RWI:**
+
+| Направление | Когда | Эффект |
+|-------------|-------|--------|
+| **DHT out** (distribution) | Фоновая задача после краулинга | Ваш индекс уходит в сеть |
+| **DHT in** (search response) | Кто-то ищет через ваш пир или вы ищете глобально | Чужие RWI-фрагменты **оседают у вас** как кэш |
+
+Именно DHT in объясняет ускорение повторных запросов: второй раз слово уже может быть в **локальном** Kelondro, без обращения к удалённым пирам.
+
+**Приватность:** слова в RWI — **хеши**, не открытый текст. Нельзя «пролистать всё, что краулил сосед» — только выполнить поиск по **точному** слову, как в обычном поисковике.
+
+### DHT: Distributed Hash Table
+
+**DHT** отвечает на один вопрос: *если я ищу слово W, к какому пиру мне обратиться?*
+
+YaCy использует **кольцевую топологию** (hash ring):
+
+```
+        0 ──────────────────────────────── 2^32-1
+        │                                    │
+        │    peer A        peer B            │
+        └──────●──────────────●──────────────┘
+              ↑              ↑
+         hash range      hash range
+         [0..X)          [X..Y)
+```
+
+1. Слово → **word hash** (детерминированная функция).
+2. Hash попадает в **диапазон** на кольце.
+3. Диапазон **закреплён** за конкретным senior-пиром.
+4. При поиске ваш пир **сразу знает адресата** — без peer-hopping и без TTL.
+
+**Вертикальный DHT** (по словам) дополняется партиционированием чанков при передаче (`network.unit.dht.partitionExponent=4` в конфиге freeworld). Dispatcher в `Dispatcher.java`:
+
+```
+выбрать RWI из локального Kelondro
+  → удалить из локального индекса
+  → разбить на партиции по DHT
+  → накопить в буфере (одинаковый target → один буфер)
+  → отправить на N пиров параллельно
+  → после N подтверждений — убрать из очереди
+```
+
+**Redundancy** — страховка от offline-пиров:
+
+| Тип пира | Копий каждого RWI-чанка |
+|----------|-------------------------|
+| Senior (отправитель) | **3** (`network.unit.dhtredundancy.senior=3`) |
+| Junior (отправитель) | **1** |
+
+При **поиске** YaCy тоже опрашивает **несколько** пиров с одним hash-range — если один offline, ответ придёт от реплики. Таймаут сбора: **6 с** по умолчанию.
+
+**Почему кольцо, а не «общая БД»:** когда пир входит или выходит, перераспределяется только **соседний** диапазон кольца, а не весь индекс. Это критично для сети из тысяч домашних машин с нестабильным uptime.
+
+### Как три слоя работают вместе
+
+**Индексация (write path):**
+
+```
+1. P2P: ваш пир (любой статус) краулит страницу
+2. RWI: indexer создаёт word→URL записи + Solr документ
+3. DHT: dispatcher выбирает чанки, считает target peer по hash
+4. P2P: HTTP transmission RWI → 3 senior-пира
+5. RWI: локальные чанки удалены; Solr остаётся
+```
+
+**Поиск (read path):**
+
+```
+1. Запрос "neural network" → хеши слов neural, network
+2. DHT: для каждого хеша — список senior-пиров-владельцев
+3. P2P: параллельные HTTP query к 3+ пирам на слово
+4. RWI: ответы — фрагменты word→URL → merge локально
+5. Solr: параллельно локальный полнотекстовый поиск
+6. Merge + rank + verify → выдача в UI
+```
+
+```mermaid
+flowchart LR
+    subgraph write [Индексация]
+        W1[Crawl] --> W2[RWI local]
+        W2 --> W3[DHT partition]
+        W3 --> W4[P2P send x3]
+        W4 --> W5[delete local RWI]
+    end
+
+    subgraph read [Поиск]
+        R1[query] --> R2[DHT lookup]
+        R2 --> R3[P2P fetch]
+        R3 --> R4[RWI merge + cache]
+        R1 --> R5[Solr local]
+        R4 --> R6[results]
+        R5 --> R6
+    end
+```
+
+### Чем это отличается от «наивного» P2P-поиска
+
+| Подход | Маршрутизация | Проблемы |
+|--------|---------------|----------|
+| **Flooding** (крикнуть всей сети) | broadcast | O(N) трафик, нет масштаба |
+| **Gnutella-style** peer hopping | TTL, релеи | секунды задержки, потери |
+| **YaCy DHT** | прямой адрес по hash | O(1) lookup, параллельные запросы |
+
+YaCy **намеренно** не хранит полные тексты страниц в P2P — только **URL + ранг**. Это снижает юридические риски (пир не хранит «запрещённый контент» целиком) и объём диска.
+
+### Настройки, которые стоит знать
+
+| Параметр | Где | Смысл |
+|----------|-----|-------|
+| `allowDistributeIndex` | `/ConfigNetwork_p.html` | Отдавать свой RWI в сеть |
+| `allowReceiveIndex` | `/ConfigNetwork_p.html` | Принимать чужой RWI |
+| `client-timeout` | Advanced behavior | Таймаут глобального поиска (мс) |
+| `indexDistribution.minChunkSize` | `yacy.init` | Размер чанка при передаче |
+| `20_dhtdistribution_idlesleep` | `yacy.init` | Пауза между передачами (мс) |
+
+Отключить **Receive** — ускорит локальный поиск, но отрежет глобальный индекс. Отключить **Distribution** — вы станете потребителем сети без вклада.
+
+---
 
 Индексация — путь от URL до двух параллельных структур: локального **Solr** и распределённого **RWI**.
 
@@ -104,29 +296,29 @@ flowchart TB
 flowchart TB
     subgraph sources [Источники]
         CR[Crawler]
-        PX[HTTP-прокси]
-        IMP[Импорт surrogates / wiki / RSS]
+        PX[HTTP proxy]
+        IMP[Import wiki RSS]
     end
 
     subgraph fetch [Загрузка]
         LD[Loader]
-        RT[robots.txt + задержка 0.5с]
+        RT[robots.txt delay 0.5s]
     end
 
     subgraph parse [Разбор]
         PR[Parser]
-        MD[Метаданные]
-        LN[Ссылки]
+        MD[Metadata]
+        LN[Links]
     end
 
     subgraph index [Индексы]
-        SOLR[Solr/Lucene]
+        SOLR[Solr Lucene]
         RWI[RWI Kelondro]
     end
 
-    subgraph p2p [P2P]
-        DHT[DHT]
-        TX[3× redundancy]
+    subgraph p2p [P2P DHT]
+        DHT[DHT partition]
+        TX[redundancy x3]
     end
 
     CR --> LD
@@ -231,25 +423,20 @@ flowchart TB
 
 ```mermaid
 sequenceDiagram
-    participant U as Пользователь
-    participant L as Ваш пир
+    participant U as User
+    participant L as Local peer
     participant S as Solr
-    participant K as RWI
-    participant P as Senior-пиры
+    participant K as RWI cache
+    participant P as Senior peers
 
-    U->>L: "machine learning"
-    par Локально
-        L->>S: Solr query
-        L->>K: кэшированные RWI
-    and Удалённо
-        L->>P: DHT → параллельный опрос
-        P-->>L: RWI-фрагменты
-    end
-    L->>L: Merge + Rank
-    opt verify=true
-        L->>L: Перезагрузка страниц
-    end
-    L-->>U: Выдача
+    U->>L: query words
+    L->>S: local Solr search
+    L->>K: local RWI cache
+    L->>P: DHT lookup parallel
+    P-->>L: RWI fragments
+    L->>L: merge rank dedup
+    Note over L: optional verify reload URLs
+    L-->>U: result page
 ```
 
 ### Типы поиска
