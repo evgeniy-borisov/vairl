@@ -1,0 +1,77 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="yG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a237e"/>
+      <stop offset="100%" style="stop-color:#3949ab"/>
+    </linearGradient>
+    <linearGradient id="yG2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00b4d8"/>
+      <stop offset="100%" style="stop-color:#48cae4"/>
+    </linearGradient>
+    <linearGradient id="yG3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d6a4f"/>
+      <stop offset="100%" style="stop-color:#52b788"/>
+    </linearGradient>
+    <filter id="yGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="#f8f9ff"/>
+
+  <!-- Central peer -->
+  <g transform="translate(520, 240)" filter="url(#yGlow)">
+    <circle cx="80" cy="75" r="70" fill="url(#yG1)" opacity="0.15"/>
+    <circle cx="80" cy="75" r="55" fill="url(#yG1)" opacity="0.9"/>
+    <text x="80" y="72" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="16" font-weight="700">YaCy</text>
+    <text x="80" y="92" text-anchor="middle" fill="#c5cae9" font-family="system-ui,sans-serif" font-size="11">peer</text>
+  </g>
+
+  <!-- Satellite peers -->
+  <g fill="url(#yG2)" opacity="0.85">
+    <circle cx="200" cy="180" r="38"/>
+    <circle cx="1000" cy="180" r="38"/>
+    <circle cx="150" cy="420" r="38"/>
+    <circle cx="1050" cy="420" r="38"/>
+    <circle cx="600" cy="100" r="32"/>
+    <circle cx="600" cy="520" r="32"/>
+  </g>
+  <g fill="#fff" font-family="system-ui,sans-serif" font-size="11" font-weight="600">
+    <text x="200" y="184" text-anchor="middle">P1</text>
+    <text x="1000" y="184" text-anchor="middle">P2</text>
+    <text x="150" y="424" text-anchor="middle">P3</text>
+    <text x="1050" y="424" text-anchor="middle">P4</text>
+    <text x="600" y="104" text-anchor="middle">P5</text>
+    <text x="600" y="524" text-anchor="middle">P6</text>
+  </g>
+
+  <!-- DHT connections -->
+  <g stroke="#3949ab" stroke-width="2" opacity="0.35" fill="none">
+    <line x1="238" y1="200" x2="465" y2="270"/>
+    <line x1="962" y1="200" x2="655" y2="270"/>
+    <line x1="188" y1="390" x2="465" y2="310"/>
+    <line x1="1012" y1="390" x2="655" y2="310"/>
+    <line x1="600" y1="132" x2="580" y2="185"/>
+    <line x1="600" y1="488" x2="580" y2="395"/>
+  </g>
+
+  <!-- Solr box -->
+  <g transform="translate(80, 480)">
+    <rect x="0" y="0" width="200" height="90" fill="url(#yG3)" opacity="0.2" rx="12" stroke="url(#yG3)" stroke-width="2"/>
+    <text x="100" y="35" text-anchor="middle" fill="#2d6a4f" font-family="system-ui,sans-serif" font-size="14" font-weight="700">Solr / Lucene</text>
+    <text x="100" y="58" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="12">;>:0;L=K9 8=45:A</text>
+    <text x="100" y="76" text-anchor="middle" fill="#888" font-family="monospace" font-size="11">4>:C<5=BK</text>
+  </g>
+
+  <!-- RWI box -->
+  <g transform="translate(920, 480)">
+    <rect x="0" y="0" width="200" height="90" fill="url(#yG2)" opacity="0.2" rx="12" stroke="url(#yG2)" stroke-width="2"/>
+    <text x="100" y="35" text-anchor="middle" fill="#0077b6" font-family="system-ui,sans-serif" font-size="14" font-weight="700">RWI + DHT</text>
+    <text x="100" y="58" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="12">Kelondro · P2P</text>
+    <text x="100" y="76" text-anchor="middle" fill="#888" font-family="monospace" font-size="11">A;>2> ’ URL</text>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="55" text-anchor="middle" fill="#1a237e" font-family="system-ui,sans-serif" font-size="36" font-weight="700">YaCy</text>
+  <text x="600" y="95" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="20">45F5=B@0;87>20==K9 ?>8A: · P2P · DHT</text>
+</svg>
