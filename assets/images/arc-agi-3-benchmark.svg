@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="arcG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="arcG2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="arcG3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee"/>
+      <stop offset="100%" style="stop-color:#34d399"/>
+    </linearGradient>
+    <marker id="arcArrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0 0, 10 4, 0 8" fill="#6366f1"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="630" fill="#f8fafc"/>
+  <rect x="1" y="1" width="1198" height="628" rx="4" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+
+  <text x="60" y="72" font-family="system-ui,sans-serif" font-size="38" font-weight="700" fill="#0f172a">ARC-AGI-3</text>
+  <text x="60" y="112" font-family="system-ui,sans-serif" font-size="22" fill="#64748b">Interactive Reasoning Benchmark · RHAE</text>
+
+  <!-- Grid 64x64 stylized -->
+  <g transform="translate(60, 150)">
+    <rect x="0" y="0" width="280" height="280" rx="16" fill="url(#arcG1)" opacity="0.95"/>
+    <text x="140" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="600" fill="#94a3b8">64×64 frame</text>
+    <g transform="translate(40, 52)">
+      <rect x="0" y="0" width="40" height="40" fill="#6366f1" rx="4"/>
+      <rect x="44" y="0" width="40" height="40" fill="#6366f1" rx="4"/>
+      <rect x="88" y="0" width="40" height="40" fill="#22d3ee" rx="4"/>
+      <rect x="132" y="0" width="40" height="40" fill="#334155" rx="4"/>
+      <rect x="176" y="0" width="40" height="40" fill="#334155" rx="4"/>
+      <rect x="0" y="44" width="40" height="40" fill="#6366f1" rx="4"/>
+      <rect x="44" y="44" width="40" height="40" fill="#22d3ee" rx="4"/>
+      <rect x="88" y="44" width="40" height="40" fill="#22d3ee" rx="4"/>
+      <rect x="132" y="44" width="40" height="40" fill="#334155" rx="4"/>
+      <rect x="176" y="44" width="40" height="40" fill="#34d399" rx="4"/>
+      <rect x="0" y="88" width="40" height="40" fill="#334155" rx="4"/>
+      <rect x="44" y="88" width="40" height="40" fill="#334155" rx="4"/>
+      <rect x="88" y="88" width="40" height="40" fill="#6366f1" rx="4"/>
+      <rect x="132" y="88" width="40" height="40" fill="#6366f1" rx="4"/>
+      <rect x="176" y="88" width="40" height="40" fill="#34d399" rx="4"/>
+      <rect x="0" y="132" width="40" height="40" fill="#334155" rx="4"/>
+      <rect x="44" y="132" width="40" height="40" fill="#f59e0b" rx="4"/>
+      <rect x="88" y="132" width="40" height="40" fill="#f59e0b" rx="4"/>
+      <rect x="132" y="132" width="40" height="40" fill="#6366f1" rx="4"/>
+      <rect x="176" y="132" width="40" height="40" fill="#334155" rx="4"/>
+      <rect x="0" y="176" width="40" height="40" fill="#334155" rx="4"/>
+      <rect x="44" y="176" width="40" height="40" fill="#334155" rx="4"/>
+      <rect x="88" y="176" width="40" height="40" fill="#f59e0b" rx="4"/>
+      <rect x="132" y="176" width="40" height="40" fill="#34d399" rx="4"/>
+      <rect x="176" y="176" width="40" height="40" fill="#34d399" rx="4"/>
+    </g>
+    <text x="140" y="268" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#64748b">explore ’ infer goal ’ plan</text>
+  </g>
+
+  <!-- Agent loop -->
+  <g transform="translate(400, 170)">
+    <rect x="0" y="0" width="360" height="240" rx="16" fill="#fff" stroke="#e2e8f0" stroke-width="2"/>
+    <text x="180" y="36" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="#0f172a">4 AB>;?0 agentic intelligence</text>
+    <text x="24" y="72" font-family="system-ui,sans-serif" font-size="14" fill="#475569">` Exploration  0:B82=>5 ?>;CG5=85 8=D>@<0F88</text>
+    <text x="24" y="104" font-family="system-ui,sans-serif" font-size="14" fill="#475569">a Modeling  world model 87 =01;N45=89</text>
+    <text x="24" y="136" font-family="system-ui,sans-serif" font-size="14" fill="#475569">b Goal-setting  F5;L 157 8=AB@C:F89</text>
+    <text x="24" y="168" font-family="system-ui,sans-serif" font-size="14" fill="#475569">c Planning  ?CBL : F5;8 + :>@@5:F8O</text>
+    <rect x="24" y="188" width="312" height="36" rx="8" fill="url(#arcG2)" opacity="0.15"/>
+    <text x="180" y="212" text-anchor="middle" font-family="monospace" font-size="13" fill="#6366f1">RHAE = (human_actions / ai_actions)²</text>
+  </g>
+
+  <!-- Score gap -->
+  <g transform="translate(820, 150)">
+    <rect x="0" y="0" width="320" height="130" rx="14" fill="#fff" stroke="#6366f1" stroke-width="2"/>
+    <text x="160" y="40" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#0f172a">Humans</text>
+    <text x="160" y="78" text-anchor="middle" font-family="monospace" font-size="32" font-weight="700" fill="#34d399">100%</text>
+    <text x="160" y="108" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#64748b">2A5 C@>2=8, human efficiency</text>
+
+    <rect x="0" y="150" width="320" height="130" rx="14" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="160" y="190" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#0f172a">Frontier LRM (official)</text>
+    <text x="160" y="228" text-anchor="middle" font-family="monospace" font-size="32" font-weight="700" fill="#64748b">&lt;1%</text>
+    <text x="160" y="258" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#64748b">Opus 4.6 · GPT 5.4 · Gemini 3.1</text>
+
+    <rect x="0" y="300" width="320" height="130" rx="14" fill="url(#arcG3)" opacity="0.12" stroke="#22d3ee" stroke-width="2"/>
+    <text x="160" y="340" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="#0f172a">ARC Prize 2026</text>
+    <text x="160" y="378" text-anchor="middle" font-family="monospace" font-size="28" font-weight="700" fill="#0891b2">$850K</text>
+    <text x="160" y="408" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#64748b">25 public · 110 private games</text>
+  </g>
+
+  <!-- Arrow -->
+  <line x1="340" y1="290" x2="395" y2="290" stroke="#6366f1" stroke-width="2" marker-end="url(#arcArrow)"/>
+  <line x1="760" y1="290" x2="815" y2="215" stroke="#6366f1" stroke-width="2" marker-end="url(#arcArrow)"/>
+</svg>
