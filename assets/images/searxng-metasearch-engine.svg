@@ -1,0 +1,75 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d47a1"/>
+      <stop offset="100%" style="stop-color:#1976d2"/>
+    </linearGradient>
+    <linearGradient id="sG2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e65100"/>
+      <stop offset="100%" style="stop-color:#ff9800"/>
+    </linearGradient>
+    <linearGradient id="sG3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1b5e20"/>
+      <stop offset="100%" style="stop-color:#43a047"/>
+    </linearGradient>
+    <filter id="sGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="#f5f8ff"/>
+
+  <!-- Central SearXNG hub -->
+  <g transform="translate(500, 220)" filter="url(#sGlow)">
+    <circle cx="100" cy="85" r="75" fill="url(#sG1)" opacity="0.12"/>
+    <circle cx="100" cy="85" r="58" fill="url(#sG1)" opacity="0.92"/>
+    <text x="100" y="78" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="15" font-weight="700">SearXNG</text>
+    <text x="100" y="98" text-anchor="middle" fill="#bbdefb" font-family="system-ui,sans-serif" font-size="11">metasearch</text>
+  </g>
+
+  <!-- Engine nodes -->
+  <g fill="url(#sG2)" opacity="0.88">
+    <rect x="120" y="140" width="110" height="50" rx="10"/>
+    <rect x="970" y="140" width="110" height="50" rx="10"/>
+    <rect x="80" y="380" width="110" height="50" rx="10"/>
+    <rect x="1010" y="380" width="110" height="50" rx="10"/>
+    <rect x="545" y="80" width="110" height="50" rx="10"/>
+    <rect x="545" y="480" width="110" height="50" rx="10"/>
+  </g>
+  <g fill="#fff" font-family="system-ui,sans-serif" font-size="12" font-weight="600">
+    <text x="175" y="170" text-anchor="middle">Google</text>
+    <text x="1025" y="170" text-anchor="middle">Bing</text>
+    <text x="135" y="410" text-anchor="middle">DDG</text>
+    <text x="1065" y="410" text-anchor="middle">Brave</text>
+    <text x="600" y="110" text-anchor="middle">Wiki</text>
+    <text x="600" y="510" text-anchor="middle">arXiv</text>
+  </g>
+
+  <!-- Connection lines -->
+  <g stroke="#1976d2" stroke-width="2" opacity="0.3" fill="none">
+    <line x1="230" y1="165" x2="445" y2="270"/>
+    <line x1="970" y1="165" x2="655" y2="270"/>
+    <line x1="190" y1="405" x2="445" y2="310"/>
+    <line x1="1010" y1="405" x2="655" y2="310"/>
+    <line x1="600" y1="130" x2="580" y2="205"/>
+    <line x1="600" y1="480" x2="580" y2="375"/>
+  </g>
+
+  <!-- User / Agent box -->
+  <g transform="translate(80, 50)">
+    <rect x="0" y="0" width="200" height="70" fill="url(#sG3)" opacity="0.18" rx="12" stroke="url(#sG3)" stroke-width="2"/>
+    <text x="100" y="30" text-anchor="middle" fill="#1b5e20" font-family="system-ui,sans-serif" font-size="14" font-weight="700">User / Agent</text>
+    <text x="100" y="52" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="12">HTTP · JSON API</text>
+  </g>
+
+  <!-- Result merge box -->
+  <g transform="translate(920, 50)">
+    <rect x="0" y="0" width="200" height="70" fill="url(#sG1)" opacity="0.15" rx="12" stroke="url(#sG1)" stroke-width="2"/>
+    <text x="100" y="30" text-anchor="middle" fill="#0d47a1" font-family="system-ui,sans-serif" font-size="14" font-weight="700">Merge + Dedup</text>
+    <text x="100" y="52" text-anchor="middle" fill="#555" font-family="system-ui,sans-serif" font-size="12">privacy · no tracking</text>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="580" text-anchor="middle" fill="#0d47a1" font-family="system-ui,sans-serif" font-size="32" font-weight="700">SearXNG</text>
+  <text x="600" y="612" text-anchor="middle" fill="#666" font-family="system-ui,sans-serif" font-size="18"><5B0?>8A: · Flask · 200+ engines · self-hosted</text>
+</svg>
