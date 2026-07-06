@@ -60,7 +60,7 @@ flowchart LR
 
 <div id="gradient-descent-xr-demo" class="gradient-descent-xr-widget">
   <div class="gdx-header">
-    <p>Четыре оптимизатора с одной стартовой точки: SGD, Momentum, Adam, RMSprop. Поверхность и траектории полупрозрачные. <strong>Сначала</strong> настройте обзор мышью, <strong>затем</strong> ENTER VR — вид совпадёт с окном браузера.</p>
+    <p>Четыре оптимизатора с одной стартовой точки. <strong>Мышь:</strong> вращение сцены (ЛКМ), луч и курсор на поверхности; <strong>Shift+клик</strong> — новая стартовая точка. В VR: мышь наводит стерео-курсор (синий/оранжевый ретиклы), ЛКМ+движение — обзор, колесо — приближение.</p>
   </div>
   <div class="gdx-controls">
     <label>Функция
@@ -89,7 +89,7 @@ flowchart LR
     <div class="gdx-canvas"></div>
     <div class="gdx-vr-slot"></div>
   </div>
-  <p class="gdx-caption">Three.js + WebXR Device API. Полноэкранная версия: <a href="{{ '/gradient-descent-xr.html' | relative_url }}">gradient-descent-xr.html</a>. VR из embedded-браузера IDE обычно недоступен — тестируйте в Chrome с шлемом.</p>
+  <p class="gdx-caption">Three.js + WebXR. Полноэкранно: <a href="{{ '/gradient-descent-xr.html' | relative_url }}">gradient-descent-xr.html</a>. Сначала настройте обзор → ENTER VR. Shift+клик по поверхности — новый старт.</p>
 </div>
 
 <script type="importmap">

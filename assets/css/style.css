@@ -2570,6 +2570,15 @@ footer {
     height: 100% !important;
 }
 
+.gradient-descent-xr-widget .gdx-scene-canvas {
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.gradient-descent-xr-widget .gdx-scene-canvas.gdx-vr-active {
+    cursor: none;
+}
+
 .gradient-descent-xr-widget .gdx-vr-slot {
     position: absolute;
     right: 12px;

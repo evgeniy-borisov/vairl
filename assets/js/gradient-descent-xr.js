@@ -102,6 +102,14 @@ if (!root) {
   let stepCount = 0;
   let pendingVrPose = null;
   let inVr = false;
+  let pointerInside = false;
+  let vrLookDrag = false;
+  let lastPointer = { x: 0, y: 0 };
+  let orbitDragged = false;
+
+  const raycaster = new THREE.Raycaster();
+  const pointerNdc = new THREE.Vector2();
+  const IPD = 0.064;
 
   /** @type {Array<{id:string,label:string,color:number,pos:{x:number,y:number},path:THREE.Vector3[],state:object,ball:THREE.Mesh|null,pathLine:THREE.Line|null,done:boolean}>} */
   let optimizers = [];
@@ -155,6 +163,50 @@ if (!root) {
   const world = new THREE.Group();
   sceneRoot.add(world);
 
+  const pointerRig = new THREE.Group();
+  scene.add(pointerRig);
+
+  const laserGeom = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+  const laserLine = new THREE.Line(
+    laserGeom,
+    new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, depthWrite: false }),
+  );
+  pointerRig.add(laserLine);
+
+  function makeReticle(color) {
+    return new THREE.Mesh(
+      new THREE.RingGeometry(0.028, 0.042, 24),
+      new THREE.MeshBasicMaterial({
+        color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.85,
+        depthWrite: false,
+      }),
+    );
+  }
+
+  const stereoCursors = new THREE.Group();
+  const leftReticle = makeReticle(0x66ccff);
+  const rightReticle = makeReticle(0xff8866);
+  const hitReticle = new THREE.Mesh(
+    new THREE.RingGeometry(0.05, 0.07, 32),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+    }),
+  );
+  const hitDot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.022, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, depthWrite: false }),
+  );
+  stereoCursors.add(leftReticle, rightReticle, hitReticle, hitDot);
+  pointerRig.add(stereoCursors);
+  pointerRig.visible = false;
+
   let surfaceMesh = null;
   let wireMesh = null;
   let gridHelper = null;
@@ -192,6 +244,80 @@ if (!root) {
 
   function hexColor(hex) {
     return `#${hex.toString(16).padStart(6, '0')}`;
+  }
+
+  function getActiveCamera() {
+    if (inVr && renderer.xr.isPresenting) return renderer.xr.getCamera();
+    return camera;
+  }
+
+  function updatePointerNdc(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointerNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+
+  function pickSurfaceHit() {
+    if (!surfaceMesh) return null;
+    const cam = getActiveCamera();
+    cam.updateMatrixWorld(true);
+    raycaster.setFromCamera(pointerNdc, cam);
+    const hits = raycaster.intersectObject(surfaceMesh, false);
+    return hits[0] || null;
+  }
+
+  function setStartFromHit(hit) {
+    const local = world.worldToLocal(hit.point.clone());
+    const start = { x: local.x, y: local.z };
+    clampPos(start);
+    FUNCTIONS[fnKey].start = { ...start };
+    resetOptimizers();
+  }
+
+  function updateStereoCursor() {
+    if (!pointerInside || !surfaceMesh) {
+      pointerRig.visible = false;
+      return;
+    }
+
+    const hit = pickSurfaceHit();
+    if (!hit) {
+      pointerRig.visible = false;
+      return;
+    }
+
+    const cam = getActiveCamera();
+    cam.updateMatrixWorld(true);
+    const camPos = new THREE.Vector3();
+    const camQuat = new THREE.Quaternion();
+    cam.getWorldPosition(camPos);
+    cam.getWorldQuaternion(camQuat);
+
+    const pt = hit.point.clone();
+    const normal = hit.face.normal.clone().transformDirection(surfaceMesh.matrixWorld).normalize();
+
+    pointerRig.visible = true;
+    laserGeom.setFromPoints([camPos, pt]);
+    laserGeom.attributes.position.needsUpdate = true;
+
+    hitReticle.position.copy(pt);
+    hitReticle.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+    hitDot.position.copy(pt).addScaledVector(normal, 0.025);
+
+    const camRight = new THREE.Vector3(1, 0, 0).applyQuaternion(camQuat);
+    const dist = Math.max(camPos.distanceTo(pt), 0.5);
+    const halfIpd = (IPD * 0.5) * Math.min(dist / 3.5, 1.35);
+
+    leftReticle.position.copy(pt).addScaledVector(camRight, -halfIpd);
+    rightReticle.position.copy(pt).addScaledVector(camRight, halfIpd);
+    leftReticle.quaternion.copy(hitReticle.quaternion);
+    rightReticle.quaternion.copy(hitReticle.quaternion);
+
+    const stereoActive = inVr && renderer.xr.isPresenting;
+    leftReticle.visible = stereoActive;
+    rightReticle.visible = stereoActive;
+    hitReticle.visible = true;
+    hitDot.visible = !stereoActive;
   }
 
   function buildOptimizers() {
@@ -565,13 +691,74 @@ if (!root) {
     inVr = true;
     controls.enabled = false;
     applyVrView();
+    renderer.domElement.classList.add('gdx-vr-active');
   });
 
   renderer.xr.addEventListener('sessionend', () => {
     inVr = false;
     controls.enabled = true;
     resetVrView();
+    renderer.domElement.classList.remove('gdx-vr-active');
+    vrLookDrag = false;
   });
+
+  const canvasEl = renderer.domElement;
+  canvasEl.classList.add('gdx-scene-canvas');
+
+  canvasEl.addEventListener('pointerenter', () => {
+    pointerInside = true;
+  });
+  canvasEl.addEventListener('pointerleave', () => {
+    pointerInside = false;
+    vrLookDrag = false;
+    pointerRig.visible = false;
+  });
+  canvasEl.addEventListener('pointermove', (event) => {
+    updatePointerNdc(event);
+    if (inVr && vrLookDrag) {
+      const dx = event.clientX - lastPointer.x;
+      const dy = event.clientY - lastPointer.y;
+      sceneRoot.rotation.y -= dx * 0.004;
+      sceneRoot.rotation.x = THREE.MathUtils.clamp(sceneRoot.rotation.x - dy * 0.004, -0.75, 0.75);
+    }
+    lastPointer.x = event.clientX;
+    lastPointer.y = event.clientY;
+  });
+  canvasEl.addEventListener('pointerdown', (event) => {
+    updatePointerNdc(event);
+    lastPointer.x = event.clientX;
+    lastPointer.y = event.clientY;
+    orbitDragged = false;
+    if (event.shiftKey) controls.enabled = false;
+    if (inVr && event.button === 0) {
+      vrLookDrag = true;
+      event.preventDefault();
+    }
+  });
+  canvasEl.addEventListener('pointerup', () => {
+    vrLookDrag = false;
+    if (!inVr) controls.enabled = true;
+  });
+  canvasEl.addEventListener('pointercancel', () => {
+    vrLookDrag = false;
+  });
+  controls.addEventListener('start', () => {
+    orbitDragged = true;
+  });
+  canvasEl.addEventListener('click', (event) => {
+    if (orbitDragged || vrLookDrag) return;
+    if (!event.shiftKey) return;
+    updatePointerNdc(event);
+    const hit = pickSurfaceHit();
+    if (hit) setStartFromHit(hit);
+  });
+  canvasEl.addEventListener('wheel', (event) => {
+    if (!inVr) return;
+    event.preventDefault();
+    const q = pendingVrPose?.quaternion || camera.quaternion;
+    const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(q);
+    sceneRoot.position.addScaledVector(fwd, event.deltaY * 0.003);
+  }, { passive: false });
 
   fnSelect.addEventListener('change', () => {
     fnKey = fnSelect.value;
@@ -624,6 +811,7 @@ if (!root) {
     }
     if (minMarker) minMarker.rotation.z += 0.012;
     if (!inVr) controls.update();
+    updateStereoCursor();
     renderer.render(scene, camera);
   });
 
