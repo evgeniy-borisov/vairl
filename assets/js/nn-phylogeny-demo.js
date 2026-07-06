@@ -1,10 +1,11 @@
 /**
  * Neural architecture phylogeny — p5.js demo.
- * Fan tree, borrow arcs, traits; split panel with PyTorch snippets on click.
+ * Fan tree, borrow arcs, timeline, catalog list; split panel with PyTorch snippets.
  */
 (function () {
   const ROOT_ID = 'nn-phylogeny-demo';
   const CANVAS_ID = 'nn-phylogeny-canvas';
+  const LIST_ID = 'nn-phylogeny-list';
   const PANEL_ID = 'nn-phylogeny-panel';
   const SPLIT_ID = 'nn-phylogeny-split';
 
@@ -99,24 +100,25 @@
 
   const MODES = {
     tree: {
-      title: 'Fan tree (полукруг)',
-      hint: 'Клик по узлу — split-панель с PyTorch-примерами ключевых идей. Узлы разведены по дуге без наложений.',
+      title: 'Дерево (fan tree)',
+      hint: 'Филогения семейств на полукруге. Клик по узлу — описание и PyTorch-код.',
     },
     borrow: {
       title: 'Заимствования',
-      hint: 'Дуги между ветвями — архитектурные заимствования. Клик по узлу — код уникальных добавлений.',
+      hint: 'Межветочные дуги — кто у кого взял идею. Клик по узлу — детали и код.',
     },
-    traits: {
-      title: 'Признаки',
-      hint: 'Размер ∝ данные/compute; яркость ∝ точность. Клик — детали и PyTorch.',
+    timeline: {
+      title: 'Время выхода',
+      hint: 'График по годам публикации: ось X — время, полосы — семейства. Клик — карточка модели.',
+    },
+    list: {
+      title: 'Список архитектур',
+      hint: 'Полный каталог 27 моделей: год, описание, достижение и особенности. Клик — PyTorch.',
     },
   };
 
-  const TRAIT_MODES = {
-    train: { label: 'Данные / compute', key: 'train' },
-    acc: { label: 'Точность / SOTA', key: 'acc' },
-    year: { label: 'Год', key: 'year' },
-  };
+  const YEAR_MIN = 1955;
+  const YEAR_MAX = 2024;
 
   const ARC_START = Math.PI * 0.05;
   const ARC_END = Math.PI * 0.95;
@@ -260,9 +262,10 @@
     const mechBar = document.getElementById('nn-phylogeny-mechs');
     const panelEl = document.getElementById(PANEL_ID);
     const splitEl = document.getElementById(SPLIT_ID);
+    const listEl = document.getElementById(LIST_ID);
+    const canvasWrap = document.getElementById(CANVAS_ID);
 
     let mode = 'tree';
-    let traitMode = 'train';
     let activeMech = null;
     let hoverId = null;
     let hoverEdge = null;
@@ -328,10 +331,47 @@
       root.classList.toggle('nn-has-selection', !!selectedId);
       if (panelEl) panelEl.hidden = !selectedId;
       renderPanel();
+      if (mode === 'list') renderCatalogList();
       resizeCanvas();
       if (detailEl && !selectedId) {
-        detailEl.textContent = 'Кликните по узлу модели — справа появятся PyTorch-примеры ключевых идей.';
+        detailEl.textContent = 'Кликните по модели — справа откроется карточка с описанием и PyTorch-кодом.';
       }
+    }
+
+    function catalogFor(id) {
+      return window.NN_PHYLOGENY_CATALOG?.[id] || {};
+    }
+
+    function familyColorCss(fam) {
+      const c = FAMILY_COLORS[fam] || [120, 120, 120];
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+
+    function renderCatalogList() {
+      if (!listEl) return;
+      const sorted = [...MODELS].sort((a, b) => a.year - b.year || a.name.localeCompare(b.name));
+      listEl.innerHTML = sorted
+        .map((m) => {
+          const cat = catalogFor(m.id);
+          const sel = selectedId === m.id ? ' nn-catalog-item-selected' : '';
+          const color = familyColorCss(m.family);
+          const mechs = m.mechs.map((k) => MECH_LABELS[k] || k).join(', ');
+          return `<button type="button" class="nn-catalog-item${sel}" data-nn-id="${m.id}">
+            <div class="nn-catalog-item-head">
+              <span class="nn-catalog-year">${m.year}</span>
+              <span class="nn-catalog-name">${m.name}</span>
+              <span class="nn-catalog-family" style="--fam-color:${color}">${m.family}</span>
+            </div>
+            <p class="nn-catalog-desc">${cat.desc || ''}</p>
+            <p class="nn-catalog-ach"><strong>Достижение:</strong> ${cat.achievement || '—'}</p>
+            <p class="nn-catalog-feat"><strong>Особенности:</strong> ${cat.features || mechs}</p>
+          </button>`;
+        })
+        .join('');
+
+      listEl.querySelectorAll('[data-nn-id]').forEach((btn) => {
+        btn.addEventListener('click', () => setSelection(btn.dataset.nnId));
+      });
     }
 
     function renderPanel() {
@@ -348,13 +388,26 @@
       if (!m) return;
 
       const meta = window.NN_PHYLOGENY_SNIPPETS?.[selectedId];
+      const cat = catalogFor(selectedId);
       const mechStr = m.mechs.map((k) => MECH_LABELS[k] || k).join(', ');
 
       const titleEl = panelEl.querySelector('.nn-panel-title');
       if (titleEl) titleEl.textContent = m.name;
 
       let html = `
-        <span class="nn-panel-meta">${m.year} · ${m.family}</span>
+        <span class="nn-panel-meta">${m.year} · ${m.family}</span>`;
+
+      if (cat.desc) {
+        html += `<p class="nn-panel-blurb">${cat.desc}</p>`;
+      }
+      if (cat.achievement) {
+        html += `<p class="nn-panel-ach"><strong>Главное достижение:</strong> ${cat.achievement}</p>`;
+      }
+      if (cat.features) {
+        html += `<p class="nn-panel-feat"><strong>Особенности:</strong> ${cat.features}</p>`;
+      }
+
+      html += `
         <dl class="nn-panel-stats">
           <dt>Задача</dt><dd>${m.task}</dd>
           <dt>Данные</dt><dd>${stars(m.train)}</dd>
@@ -362,8 +415,8 @@
           <dt>Механизмы</dt><dd>${mechStr}</dd>
         </dl>`;
 
-      if (meta?.blurb) {
-        html += `<p class="nn-panel-blurb">${meta.blurb}</p>`;
+      if (meta?.blurb && meta.blurb !== cat.desc) {
+        html += `<p class="nn-panel-code-intro">${meta.blurb}</p>`;
       }
 
       (meta?.snippets || []).forEach((sn) => {
@@ -401,23 +454,30 @@
     }
 
     function canvasSize() {
+      if (mode === 'list') {
+        const pane = root.querySelector('.nn-tree-pane');
+        const w = pane ? Math.max(280, pane.clientWidth) : Math.min(920, root.clientWidth);
+        return { w, h: 0 };
+      }
+
       const pane = root.querySelector('.nn-tree-pane');
       const w = pane ? Math.max(280, pane.clientWidth) : Math.min(920, root.clientWidth);
 
       if (isFullscreen()) {
-        // Размер от viewport/root, не от split/canvas — иначе feedback loop (canvas → pane → split → canvas…)
         const available = root.clientHeight - chromeHeight();
         const h = Math.max(320, Math.min(available, window.innerHeight - chromeHeight()));
         return { w, h };
       }
 
-      const h = selectedId ? 520 : 540;
+      const h = mode === 'timeline' ? 560 : selectedId ? 520 : 540;
       return { w, h };
     }
 
     function resizeCanvas() {
       if (!p5Instance) return;
+      if (mode === 'list') return;
       const { w, h } = canvasSize();
+      if (h < 1) return;
       if (Math.abs(w - lastCanvasW) < 2 && Math.abs(h - lastCanvasH) < 2) return;
       lastCanvasW = w;
       lastCanvasH = h;
@@ -436,7 +496,8 @@
     const sketch = (p) => {
       let colors = {};
       let layout = null;
-      const pad = { top: 32, bottom: 44, side: 12 };
+      let timelinePts = {};
+      const pad = { top: 36, bottom: 52, side: 48 };
 
       p.setup = function () {
         const { w, h } = canvasSize();
@@ -476,17 +537,12 @@
         return alpha != null ? [...c, alpha] : c;
       }
 
-      function nodeRadius(m) {
-        if (mode !== 'traits') return 8;
-        const key = TRAIT_MODES[traitMode].key;
-        const v = m[key];
-        if (key === 'year') return p.map(v, 1957, 2023, 6, 12);
-        return 6 + v * 1.6;
+      function nodeRadius() {
+        return 8;
       }
 
-      function nodeAlpha(m) {
-        if (mode !== 'traits') return 255;
-        return 80 + m.acc * 35;
+      function nodeAlpha() {
+        return 255;
       }
 
       function activeId() {
@@ -494,17 +550,31 @@
       }
 
       function hitTest(mx, my) {
+        if (mode === 'timeline') return timelineHitTest(mx, my);
         if (!layout) return null;
         let best = null;
         let bestD = 1e9;
         MODELS.forEach((m) => {
           const pt = layout.nodes[m.id];
           if (!pt) return;
-          const r = nodeRadius(m) + 6;
+          const r = nodeRadius() + 6;
           const d = p.dist(mx, my, pt.x, pt.y);
           if (d < r && d < bestD) {
             bestD = d;
             best = m.id;
+          }
+        });
+        return best;
+      }
+
+      function timelineHitTest(mx, my) {
+        let best = null;
+        let bestD = 14;
+        Object.entries(timelinePts).forEach(([id, pt]) => {
+          const d = p.dist(mx, my, pt.x, pt.y);
+          if (d < bestD) {
+            bestD = d;
+            best = id;
           }
         });
         return best;
@@ -618,11 +688,11 @@
         MODELS.forEach((m) => {
           const pt = layout.nodes[m.id];
           if (!pt) return;
-          const r = nodeRadius(m);
+          const r = nodeRadius();
           const dim = activeMech && !mechMatch(m) && selectedId !== m.id && hoverId !== m.id;
           const isSelected = selectedId === m.id;
           const isHover = hoverId === m.id && !isSelected;
-          const fc = familyColor(m.family, dim ? 50 : nodeAlpha(m));
+          const fc = familyColor(m.family, dim ? 50 : nodeAlpha());
 
           if (isSelected) {
             p.noFill();
@@ -672,10 +742,84 @@
         p.textSize(11);
         p.textAlign(p.LEFT, p.TOP);
         p.text(MODES[mode].title, pad.side, 8);
-        if (mode === 'traits') {
+        if (mode === 'timeline') {
           p.textSize(10);
-          p.text(`Ось: ${TRAIT_MODES[traitMode].label}`, pad.side, 24);
+          p.text(`${MODELS.length} архитектур · ${YEAR_MIN}–${YEAR_MAX}`, pad.side, 24);
         }
+      }
+
+      function drawTimeline() {
+        timelinePts = {};
+        const { families, order } = buildTree();
+        const x0 = pad.side;
+        const x1 = p.width - pad.side;
+        const y0 = pad.top + 8;
+        const y1 = p.height - pad.bottom;
+        const laneH = (y1 - y0) / order.length;
+
+        p.stroke(...colors.edge);
+        p.strokeWeight(1);
+        p.line(x0, y1, x1, y1);
+
+        for (let y = 1960; y <= 2020; y += 10) {
+          const tx = p.map(y, YEAR_MIN, YEAR_MAX, x0, x1);
+          p.stroke(...colors.edge);
+          p.line(tx, y1, tx, y1 - 5);
+          p.fill(...colors.muted);
+          p.noStroke();
+          p.textSize(9);
+          p.textAlign(p.CENTER, p.TOP);
+          p.text(String(y), tx, y1 + 4);
+        }
+
+        order.forEach((fam, fi) => {
+          const laneTop = y0 + fi * laneH;
+          const laneMid = laneTop + laneH / 2;
+          const fc = familyColor(fam, 40);
+
+          p.fill(...fc);
+          p.noStroke();
+          p.rect(x0 - 4, laneTop + 1, x1 - x0 + 8, laneH - 2, 3);
+
+          p.fill(...familyColor(fam));
+          p.textSize(8);
+          p.textAlign(p.RIGHT, p.CENTER);
+          const label = fam.length > 16 ? fam.slice(0, 14) + '…' : fam;
+          p.text(label, x0 - 8, laneMid);
+
+          families[fam].forEach((m) => {
+            const dim = activeMech && !mechMatch(m);
+            const tx = p.map(m.year, YEAR_MIN, YEAR_MAX, x0, x1);
+            timelinePts[m.id] = { x: tx, y: laneMid };
+
+            const isSelected = selectedId === m.id;
+            const isHover = hoverId === m.id && !isSelected;
+            const r = isSelected ? 9 : isHover ? 8 : 6;
+
+            if (isSelected) {
+              p.noFill();
+              p.stroke(...colors.select);
+              p.strokeWeight(2.5);
+              p.circle(tx, laneMid, r * 3.2);
+            } else if (isHover) {
+              p.noFill();
+              p.stroke(...colors.highlight);
+              p.strokeWeight(2);
+              p.circle(tx, laneMid, r * 2.8);
+            }
+
+            p.noStroke();
+            p.fill(...familyColor(fam, dim ? 60 : 230));
+            p.circle(tx, laneMid, r * 2);
+
+            if (isSelected || isHover) {
+              p.fill(...colors.text);
+              p.textSize(9);
+              p.textAlign(p.CENTER, p.BOTTOM);
+              p.text(`${m.name} (${m.year})`, tx, laneMid - r - 3);
+            }
+          });
+        });
       }
 
       function syncDetail() {
@@ -694,18 +838,24 @@
       }
 
       p.draw = function () {
+        if (mode === 'list') return;
         updateColors();
-        layout = buildLayout(p, pad, p.width, p.height);
         p.background(...colors.bg);
         drawLegend();
 
-        if (mode === 'borrow') drawBorrowArcs();
-        drawTreeEdges();
-        drawNodes();
+        if (mode === 'timeline') {
+          drawTimeline();
+        } else {
+          layout = buildLayout(p, pad, p.width, p.height);
+          if (mode === 'borrow') drawBorrowArcs();
+          drawTreeEdges();
+          drawNodes();
+        }
         syncDetail();
       };
 
       p.mouseMoved = function () {
+        if (mode === 'list') return;
         if (p.mouseX < 0 || p.mouseY < 0 || p.mouseX > p.width || p.mouseY > p.height) return;
         hoverId = hitTest(p.mouseX, p.mouseY);
         hoverEdge = mode === 'borrow' ? edgeHitTest(p.mouseX, p.mouseY) : null;
@@ -713,6 +863,7 @@
       };
 
       p.mousePressed = function () {
+        if (mode === 'list') return;
         if (p.mouseX < 0 || p.mouseY < 0 || p.mouseX > p.width || p.mouseY > p.height) return;
         const id = hitTest(p.mouseX, p.mouseY);
         if (id) setSelection(id);
@@ -730,29 +881,38 @@
 
     function setMode(next) {
       mode = next;
+      const isList = mode === 'list';
+      const isCanvas = !isList;
+
       root.querySelectorAll('[data-nn-mode]').forEach((btn) => {
         btn.classList.toggle('active', btn.dataset.nnMode === mode);
       });
-      root.querySelectorAll('[data-nn-trait-wrap]').forEach((el) => {
-        el.hidden = mode !== 'traits';
-      });
+      root.classList.toggle('nn-mode-list', isList);
       root.querySelectorAll('[data-nn-mech-wrap]').forEach((el) => {
-        el.hidden = mode === 'traits';
+        el.hidden = mode !== 'tree' && mode !== 'borrow';
       });
+
+      if (canvasWrap) canvasWrap.style.display = isCanvas ? '' : 'none';
+      if (listEl) {
+        listEl.hidden = !isList;
+        if (isList) renderCatalogList();
+      }
+
+      if (p5Instance) {
+        if (isList) p5Instance.noLoop();
+        else {
+          p5Instance.loop();
+          lastCanvasW = 0;
+          lastCanvasH = 0;
+          scheduleResize();
+        }
+      }
+
       if (hintEl) hintEl.textContent = MODES[mode].hint;
     }
 
     root.querySelectorAll('[data-nn-mode]').forEach((btn) => {
       btn.addEventListener('click', () => setMode(btn.dataset.nnMode));
-    });
-
-    root.querySelectorAll('[data-nn-trait]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        traitMode = btn.dataset.nnTrait;
-        root.querySelectorAll('[data-nn-trait]').forEach((b) => {
-          b.classList.toggle('active', b.dataset.nnTrait === traitMode);
-        });
-      });
     });
 
     if (mechBar) {
@@ -796,7 +956,7 @@
 
     setMode('tree');
     if (detailEl) {
-      detailEl.textContent = 'Кликните по узлу модели — справа появятся PyTorch-примеры ключевых идей.';
+      detailEl.textContent = 'Кликните по модели — справа откроется карточка с описанием и PyTorch-кодом.';
     }
   }
 

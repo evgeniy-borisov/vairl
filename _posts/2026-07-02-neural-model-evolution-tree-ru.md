@@ -61,14 +61,15 @@ flowchart TB
 
 ### Интерактив: fan tree и заимствования (p5.js)
 
-Переключите режим и (в режиме заимствований) фильтр по **механизму** — подсветятся узлы и дуги. **Клик по узлу** делит область пополам: слева дерево, справа — сводка и лаконичные **PyTorch-примеры** того, что было изобретено в этой архитектуре.
+Переключите вкладку: **дерево**, **заимствования**, **график времени выхода** или **полный список** с описанием каждой архитектуры. **Клик по модели** открывает карточку с достижением, особенностями и PyTorch-кодом.
 
 <div class="nn-phylogeny-widget phase-portrait-widget" id="nn-phylogeny-demo">
   <div class="nn-toolbar">
     <div class="phase-portrait-controls">
-      <button type="button" data-nn-mode="tree" class="active">Fan tree</button>
+      <button type="button" data-nn-mode="tree" class="active">Дерево</button>
       <button type="button" data-nn-mode="borrow">Заимствования</button>
-      <button type="button" data-nn-mode="traits">Признаки</button>
+      <button type="button" data-nn-mode="timeline">Время выхода</button>
+      <button type="button" data-nn-mode="list">Список</button>
     </div>
     <div class="nn-toolbar-actions">
       <span class="nn-theme-label">Тема</span>
@@ -78,16 +79,11 @@ flowchart TB
       <span class="nn-hljs-theme-label"></span>
     </div>
   </div>
-  <div class="nn-trait-bar" data-nn-trait-wrap hidden>
-    <span style="font-size:11px;color:#666;align-self:center">Размер / яркость:</span>
-    <button type="button" data-nn-trait="train" class="active">Данные / compute</button>
-    <button type="button" data-nn-trait="acc">Точность</button>
-    <button type="button" data-nn-trait="year">Год</button>
-  </div>
   <div class="nn-mech-bar" data-nn-mech-wrap id="nn-phylogeny-mechs"></div>
   <div class="nn-split-wrap" id="nn-phylogeny-split">
     <div class="nn-tree-pane">
       <div id="nn-phylogeny-canvas" class="nn-canvas phase-portrait-canvas"></div>
+      <div id="nn-phylogeny-list" class="nn-catalog-list" hidden></div>
     </div>
     <aside class="nn-code-pane" id="nn-phylogeny-panel" hidden>
       <header class="nn-panel-head">
@@ -97,19 +93,21 @@ flowchart TB
       <div class="nn-panel-body"></div>
     </aside>
   </div>
-  <p class="nn-hint" id="nn-phylogeny-hint">Клик по узлу — split-панель с PyTorch-примерами ключевых идей.</p>
-  <p class="nn-detail" id="nn-phylogeny-detail">Кликните по узлу модели — справа появятся PyTorch-примеры ключевых идей.</p>
-  <p class="phase-portrait-caption">Скетч на <a href="https://p5js.org/" target="_blank" rel="noopener">p5.js</a>; подсветка — <a href="https://highlightjs.org/" target="_blank" rel="noopener">highlight.js</a> (GitHub Light / GitHub Dark). Кнопка ⛶ — полноэкранный режим.</p>
+  <p class="nn-hint" id="nn-phylogeny-hint">Филогения семейств на полукруге. Клик — карточка модели.</p>
+  <p class="nn-detail" id="nn-phylogeny-detail">Кликните по модели — справа откроется карточка с описанием и PyTorch-кодом.</p>
+  <p class="phase-portrait-caption">27 архитектур · p5.js + highlight.js (GitHub Light / Dark) · ⛶ полноэкранный режим.</p>
 </div>
 
+<script src="{{ '/assets/js/nn-phylogeny-catalog.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/nn-phylogeny-snippets.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/nn-phylogeny-demo.js' | relative_url }}"></script>
 
-| Режим | Что показывает |
-|-------|----------------|
-| **Fan tree** | Таксономия семейств; клик — PyTorch-код |
-| **Заимствования** | Межветочные дуги + код уникальных добавлений |
-| **Признаки** | Размер ∝ compute; яркость ∝ точность |
+| Вкладка | Что показывает |
+|---------|----------------|
+| **Дерево** | Fan tree по семействам; клик — карточка + PyTorch |
+| **Заимствования** | Межветочные дуги архитектурных заимствований |
+| **Время выхода** | График по годам (1957–2023), полосы — семейства |
+| **Список** | Полный каталог: год, описание, достижение, особенности |
 
 ---
 
