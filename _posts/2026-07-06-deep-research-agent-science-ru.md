@@ -24,6 +24,7 @@ image: /assets/images/deep-research-agent-science.svg
 | [Зачем отдельный агент](#зачем-deep-research-agent-а-не-deep-research) | Отличие от «глубокого поиска» и coding-агентов |
 | [Архитектура](#архитектура-deep-research-agent) | Пять фаз и обратная связь |
 | [IMRaD: структура статьи](#imrad-структура-научной-статьи) | Схема «песочных часов» и вопросы к каждому разделу |
+| [IMRaD Breakdown](#пример-imrad-разбивка-статьи-sterk--rabe) | Детальная иерархия разделов (Sterk & Rabe) |
 | [Разделы и агент](#что-собирает-deep-research-agent-по-разделам) | Артефакты агента по IMRaD |
 | [Цикл проверки](#цикл-проверки-и-сравнительный-анализ) | Эксперименты, baseline, ревью |
 | [AI Scientist](#the-ai-scientist-sakana-ai) | v1 → v2 → Nature |
@@ -181,6 +182,106 @@ flowchart TB
 | **Experimental Setup** | Датасеты, hyperparams, hardware | Methods |
 | **Ablation Study** | Сравнение вариантов | Results |
 | **Broader Impact / Limitations** | Этика, угрозы валидности | Discussion |
+
+### Пример IMRaD: разбивка статьи (Sterk & Rabe)
+
+Помимо «песочных часов», полезен **пошаговый чеклист** — что именно писать внутри каждого раздела. Классическая схема **IMRaD Paper Breakdown** из обзора Sterk & Rabe (2008) разбивает статью на **иерархию подблоков**: от аннотации до каждого абзаца Discussion.
+
+Оригинал (клиническая медицина):
+
+![IMRaD Paper Breakdown — иерархическая структура разделов (Sterk & Rabe, 2008)](/assets/images/imrad-paper-breakdown-sterk-rabe.png)
+
+Ниже — **та же структура в Mermaid** с русскими подписями. Для Deep Research Agent каждый лист дерева — отдельный **артефакт**, который агент генерирует, проверяет и только потом вклеивает в LaTeX.
+
+```mermaid
+flowchart TB
+    subgraph ABS["Abstract · Аннотация"]
+        direction TB
+        A1["Обоснование и гипотеза<br/><i>Rationale / Hypothesis</i>"]
+        A2["Дизайн исследования и методы<br/><i>Study design / Methods</i>"]
+        A3["Результаты с данными<br/><i>Results with data</i>"]
+        A4["Вывод и импликации<br/><i>Conclusion / Implication</i>"]
+        A1 --> A2 --> A3 --> A4
+    end
+
+    subgraph INT["Introduction · Введение"]
+        direction TB
+        I1["Общий фон предметной области<br/><i>General background</i>"]
+        I2["Конкретная дилемма / проблема<br/><i>The specific dilemma</i>"]
+        I3["Почему вопрос до сих пор открыт?<br/><i>Why still unresolved?</i>"]
+        I4["Ваша идея решения — как очевидный ход<br/><i>My idea: sell as obvious</i>"]
+        I5["Гипотеза или исследовательский вопрос / цель<br/><i>Hypothesis / Aim</i>"]
+        I1 --> I2 --> I3 --> I4 --> I5
+    end
+
+    subgraph MET["Methods · Методы"]
+        direction TB
+        M1["Дизайн: что, когда, как часто<br/><i>Design: what, when, how often</i>"]
+        M2["Объекты: включение/исключение, подгруппы, этика<br/><i>Subjects: inclusion, ethics</i>"]
+        M3["Измерения: параметры, единицы, валидность<br/><i>Measurements: parameters, validity</i>"]
+        M4["Вмешательство: доза, compliance, побочные эффекты<br/><i>Interventional: dose, compliance</i>"]
+        M5["Анализ: преобразования, тесты, мощность<br/><i>Analysis: stats, power</i>"]
+        M1 --> M2 --> M3 --> M4 --> M5
+    end
+
+    subgraph RES["Results · Результаты"]
+        direction TB
+        R1["Baseline: группы, Table 1<br/><i>Baseline / cross-sectional</i>"]
+        R2["Главные вопросы: фигуры, таблицы, текст<br/><i>Main questions: readable data</i>"]
+        R3["Вторичные вопросы: аналогично<br/><i>Secondary questions</i>"]
+        R4["Неожиданные наблюдения: кратко<br/><i>Unexpected observations</i>"]
+        R1 --> R2 --> R3 --> R4
+    end
+
+    subgraph DIS["Discussion · Обсуждение"]
+        direction TB
+        D1["Суть: главный результат, сообщение, импликация<br/><i>Bottom line</i>"]
+        D2["Сравнение с ранними работами: что нового?<br/><i>Comparison: what is new</i>"]
+        D3["Слабые/сильные стороны: дизайн, bias, мощность<br/><i>Weakness / strength: be honest</i>"]
+        D4["Интерпретация и механизмы: что решено, что нет<br/><i>Interpretation & mechanisms</i>"]
+        D5["Практическая значимость<br/><i>Clinical / practical relevance</i>"]
+        D6["Заключение с импликацией и рекомендациями<br/><i>Conclusion with suggestion</i>"]
+        D1 --> D2 --> D3 --> D4 --> D5 --> D6
+    end
+
+    ABS ==> INT
+    INT ==> MET
+    MET ==> RES
+    RES ==> DIS
+```
+
+**Как читать схему:** вертикальные цепочки внутри каждого subgraph — **рекомендуемый порядок абзацев** в разделе. Стрелки `==>` между блоками — логика всей статьи: Abstract сжимает IMRaD; Introduction сужает поле к гипотезе; Methods и Results — узкая часть; Discussion расширяет обратно.
+
+#### Таблица подблоков
+
+| Раздел | Подблок | Вопрос, на который отвечает | Для ML / AI-агента |
+|--------|---------|------------------------------|---------------------|
+| **Abstract** | Обоснование и гипотеза | Зачем и что проверяем? | Research goal + hypothesis object |
+| | Дизайн / методы | Как устроено исследование? | Architecture, training setup (1–2 предложения) |
+| | Результаты с данными | Ключевые числа? | Best metric vs baseline |
+| | Вывод / импликация | So what? | Contribution в одном абзаце |
+| **Introduction** | Общий фон | Контекст поля | Survey + citation graph |
+| | Дилемма | Конкретная боль | Failure mode, open problem |
+| | Почему открыт? | Research gap | SOTA table: что не закрыто |
+| | Идея решения | Ваш подход | Novelty pitch для reviewer |
+| | Гипотеза / цель | Что именно проверяем? | `Hypothesis` artifact агента |
+| **Methods** | Дизайн | Что, когда, как часто? | Experiment protocol |
+| | Объекты | Кого/что включаем? | Dataset splits, inclusion criteria |
+| | Измерения | Что измеряем? | Metrics, eval protocol |
+| | Вмешательство | Что меняем? | Algorithm, hyperparams, ablation vars |
+| | Анализ | Как считаем? | Statistical tests, seeds, significance |
+| **Results** | Baseline / Table 1 | Исходные условия | Dataset stats, baseline numbers |
+| | Главные вопросы | Ответы на primary aims | Main result tables + figures |
+| | Вторичные вопросы | Доп. анализ | Ablations, sensitivity |
+| | Неожиданные находки | Surprises | Failure cases, edge behaviour |
+| **Discussion** | Bottom line | Главное сообщение | 2–3 предложения без новых данных |
+| | Сравнение с литературой | Что нового vs SOTA? | Related Work cross-check |
+| | Слабости / силы | Честная оценка | Limitations, threats to validity |
+| | Механизмы | Почему сработало / нет? | Interpretation (осторожно!) |
+| | Практическая значимость | Зачем миру? | Broader impact, deployment |
+| | Заключение | Рекомендации | Future work для следующего цикла агента |
+
+**Для Deep Research Agent** эта разбивка — **спецификация задач writing-agent**: каждый подблок = отдельный prompt с входными артефактами (lit notes, experiment logs, benchmark matrix). Automated Reviewer может проверять **полноту**: есть ли в Discussion блок «слабости», есть ли в Results «baseline table», не перепутаны ли Results и Discussion.
 
 ---
 
@@ -388,3 +489,4 @@ flowchart LR
 
 ### IMRaD
 - Cals J.W.L., Kotz D. — *Research Policy Manuscript Structure* (Springer, 2013); схема структуры статьи
+- Sterk P.J., Rabe K.F. — *The joy of writing a paper* (Breathe, 2008, 4(3), 224–232); IMRaD Paper Breakdown
