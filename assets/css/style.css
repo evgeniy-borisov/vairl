@@ -834,33 +834,48 @@ nav a {
     border: 1px solid color-mix(in srgb, var(--fam-color) 35%, transparent);
 }
 
-.nn-phylogeny-widget .nn-catalog-desc,
-.nn-phylogeny-widget .nn-catalog-ach,
-.nn-phylogeny-widget .nn-catalog-feat {
-    margin: 0 0 4px;
+.nn-phylogeny-widget .nn-catalog-lead {
+    margin: 0 0 8px;
     font-size: 12px;
     line-height: 1.5;
-    color: #555;
+    color: #666;
+    font-style: italic;
 }
 
-.nn-phylogeny-widget .nn-catalog-ach strong,
-.nn-phylogeny-widget .nn-catalog-feat strong {
-    color: #444;
-    font-weight: 600;
+.nn-phylogeny-widget .nn-catalog-section {
+    margin: 0 0 8px;
 }
 
-.nn-phylogeny-widget .nn-panel-ach,
-.nn-phylogeny-widget .nn-panel-feat,
-.nn-phylogeny-widget .nn-panel-code-intro {
-    margin: 0 0 10px;
+.nn-phylogeny-widget .nn-catalog-section h5 {
+    margin: 0 0 3px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #667eea;
+}
+
+.nn-phylogeny-widget .nn-catalog-section p {
+    margin: 0;
     font-size: 12px;
     line-height: 1.55;
     color: #555;
 }
 
-.nn-phylogeny-widget .nn-panel-ach strong,
-.nn-phylogeny-widget .nn-panel-feat strong {
-    color: #444;
+.nn-phylogeny-widget .nn-panel-body .nn-catalog-section {
+    margin-bottom: 10px;
+}
+
+.nn-phylogeny-widget .nn-panel-body .nn-catalog-lead {
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.nn-phylogeny-widget .nn-panel-code-intro {
+    margin: 12px 0 8px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #555;
 }
 
 .nn-phylogeny-widget.nn-theme-dark .nn-catalog-item {
@@ -874,18 +889,18 @@ nav a {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.18), rgba(108, 92, 231, 0.1));
 }
 
-.nn-phylogeny-widget.nn-theme-dark .nn-catalog-name,
-.nn-phylogeny-widget.nn-theme-dark .nn-catalog-ach strong,
-.nn-phylogeny-widget.nn-theme-dark .nn-catalog-feat strong {
+.nn-phylogeny-widget.nn-theme-dark .nn-catalog-name {
     color: #e6e8ef;
 }
 
-.nn-phylogeny-widget.nn-theme-dark .nn-catalog-desc,
-.nn-phylogeny-widget.nn-theme-dark .nn-catalog-ach,
-.nn-phylogeny-widget.nn-theme-dark .nn-catalog-feat,
-.nn-phylogeny-widget.nn-theme-dark .nn-panel-ach,
-.nn-phylogeny-widget.nn-theme-dark .nn-panel-feat {
+.nn-phylogeny-widget.nn-theme-dark .nn-catalog-lead,
+.nn-phylogeny-widget.nn-theme-dark .nn-catalog-section p,
+.nn-phylogeny-widget.nn-theme-dark .nn-panel-code-intro {
     color: #a8adbc;
+}
+
+.nn-phylogeny-widget.nn-theme-dark .nn-catalog-section h5 {
+    color: #8b9cff;
 }
 
 .nn-phylogeny-widget:fullscreen .nn-catalog-list,

@@ -95,7 +95,7 @@ flowchart TB
   </div>
   <p class="nn-hint" id="nn-phylogeny-hint">Филогения семейств на полукруге. Клик — карточка модели.</p>
   <p class="nn-detail" id="nn-phylogeny-detail">Кликните по модели — справа откроется карточка с описанием и PyTorch-кодом.</p>
-  <p class="phase-portrait-caption">27 архитектур · p5.js + highlight.js (GitHub Light / Dark) · ⛶ полноэкранный режим.</p>
+  <p class="phase-portrait-caption">30 архитектур (вкл. VAE, GAN, U-Net) · p5.js + highlight.js · ⛶ полноэкранный режим.</p>
 </div>
 
 <script src="{{ '/assets/js/nn-phylogeny-catalog.js' | relative_url }}"></script>
@@ -107,7 +107,7 @@ flowchart TB
 | **Дерево** | Fan tree по семействам; клик — карточка + PyTorch |
 | **Заимствования** | Межветочные дуги архитектурных заимствований |
 | **Время выхода** | График по годам (1957–2023), полосы — семейства |
-| **Список** | Полный каталог: год, описание, достижение, особенности |
+| **Список** | Каталог с разделами: зачем важно, достижение, особенности |
 
 ---
 

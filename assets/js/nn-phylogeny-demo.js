@@ -18,6 +18,7 @@
     'Vision Transformer': [26, 188, 156],
     Multimodal: [250, 112, 154],
     Diffusion: [72, 219, 251],
+    'Latent & GAN': [236, 72, 153],
     'Scale & MoE': [162, 155, 254],
     'Open weights': [149, 165, 166],
   };
@@ -30,6 +31,7 @@
     { id: 'alexnet', name: 'AlexNet', year: 2012, family: 'Convolutional', train: 3, acc: 4, task: 'CV', mechs: ['conv', 'gpu'] },
     { id: 'vgg', name: 'VGG', year: 2014, family: 'Convolutional', train: 4, acc: 4, task: 'CV', mechs: ['conv'] },
     { id: 'resnet', name: 'ResNet', year: 2015, family: 'Convolutional', train: 4, acc: 5, task: 'CV', mechs: ['conv', 'residual'] },
+    { id: 'unet', name: 'U-Net', year: 2015, family: 'Convolutional', train: 3, acc: 4, task: 'сегментация', mechs: ['conv', 'residual'] },
     { id: 'densenet', name: 'DenseNet', year: 2017, family: 'Convolutional', train: 4, acc: 4, task: 'CV', mechs: ['conv', 'residual'] },
     { id: 'effnet', name: 'EfficientNet', year: 2019, family: 'Convolutional', train: 3, acc: 5, task: 'CV edge', mechs: ['conv', 'scaling'] },
     { id: 'rnn', name: 'RNN', year: 1986, family: 'Sequence', train: 2, acc: 2, task: 'последовательности', mechs: ['recurrent'] },
@@ -43,6 +45,8 @@
     { id: 'gpt3', name: 'GPT-3', year: 2020, family: 'Generative LM', train: 5, acc: 5, task: 'LM / ICL', mechs: ['attention', 'scaling'] },
     { id: 't5', name: 'T5', year: 2019, family: 'Generative LM', train: 4, acc: 5, task: 'text-to-text', mechs: ['attention'] },
     { id: 'vit', name: 'ViT', year: 2020, family: 'Vision Transformer', train: 4, acc: 5, task: 'CV', mechs: ['attention', 'residual'] },
+    { id: 'vae', name: 'VAE', year: 2013, family: 'Latent & GAN', train: 3, acc: 3, task: 'генерация / сжатие', mechs: ['latent', 'elbo'] },
+    { id: 'gan', name: 'GAN', year: 2014, family: 'Latent & GAN', train: 4, acc: 4, task: 'генерация', mechs: ['adversarial', 'latent'] },
     { id: 'clip', name: 'CLIP', year: 2021, family: 'Multimodal', train: 5, acc: 5, task: 'vision+text', mechs: ['attention', 'contrastive'] },
     { id: 'ddpm', name: 'DDPM', year: 2020, family: 'Diffusion', train: 4, acc: 4, task: 'генерация', mechs: ['diffusion'] },
     { id: 'sd', name: 'Stable Diffusion', year: 2022, family: 'Diffusion', train: 4, acc: 5, task: 'text2img', mechs: ['diffusion', 'latent'] },
@@ -58,9 +62,14 @@
     ['lenet', 'alexnet', 'глубокая CNN'],
     ['alexnet', 'vgg', 'глубина'],
     ['alexnet', 'resnet', 'обучение глубоких сетей'],
+    ['resnet', 'unet', 'skip в decoder'],
     ['resnet', 'densenet', 'skip connections'],
+    ['unet', 'ddpm', 'U-Net backbone'],
     ['resnet', 'effnet', 'compound scaling'],
     ['resnet', 'vit', 'residual → patches'],
+    ['mlp', 'vae', 'encoder-decoder + ELBO'],
+    ['vae', 'gan', 'генеративное моделирование'],
+    ['vae', 'sd', 'latent diffusion space'],
     ['rnn', 'lstm', 'gating'],
     ['lstm', 'gru', 'упрощённые ворота'],
     ['lstm', 'seq2seq', 'encoder-decoder'],
@@ -95,6 +104,8 @@
     linear: 'Linear units',
     mlm: 'Masked LM',
     latent: 'Latent space',
+    elbo: 'Variational / ELBO',
+    adversarial: 'Adversarial',
     gpu: 'GPU training',
   };
 
@@ -113,7 +124,7 @@
     },
     list: {
       title: 'Список архитектур',
-      hint: 'Полный каталог 27 моделей: год, описание, достижение и особенности. Клик — PyTorch.',
+      hint: 'Полный каталог моделей: разбор «зачем важно», достижение, особенности. Клик — PyTorch.',
     },
   };
 
@@ -347,6 +358,24 @@
       return `rgb(${c[0]},${c[1]},${c[2]})`;
     }
 
+    function catalogSectionsHtml(cat, fallbackMechs) {
+      const parts = [];
+      if (cat.lead) {
+        parts.push(`<p class="nn-catalog-lead">${cat.lead}</p>`);
+      }
+      if (cat.why) {
+        parts.push(`<section class="nn-catalog-section"><h5>Зачем это важно</h5><p>${cat.why}</p></section>`);
+      }
+      if (cat.achievement) {
+        parts.push(`<section class="nn-catalog-section"><h5>Главное достижение</h5><p>${cat.achievement}</p></section>`);
+      }
+      const feat = cat.features || fallbackMechs;
+      if (feat) {
+        parts.push(`<section class="nn-catalog-section"><h5>Особенности архитектуры</h5><p>${feat}</p></section>`);
+      }
+      return parts.join('');
+    }
+
     function renderCatalogList() {
       if (!listEl) return;
       const sorted = [...MODELS].sort((a, b) => a.year - b.year || a.name.localeCompare(b.name));
@@ -362,9 +391,7 @@
               <span class="nn-catalog-name">${m.name}</span>
               <span class="nn-catalog-family" style="--fam-color:${color}">${m.family}</span>
             </div>
-            <p class="nn-catalog-desc">${cat.desc || ''}</p>
-            <p class="nn-catalog-ach"><strong>Достижение:</strong> ${cat.achievement || '—'}</p>
-            <p class="nn-catalog-feat"><strong>Особенности:</strong> ${cat.features || mechs}</p>
+            ${catalogSectionsHtml(cat, mechs)}
           </button>`;
         })
         .join('');
@@ -394,18 +421,8 @@
       const titleEl = panelEl.querySelector('.nn-panel-title');
       if (titleEl) titleEl.textContent = m.name;
 
-      let html = `
-        <span class="nn-panel-meta">${m.year} · ${m.family}</span>`;
-
-      if (cat.desc) {
-        html += `<p class="nn-panel-blurb">${cat.desc}</p>`;
-      }
-      if (cat.achievement) {
-        html += `<p class="nn-panel-ach"><strong>Главное достижение:</strong> ${cat.achievement}</p>`;
-      }
-      if (cat.features) {
-        html += `<p class="nn-panel-feat"><strong>Особенности:</strong> ${cat.features}</p>`;
-      }
+      let html = `<span class="nn-panel-meta">${m.year} · ${m.family}</span>`;
+      html += catalogSectionsHtml(cat, mechStr);
 
       html += `
         <dl class="nn-panel-stats">
@@ -415,8 +432,8 @@
           <dt>Механизмы</dt><dd>${mechStr}</dd>
         </dl>`;
 
-      if (meta?.blurb && meta.blurb !== cat.desc) {
-        html += `<p class="nn-panel-code-intro">${meta.blurb}</p>`;
+      if (meta?.blurb) {
+        html += `<p class="nn-panel-code-intro"><strong>Код:</strong> ${meta.blurb}</p>`;
       }
 
       (meta?.snippets || []).forEach((sn) => {

@@ -114,6 +114,41 @@ res    = round(gamma ** phi)  # 224 → 299…`,
       },
     ],
   },
+  unet: {
+    blurb: 'Симметричный encoder–decoder со skip connections для пиксельной сегментации.',
+    snippets: [
+      {
+        title: 'Skip + upsample',
+        code: `up = F.interpolate(bottleneck, scale_factor=2)
+cat = torch.cat([up, enc_feat], dim=1)  # copy-and-crop
+out = self.dec_conv(cat)`,
+      },
+    ],
+  },
+  vae: {
+    blurb: 'Variational autoencoder: ELBO + reparameterization trick.',
+    snippets: [
+      {
+        title: 'Reparameterization',
+        code: `mu, logvar = encoder(x).chunk(2, dim=-1)
+std = (0.5 * logvar).exp()
+z = mu + std * torch.randn_like(std)
+x_hat = decoder(z)
+loss = recon_loss + kl_divergence(mu, logvar)`,
+      },
+    ],
+  },
+  gan: {
+    blurb: 'Minimax: generator vs discriminator без явной плотности.',
+    snippets: [
+      {
+        title: 'GAN loss',
+        code: `D_loss = -(log(D(x)) + log(1 - D(G(z))))
+G_loss = -log(D(G(z)))
+# DCGAN: BatchNorm, strided conv, ReLU/LeakyReLU`,
+      },
+    ],
+  },
   rnn: {
     blurb: 'Рекуррентное скрытое состояние h_t = f(Wx_t + Uh_{t-1}).',
     snippets: [
