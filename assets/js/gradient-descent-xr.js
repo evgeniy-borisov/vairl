@@ -12,7 +12,7 @@ import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 const ROOT_ID = 'gradient-descent-xr-demo';
 const FULLPAGE_ID = 'gradient-descent-xr-fullpage';
 /** Semver визуализации — показывается в углу канваса. */
-const GDX_VIS_VERSION = '1.4.0';
+const GDX_VIS_VERSION = '1.4.1';
 
 const FUNCTIONS = {
   bowl: {
@@ -80,9 +80,13 @@ const SURFACE_OPACITY = 0.38;
 const PATH_OPACITY = 0.28;
 const PATH_LINE_WIDTH = 1.4;
 const BALL_OPACITY = 0.72;
-const BALL_LERP = 0.16;
-const STEP_INTERVAL_MS = 48;
-const SUB_STEPS_PER_TICK = 6;
+const BALL_LERP = 0.14;
+/** Микро-шагов оптимизации в секунду (плавность). */
+const MICRO_STEPS_PER_SEC = 52;
+/** Лимит микро-шагов за кадр — без скачков при просадке FPS. */
+const MAX_MICRO_STEPS_PER_FRAME = 8;
+/** Множитель α для замедления спуска при том же числе шагов. */
+const LR_TIME_FACTOR = 0.18;
 const VR_PULLBACK = 2.2;
 const GRAD_EPS = 1e-5;
 
@@ -127,8 +131,9 @@ function initGradientDescent(root) {
   let fnKey = fnSelect.value;
   let learningRate = Number(lrRange.value);
   let running = true;
-  let lastStepAt = 0;
   let stepCount = 0;
+  let lastFrameTime = 0;
+  let simAccumulator = 0;
   let pendingVrPose = null;
   let inVr = false;
   let pointerInside = false;
@@ -154,7 +159,7 @@ function initGradientDescent(root) {
   const pointerNdc = new THREE.Vector2();
   const IPD = 0.064;
 
-  /** @type {Array<{id:string,label:string,color:number,pos:{x:number,y:number},displayPos:{x:number,y:number},path:THREE.Vector3[],state:object,ball:THREE.Mesh|null,pathLine:Line2|null,done:boolean}>} */
+  /** @type {Array<{id:string,label:string,color:number,pos:{x:number,y:number},displayPos:{x:number,y:number},pathMath:{x:number,y:number}[],state:object,ball:THREE.Mesh|null,pathLine:Line2|null,done:boolean}>} */
   let optimizers = [];
 
   function sceneColors() {
@@ -588,7 +593,7 @@ function initGradientDescent(root) {
         color: def.color,
         pos,
         displayPos: { ...pos },
-        path: [toWorld(pos.x, pos.y).clone()],
+        pathMath: [{ x: pos.x, y: pos.y }],
         state: def.initState(),
         ball,
         pathLine,
@@ -597,19 +602,28 @@ function initGradientDescent(root) {
     });
   }
 
-  function updatePathLine(opt) {
-    const pts = opt.path;
-    if (!opt.pathLine || pts.length < 2) {
-      if (opt.pathLine) opt.pathLine.visible = false;
+  function rebuildPathLine(opt) {
+    if (!opt.pathLine) return;
+
+    const renderPts = opt.pathMath.map((p) => toWorld(p.x, p.y));
+    renderPts.push(toWorld(opt.displayPos.x, opt.displayPos.y));
+
+    if (renderPts.length < 2) {
+      opt.pathLine.visible = false;
       return;
     }
-    const flat = new Float32Array(pts.length * 3);
-    for (let i = 0; i < pts.length; i++) {
-      flat[i * 3] = pts[i].x;
-      flat[i * 3 + 1] = pts[i].y;
-      flat[i * 3 + 2] = pts[i].z;
+
+    const flat = new Float32Array(renderPts.length * 3);
+    for (let i = 0; i < renderPts.length; i++) {
+      flat[i * 3] = renderPts[i].x;
+      flat[i * 3 + 1] = renderPts[i].y;
+      flat[i * 3 + 2] = renderPts[i].z;
     }
+
+    const prevGeo = opt.pathLine.geometry;
+    opt.pathLine.geometry = new LineGeometry();
     opt.pathLine.geometry.setPositions(flat);
+    prevGeo.dispose();
     opt.pathLine.computeLineDistances();
     opt.pathLine.visible = true;
   }
@@ -620,7 +634,7 @@ function initGradientDescent(root) {
       opt.displayPos.y += (opt.pos.y - opt.displayPos.y) * BALL_LERP;
       opt.ball.position.copy(toWorld(opt.displayPos.x, opt.displayPos.y));
       opt.ball.material.opacity = opt.done ? BALL_OPACITY * 0.45 : BALL_OPACITY;
-      updatePathLine(opt);
+      rebuildPathLine(opt);
     });
   }
 
@@ -841,9 +855,12 @@ function initGradientDescent(root) {
       opt.done = true;
       return false;
     }
-    STEP_FN[opt.id](opt, g, learningRate);
+    STEP_FN[opt.id](opt, g, learningRate * LR_TIME_FACTOR);
     clampPos(opt.pos);
-    opt.path.push(toWorld(opt.pos.x, opt.pos.y).clone());
+    const last = opt.pathMath[opt.pathMath.length - 1];
+    if (!last || last.x !== opt.pos.x || last.y !== opt.pos.y) {
+      opt.pathMath.push({ x: opt.pos.x, y: opt.pos.y });
+    }
     return true;
   }
 
@@ -854,28 +871,25 @@ function initGradientDescent(root) {
   function resetOptimizers() {
     buildOptimizers();
     stepCount = 0;
-    lastStepAt = performance.now();
+    simAccumulator = 0;
+    lastFrameTime = 0;
     updateMarkers();
     updateMetrics();
   }
 
-  function simulationStep() {
+  function runSimulationMicroStep() {
     let anyMoved = false;
-    for (let s = 0; s < SUB_STEPS_PER_TICK; s += 1) {
-      let movedThisSub = false;
-      optimizers.forEach((opt) => {
-        if (optimizerStep(opt)) movedThisSub = true;
-      });
-      if (!movedThisSub) break;
-      anyMoved = true;
-      stepCount += 1;
-    }
+    optimizers.forEach((opt) => {
+      if (optimizerStep(opt)) anyMoved = true;
+    });
     if (!anyMoved) {
       running = false;
       btnPlay.textContent = 'Старт';
       btnPlay.classList.remove('active');
+      return false;
     }
-    updateMetrics();
+    stepCount += 1;
+    return true;
   }
 
   function updateMetrics() {
@@ -885,7 +899,8 @@ function initGradientDescent(root) {
       const mark = opt.done ? ' ✓' : '';
       return `${opt.label.padEnd(9)} f=${f.toFixed(4)}  (${opt.pos.x.toFixed(2)}, ${opt.pos.y.toFixed(2)})${mark}`;
     });
-    metricsEl.textContent = `шаг ${stepCount}  ·  α=${learningRate.toFixed(2)}  ·  ${spec.label}\n${lines.join('\n')}`;
+    metricsEl.textContent =
+      `шаг ${stepCount}  ·  t=${(stepCount / MICRO_STEPS_PER_SEC).toFixed(1)}s  ·  α=${learningRate.toFixed(2)}  ·  ${spec.label}\n${lines.join('\n')}`;
   }
 
   function captureVrPose() {
@@ -1007,10 +1022,11 @@ function initGradientDescent(root) {
     running = !running;
     btnPlay.textContent = running ? 'Пауза' : 'Старт';
     btnPlay.classList.toggle('active', running);
-    lastStepAt = performance.now();
   });
 
-  btnStep.addEventListener('click', () => simulationStep());
+  btnStep.addEventListener('click', () => {
+    if (runSimulationMicroStep()) updateMetrics();
+  });
 
   btnReset.addEventListener('click', () => {
     resetOptimizers();
@@ -1037,10 +1053,24 @@ function initGradientDescent(root) {
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
   renderer.setAnimationLoop((time) => {
-    if (running && time - lastStepAt >= STEP_INTERVAL_MS) {
-      simulationStep();
-      lastStepAt = time;
+    if (!lastFrameTime) lastFrameTime = time;
+    const dt = Math.min((time - lastFrameTime) / 1000, 0.05);
+    lastFrameTime = time;
+
+    if (running) {
+      simAccumulator += dt * MICRO_STEPS_PER_SEC;
+      let stepsThisFrame = 0;
+      while (simAccumulator >= 1 && stepsThisFrame < MAX_MICRO_STEPS_PER_FRAME) {
+        if (!runSimulationMicroStep()) {
+          simAccumulator = 0;
+          break;
+        }
+        simAccumulator -= 1;
+        stepsThisFrame += 1;
+      }
+      if (stepsThisFrame > 0) updateMetrics();
     }
+
     updateBallPositions();
     if (minMarker) minMarker.rotation.z += 0.012;
     if (!inVr) controls.update();
