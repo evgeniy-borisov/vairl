@@ -2,14 +2,14 @@
  * 3D multi-optimizer landscape with WebXR.
  * Embeds in #gradient-descent-xr-demo or fullscreen #gradient-descent-xr-fullpage.
  */
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { VRButton } from 'three/addons/webxr/VRButton.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js';
+import { VRButton } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/webxr/VRButton.js';
 
 const ROOT_ID = 'gradient-descent-xr-demo';
 const FULLPAGE_ID = 'gradient-descent-xr-fullpage';
 /** Semver визуализации — показывается в углу канваса. */
-const GDX_VIS_VERSION = '1.3.0';
+const GDX_VIS_VERSION = '1.3.1';
 
 const FUNCTIONS = {
   bowl: {
@@ -84,6 +84,27 @@ const root = document.getElementById(ROOT_ID) || document.getElementById(FULLPAG
 if (!root) {
   // Module loaded without a mount point.
 } else {
+  try {
+    initGradientDescent(root);
+  } catch (err) {
+    console.error('[gdx-vis]', err);
+    showInitError(root, err);
+  }
+}
+
+function showInitError(root, err) {
+  const box = root.querySelector('.gdx-metrics') || root;
+  const msg = document.createElement('p');
+  msg.className = 'gdx-init-error';
+  msg.textContent = `Не удалось загрузить 3D: ${err?.message || err}`;
+  box.prepend(msg);
+  const badge = document.createElement('div');
+  badge.className = 'gdx-version-badge';
+  badge.textContent = `gdx-vis v${GDX_VIS_VERSION} · error`;
+  (root.querySelector('.gdx-canvas-wrap') || root).appendChild(badge);
+}
+
+function initGradientDescent(root) {
   const fullpage = root.id === FULLPAGE_ID;
   const $ = (sel) => root.querySelector(sel);
 
@@ -152,10 +173,19 @@ if (!root) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
-  renderer.xr.enabled = true;
+  const xrAvailable = typeof navigator !== 'undefined' && 'xr' in navigator;
+  if (xrAvailable) renderer.xr.enabled = true;
   canvasHost.appendChild(renderer.domElement);
 
-  const vrButton = VRButton.createButton(renderer);
+  let vrButton;
+  if (xrAvailable) {
+    vrButton = VRButton.createButton(renderer);
+  } else {
+    vrButton = document.createElement('button');
+    vrButton.type = 'button';
+    vrButton.textContent = 'VR NOT SUPPORTED';
+    vrButton.disabled = true;
+  }
   vrButton.classList.add('gdx-vr-button');
   vrButton.title = 'Сначала настройте обзор мышью';
   (vrSlot || root).appendChild(vrButton);
@@ -267,6 +297,12 @@ if (!root) {
     return camera;
   }
 
+  function getRaycastCamera() {
+    const cam = getActiveCamera();
+    if (cam.isArrayCamera && cam.cameras?.length) return cam.cameras[0];
+    return cam;
+  }
+
   function updatePointerNdc(event) {
     const rect = renderer.domElement.getBoundingClientRect();
     pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -275,7 +311,7 @@ if (!root) {
 
   function pickSurfaceHit() {
     if (!surfaceMesh) return null;
-    const cam = getActiveCamera();
+    const cam = getRaycastCamera();
     cam.updateMatrixWorld(true);
     raycaster.setFromCamera(pointerNdc, cam);
     const hits = raycaster.intersectObject(surfaceMesh, false);
@@ -297,12 +333,12 @@ if (!root) {
     }
 
     const hit = pickSurfaceHit();
-    if (!hit) {
+    if (!hit || !hit.face?.normal) {
       pointerRig.visible = false;
       return;
     }
 
-    const cam = getActiveCamera();
+    const cam = getRaycastCamera();
     cam.updateMatrixWorld(true);
     const camPos = new THREE.Vector3();
     const camQuat = new THREE.Quaternion();
@@ -310,6 +346,7 @@ if (!root) {
     cam.getWorldQuaternion(camQuat);
 
     const pt = hit.point.clone();
+    surfaceMesh.updateWorldMatrix(true, false);
     const normal = hit.face.normal.clone().transformDirection(surfaceMesh.matrixWorld).normalize();
 
     pointerRig.visible = true;
@@ -854,26 +891,28 @@ if (!root) {
 
   vrButton.addEventListener('pointerdown', captureVrPose);
 
-  renderer.xr.addEventListener('sessionstart', () => {
-    inVr = true;
-    controls.enabled = false;
-    applyVrView();
-    renderer.domElement.classList.add('gdx-vr-active');
-    attachVrMouseListeners();
-    refreshVersionBadge();
-  });
+  if (renderer.xr?.addEventListener) {
+    renderer.xr.addEventListener('sessionstart', () => {
+      inVr = true;
+      controls.enabled = false;
+      applyVrView();
+      renderer.domElement.classList.add('gdx-vr-active');
+      attachVrMouseListeners();
+      refreshVersionBadge();
+    });
 
-  renderer.xr.addEventListener('sessionend', () => {
-    inVr = false;
-    controls.enabled = true;
-    resetVrView();
-    renderer.domElement.classList.remove('gdx-vr-active');
-    vrLookDrag = false;
-    vrPanDrag = false;
-    vrMouseActive = false;
-    detachVrMouseListeners();
-    refreshVersionBadge();
-  });
+    renderer.xr.addEventListener('sessionend', () => {
+      inVr = false;
+      controls.enabled = true;
+      resetVrView();
+      renderer.domElement.classList.remove('gdx-vr-active');
+      vrLookDrag = false;
+      vrPanDrag = false;
+      vrMouseActive = false;
+      detachVrMouseListeners();
+      refreshVersionBadge();
+    });
+  }
 
   const canvasEl = renderer.domElement;
   canvasEl.classList.add('gdx-scene-canvas');
@@ -893,9 +932,11 @@ if (!root) {
   canvasEl.addEventListener('pointerdown', handlePointerDown);
   canvasEl.addEventListener('pointerup', handlePointerUp);
   canvasEl.addEventListener('pointercancel', handlePointerUp);
-  controls.addEventListener('start', () => {
-    orbitDragged = true;
-  });
+  if (typeof controls.addEventListener === 'function') {
+    controls.addEventListener('start', () => {
+      orbitDragged = true;
+    });
+  }
   canvasEl.addEventListener('click', (event) => {
     if (orbitDragged || vrLookDrag || vrPanDrag) return;
     if (!event.shiftKey) return;

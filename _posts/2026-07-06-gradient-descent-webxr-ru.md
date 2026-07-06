@@ -92,14 +92,6 @@ flowchart LR
   <p class="gdx-caption">Three.js + WebXR. Полноэкранно: <a href="{{ '/gradient-descent-xr.html' | relative_url }}">gradient-descent-xr.html</a>. Сначала настройте обзор → ENTER VR. Shift+клик по поверхности — новый старт.</p>
 </div>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-  }
-}
-</script>
 <script type="module" src="{{ '/assets/js/gradient-descent-xr.js' | relative_url }}"></script>
 
 ---
