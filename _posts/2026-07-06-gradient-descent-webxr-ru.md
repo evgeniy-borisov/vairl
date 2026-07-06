@@ -54,13 +54,13 @@ flowchart LR
 
 Слишком большой $\alpha$ на Розенброке и седле даёт осцилляции или «выброс» с траектории; слишком малый — медленный прогресс по дну оврага.
 
-### Интерактив: ландшафт и траектория
+### Интерактив: ландшафт и траектории
 
-Крутите сцену мышью. При поддержке WebXR — кнопка **ENTER VR** в углу канваса (нужны HTTPS или `localhost` и шлем в Chrome/Edge).
+Крутите сцену мышью, сравните **четыре оптимизатора** с одной стартовой точки. Поверхность и траектории полупрозрачные — видны пересечения путей. **Сначала** выберите удобный обзор в окне, **затем** нажмите **ENTER VR** (вид совпадёт, камера чуть отодвинута назад).
 
 <div id="gradient-descent-xr-demo" class="gradient-descent-xr-widget">
   <div class="gdx-header">
-    <p>Ландшафт $f(x,y)$ и шаги $x_{k+1} = x_k - \alpha\nabla f$. Высота поверхности пропорциональна $f$; стрелка показывает направление спуска.</p>
+    <p>Четыре оптимизатора с одной стартовой точки: SGD, Momentum, Adam, RMSprop. Поверхность и траектории полупрозрачные. <strong>Сначала</strong> настройте обзор мышью, <strong>затем</strong> ENTER VR — вид совпадёт с окном браузера.</p>
   </div>
   <div class="gdx-controls">
     <label>Функция
@@ -77,6 +77,12 @@ flowchart LR
     <button type="button" id="gdx-btn-play" class="active">Пауза</button>
     <button type="button" id="gdx-btn-step">Шаг</button>
     <button type="button" id="gdx-btn-reset">Сброс</button>
+  </div>
+  <div class="gdx-legend" aria-hidden="true">
+    <span class="gdx-leg" data-opt="sgd">● SGD</span>
+    <span class="gdx-leg" data-opt="momentum">● Momentum</span>
+    <span class="gdx-leg" data-opt="adam">● Adam</span>
+    <span class="gdx-leg" data-opt="rmsprop">● RMSprop</span>
   </div>
   <div class="gdx-metrics" aria-live="polite"></div>
   <div class="gdx-canvas-wrap">
@@ -125,11 +131,10 @@ flowchart LR
 
 | Элемент демо | Что показывает |
 |--------------|----------------|
-| Поверхность $z=f(x,y)$ | Форму loss в координатах параметров |
-| Траектория | История итераций GD |
-| Стрелка $-\nabla f$ | Локальное направление шага |
-| Слайдер $\alpha$ | Влияние learning rate на динамику |
-| WebXR | Тот же код в мониторе и в шлеме |
+| Полупрозрачная поверхность $z=f(x,y)$ | Форму loss; сквозь неё видны траектории |
+| 4 траектории (SGD, Momentum, Adam, RMSprop) | Разная динамика при одном $\alpha$ |
+| Слайдер $\alpha$ | Влияние learning rate на все методы сразу |
+| VR с сохранением обзора | Позиция из окна браузера + отступ камеры назад |
 
 Градиентный спуск в 3D — наглядный мост между формулой из курса оптимизации и тем, что происходит при обучении моделей.
 

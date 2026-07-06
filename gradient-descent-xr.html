@@ -18,7 +18,7 @@
   <div id="gradient-descent-xr-fullpage" class="gradient-descent-xr-widget">
     <div class="gdx-header">
       <h1 style="font-size:15px;margin:0 0 6px">Градиентный спуск в 3D</h1>
-      <p>Ландшафт f(x, y) и траектория x<sub>k+1</sub> = x<sub>k</sub> − α∇f. Крутите сцену мышью или войдите в VR.</p>
+      <p>SGD, Momentum, Adam, RMSprop — параллельные траектории. Сначала настройте обзор мышью, затем ENTER VR.</p>
     </div>
     <div class="gdx-controls">
       <label>Функция
@@ -35,6 +35,12 @@
       <button type="button" id="gdx-btn-play" class="active">Пауза</button>
       <button type="button" id="gdx-btn-step">Шаг</button>
       <button type="button" id="gdx-btn-reset">Сброс</button>
+    </div>
+    <div class="gdx-legend" aria-hidden="true">
+      <span class="gdx-leg" data-opt="sgd">● SGD</span>
+      <span class="gdx-leg" data-opt="momentum">● Momentum</span>
+      <span class="gdx-leg" data-opt="adam">● Adam</span>
+      <span class="gdx-leg" data-opt="rmsprop">● RMSprop</span>
     </div>
     <div class="gdx-metrics" aria-live="polite"></div>
     <div class="gdx-canvas-wrap" style="position:fixed;inset:0">

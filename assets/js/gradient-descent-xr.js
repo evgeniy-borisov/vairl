@@ -1,5 +1,5 @@
 /**
- * 3D gradient descent landscape with WebXR (inline + immersive-vr).
+ * 3D multi-optimizer landscape with WebXR.
  * Embeds in #gradient-descent-xr-demo or fullscreen #gradient-descent-xr-fullpage.
  */
 import * as THREE from 'three';
@@ -62,9 +62,21 @@ const FUNCTIONS = {
   },
 };
 
+const OPTIMIZER_DEFS = [
+  { id: 'sgd', label: 'SGD', color: 0xff6644, initState: () => ({}) },
+  { id: 'momentum', label: 'Momentum', color: 0x66aaff, initState: () => ({ vx: 0, vy: 0 }) },
+  { id: 'adam', label: 'Adam', color: 0x44dd88, initState: () => ({ mx: 0, my: 0, vx: 0, vy: 0, t: 0 }) },
+  { id: 'rmsprop', label: 'RMSprop', color: 0xcc66ff, initState: () => ({ sx: 0, sy: 0 }) },
+];
+
 const HEIGHT_SCALE = 0.22;
 const SURFACE_RES = 80;
+const SURFACE_OPACITY = 0.38;
+const PATH_OPACITY = 0.55;
+const BALL_OPACITY = 0.72;
 const STEP_INTERVAL_MS = 280;
+const VR_PULLBACK = 2.2;
+const GRAD_EPS = 1e-5;
 
 const root = document.getElementById(ROOT_ID) || document.getElementById(FULLPAGE_ID);
 if (!root) {
@@ -87,9 +99,12 @@ if (!root) {
   let learningRate = Number(lrRange.value);
   let running = true;
   let lastStepAt = 0;
-  let pos = { x: 0, y: 0 };
-  let path = [];
   let stepCount = 0;
+  let pendingVrPose = null;
+  let inVr = false;
+
+  /** @type {Array<{id:string,label:string,color:number,pos:{x:number,y:number},path:THREE.Vector3[],state:object,ball:THREE.Mesh|null,pathLine:THREE.Line|null,done:boolean}>} */
+  let optimizers = [];
 
   function sceneColors() {
     const dark = document.documentElement.getAttribute('data-theme') !== 'light';
@@ -102,10 +117,13 @@ if (!root) {
   const colors = sceneColors();
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(colors.bg);
-  scene.fog = new THREE.Fog(colors.fog, 8, 22);
+  scene.fog = new THREE.Fog(colors.fog, 10, 28);
+
+  const sceneRoot = new THREE.Group();
+  scene.add(sceneRoot);
 
   const camera = new THREE.PerspectiveCamera(55, 1, 0.05, 100);
-  camera.position.set(4.2, 3.4, 4.8);
+  camera.position.set(5.4, 4.0, 5.8);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -115,6 +133,7 @@ if (!root) {
 
   const vrButton = VRButton.createButton(renderer);
   vrButton.classList.add('gdx-vr-button');
+  vrButton.title = 'Сначала настройте обзор мышью';
   (vrSlot || root).appendChild(vrButton);
 
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -122,11 +141,11 @@ if (!root) {
   controls.dampingFactor = 0.06;
   controls.target.set(0, 0.8, 0);
   controls.maxPolarAngle = Math.PI * 0.48;
-  controls.minDistance = 2;
-  controls.maxDistance = 14;
+  controls.minDistance = 3;
+  controls.maxDistance = 16;
 
-  scene.add(new THREE.AmbientLight(0x6677aa, 0.45));
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+  scene.add(new THREE.AmbientLight(0x6677aa, 0.5));
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
   keyLight.position.set(5, 9, 4);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.set(1024, 1024);
@@ -134,14 +153,11 @@ if (!root) {
   scene.add(new THREE.HemisphereLight(0x8899ff, 0x111118, 0.35));
 
   const world = new THREE.Group();
-  scene.add(world);
+  sceneRoot.add(world);
 
   let surfaceMesh = null;
   let wireMesh = null;
   let gridHelper = null;
-  let pathLine = null;
-  let gradArrow = null;
-  let ball = null;
   let minMarker = null;
   let axisLabels = [];
 
@@ -157,10 +173,82 @@ if (!root) {
     return new THREE.Vector3(x, heightAt(x, y) + 0.03, y);
   }
 
+  function gradNorm(x, y) {
+    const g = currentFn().grad(x, y);
+    return Math.hypot(g.x, g.y);
+  }
+
+  function clampPos(pos) {
+    const { xMin, xMax, yMin, yMax } = currentFn().domain;
+    pos.x = THREE.MathUtils.clamp(pos.x, xMin, xMax);
+    pos.y = THREE.MathUtils.clamp(pos.y, yMin, yMax);
+  }
+
   function colorForHeight(t) {
     const c = new THREE.Color();
     c.setHSL(0.62 - t * 0.48, 0.72, 0.38 + t * 0.18);
     return c;
+  }
+
+  function hexColor(hex) {
+    return `#${hex.toString(16).padStart(6, '0')}`;
+  }
+
+  function buildOptimizers() {
+    optimizers.forEach((opt) => {
+      if (opt.ball) {
+        world.remove(opt.ball);
+        opt.ball.geometry.dispose();
+        opt.ball.material.dispose();
+      }
+      if (opt.pathLine) {
+        world.remove(opt.pathLine);
+        opt.pathLine.geometry.dispose();
+        opt.pathLine.material.dispose();
+      }
+    });
+
+    const spec = currentFn();
+    optimizers = OPTIMIZER_DEFS.map((def) => {
+      const pos = { ...spec.start };
+      const ball = new THREE.Mesh(
+        new THREE.SphereGeometry(0.075, 20, 20),
+        new THREE.MeshStandardMaterial({
+          color: def.color,
+          emissive: def.color,
+          emissiveIntensity: 0.15,
+          roughness: 0.35,
+          transparent: true,
+          opacity: BALL_OPACITY,
+          depthWrite: false,
+        }),
+      );
+      ball.castShadow = false;
+      world.add(ball);
+
+      const pathLine = new THREE.Line(
+        new THREE.BufferGeometry(),
+        new THREE.LineBasicMaterial({
+          color: def.color,
+          transparent: true,
+          opacity: PATH_OPACITY,
+          depthWrite: false,
+        }),
+      );
+      world.add(pathLine);
+
+      return {
+        id: def.id,
+        label: def.label,
+        color: def.color,
+        pos,
+        path: [toWorld(pos.x, pos.y).clone()],
+        state: def.initState(),
+        ball,
+        pathLine,
+        done: false,
+      };
+    });
   }
 
   function buildSurface() {
@@ -211,28 +299,38 @@ if (!root) {
       new THREE.MeshStandardMaterial({
         vertexColors: true,
         roughness: 0.55,
-        metalness: 0.08,
+        metalness: 0.06,
         side: THREE.DoubleSide,
+        transparent: true,
+        opacity: SURFACE_OPACITY,
+        depthWrite: false,
       }),
     );
-    surfaceMesh.receiveShadow = true;
+    surfaceMesh.renderOrder = 1;
     world.add(surfaceMesh);
 
     wireMesh = new THREE.Mesh(
       geo.clone(),
       new THREE.MeshBasicMaterial({
-        color: 0x334466,
+        color: 0x4466aa,
         wireframe: true,
         transparent: true,
-        opacity: 0.14,
+        opacity: 0.1,
+        depthWrite: false,
       }),
     );
+    wireMesh.renderOrder = 2;
     world.add(wireMesh);
 
     if (gridHelper) world.remove(gridHelper);
-    const span = Math.max(xMax - xMin, yMax - yMin);
-    gridHelper = new THREE.GridHelper(span, 16, 0x3a3a55, 0x222233);
+    const span = Math.max(xMax - xMin, yMax - yMax);
+    gridHelper = new THREE.GridHelper(Math.max(xMax - xMin, yMax - yMin), 16, 0x3a3a55, 0x222233);
     gridHelper.position.y = -0.01;
+    const gridMats = Array.isArray(gridHelper.material) ? gridHelper.material : [gridHelper.material];
+    gridMats.forEach((m) => {
+      m.transparent = true;
+      m.opacity = 0.35;
+    });
     world.add(gridHelper);
 
     rebuildAxisLabels();
@@ -276,7 +374,7 @@ if (!root) {
     ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
     const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0.75 });
     const sprite = new THREE.Sprite(material);
     sprite.scale.set(0.9, 0.45, 1);
     return sprite;
@@ -303,7 +401,8 @@ if (!root) {
         color: 0x44ff99,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.5,
+        depthWrite: false,
       }),
     );
     ring.rotation.x = -Math.PI / 2;
@@ -313,94 +412,142 @@ if (!root) {
     world.add(minMarker);
   }
 
-  function ensureMarkers() {
-    if (!ball) {
-      ball = new THREE.Mesh(
-        new THREE.SphereGeometry(0.09, 24, 24),
-        new THREE.MeshStandardMaterial({ color: 0xff6644, emissive: 0x441100, roughness: 0.35 }),
-      );
-      ball.castShadow = true;
-      world.add(ball);
-    }
-
-    if (!pathLine) {
-      pathLine = new THREE.Line(
-        new THREE.BufferGeometry(),
-        new THREE.LineBasicMaterial({ color: 0xffaa66 }),
-      );
-      world.add(pathLine);
-    }
-
-    if (!gradArrow) {
-      gradArrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 0.6, 0x66aaff, 0.14, 0.08);
-      world.add(gradArrow);
-    }
+  function stepSGD(opt, g, lr) {
+    opt.pos.x -= lr * g.x;
+    opt.pos.y -= lr * g.y;
   }
 
-  function resetOptimizer() {
+  function stepMomentum(opt, g, lr) {
+    const beta = 0.9;
+    opt.state.vx = beta * opt.state.vx + g.x;
+    opt.state.vy = beta * opt.state.vy + g.y;
+    opt.pos.x -= lr * opt.state.vx;
+    opt.pos.y -= lr * opt.state.vy;
+  }
+
+  function stepAdam(opt, g, lr) {
+    const b1 = 0.9;
+    const b2 = 0.999;
+    const eps = 1e-8;
+    opt.state.t += 1;
+    opt.state.mx = b1 * opt.state.mx + (1 - b1) * g.x;
+    opt.state.my = b1 * opt.state.my + (1 - b1) * g.y;
+    opt.state.vx = b2 * opt.state.vx + (1 - b2) * g.x * g.x;
+    opt.state.vy = b2 * opt.state.vy + (1 - b2) * g.y * g.y;
+    const t = opt.state.t;
+    const mxHat = opt.state.mx / (1 - b1 ** t);
+    const myHat = opt.state.my / (1 - b1 ** t);
+    const vxHat = opt.state.vx / (1 - b2 ** t);
+    const vyHat = opt.state.vy / (1 - b2 ** t);
+    opt.pos.x -= (lr * mxHat) / (Math.sqrt(vxHat) + eps);
+    opt.pos.y -= (lr * myHat) / (Math.sqrt(vyHat) + eps);
+  }
+
+  function stepRMSprop(opt, g, lr) {
+    const decay = 0.9;
+    const eps = 1e-8;
+    opt.state.sx = decay * opt.state.sx + (1 - decay) * g.x * g.x;
+    opt.state.sy = decay * opt.state.sy + (1 - decay) * g.y * g.y;
+    opt.pos.x -= (lr * g.x) / (Math.sqrt(opt.state.sx) + eps);
+    opt.pos.y -= (lr * g.y) / (Math.sqrt(opt.state.sy) + eps);
+  }
+
+  const STEP_FN = {
+    sgd: stepSGD,
+    momentum: stepMomentum,
+    adam: stepAdam,
+    rmsprop: stepRMSprop,
+  };
+
+  function optimizerStep(opt) {
+    if (opt.done) return false;
     const spec = currentFn();
-    pos = { ...spec.start };
-    path = [toWorld(pos.x, pos.y).clone()];
+    const g = spec.grad(opt.pos.x, opt.pos.y);
+    const gNorm = Math.hypot(g.x, g.y);
+    if (gNorm < GRAD_EPS) {
+      opt.done = true;
+      return false;
+    }
+    STEP_FN[opt.id](opt, g, learningRate);
+    clampPos(opt.pos);
+    opt.path.push(toWorld(opt.pos.x, opt.pos.y).clone());
+    return true;
+  }
+
+  function updateMarkers() {
+    optimizers.forEach((opt) => {
+      const w = toWorld(opt.pos.x, opt.pos.y);
+      opt.ball.position.copy(w);
+      opt.pathLine.geometry.setFromPoints(opt.path.map((p) => p.clone()));
+      opt.ball.material.opacity = opt.done ? BALL_OPACITY * 0.45 : BALL_OPACITY;
+    });
+  }
+
+  function resetOptimizers() {
+    buildOptimizers();
     stepCount = 0;
     lastStepAt = performance.now();
     updateMarkers();
     updateMetrics();
   }
 
-  function gradientStep() {
-    const spec = currentFn();
-    const g = spec.grad(pos.x, pos.y);
-    const gNorm = Math.hypot(g.x, g.y);
-    if (gNorm < 1e-5) {
+  function simulationStep() {
+    let anyMoved = false;
+    optimizers.forEach((opt) => {
+      if (optimizerStep(opt)) anyMoved = true;
+    });
+    if (!anyMoved) {
       running = false;
       btnPlay.textContent = 'Старт';
       btnPlay.classList.remove('active');
-      return;
     }
-
-    pos.x -= learningRate * g.x;
-    pos.y -= learningRate * g.y;
-
-    const { xMin, xMax, yMin, yMax } = spec.domain;
-    pos.x = THREE.MathUtils.clamp(pos.x, xMin, xMax);
-    pos.y = THREE.MathUtils.clamp(pos.y, yMin, yMax);
-
-    path.push(toWorld(pos.x, pos.y).clone());
     stepCount += 1;
     updateMarkers();
     updateMetrics();
   }
 
-  function updateMarkers() {
-    ensureMarkers();
-    const w = toWorld(pos.x, pos.y);
-    ball.position.copy(w);
-    pathLine.geometry.setFromPoints(path.map((p) => p.clone()));
-
-    const g = currentFn().grad(pos.x, pos.y);
-    const gLen = Math.hypot(g.x, g.y);
-    if (gLen > 1e-6) {
-      const dir = new THREE.Vector3(-g.x, 0, -g.y).normalize();
-      const arrowLen = Math.min(1.2, 0.25 + gLen * 0.15);
-      gradArrow.setDirection(dir);
-      gradArrow.position.copy(w);
-      gradArrow.setLength(arrowLen, arrowLen * 0.22, arrowLen * 0.14);
-      gradArrow.visible = true;
-    } else {
-      gradArrow.visible = false;
-    }
-  }
-
   function updateMetrics() {
     const spec = currentFn();
-    const value = spec.f(pos.x, pos.y);
-    const g = spec.grad(pos.x, pos.y);
-    metricsEl.textContent =
-      `f = ${spec.label}\n` +
-      `x = ${pos.x.toFixed(4)}  y = ${pos.y.toFixed(4)}\n` +
-      `f(x,y) = ${value.toFixed(5)}\n` +
-      `∇f = (${g.x.toFixed(3)}, ${g.y.toFixed(3)})\n` +
-      `шаг: ${stepCount}`;
+    const lines = optimizers.map((opt) => {
+      const f = spec.f(opt.pos.x, opt.pos.y);
+      const mark = opt.done ? ' ✓' : '';
+      return `${opt.label.padEnd(9)} f=${f.toFixed(4)}  (${opt.pos.x.toFixed(2)}, ${opt.pos.y.toFixed(2)})${mark}`;
+    });
+    metricsEl.textContent = `шаг ${stepCount}  ·  α=${learningRate.toFixed(2)}  ·  ${spec.label}\n${lines.join('\n')}`;
+  }
+
+  function captureVrPose() {
+    camera.updateMatrixWorld();
+    pendingVrPose = {
+      position: camera.position.clone(),
+      quaternion: camera.quaternion.clone(),
+    };
+  }
+
+  function applyVrView() {
+    if (!pendingVrPose) return;
+
+    const poseMatrix = new THREE.Matrix4();
+    poseMatrix.compose(
+      pendingVrPose.position,
+      pendingVrPose.quaternion,
+      new THREE.Vector3(1, 1, 1),
+    );
+    const inv = poseMatrix.clone().invert();
+    sceneRoot.matrix.copy(inv);
+    sceneRoot.matrix.decompose(sceneRoot.position, sceneRoot.quaternion, sceneRoot.scale);
+
+    const back = new THREE.Vector3(0, 0, VR_PULLBACK);
+    back.applyQuaternion(pendingVrPose.quaternion);
+    sceneRoot.position.add(back);
+  }
+
+  function resetVrView() {
+    sceneRoot.position.set(0, 0, 0);
+    sceneRoot.quaternion.set(0, 0, 0, 1);
+    sceneRoot.scale.set(1, 1, 1);
+    sceneRoot.matrix.identity();
+    pendingVrPose = null;
   }
 
   function resize() {
@@ -412,10 +559,24 @@ if (!root) {
     renderer.setSize(w, h, false);
   }
 
+  vrButton.addEventListener('pointerdown', captureVrPose);
+
+  renderer.xr.addEventListener('sessionstart', () => {
+    inVr = true;
+    controls.enabled = false;
+    applyVrView();
+  });
+
+  renderer.xr.addEventListener('sessionend', () => {
+    inVr = false;
+    controls.enabled = true;
+    resetVrView();
+  });
+
   fnSelect.addEventListener('change', () => {
     fnKey = fnSelect.value;
     buildSurface();
-    resetOptimizer();
+    resetOptimizers();
   });
 
   lrRange.addEventListener('input', () => {
@@ -430,10 +591,10 @@ if (!root) {
     lastStepAt = performance.now();
   });
 
-  btnStep.addEventListener('click', () => gradientStep());
+  btnStep.addEventListener('click', () => simulationStep());
 
   btnReset.addEventListener('click', () => {
-    resetOptimizer();
+    resetOptimizers();
     if (!running) {
       running = true;
       btnPlay.textContent = 'Пауза';
@@ -441,6 +602,11 @@ if (!root) {
     }
   });
 
+  root.querySelectorAll('.gdx-leg').forEach((el) => {
+    const id = el.dataset.opt;
+    const def = OPTIMIZER_DEFS.find((d) => d.id === id);
+    if (def) el.style.color = hexColor(def.color);
+  });
   const ro = new ResizeObserver(resize);
   ro.observe(canvasHost);
   if (fullpage) window.addEventListener('resize', resize);
@@ -453,15 +619,17 @@ if (!root) {
 
   renderer.setAnimationLoop((time) => {
     if (running && time - lastStepAt >= STEP_INTERVAL_MS) {
-      gradientStep();
+      simulationStep();
       lastStepAt = time;
     }
     if (minMarker) minMarker.rotation.z += 0.012;
-    controls.update();
+    if (!inVr) controls.update();
     renderer.render(scene, camera);
   });
 
   buildSurface();
-  resetOptimizer();
+  buildOptimizers();
+  updateMarkers();
+  updateMetrics();
   resize();
 }
