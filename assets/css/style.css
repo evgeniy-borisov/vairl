@@ -2301,6 +2301,7 @@ footer {
 [data-theme="dark"] .grpo-ppo-widget,
 [data-theme="dark"] .partition-logic-widget,
 [data-theme="dark"] .rag-pipeline-widget,
+[data-theme="dark"] .gradient-descent-xr-widget,
 [data-theme="dark"] .rl-policy-credit-widget,
 [data-theme="dark"] .edge-nn-widget {
     background: var(--widget-bg);
@@ -2446,5 +2447,202 @@ footer {
 
 [data-theme="dark"] .criticality-widget .crit-wave-bar {
     background: var(--border-light);
+}
+
+/* Gradient descent WebXR widget (Three.js) */
+.gradient-descent-xr-widget {
+    margin: 32px 0 28px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--widget-bg);
+    overflow: hidden;
+}
+
+.gradient-descent-xr-widget .gdx-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--widget-header);
+}
+
+.gradient-descent-xr-widget .gdx-header p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+.gradient-descent-xr-widget .gdx-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--widget-controls);
+}
+
+.gradient-descent-xr-widget .gdx-controls label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.gradient-descent-xr-widget .gdx-controls select {
+    font: inherit;
+    font-size: 12px;
+    padding: 6px 8px;
+    border: 1px solid var(--widget-btn-border);
+    border-radius: 6px;
+    background: var(--widget-btn-bg);
+    color: var(--widget-btn-text);
+}
+
+.gradient-descent-xr-widget .gdx-controls input[type="range"] {
+    width: min(160px, 28vw);
+}
+
+.gradient-descent-xr-widget .gdx-controls button {
+    font: inherit;
+    font-size: 12px;
+    padding: 7px 12px;
+    border: 1px solid var(--widget-btn-border);
+    border-radius: 6px;
+    background: var(--widget-btn-bg);
+    color: var(--widget-btn-text);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.gradient-descent-xr-widget .gdx-controls button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.gradient-descent-xr-widget .gdx-controls button.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.gradient-descent-xr-widget .gdx-metrics {
+    padding: 10px 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    white-space: pre-line;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--widget-bg);
+}
+
+.gradient-descent-xr-widget .gdx-canvas-wrap {
+    position: relative;
+    background: var(--widget-canvas-bg);
+}
+
+.gradient-descent-xr-widget .gdx-canvas {
+    width: 100%;
+    height: min(52vh, 480px);
+    min-height: 320px;
+}
+
+.gradient-descent-xr-widget .gdx-canvas canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.gradient-descent-xr-widget .gdx-vr-slot {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+}
+
+.gradient-descent-xr-widget .gdx-vr-button {
+    position: static !important;
+    margin: 0 !important;
+    font: inherit !important;
+    font-size: 12px !important;
+    padding: 8px 14px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--widget-btn-border) !important;
+    background: var(--widget-btn-bg) !important;
+    color: var(--widget-btn-text) !important;
+    cursor: pointer;
+    opacity: 0.95;
+}
+
+.gradient-descent-xr-widget .gdx-caption {
+    margin: 0;
+    padding: 10px 14px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-faint);
+}
+
+/* Full-page variant */
+#gradient-descent-xr-fullpage {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #0a0a0f;
+}
+
+#gradient-descent-xr-fullpage .gdx-canvas {
+    height: 100vh;
+}
+
+#gradient-descent-xr-fullpage .gdx-controls,
+#gradient-descent-xr-fullpage .gdx-header,
+#gradient-descent-xr-fullpage .gdx-metrics {
+    position: fixed;
+    z-index: 101;
+    left: 16px;
+    background: rgba(14, 14, 20, 0.9);
+    border: 1px solid #2a2a38;
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
+}
+
+#gradient-descent-xr-fullpage .gdx-header { top: 16px; width: min(360px, calc(100vw - 32px)); }
+#gradient-descent-xr-fullpage .gdx-controls { top: 110px; width: min(360px, calc(100vw - 32px)); }
+#gradient-descent-xr-fullpage .gdx-metrics { top: 200px; width: min(360px, calc(100vw - 32px)); }
+
+[data-theme="dark"] .gradient-descent-xr-widget {
+    background: var(--widget-bg);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .gradient-descent-xr-widget .gdx-header,
+[data-theme="dark"] .gradient-descent-xr-widget .gdx-caption {
+    background: var(--widget-header);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .gradient-descent-xr-widget .gdx-controls {
+    background: var(--widget-controls);
+}
+
+[data-theme="dark"] .gradient-descent-xr-widget .gdx-header p,
+[data-theme="dark"] .gradient-descent-xr-widget .gdx-metrics,
+[data-theme="dark"] .gradient-descent-xr-widget .gdx-caption {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .gradient-descent-xr-widget .gdx-controls button,
+[data-theme="dark"] .gradient-descent-xr-widget .gdx-controls select {
+    background: var(--widget-btn-bg);
+    border-color: var(--widget-btn-border);
+    color: var(--widget-btn-text);
+}
+
+[data-theme="dark"] .gradient-descent-xr-widget .gdx-controls button.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 

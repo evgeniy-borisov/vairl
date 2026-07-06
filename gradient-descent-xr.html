@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Градиентный спуск — WebXR</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="gradient-descent-xr-fullpage" class="gradient-descent-xr-widget">
+    <div class="gdx-header">
+      <h1 style="font-size:15px;margin:0 0 6px">Градиентный спуск в 3D</h1>
+      <p>Ландшафт f(x, y) и траектория x<sub>k+1</sub> = x<sub>k</sub> − α∇f. Крутите сцену мышью или войдите в VR.</p>
+    </div>
+    <div class="gdx-controls">
+      <label>Функция
+        <select id="gdx-fn-select">
+          <option value="bowl">Параболоид x² + y²</option>
+          <option value="ripple">Рябь с локальными минимумами</option>
+          <option value="rosenbrock">Розенброк</option>
+          <option value="saddle">Седло x² − y²</option>
+        </select>
+      </label>
+      <label>α = <span id="gdx-lr-value">0.08</span>
+        <input id="gdx-lr-range" type="range" min="0.01" max="0.25" step="0.01" value="0.08">
+      </label>
+      <button type="button" id="gdx-btn-play" class="active">Пауза</button>
+      <button type="button" id="gdx-btn-step">Шаг</button>
+      <button type="button" id="gdx-btn-reset">Сброс</button>
+    </div>
+    <div class="gdx-metrics" aria-live="polite"></div>
+    <div class="gdx-canvas-wrap" style="position:fixed;inset:0">
+      <div class="gdx-canvas"></div>
+      <div class="gdx-vr-slot"></div>
+    </div>
+  </div>
+  <script type="module" src="assets/js/gradient-descent-xr.js"></script>
+</body>
+</html>
