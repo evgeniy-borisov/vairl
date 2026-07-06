@@ -1,0 +1,158 @@
+<svg width="1100" height="1280" viewBox="0 0 1100 1280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="imradIntro" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8f4fd"/>
+      <stop offset="100%" style="stop-color:#d0e8f7"/>
+    </linearGradient>
+    <linearGradient id="imradDiscuss" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#d0e8f7"/>
+      <stop offset="100%" style="stop-color:#e8f4fd"/>
+    </linearGradient>
+    <marker id="imradArr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#636e72"/>
+    </marker>
+    <filter id="imradSh">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <rect width="1100" height="1280" fill="#fafbfc"/>
+  <text x="550" y="42" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="700" fill="#2d3436">!B@C:BC@0 =0CG=>9 AB0BL8 (IMRaD)</text>
+  <text x="550" y="68" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="#636e72">>B >1I53> :>=B5:AB0 : G0AB=><C 8AA;54>20=8N 8 >1@0B=> : 2K2>40<</text>
+
+  <!-- Left: IMRaD acronym circle -->
+  <circle cx="130" cy="420" r="72" fill="#fff" stroke="#74b9ff" stroke-width="2" filter="url(#imradSh)"/>
+  <text x="130" y="395" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="700" fill="#0984e3">I</text>
+  <text x="130" y="415" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#636e72">2545=85</text>
+  <rect x="98" y="425" width="28" height="22" rx="3" fill="#dfe6e9" stroke="#b2bec3"/>
+  <text x="112" y="440" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#2d3436">M</text>
+  <rect x="132" y="425" width="28" height="22" rx="3" fill="#dfe6e9" stroke="#b2bec3"/>
+  <text x="146" y="440" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#2d3436">R</text>
+  <text x="130" y="468" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="700" fill="#0984e3">D</text>
+  <text x="130" y="484" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#636e72">1AC645=85</text>
+
+  <!-- Left: scope bowtie -->
+  <g transform="translate(55, 920)">
+    <polygon points="0,60 120,0 120,120" fill="#e8f4fd" stroke="#74b9ff" stroke-width="1.5"/>
+    <polygon points="120,0 240,60 120,120" fill="#b2dfe8" stroke="#00b894" stroke-width="1.5"/>
+    <text x="55" y="55" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#2d3436">0 ?@545;0<8</text>
+    <text x="55" y="70" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#2d3436">8AA;54>20=8O</text>
+    <text x="55" y="88" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" font-weight="600" fill="#636e72">(H8@>:>)</text>
+    <text x="180" y="58" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#2d3436">0H5</text>
+    <text x="180" y="74" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="#2d3436">8AA;54>20=85</text>
+    <text x="180" y="90" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#636e72">(C7:>)</text>
+  </g>
+  <text x="175" y="1060" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#636e72">>38:0 «?5A>G=KE G0A>2»</text>
+
+  <!-- Central column -->
+  <!-- Title -->
+  <ellipse cx="550" cy="108" rx="90" ry="22" fill="#fff" stroke="#2d3436" stroke-width="2" filter="url(#imradSh)"/>
+  <text x="550" y="113" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="#2d3436">Title · 03>;>2>:</text>
+
+  <!-- Abstract -->
+  <rect x="430" y="145" width="240" height="52" rx="6" fill="#fff" stroke="#2d3436" stroke-width="1.5" filter="url(#imradSh)"/>
+  <text x="550" y="168" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#2d3436">Abstract · ==>B0F8O</text>
+  <text x="550" y="186" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#636e72"><8=8-IMRaD + 3;02=K5 =0E>4:8</text>
+
+  <!-- Introduction trapezoid -->
+  <polygon points="380,220 720,220 680,310 420,310" fill="url(#imradIntro)" stroke="#0984e3" stroke-width="2" filter="url(#imradSh)"/>
+  <text x="550" y="258" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="#0984e3">Introduction · 2545=85</text>
+  <text x="550" y="278" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#636e72">I  AC65=85 >B ?>;O : 7040G5</text>
+
+  <!-- Study Site optional -->
+  <rect x="460" y="325" width="180" height="40" rx="6" fill="none" stroke="#b2bec3" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="550" y="350" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#636e72">Study Site (>?F.)</text>
+
+  <!-- Methods -->
+  <rect x="440" y="380" width="220" height="56" rx="6" fill="#fff" stroke="#00b894" stroke-width="2" filter="url(#imradSh)"/>
+  <text x="550" y="405" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="#00b894">Methods · 5B>4K</text>
+  <text x="550" y="423" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#636e72">M  C7:0O G0ABL «G0A>2»</text>
+
+  <!-- Results -->
+  <rect x="440" y="450" width="220" height="56" rx="6" fill="#fff" stroke="#00b894" stroke-width="2" filter="url(#imradSh)"/>
+  <text x="550" y="475" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="#00b894">Results ·  57C;LB0BK</text>
+  <text x="550" y="493" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#636e72">R  D0:BK 157 8=B5@?@5B0F88</text>
+
+  <!-- Discussion trapezoid -->
+  <polygon points="420,525 680,525 720,615 380,615" fill="url(#imradDiscuss)" stroke="#0984e3" stroke-width="2" filter="url(#imradSh)"/>
+  <text x="550" y="563" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="#0984e3">Discussion · 1AC645=85</text>
+  <text x="550" y="583" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#636e72">D  @0AH8@5=85 : >1I8< 2K2>40<</text>
+
+  <!-- Conclusions optional -->
+  <rect x="450" y="630" width="200" height="40" rx="6" fill="none" stroke="#b2bec3" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="550" y="655" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#636e72">Conclusions (>?F.)</text>
+
+  <!-- Acknowledgments -->
+  <rect x="420" y="685" width="260" height="36" rx="6" fill="none" stroke="#b2bec3" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="550" y="708" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#636e72">Acknowledgments · ;03>40@=>AB8</text>
+
+  <!-- References -->
+  <rect x="360" y="735" width="380" height="44" rx="6" fill="#fff" stroke="#2d3436" stroke-width="2" filter="url(#imradSh)"/>
+  <text x="550" y="763" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#2d3436">References · !?8A>: ;8B5@0BC@K</text>
+
+  <!-- Vertical flow arrow -->
+  <line x1="550" y1="130" x2="550" y2="145" stroke="#636e72" stroke-width="1.5" marker-end="url(#imradArr)"/>
+  <line x1="550" y1="197" x2="550" y2="220" stroke="#636e72" stroke-width="1.5" marker-end="url(#imradArr)"/>
+  <line x1="550" y1="310" x2="550" y2="325" stroke="#b2bec3" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="550" y1="365" x2="550" y2="380" stroke="#636e72" stroke-width="1.5" marker-end="url(#imradArr)"/>
+  <line x1="550" y1="436" x2="550" y2="450" stroke="#636e72" stroke-width="1.5" marker-end="url(#imradArr)"/>
+  <line x1="550" y1="506" x2="550" y2="525" stroke="#636e72" stroke-width="1.5" marker-end="url(#imradArr)"/>
+  <line x1="550" y1="615" x2="550" y2="630" stroke="#b2bec3" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="550" y1="670" x2="550" y2="685" stroke="#b2bec3" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="550" y1="721" x2="550" y2="735" stroke="#636e72" stroke-width="1.5" marker-end="url(#imradArr)"/>
+
+  <!-- Dashed links to IMRaD circle -->
+  <line x1="202" y1="400" x2="418" y2="265" stroke="#74b9ff" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.6"/>
+  <line x1="202" y1="440" x2="418" y2="570" stroke="#74b9ff" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.6"/>
+
+  <!-- Right: annotations -->
+  <g font-family="system-ui,sans-serif">
+    <text x="790" y="113" font-size="12" font-weight="600" fill="#2d3436"> GQ< AB0BLO?</text>
+    <text x="790" y="130" font-size="10" fill="#636e72">@0B:>, 8=D>@<0B82=>, ?>8A:>2></text>
+
+    <text x="790" y="172" font-size="12" font-weight="600" fill="#2d3436">!CBL 2 42CE A;>20E?</text>
+    <text x="790" y="189" font-size="10" fill="#636e72">>38:0 IMRaD + 3;02=K5 =0E>4:8</text>
+
+    <text x="790" y="258" font-size="12" font-weight="600" fill="#0984e3">0G5< 2K MB> 45;0;8?</text>
+    <text x="790" y="275" font-size="10" fill="#636e72">@>1;5<0, 206=>ABL, 8725AB=>5 /</text>
+    <text x="790" y="288" font-size="10" fill="#636e72">=58725AB=>5, 38?>B57K, F5;8</text>
+
+    <text x="790" y="350" font-size="11" font-weight="600" fill="#636e72">45 ?@>2>48;8? (>?F.)</text>
+    <text x="790" y="365" font-size="10" fill="#636e72"> 5;520=B=>ABL ?;>I04:8</text>
+
+    <text x="790" y="405" font-size="12" font-weight="600" fill="#00b894">0: 2K MB> 45;0;8?</text>
+    <text x="790" y="422" font-size="10" fill="#636e72">5B>4K + >1>A=>20=85 2K1>@0</text>
+
+    <text x="790" y="475" font-size="12" font-weight="600" fill="#00b894">'B> 2K =0H;8?</text>
+    <text x="790" y="492" font-size="10" fill="#636e72">$0:BK, B01;8FK, 3@0D8:8 </text>
+    <text x="790" y="505" font-size="10" fill="#636e72">157 >1AC645=8O!</text>
+
+    <text x="790" y="563" font-size="12" font-weight="600" fill="#0984e3">'B> MB> 7=0G8B?  GB> 40;LH5?</text>
+    <text x="790" y="580" font-size="10" fill="#636e72">=B5@?@5B0F8O, F5;8 4>AB83=CBK?,</text>
+    <text x="790" y="593" font-size="10" fill="#636e72">>3@0=8G5=8O, 8<?;8:0F88</text>
+
+    <text x="790" y="655" font-size="11" font-weight="600" fill="#636e72">;02=K5 2K2>4K? (>?F.)</text>
+    <text x="790" y="670" font-size="10" fill="#636e72">5 4C1;8@>20BL Discussion</text>
+  </g>
+
+  <!-- Connector lines to annotations -->
+  <g stroke="#dfe6e9" stroke-width="1" fill="none">
+    <line x1="640" y1="108" x2="785" y2="108"/>
+    <line x1="670" y1="171" x2="785" y2="171"/>
+    <line x1="680" y1="265" x2="785" y2="265"/>
+    <line x1="640" y1="345" x2="785" y2="345"/>
+    <line x1="660" y1="408" x2="785" y2="408"/>
+    <line x1="660" y1="478" x2="785" y2="478"/>
+    <line x1="680" y1="570" x2="785" y2="570"/>
+    <line x1="650" y1="650" x2="785" y2="650"/>
+  </g>
+
+  <!-- Agent mapping footer -->
+  <rect x="40" y="1100" width="1020" height="150" rx="12" fill="#fff" stroke="#dfe6e9" stroke-width="1.5"/>
+  <text x="550" y="1130" text-anchor="middle" font-family="system-ui,sans-serif" font-size="14" font-weight="700" fill="#2d3436">Deep Research Agent ’ @0745;K IMRaD</text>
+  <text x="70" y="1160" font-family="system-ui,sans-serif" font-size="11" fill="#636e72">Literature phase ’ Introduction, Related Work, References</text>
+  <text x="70" y="1182" font-family="system-ui,sans-serif" font-size="11" fill="#636e72">Ideation ’ 38?>B57K 2> 2545=88 8 Methods</text>
+  <text x="70" y="1204" font-family="system-ui,sans-serif" font-size="11" fill="#636e72">Experiment ’ Methods (setup), Results (<5B@8:8)</text>
+  <text x="70" y="1226" font-family="system-ui,sans-serif" font-size="11" fill="#636e72">Review loop ’ Discussion (limitations), Abstract (D8=0;L=K9 A8=B57)</text>
+  <text x="550" y="1260" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#b2bec3">40?B0F8O AE5<K Cals &amp; Kotz (2013), Springer · VAIRL</text>
+</svg>

@@ -23,7 +23,8 @@ image: /assets/images/deep-research-agent-science.svg
 |--------|--------|
 | [Зачем отдельный агент](#зачем-deep-research-agent-а-не-deep-research) | Отличие от «глубокого поиска» и coding-агентов |
 | [Архитектура](#архитектура-deep-research-agent) | Пять фаз и обратная связь |
-| [Разделы статьи](#привязка-к-разделам-научной-статьи-imrad) | Что агент собирает для IMRaD |
+| [IMRaD: структура статьи](#imrad-структура-научной-статьи) | Схема «песочных часов» и вопросы к каждому разделу |
+| [Разделы и агент](#что-собирает-deep-research-agent-по-разделам) | Артефакты агента по IMRaD |
 | [Цикл проверки](#цикл-проверки-и-сравнительный-анализ) | Эксперименты, baseline, ревью |
 | [AI Scientist](#the-ai-scientist-sakana-ai) | v1 → v2 → Nature |
 | [Сравнение систем](#сравнение-автономных-научных-систем) | Таблицы по 10+ фреймворкам |
@@ -110,23 +111,96 @@ flowchart TB
 
 ---
 
-## Привязка к разделам научной статьи (IMRaD)
+## IMRaD: структура научной статьи
+
+**IMRaD** (Introduction — Methods — Results — and Discussion) — стандартная логика научного текста. Её часто изображают как **«песочные часы»**: сверху широкий контекст поля, в середине — узкая методология и конкретные данные, снизу снова расширение к выводам и импликациям.
+
+Для Deep Research Agent IMRaD — не просто шаблон LaTeX, а **контракт на артефакты**: каждый раздел отвечает на конкретный вопрос; агент не переходит к следующему, пока не заполнит предыдущий.
+
+### Схема с подписями
+
+![Структура научной статьи IMRaD: песочные часы от введения к методам и результатам, затем к обсуждению](/assets/images/imrad-paper-structure-ru.svg)
+
+*Слева:* ядро **IMRaD** (I → M + R → D) и логика охвата — от широкого поля к «вашему исследованию» и обратно. *Справа:* ключевой вопрос к каждому разделу. Пунктиром — опциональные блоки (Study Site, Conclusions, Acknowledgments).
+
+Оригинальная схема из обзора Cals & Kotz (2013); ниже — та же логика с русскими подписями и привязкой к агенту.
+
+![Классическая схема структуры научной статьи (Cals & Kotz, 2013)](/assets/images/imrad-paper-structure.png)
+
+### Вопросы к каждому разделу
+
+| Раздел | Форма в схеме | Ключевой вопрос | Что должно быть внутри |
+|--------|---------------|-----------------|------------------------|
+| **Title** | Овал | О чём статья? | Кратко, информативно, пригодно для поиска человеком и машиной |
+| **Abstract** | Прямоугольник | Суть в двух словах? | Мини-IMRaD: проблема → метод → результат → вывод; **главные находки** |
+| **Introduction** | Сужающаяся трапеция ↓ | Зачем вы это делали? | Проблема, важность, известное / неизвестное, research gap, гипотезы, цели, contributions |
+| **Study Site** | Пунктир (опц.) | Где проводили? | Площадка, релевантность; в ML часто входит в Methods |
+| **Methods** | Узкий блок | Как вы это делали? | Дизайн, алгоритмы, датасеты, метрики — **и обоснование** выбора |
+| **Results** | Узкий блок | Что вы нашли? | Таблицы, графики, статистика — **без интерпретации** |
+| **Discussion** | Расширяющаяся трапеция ↑ | Что это значит? И что дальше? | Интерпретация, достигнуты ли цели, limitations, future work, практические импликации |
+| **Conclusions** | Пунктир (опц.) | Главные выводы? | Не дублировать Discussion; 3–5 тезисов significance |
+| **Acknowledgments** | Пунктир | — | Гранты, инфраструктура, помощь |
+| **References** | Широкое основание | На чём основано? | Полный список источников; каждая сильная claim → citation |
+
+### Логика «песочных часов»
+
+```mermaid
+flowchart TB
+    subgraph Wide1["Широкий контекст"]
+        Field[Поле и предметная область]
+        Gap[Research gap]
+    end
+
+    subgraph Narrow["Узкая часть — ваше исследование"]
+        M[Methods: как]
+        R[Results: что нашли]
+    end
+
+    subgraph Wide2["Широкие выводы"]
+        D[Discussion: что значит]
+        Imp[Импликации для поля]
+    end
+
+    Field --> Gap
+    Gap --> M
+    M --> R
+    R --> D
+    D --> Imp
+```
+
+**Правило для агента:** во **Introduction** нельзя «спойлерить» результаты; в **Results** нельзя обсуждать — только факты; в **Discussion** нельзя вводить новые данные, которых не было в Results. Automated Reviewer в AI Scientist как раз ловит такие нарушения.
+
+### IMRaD в ML-статьях (расширение)
+
+В статьях по machine learning к классическому IMRaD часто добавляют:
+
+| Доп. раздел | Роль | Аналог в IMRaD |
+|-------------|------|----------------|
+| **Related Work** | SOTA-таблица, positioning | Часть Introduction или отдельная секция |
+| **Background / Preliminaries** | Notation, постановка | Начало Methods |
+| **Experimental Setup** | Датасеты, hyperparams, hardware | Methods |
+| **Ablation Study** | Сравнение вариантов | Results |
+| **Broader Impact / Limitations** | Этика, угрозы валидности | Discussion |
+
+---
+
+## Что собирает Deep Research Agent по разделам
 
 Агент не «пишет текст подряд» — он **накапливает типизированные артефакты**, которые мапятся на разделы:
 
-| Раздел статьи | Что собирает агент | Инструменты / источники |
-|---------------|-------------------|-------------------------|
-| **Abstract** | Синтез после всех фаз | LLM + шаблон конференции |
-| **Introduction** | Problem statement, motivation, contributions | Lit search + gap analysis |
-| **Related Work** | Обзор предметной области, SOTA-таблица | arXiv, Semantic Scholar, citation graph |
-| **Background** | Определения, notation, постановка задачи | Textbooks, survey papers |
-| **Method** | Алгоритм, архитектура, loss, гипотеза | Ideation agent + formalization |
-| **Experimental Setup** | Датасеты, splits, hyperparameters, hardware | `dataset_search`, configs |
-| **Results** | Метрики, таблицы, статистика | Experiment runner + pandas |
-| **Ablation / Analysis** | Сравнение вариантов, sensitivity | Tree search branches |
-| **Discussion** | Интерпретация, limitations, threats to validity | Reflection / Meta-review agent |
-| **Conclusion** | Takeaways, future work | Supervisor synthesis |
-| **References** | BibTeX с верификацией цитат | `claim_verifier`, CrossRef |
+| Раздел статьи | Что собирает агент | Фаза агента | Инструменты |
+|---------------|-------------------|-------------|-------------|
+| **Abstract** | Синтез после всех фаз | Writing | LLM + шаблон конференции |
+| **Introduction** | Problem statement, motivation, contributions | Literature + Ideation | Lit search, gap analysis |
+| **Related Work** | Обзор области, SOTA-таблица | Literature | arXiv, Semantic Scholar, citation graph |
+| **Background** | Определения, notation | Literature | Surveys, textbooks |
+| **Method** | Алгоритм, loss, гипотеза | Ideation + Experiment | Code gen, formalization |
+| **Experimental Setup** | Датасеты, splits, hyperparameters | Experiment | `dataset_search`, configs |
+| **Results** | Метрики, таблицы, статистика | Experiment | Experiment runner, pandas |
+| **Ablation / Analysis** | Сравнение вариантов | Experiment | Tree search branches |
+| **Discussion** | Интерпретация, limitations | Review → Writing | Reflection / Meta-review agent |
+| **Conclusion** | Takeaways, future work | Writing | Supervisor synthesis |
+| **References** | BibTeX с верификацией | Literature + Writing | `claim_verifier`, CrossRef |
 
 **Сравнительный анализ** — отдельный подконтур: агент строит **benchmark matrix** (метод × датасет × метрика), подтягивает published numbers из литературы и дополняет своими runs. Без этого Related Work и Results расходятся — типичная ошибка слабых систем.
 
@@ -311,3 +385,6 @@ flowchart LR
 ### Бенчмарки и обзоры
 - [MLReplicate (arXiv:2605.16616)](https://arxiv.org/abs/2605.16616)
 - [Autoresearch Tools Compared — Ry Walker](https://rywalker.com/research/autoresearch-tools)
+
+### IMRaD
+- Cals J.W.L., Kotz D. — *Research Policy Manuscript Structure* (Springer, 2013); схема структуры статьи
