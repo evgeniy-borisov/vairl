@@ -2,14 +2,14 @@
  * 3D multi-optimizer landscape with WebXR.
  * Embeds in #gradient-descent-xr-demo or fullscreen #gradient-descent-xr-fullpage.
  */
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js';
-import { VRButton } from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/webxr/VRButton.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 const ROOT_ID = 'gradient-descent-xr-demo';
 const FULLPAGE_ID = 'gradient-descent-xr-fullpage';
 /** Semver визуализации — показывается в углу канваса. */
-const GDX_VIS_VERSION = '1.3.1';
+const GDX_VIS_VERSION = '1.3.2';
 
 const FUNCTIONS = {
   bowl: {
