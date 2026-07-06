@@ -8,6 +8,8 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 const ROOT_ID = 'gradient-descent-xr-demo';
 const FULLPAGE_ID = 'gradient-descent-xr-fullpage';
+/** Semver визуализации — показывается в углу канваса. */
+const GDX_VIS_VERSION = '1.3.0';
 
 const FUNCTIONS = {
   bowl: {
@@ -95,6 +97,18 @@ if (!root) {
   const metricsEl = $('.gdx-metrics');
   const vrSlot = $('.gdx-vr-slot');
 
+  const versionBadge = document.createElement('div');
+  versionBadge.className = 'gdx-version-badge';
+  versionBadge.setAttribute('aria-label', `Версия визуализации ${GDX_VIS_VERSION}`);
+  (canvasHost.parentElement || canvasHost).appendChild(versionBadge);
+
+  function refreshVersionBadge() {
+    const mouseHint = inVr && vrMouseActive ? ' · mouse VR' : '';
+    versionBadge.textContent = `gdx-vis v${GDX_VIS_VERSION}${mouseHint}`;
+    versionBadge.classList.toggle('gdx-mouse-on', inVr && vrMouseActive);
+  }
+  refreshVersionBadge();
+
   let fnKey = fnSelect.value;
   let learningRate = Number(lrRange.value);
   let running = true;
@@ -104,6 +118,8 @@ if (!root) {
   let inVr = false;
   let pointerInside = false;
   let vrLookDrag = false;
+  let vrPanDrag = false;
+  let vrMouseActive = false;
   let lastPointer = { x: 0, y: 0 };
   let orbitDragged = false;
 
@@ -318,6 +334,157 @@ if (!root) {
     rightReticle.visible = stereoActive;
     hitReticle.visible = true;
     hitDot.visible = !stereoActive;
+  }
+
+  function getViewQuaternion() {
+    const q = new THREE.Quaternion();
+    getActiveCamera().getWorldQuaternion(q);
+    return q;
+  }
+
+  function vrDolly(delta) {
+    const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(getViewQuaternion());
+    sceneRoot.position.addScaledVector(fwd, delta);
+  }
+
+  function vrPanScreen(dx, dy) {
+    const q = getViewQuaternion();
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(q);
+    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
+    sceneRoot.position.addScaledVector(right, -dx * 0.005);
+    sceneRoot.position.addScaledVector(up, dy * 0.005);
+  }
+
+  function vrRotateScreen(dx, dy) {
+    sceneRoot.rotation.y -= dx * 0.004;
+    sceneRoot.rotation.x = THREE.MathUtils.clamp(sceneRoot.rotation.x - dy * 0.004, -0.85, 0.85);
+  }
+
+  function isMouseLikePointer(event) {
+    return event.pointerType === 'mouse' || event.pointerType === 'pen';
+  }
+
+  function noteVrMouse(event) {
+    if (inVr && isMouseLikePointer(event)) {
+      vrMouseActive = true;
+      refreshVersionBadge();
+    }
+  }
+
+  function updatePointerFromClient(clientX, clientY) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const w = rect.width || window.innerWidth;
+    const h = rect.height || window.innerHeight;
+    pointerNdc.x = ((clientX - rect.left) / w) * 2 - 1;
+    pointerNdc.y = -((clientY - rect.top) / h) * 2 + 1;
+  }
+
+  function handlePointerMove(event) {
+    noteVrMouse(event);
+    updatePointerNdc(event);
+    const dx = event.clientX - lastPointer.x;
+    const dy = event.clientY - lastPointer.y;
+
+    if (inVr) {
+      if (vrLookDrag && (event.buttons & 1)) vrRotateScreen(dx, dy);
+      if (vrPanDrag && (event.buttons & 2 || event.buttons & 4)) vrPanScreen(dx, dy);
+    }
+
+    lastPointer.x = event.clientX;
+    lastPointer.y = event.clientY;
+  }
+
+  function handleWheel(event) {
+    if (!inVr) return;
+    noteVrMouse(event);
+    event.preventDefault();
+    event.stopPropagation();
+    const delta = event.deltaY * (event.deltaMode === 1 ? 24 : 1);
+    if (event.shiftKey) {
+      const s = THREE.MathUtils.clamp(sceneRoot.scale.x - delta * 0.0015, 0.35, 2.5);
+      sceneRoot.scale.setScalar(s);
+    } else {
+      vrDolly(delta * 0.003);
+    }
+  }
+
+  function onWindowMouseMove(event) {
+    if (!inVr) return;
+    vrMouseActive = true;
+    refreshVersionBadge();
+    pointerInside = true;
+    updatePointerFromClient(event.clientX, event.clientY);
+    const dx = event.clientX - lastPointer.x;
+    const dy = event.clientY - lastPointer.y;
+    if (vrLookDrag && (event.buttons & 1)) vrRotateScreen(dx, dy);
+    if (vrPanDrag && (event.buttons & 2 || event.buttons & 4)) vrPanScreen(dx, dy);
+    lastPointer.x = event.clientX;
+    lastPointer.y = event.clientY;
+  }
+
+  function onWindowMouseDown(event) {
+    if (!inVr) return;
+    vrMouseActive = true;
+    refreshVersionBadge();
+    updatePointerFromClient(event.clientX, event.clientY);
+    lastPointer.x = event.clientX;
+    lastPointer.y = event.clientY;
+    vrLookDrag = event.button === 0;
+    vrPanDrag = event.button === 1 || event.button === 2;
+    event.preventDefault();
+  }
+
+  function onWindowMouseUp() {
+    vrLookDrag = false;
+    vrPanDrag = false;
+  }
+
+  function attachVrMouseListeners() {
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('pointerdown', handlePointerDown, { capture: true });
+    window.addEventListener('pointerup', handlePointerUp, { capture: true });
+    window.addEventListener('pointercancel', handlePointerUp, { capture: true });
+    window.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+    window.addEventListener('mousemove', onWindowMouseMove, { passive: true });
+    window.addEventListener('mousedown', onWindowMouseDown, { capture: true });
+    window.addEventListener('mouseup', onWindowMouseUp, { capture: true });
+    window.addEventListener('contextmenu', preventContextInVr, { capture: true });
+  }
+
+  function detachVrMouseListeners() {
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointerdown', handlePointerDown, { capture: true });
+    window.removeEventListener('pointerup', handlePointerUp, { capture: true });
+    window.removeEventListener('pointercancel', handlePointerUp, { capture: true });
+    window.removeEventListener('wheel', handleWheel, { capture: true });
+    window.removeEventListener('mousemove', onWindowMouseMove);
+    window.removeEventListener('mousedown', onWindowMouseDown, { capture: true });
+    window.removeEventListener('mouseup', onWindowMouseUp, { capture: true });
+    window.removeEventListener('contextmenu', preventContextInVr, { capture: true });
+  }
+
+  function preventContextInVr(event) {
+    if (inVr) event.preventDefault();
+  }
+
+  function handlePointerDown(event) {
+    updatePointerNdc(event);
+    lastPointer.x = event.clientX;
+    lastPointer.y = event.clientY;
+    orbitDragged = false;
+    if (event.shiftKey) controls.enabled = false;
+    if (inVr) {
+      noteVrMouse(event);
+      vrLookDrag = event.button === 0;
+      vrPanDrag = event.button === 1 || event.button === 2;
+      event.preventDefault();
+    }
+  }
+
+  function handlePointerUp() {
+    vrLookDrag = false;
+    vrPanDrag = false;
+    if (!inVr) controls.enabled = true;
   }
 
   function buildOptimizers() {
@@ -692,6 +859,8 @@ if (!root) {
     controls.enabled = false;
     applyVrView();
     renderer.domElement.classList.add('gdx-vr-active');
+    attachVrMouseListeners();
+    refreshVersionBadge();
   });
 
   renderer.xr.addEventListener('sessionend', () => {
@@ -700,6 +869,10 @@ if (!root) {
     resetVrView();
     renderer.domElement.classList.remove('gdx-vr-active');
     vrLookDrag = false;
+    vrPanDrag = false;
+    vrMouseActive = false;
+    detachVrMouseListeners();
+    refreshVersionBadge();
   });
 
   const canvasEl = renderer.domElement;
@@ -709,56 +882,27 @@ if (!root) {
     pointerInside = true;
   });
   canvasEl.addEventListener('pointerleave', () => {
-    pointerInside = false;
-    vrLookDrag = false;
-    pointerRig.visible = false;
-  });
-  canvasEl.addEventListener('pointermove', (event) => {
-    updatePointerNdc(event);
-    if (inVr && vrLookDrag) {
-      const dx = event.clientX - lastPointer.x;
-      const dy = event.clientY - lastPointer.y;
-      sceneRoot.rotation.y -= dx * 0.004;
-      sceneRoot.rotation.x = THREE.MathUtils.clamp(sceneRoot.rotation.x - dy * 0.004, -0.75, 0.75);
+    if (!inVr) {
+      pointerInside = false;
+      pointerRig.visible = false;
     }
-    lastPointer.x = event.clientX;
-    lastPointer.y = event.clientY;
-  });
-  canvasEl.addEventListener('pointerdown', (event) => {
-    updatePointerNdc(event);
-    lastPointer.x = event.clientX;
-    lastPointer.y = event.clientY;
-    orbitDragged = false;
-    if (event.shiftKey) controls.enabled = false;
-    if (inVr && event.button === 0) {
-      vrLookDrag = true;
-      event.preventDefault();
-    }
-  });
-  canvasEl.addEventListener('pointerup', () => {
     vrLookDrag = false;
-    if (!inVr) controls.enabled = true;
+    vrPanDrag = false;
   });
-  canvasEl.addEventListener('pointercancel', () => {
-    vrLookDrag = false;
-  });
+  canvasEl.addEventListener('pointermove', handlePointerMove);
+  canvasEl.addEventListener('pointerdown', handlePointerDown);
+  canvasEl.addEventListener('pointerup', handlePointerUp);
+  canvasEl.addEventListener('pointercancel', handlePointerUp);
   controls.addEventListener('start', () => {
     orbitDragged = true;
   });
   canvasEl.addEventListener('click', (event) => {
-    if (orbitDragged || vrLookDrag) return;
+    if (orbitDragged || vrLookDrag || vrPanDrag) return;
     if (!event.shiftKey) return;
     updatePointerNdc(event);
     const hit = pickSurfaceHit();
     if (hit) setStartFromHit(hit);
   });
-  canvasEl.addEventListener('wheel', (event) => {
-    if (!inVr) return;
-    event.preventDefault();
-    const q = pendingVrPose?.quaternion || camera.quaternion;
-    const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(q);
-    sceneRoot.position.addScaledVector(fwd, event.deltaY * 0.003);
-  }, { passive: false });
 
   fnSelect.addEventListener('change', () => {
     fnKey = fnSelect.value;

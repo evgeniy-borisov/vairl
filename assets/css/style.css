@@ -2579,6 +2579,30 @@ footer {
     cursor: none;
 }
 
+.gdx-version-badge {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    z-index: 3;
+    font-size: 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: rgba(160, 165, 190, 0.42);
+    pointer-events: none;
+    user-select: none;
+    text-align: left;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+}
+
+.gdx-version-badge.gdx-mouse-on {
+    color: rgba(120, 190, 255, 0.58);
+}
+
+#gradient-descent-xr-fullpage .gdx-version-badge {
+    position: fixed;
+    z-index: 102;
+}
+
 .gradient-descent-xr-widget .gdx-vr-slot {
     position: absolute;
     right: 12px;
