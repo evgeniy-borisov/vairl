@@ -9,7 +9,7 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 const ROOT_ID = 'gradient-descent-xr-demo';
 const FULLPAGE_ID = 'gradient-descent-xr-fullpage';
 /** Semver визуализации — показывается в углу канваса. */
-const GDX_VIS_VERSION = '1.3.2';
+const GDX_VIS_VERSION = '1.3.3';
 
 const FUNCTIONS = {
   bowl: {
@@ -118,18 +118,6 @@ function initGradientDescent(root) {
   const metricsEl = $('.gdx-metrics');
   const vrSlot = $('.gdx-vr-slot');
 
-  const versionBadge = document.createElement('div');
-  versionBadge.className = 'gdx-version-badge';
-  versionBadge.setAttribute('aria-label', `Версия визуализации ${GDX_VIS_VERSION}`);
-  (canvasHost.parentElement || canvasHost).appendChild(versionBadge);
-
-  function refreshVersionBadge() {
-    const mouseHint = inVr && vrMouseActive ? ' · mouse VR' : '';
-    versionBadge.textContent = `gdx-vis v${GDX_VIS_VERSION}${mouseHint}`;
-    versionBadge.classList.toggle('gdx-mouse-on', inVr && vrMouseActive);
-  }
-  refreshVersionBadge();
-
   let fnKey = fnSelect.value;
   let learningRate = Number(lrRange.value);
   let running = true;
@@ -143,6 +131,18 @@ function initGradientDescent(root) {
   let vrMouseActive = false;
   let lastPointer = { x: 0, y: 0 };
   let orbitDragged = false;
+
+  const versionBadge = document.createElement('div');
+  versionBadge.className = 'gdx-version-badge';
+  versionBadge.setAttribute('aria-label', `Версия визуализации ${GDX_VIS_VERSION}`);
+  (canvasHost.parentElement || canvasHost).appendChild(versionBadge);
+
+  function refreshVersionBadge() {
+    const mouseHint = inVr && vrMouseActive ? ' · mouse VR' : '';
+    versionBadge.textContent = `gdx-vis v${GDX_VIS_VERSION}${mouseHint}`;
+    versionBadge.classList.toggle('gdx-mouse-on', inVr && vrMouseActive);
+  }
+  refreshVersionBadge();
 
   const raycaster = new THREE.Raycaster();
   const pointerNdc = new THREE.Vector2();
