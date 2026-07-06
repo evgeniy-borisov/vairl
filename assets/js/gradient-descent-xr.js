@@ -5,11 +5,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 
 const ROOT_ID = 'gradient-descent-xr-demo';
 const FULLPAGE_ID = 'gradient-descent-xr-fullpage';
 /** Semver визуализации — показывается в углу канваса. */
-const GDX_VIS_VERSION = '1.3.3';
+const GDX_VIS_VERSION = '1.4.0';
 
 const FUNCTIONS = {
   bowl: {
@@ -74,9 +77,12 @@ const OPTIMIZER_DEFS = [
 const HEIGHT_SCALE = 0.22;
 const SURFACE_RES = 80;
 const SURFACE_OPACITY = 0.38;
-const PATH_OPACITY = 0.55;
+const PATH_OPACITY = 0.28;
+const PATH_LINE_WIDTH = 1.4;
 const BALL_OPACITY = 0.72;
-const STEP_INTERVAL_MS = 280;
+const BALL_LERP = 0.16;
+const STEP_INTERVAL_MS = 48;
+const SUB_STEPS_PER_TICK = 6;
 const VR_PULLBACK = 2.2;
 const GRAD_EPS = 1e-5;
 
@@ -148,7 +154,7 @@ function initGradientDescent(root) {
   const pointerNdc = new THREE.Vector2();
   const IPD = 0.064;
 
-  /** @type {Array<{id:string,label:string,color:number,pos:{x:number,y:number},path:THREE.Vector3[],state:object,ball:THREE.Mesh|null,pathLine:THREE.Line|null,done:boolean}>} */
+  /** @type {Array<{id:string,label:string,color:number,pos:{x:number,y:number},displayPos:{x:number,y:number},path:THREE.Vector3[],state:object,ball:THREE.Mesh|null,pathLine:Line2|null,done:boolean}>} */
   let optimizers = [];
 
   function sceneColors() {
@@ -539,10 +545,15 @@ function initGradientDescent(root) {
     });
 
     const spec = currentFn();
+    const pathRes = () => ({
+      x: canvasHost.clientWidth || window.innerWidth,
+      y: canvasHost.clientHeight || window.innerHeight,
+    });
+
     optimizers = OPTIMIZER_DEFS.map((def) => {
       const pos = { ...spec.start };
       const ball = new THREE.Mesh(
-        new THREE.SphereGeometry(0.075, 20, 20),
+        new THREE.SphereGeometry(0.062, 20, 20),
         new THREE.MeshStandardMaterial({
           color: def.color,
           emissive: def.color,
@@ -556,15 +567,19 @@ function initGradientDescent(root) {
       ball.castShadow = false;
       world.add(ball);
 
-      const pathLine = new THREE.Line(
-        new THREE.BufferGeometry(),
-        new THREE.LineBasicMaterial({
-          color: def.color,
-          transparent: true,
-          opacity: PATH_OPACITY,
-          depthWrite: false,
-        }),
-      );
+      const { x: rw, y: rh } = pathRes();
+      const pathMat = new LineMaterial({
+        color: def.color,
+        linewidth: PATH_LINE_WIDTH,
+        transparent: true,
+        opacity: PATH_OPACITY,
+        depthWrite: false,
+        worldUnits: false,
+      });
+      pathMat.resolution.set(rw, rh);
+      const pathLine = new Line2(new LineGeometry(), pathMat);
+      pathLine.frustumCulled = false;
+      pathLine.visible = false;
       world.add(pathLine);
 
       return {
@@ -572,12 +587,40 @@ function initGradientDescent(root) {
         label: def.label,
         color: def.color,
         pos,
+        displayPos: { ...pos },
         path: [toWorld(pos.x, pos.y).clone()],
         state: def.initState(),
         ball,
         pathLine,
         done: false,
       };
+    });
+  }
+
+  function updatePathLine(opt) {
+    const pts = opt.path;
+    if (!opt.pathLine || pts.length < 2) {
+      if (opt.pathLine) opt.pathLine.visible = false;
+      return;
+    }
+    const flat = new Float32Array(pts.length * 3);
+    for (let i = 0; i < pts.length; i++) {
+      flat[i * 3] = pts[i].x;
+      flat[i * 3 + 1] = pts[i].y;
+      flat[i * 3 + 2] = pts[i].z;
+    }
+    opt.pathLine.geometry.setPositions(flat);
+    opt.pathLine.computeLineDistances();
+    opt.pathLine.visible = true;
+  }
+
+  function updateBallPositions() {
+    optimizers.forEach((opt) => {
+      opt.displayPos.x += (opt.pos.x - opt.displayPos.x) * BALL_LERP;
+      opt.displayPos.y += (opt.pos.y - opt.displayPos.y) * BALL_LERP;
+      opt.ball.position.copy(toWorld(opt.displayPos.x, opt.displayPos.y));
+      opt.ball.material.opacity = opt.done ? BALL_OPACITY * 0.45 : BALL_OPACITY;
+      updatePathLine(opt);
     });
   }
 
@@ -805,12 +848,7 @@ function initGradientDescent(root) {
   }
 
   function updateMarkers() {
-    optimizers.forEach((opt) => {
-      const w = toWorld(opt.pos.x, opt.pos.y);
-      opt.ball.position.copy(w);
-      opt.pathLine.geometry.setFromPoints(opt.path.map((p) => p.clone()));
-      opt.ball.material.opacity = opt.done ? BALL_OPACITY * 0.45 : BALL_OPACITY;
-    });
+    updateBallPositions();
   }
 
   function resetOptimizers() {
@@ -823,16 +861,20 @@ function initGradientDescent(root) {
 
   function simulationStep() {
     let anyMoved = false;
-    optimizers.forEach((opt) => {
-      if (optimizerStep(opt)) anyMoved = true;
-    });
+    for (let s = 0; s < SUB_STEPS_PER_TICK; s += 1) {
+      let movedThisSub = false;
+      optimizers.forEach((opt) => {
+        if (optimizerStep(opt)) movedThisSub = true;
+      });
+      if (!movedThisSub) break;
+      anyMoved = true;
+      stepCount += 1;
+    }
     if (!anyMoved) {
       running = false;
       btnPlay.textContent = 'Старт';
       btnPlay.classList.remove('active');
     }
-    stepCount += 1;
-    updateMarkers();
     updateMetrics();
   }
 
@@ -887,6 +929,11 @@ function initGradientDescent(root) {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
+    optimizers.forEach((opt) => {
+      if (opt.pathLine?.material?.resolution) {
+        opt.pathLine.material.resolution.set(w, h);
+      }
+    });
   }
 
   vrButton.addEventListener('pointerdown', captureVrPose);
@@ -994,6 +1041,7 @@ function initGradientDescent(root) {
       simulationStep();
       lastStepAt = time;
     }
+    updateBallPositions();
     if (minMarker) minMarker.rotation.z += 0.012;
     if (!inVr) controls.update();
     updateStereoCursor();
