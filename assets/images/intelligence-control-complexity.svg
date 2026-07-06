@@ -1,0 +1,83 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="ctrlGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#38bdf8"/>
+      <stop offset="100%" style="stop-color:#818cf8"/>
+    </linearGradient>
+    <linearGradient id="sysGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f472b6"/>
+      <stop offset="100%" style="stop-color:#fb923c"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Controller (small) -->
+  <g transform="translate(120, 200)">
+    <rect x="0" y="0" width="180" height="120" rx="12" fill="none" stroke="url(#ctrlGrad)" stroke-width="2.5" opacity="0.9"/>
+    <text x="90" y="55" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="14">#?@02;5=85</text>
+    <text x="90" y="78" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="22" font-weight="600">V_ctrl</text>
+    <circle cx="90" cy="95" r="4" fill="#38bdf8" opacity="0.6"/>
+    <circle cx="75" cy="95" r="3" fill="#38bdf8" opacity="0.4"/>
+    <circle cx="105" cy="95" r="3" fill="#38bdf8" opacity="0.4"/>
+  </g>
+
+  <!-- Arrow controller -> system -->
+  <path d="M 310 260 L 420 260" stroke="url(#ctrlGrad)" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="365" y="245" text-anchor="middle" fill="#64748b" font-family="system-ui,sans-serif" font-size="13">U</text>
+
+  <!-- System (grows with intelligence) -->
+  <g transform="translate(430, 120)">
+    <ellipse cx="200" cy="180" rx="220" ry="160" fill="none" stroke="url(#sysGrad)" stroke-width="2" opacity="0.25"/>
+    <ellipse cx="200" cy="180" rx="170" ry="125" fill="none" stroke="url(#sysGrad)" stroke-width="2" opacity="0.4"/>
+    <ellipse cx="200" cy="180" rx="120" ry="90" fill="none" stroke="url(#sysGrad)" stroke-width="2.5" opacity="0.7"/>
+    <circle cx="200" cy="180" r="55" fill="url(#sysGrad)" opacity="0.15" filter="url(#glow)"/>
+    <text x="200" y="175" text-anchor="middle" fill="#f8fafc" font-family="system-ui,sans-serif" font-size="18" font-weight="600">!8AB5<0 S</text>
+    <text x="200" y="200" text-anchor="middle" fill="#fb923c" font-family="system-ui,sans-serif" font-size="15">variety ‘</text>
+    <!-- Internal nodes -->
+    <circle cx="130" cy="130" r="8" fill="#f472b6" opacity="0.7"/>
+    <circle cx="270" cy="140" r="10" fill="#fb923c" opacity="0.7"/>
+    <circle cx="160" cy="230" r="9" fill="#f472b6" opacity="0.6"/>
+    <circle cx="250" cy="220" r="7" fill="#fb923c" opacity="0.6"/>
+    <circle cx="200" cy="100" r="6" fill="#f472b6" opacity="0.5"/>
+    <line x1="130" y1="130" x2="200" y2="180" stroke="#f472b6" stroke-width="1" opacity="0.3"/>
+    <line x1="270" y1="140" x2="200" y2="180" stroke="#fb923c" stroke-width="1" opacity="0.3"/>
+    <line x1="160" y1="230" x2="200" y2="180" stroke="#f472b6" stroke-width="1" opacity="0.3"/>
+    <line x1="250" y1="220" x2="200" y2="180" stroke="#fb923c" stroke-width="1" opacity="0.3"/>
+  </g>
+
+  <!-- Feedback arrow -->
+  <path d="M 630 380 Q 400 480 210 340" stroke="#64748b" stroke-width="1.5" fill="none" stroke-dasharray="6,5" opacity="0.6"/>
+  <text x="420" y="430" text-anchor="middle" fill="#64748b" font-family="system-ui,sans-serif" font-size="13">Y ’ =01;N45=85</text>
+
+  <!-- Ashby inequality -->
+  <g transform="translate(780, 180)">
+    <rect x="0" y="0" width="340" height="200" rx="16" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="170" y="45" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="14">0:>= =5>1E>48<>3> @07=>>1@078O</text>
+    <text x="170" y="100" text-anchor="middle" fill="#e2e8f0" font-family="Georgia,serif" font-size="28" font-style="italic">V_ctrl e V_sys</text>
+    <text x="170" y="145" text-anchor="middle" fill="#64748b" font-family="system-ui,sans-serif" font-size="13">Ashby, 1956</text>
+    <line x1="40" y1="165" x2="300" y2="165" stroke="#334155" stroke-width="1"/>
+    <text x="170" y="190" text-anchor="middle" fill="#475569" font-family="system-ui,sans-serif" font-size="12">C<=55 >1J5:B ’ 4>@>65 @53C;OB>@</text>
+  </g>
+
+  <!-- Title area -->
+  <text x="600" y="560" text-anchor="middle" fill="#cbd5e1" font-family="system-ui,sans-serif" font-size="28" font-weight="600">=B5;;5:B 8 A;>6=>ABL C?@02;5=8O</text>
+  <text x="600" y="595" text-anchor="middle" fill="#64748b" font-family="system-ui,sans-serif" font-size="16">:815@=5B8:0 · 18>;>38O · AI-035=BK</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/>
+    </marker>
+  </defs>
+</svg>
