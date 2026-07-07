@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43e97b"/>
+      <stop offset="100%" style="stop-color:#38f9d7"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fa709a"/>
+      <stop offset="100%" style="stop-color:#fee140"/>
+    </linearGradient>
+    <linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb"/>
+      <stop offset="100%" style="stop-color:#f5576c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbff"/>
+  <rect x="1" y="1" width="1198" height="628" rx="4" fill="none" stroke="#e4e6f0" stroke-width="2"/>
+  <circle cx="180" cy="140" r="90" fill="url(#g1)" opacity="0.10"/>
+  <circle cx="1020" cy="500" r="100" fill="url(#g2)" opacity="0.10"/>
+
+  <text x="600" y="58" text-anchor="middle" fill="#333" font-family="system-ui,sans-serif" font-size="34" font-weight="700">Controllability &amp; Observability</text>
+  <text x="600" y="96" text-anchor="middle" fill="#666" font-family="system-ui,sans-serif" font-size="17">;0AA8G5A:85 ?@8<5@K Kalman · A8AB5<>B5E=8:0</text>
+
+  <!-- 2x2 matrix -->
+  <line x1="600" y1="140" x2="600" y2="560" stroke="#c8cce0" stroke-width="3"/>
+  <line x1="200" y1="350" x2="1000" y2="350" stroke="#c8cce0" stroke-width="3"/>
+
+  <text x="400" y="170" text-anchor="middle" fill="#5a67d8" font-family="system-ui,sans-serif" font-size="15" font-weight="700">01;N405<></text>
+  <text x="800" y="170" text-anchor="middle" fill="#c05621" font-family="system-ui,sans-serif" font-size="15" font-weight="700">5 =01;N405<></text>
+  <text x="230" y="260" text-anchor="middle" fill="#2d9f8f" font-family="system-ui,sans-serif" font-size="14" font-weight="700" transform="rotate(-90 230 260)">#?@02;O5<></text>
+  <text x="230" y="470" text-anchor="middle" fill="#e53e3e" font-family="system-ui,sans-serif" font-size="14" font-weight="700" transform="rotate(-90 230 470)">5 C?@02;O5<></text>
+
+  <!-- Q1: Co + Ob -->
+  <rect x="280" y="200" width="280" height="120" rx="14" fill="url(#g2)" opacity="0.20" stroke="url(#g2)" stroke-width="2"/>
+  <text x="420" y="248" text-anchor="middle" fill="#2d9f8f" font-family="system-ui,sans-serif" font-size="16" font-weight="700">Co ' Ob</text>
+  <text x="420" y="278" text-anchor="middle" fill="#4a5568" font-family="system-ui,sans-serif" font-size="13">2>9=>9 8=B53@0B>@</text>
+  <text x="420" y="300" text-anchor="middle" fill="#718096" font-family="system-ui,sans-serif" font-size="12">y = ?>78F8O, u = A8;0</text>
+
+  <!-- Q2: Co + !Ob -->
+  <rect x="640" y="200" width="280" height="120" rx="14" fill="url(#g3)" opacity="0.20" stroke="url(#g3)" stroke-width="2"/>
+  <text x="780" y="248" text-anchor="middle" fill="#c05621" font-family="system-ui,sans-serif" font-size="16" font-weight="700">Co ' ¬Ob</text>
+  <text x="780" y="278" text-anchor="middle" fill="#4a5568" font-family="system-ui,sans-serif" font-size="13">20 10:0, >48= 40BG8:</text>
+  <text x="780" y="300" text-anchor="middle" fill="#718096" font-family="system-ui,sans-serif" font-size="12">u 2;8O5B =0 >10, y  =0 >48=</text>
+
+  <!-- Q3: !Co + Ob -->
+  <rect x="280" y="380" width="280" height="120" rx="14" fill="url(#g1)" opacity="0.20" stroke="url(#g1)" stroke-width="2"/>
+  <text x="420" y="428" text-anchor="middle" fill="#5a67d8" font-family="system-ui,sans-serif" font-size="16" font-weight="700">¬Co ' Ob</text>
+  <text x="420" y="458" text-anchor="middle" fill="#4a5568" font-family="system-ui,sans-serif" font-size="13">20 10:0, >48= :;0?0=</text>
+  <text x="420" y="480" text-anchor="middle" fill="#718096" font-family="system-ui,sans-serif" font-size="12">u 2 >48=, y A >1>8E</text>
+
+  <!-- Q4: !Co + !Ob -->
+  <rect x="640" y="380" width="280" height="120" rx="14" fill="url(#g4)" opacity="0.20" stroke="url(#g4)" stroke-width="2"/>
+  <text x="780" y="428" text-anchor="middle" fill="#e53e3e" font-family="system-ui,sans-serif" font-size="16" font-weight="700">¬Co ' ¬Ob</text>
+  <text x="780" y="458" text-anchor="middle" fill="#4a5568" font-family="system-ui,sans-serif" font-size="13">!:@KB0O ?>4A8AB5<0</text>
+  <text x="780" y="480" text-anchor="middle" fill="#718096" font-family="system-ui,sans-serif" font-size="12">u 8 C =5 4>AB830NB <>40</text>
+
+  <!-- Kalman block diagram hint -->
+  <rect x="320" y="530" width="560" height="44" rx="8" fill="#edf2f7" stroke="#cbd5e0"/>
+  <text x="600" y="558" text-anchor="middle" fill="#4a5568" font-family="system-ui,sans-serif" font-size="14">x ’ [A,B,C] ’ rank(5ž) = n ? rank(5ª) = n ?</text>
+</svg>
