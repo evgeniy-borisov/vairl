@@ -64,37 +64,136 @@
     return m && +m[1] >= 16 && +m[1] <= 31;
   }
 
+  function isMdnsHost(host) {
+    return typeof host === 'string' && host.endsWith('.local');
+  }
+
+  function hostFromIceLine(line) {
+    if (!line || !line.includes(' typ host ')) return null;
+    const parts = line.trim().split(/\s+/);
+    const typIdx = parts.findIndex((p) => p === 'typ');
+    if (typIdx < 5) return null;
+    return parts[typIdx - 2];
+  }
+
+  function emptyIpResult() {
+    return { ips: new Set(), mdns: new Set() };
+  }
+
+  function ingestIceCandidate(result, candidate) {
+    if (!candidate) return;
+    const addr = candidate.address || candidate.ip;
+    if (addr) {
+      if (isPrivateIp(addr)) result.ips.add(addr);
+      else if (isMdnsHost(addr)) result.mdns.add(addr);
+    }
+    const line = candidate.candidate || '';
+    if (!line) return;
+    const host = hostFromIceLine(line);
+    if (host) {
+      if (isPrivateIp(host)) result.ips.add(host);
+      else if (isMdnsHost(host)) result.mdns.add(host);
+    }
+    const found = line.match(/\b(\d+\.\d+\.\d+\.\d+)\b/g);
+    if (found) found.forEach((ip) => { if (isPrivateIp(ip)) result.ips.add(ip); });
+  }
+
+  function finalizeIpResult(result) {
+    const pageHost = window.location.hostname;
+    if (isPrivateIp(pageHost)) result.ips.add(pageHost);
+    return { ips: [...result.ips], mdns: [...result.mdns] };
+  }
+
+  function mergeIpResults(a, b) {
+    return {
+      ips: [...new Set([...(a.ips || []), ...(b.ips || [])])],
+      mdns: [...new Set([...(a.mdns || []), ...(b.mdns || [])])],
+    };
+  }
+
   function gatherLocalIPs() {
     return new Promise((resolve) => {
-      const ips = new Set();
+      const result = emptyIpResult();
       if (!window.RTCPeerConnection) {
-        resolve([]);
+        resolve(finalizeIpResult(result));
         return;
       }
-      const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS_LAN });
-      pc.createDataChannel('cps-ip-probe');
+      const pc = new RTCPeerConnection({ iceServers: [], iceCandidatePoolSize: 0 });
+      let settled = false;
       const finish = () => {
+        if (settled) return;
+        settled = true;
         try { pc.close(); } catch (_) { /* ignore */ }
-        resolve([...ips]);
+        resolve(finalizeIpResult(result));
       };
+      pc.createDataChannel('cps-ip-probe');
       pc.onicecandidate = (ev) => {
         if (!ev.candidate) {
           finish();
           return;
         }
-        const found = ev.candidate.candidate.match(/\b(\d+\.\d+\.\d+\.\d+)\b/g);
-        if (found) found.forEach((ip) => { if (isPrivateIp(ip)) ips.add(ip); });
+        ingestIceCandidate(result, ev.candidate);
       };
       pc.createOffer()
         .then((o) => pc.setLocalDescription(o))
         .catch(finish);
-      setTimeout(finish, 3500);
+      setTimeout(finish, 5000);
     });
   }
 
-  function formatIpList(ips, roleLabel) {
-    if (!ips.length) return `${roleLabel}: локальный IP не определён (разрешите WebRTC)`;
-    return `${roleLabel}: ${ips.join(', ')}`;
+  async function ipsFromRtcStats(pc) {
+    const result = emptyIpResult();
+    if (!pc?.getStats) return finalizeIpResult(result);
+    try {
+      const stats = await pc.getStats();
+      stats.forEach((report) => {
+        if (report.type !== 'local-candidate' && report.type !== 'remote-candidate') return;
+        const addr = report.address || report.ip;
+        if (addr) {
+          if (isPrivateIp(addr)) result.ips.add(addr);
+          else if (isMdnsHost(addr)) result.mdns.add(addr);
+        }
+        if (report.candidateType === 'host' && report.protocol) {
+          ingestIceCandidate(result, { candidate: `typ host ${addr || ''}`, address: addr });
+        }
+      });
+    } catch (_) { /* ignore */ }
+    return finalizeIpResult(result);
+  }
+
+  function peerConnectionFromConn(conn) {
+    return conn?.peerConnection || conn?._pc || conn?._peerConnection || null;
+  }
+
+  async function ipsFromDataConnection(conn) {
+    const pc = peerConnectionFromConn(conn);
+    return pc ? ipsFromRtcStats(pc) : { ips: [], mdns: [] };
+  }
+
+  function formatIpList(result, roleLabel) {
+    const ips = result?.ips || (Array.isArray(result) ? result : []);
+    const mdns = result?.mdns || [];
+    if (ips.length) return `${roleLabel}: ${ips.join(', ')}`;
+    if (mdns.length) {
+      return `${roleLabel}: ${mdns.join(', ')} · IP скрыт (mDNS). Смотрите Wi‑Fi → детали сети`;
+    }
+    return `${roleLabel}: IP недоступен в браузере на HTTPS · Wi‑Fi → детали сети на устройстве`;
+  }
+
+  function primaryIp(result) {
+    return result?.ips?.[0] || null;
+  }
+
+  async function updateLocalIpsEl(el, roleLabel, conn) {
+    if (!el) return { ips: [], mdns: [] };
+    el.textContent = `${roleLabel}: определяем…`;
+    let merged = await gatherLocalIPs();
+    if (conn) {
+      const fromConn = await ipsFromDataConnection(conn);
+      merged = mergeIpResults(merged, fromConn);
+    }
+    el.textContent = formatIpList(merged, roleLabel);
+    return merged;
   }
 
   function updateNetworkPanels(root, networkMode) {
@@ -575,10 +674,10 @@
     if (relayInput && !relayInput.value && networkMode === 'vpn') relayInput.value = relayBase;
     updateNetworkPanels(root, networkMode);
 
-    gatherLocalIPs().then((ips) => {
-      if (localIpsEl) localIpsEl.textContent = formatIpList(ips, 'Проектор');
-      if (networkMode === 'lan' && ips[0] && relayInput && !relayInput.value) {
-        relayInput.placeholder = `ws://${ips[0]}:${DEFAULT_RELAY_PORT}`;
+    updateLocalIpsEl(localIpsEl, 'Проектор').then((probe) => {
+      const ip = primaryIp(probe);
+      if (networkMode === 'lan' && ip && relayInput && !relayInput.value) {
+        relayInput.placeholder = `ws://${ip}:${DEFAULT_RELAY_PORT}`;
       }
     });
 
@@ -834,6 +933,7 @@
           const ch = networkMode === 'lan' ? 'WebRTC (локальная сеть)' : 'WebRTC + TURN';
           setChannel(ch);
           setStatus('Телефон подключён. Тяните углы для совмещения с экраном.');
+          updateLocalIpsEl(localIpsEl, 'Проектор', incoming);
           try {
             incoming.send(new Uint8Array([0xff, 0, 1]));
           } catch (_) { /* ignore */ }
@@ -919,9 +1019,7 @@
         ? 'Сеть: локальная Wi‑Fi (прямой P2P)'
         : 'Сеть: VPN / интернет (TURN + relay)';
     }
-    gatherLocalIPs().then((ips) => {
-      if (localIpsEl) localIpsEl.textContent = formatIpList(ips, 'Телефон');
-    });
+    updateLocalIpsEl(localIpsEl, 'Телефон');
 
     async function maintainTransport() {
       while (running) {
@@ -941,6 +1039,7 @@
               ? 'WebRTC (локальная сеть)'
               : 'WebRTC + TURN';
           setStatus(`Трансляция («${room}»). ${modeLabel}`);
+          if (transport.conn) updateLocalIpsEl(localIpsEl, 'Телефон', transport.conn);
         } catch (err) {
           setStatus(`${err.message} Повтор через 3 с…`);
           await sleep(3000);

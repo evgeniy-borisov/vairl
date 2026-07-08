@@ -87,7 +87,7 @@ flowchart LR
         </div>
         <div class="cps-lan-panel">
           <p class="cps-local-ips">Определяем IP…</p>
-          <p class="cps-hint">Ноутбук и телефон в одной Wi‑Fi. Прямой WebRTC без relay.</p>
+          <p class="cps-hint">Ноутбук и телефон в одной Wi‑Fi. Прямой WebRTC без relay. На github.io браузер часто скрывает 192.168.x.x — смотрите IP в настройках Wi‑Fi.</p>
         </div>
         <div class="cps-vpn-panel" hidden>
           <p class="cps-label">WebSocket relay</p>
@@ -224,10 +224,11 @@ flowchart LR
 
 | Что | Вывод |
 |-----|--------|
-| Сигнализация | PeerJS cloud только для «знакомства» браузеров; кадры через него не идут |
-| Данные | P2P data channel, бинарные кадры 128×96, ~15 fps |
+| Режимы | **LAN** — прямой P2P; **VPN** — TURN + WS relay |
+| Сигнализация | PeerJS cloud только для «знакомства» браузеров |
+| Данные | P2P data channel (или relay), бинарные кадры 128×96, ~15 fps |
 | Калибровка | Ручной perspective warp четырьмя углами мышью |
-| Сценарий | Живое демо на проекторе за минуту: QR → камера → overlay |
+| Сценарий | Живое демо: выбрать сеть → QR → камера → overlay |
 
 ---
 
