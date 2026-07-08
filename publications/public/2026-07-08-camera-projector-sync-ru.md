@@ -1,10 +1,11 @@
 ---
 layout: post
 title: "Камера → проектор: PoC обратной связи в браузере"
-date: 2026-07-08 01:30:00 +0300
+date: 2026-07-08 10:00:00 +0300
 excerpt: "Два устройства в web-браузере: телефон с камерой шлёт контуры предмета на проектор по WebRTC; на экране проектора углы настраиваются мышью."
 lang: ru
 image: /assets/images/camera-projector-sync.svg
+permalink: /blog/2026/07/08/camera-projector-sync-ru/
 visibility: public
 review_track: blog
 review_status: approved
