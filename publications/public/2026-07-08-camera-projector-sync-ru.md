@@ -60,7 +60,7 @@ flowchart LR
 
 ## Интерактив (режим проектора)
 
-<div id="camera-projector-sync-demo" class="camera-projector-sync-widget" data-role="projector">
+<div id="camera-projector-sync-demo" class="camera-projector-sync-widget" data-role="projector" data-phone-page="{{ '/camera-projector-poc.html' | relative_url }}">
   <div class="cps-panel cps-panel-projector">
     <header class="cps-header">
       <p class="cps-lead">Откройте эту же страницу на телефоне по QR. Углы сохраняются в <code>localStorage</code> для комнаты.</p>

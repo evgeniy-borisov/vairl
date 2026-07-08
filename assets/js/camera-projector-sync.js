@@ -3,12 +3,11 @@
  * Projector: perspective warp with draggable corners.
  */
 (function () {
-  const ROOT_ID = 'camera-projector-sync';
-  const FULLPAGE_ID = 'camera-projector-sync-fullpage';
   const GRID_W = 96;
   const GRID_H = 72;
   const SEND_FPS = 12;
   const PEER_HOST = '0.peerjs.com';
+  const QR_CDN = 'https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js';
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -50,6 +49,34 @@
     u.searchParams.set('role', role);
     u.searchParams.set('room', room);
     return u.toString();
+  }
+
+  /** Phone opens standalone PoC page when widget is embedded in a blog post. */
+  function phoneJoinUrl(room, root) {
+    const pocPage = root?.dataset?.phonePage;
+    if (pocPage) {
+      const u = new URL(pocPage, window.location.origin);
+      u.searchParams.set('role', 'phone');
+      u.searchParams.set('room', room);
+      return u.toString();
+    }
+    if (root?.classList?.contains('cps-fullpage')) {
+      return joinUrl('phone', room);
+    }
+    return joinUrl('phone', room);
+  }
+
+  async function renderQr(canvas, url) {
+    if (!canvas || !url) return;
+    await loadScript(QR_CDN);
+    if (!window.QRCode?.toCanvas) {
+      throw new Error('QRCode library unavailable');
+    }
+    await window.QRCode.toCanvas(canvas, url, {
+      width: 160,
+      margin: 1,
+      color: { dark: '#222222', light: '#ffffff' },
+    });
   }
 
   function grayscaleFromImageData(data, w, h) {
@@ -356,14 +383,17 @@
       canvas.requestFullscreen?.().catch(() => {});
     });
 
-    const phoneUrl = joinUrl('phone', room);
+    const phoneUrl = phoneJoinUrl(room, root);
     if (roomEl) roomEl.textContent = room;
     if (linkEl) {
       linkEl.href = phoneUrl;
       linkEl.textContent = phoneUrl;
     }
-    if (qrCanvas && window.QRCode) {
-      window.QRCode.toCanvas(qrCanvas, phoneUrl, { width: 160, margin: 1, color: { dark: '#222', light: '#fff' } });
+    try {
+      await renderQr(qrCanvas, phoneUrl);
+    } catch (err) {
+      console.error(err);
+      setStatus(`QR не загрузился: ${err.message}. Используйте ссылку ниже.`);
     }
 
     setStatus('Подключение к сигнальному серверу PeerJS…');
@@ -570,7 +600,6 @@
 
     try {
       if (role === 'projector') {
-        await loadScript('https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js');
         await initProjector(root, room);
       } else {
         await initPhone(root, room);
@@ -583,10 +612,7 @@
   }
 
   function boot() {
-    [ROOT_ID, FULLPAGE_ID].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) initRoot(el);
-    });
+    document.querySelectorAll('.camera-projector-sync-widget').forEach((el) => initRoot(el));
   }
 
   if (document.readyState === 'loading') {
