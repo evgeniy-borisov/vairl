@@ -2703,3 +2703,221 @@ footer {
     color: var(--accent);
 }
 
+/* Private section gate */
+.private-gate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40vh;
+    padding: 2rem 1rem;
+}
+
+.private-gate-card {
+    max-width: 24rem;
+    width: 100%;
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    text-align: center;
+}
+
+.private-gate-card h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+}
+
+.private-gate-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.private-gate-card input[type="password"] {
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.private-gate-card button {
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.private-gate-error {
+    color: #c0392b;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.private-badge {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.private-intro {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+/* Camera → Projector PoC */
+.camera-projector-sync-widget {
+    font-family: system-ui, -apple-system, sans-serif;
+    color: var(--text, #1a1a2e);
+}
+
+.camera-projector-sync-widget .cps-header {
+    margin-bottom: 0.75rem;
+}
+
+.camera-projector-sync-widget .cps-lead {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted, #666);
+    line-height: 1.45;
+}
+
+.camera-projector-sync-widget .cps-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted, #888);
+    margin: 0.75rem 0 0.25rem;
+}
+
+.camera-projector-sync-widget .cps-room-id {
+    font-family: ui-monospace, monospace;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.camera-projector-sync-widget .cps-qr {
+    display: block;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+    border: 1px solid var(--border, #e0e0e8);
+}
+
+.camera-projector-sync-widget .cps-join-link {
+    font-size: 0.75rem;
+    word-break: break-all;
+    color: var(--accent, #667eea);
+}
+
+.camera-projector-sync-widget .cps-status {
+    font-size: 0.85rem;
+    color: var(--text-muted, #666);
+    margin-top: 0.75rem;
+}
+
+.camera-projector-sync-widget .cps-toolbar,
+.camera-projector-sync-widget .cps-phone-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0.75rem 0;
+}
+
+.camera-projector-sync-widget button,
+.camera-projector-sync-widget select {
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--border, #ddd);
+    border-radius: 8px;
+    background: var(--bg-secondary, #f8f9fc);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.camera-projector-sync-widget button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.camera-projector-sync-widget .cps-projector-layout {
+    display: grid;
+    grid-template-columns: minmax(180px, 220px) 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.camera-projector-sync-widget .cps-sidebar {
+    padding: 0.75rem;
+    border: 1px solid var(--border, #e8e8ec);
+    border-radius: 10px;
+    background: var(--bg-secondary, #fafbfd);
+}
+
+.camera-projector-sync-widget .cps-canvas-wrap {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border, #e8e8ec);
+    background: #050508;
+}
+
+.camera-projector-sync-widget .cps-projector-canvas {
+    display: block;
+    width: 100%;
+    cursor: crosshair;
+}
+
+.camera-projector-sync-widget .cps-phone-preview {
+    display: block;
+    width: 100%;
+    max-height: 55vh;
+    border-radius: 10px;
+    background: #111;
+    margin: 0.5rem 0;
+}
+
+.cps-fullpage {
+    min-height: 100vh;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.cps-fullpage .cps-projector-layout {
+    grid-template-columns: minmax(180px, 240px) 1fr;
+}
+
+.cps-fullpage .cps-canvas-wrap {
+    min-height: calc(100vh - 120px);
+}
+
+.cps-fullpage .cps-projector-canvas {
+    min-height: calc(100vh - 120px);
+}
+
+@media (max-width: 720px) {
+    .camera-projector-sync-widget .cps-projector-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+[data-theme="dark"] .camera-projector-sync-widget .cps-sidebar {
+    background: var(--bg-secondary);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .camera-projector-sync-widget button,
+[data-theme="dark"] .camera-projector-sync-widget select {
+    background: var(--widget-btn-bg);
+    border-color: var(--widget-btn-border);
+    color: var(--widget-btn-text);
+}
+

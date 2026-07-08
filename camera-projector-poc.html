@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Камера → проектор — PoC</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="camera-projector-sync-fullpage" class="camera-projector-sync-widget cps-fullpage" data-role="projector">
+    <div class="cps-panel cps-panel-projector">
+      <header class="cps-header">
+        <h1 style="font-size:15px;margin:0 0 4px">Камера → проектор</h1>
+        <p class="cps-lead">PoC обратной связи: телефон шлёт контуры, проектор совмещает их мышью.</p>
+      </header>
+
+      <div class="cps-projector-layout">
+        <aside class="cps-sidebar">
+          <p class="cps-label">Комната</p>
+          <p class="cps-room-id">—</p>
+          <canvas class="cps-qr" width="160" height="160" aria-label="QR для телефона"></canvas>
+          <p class="cps-label">Ссылка для телефона</p>
+          <a class="cps-join-link" href="#" target="_blank" rel="noopener">—</a>
+          <div class="cps-toolbar">
+            <button type="button" data-cps-reset-corners>Сброс углов</button>
+            <button type="button" data-cps-fullscreen>На весь экран</button>
+          </div>
+          <p class="cps-status" aria-live="polite">Загрузка…</p>
+        </aside>
+        <div class="cps-canvas-wrap">
+          <canvas class="cps-projector-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="cps-panel cps-panel-phone" hidden>
+      <header class="cps-header">
+        <h1 style="font-size:15px;margin:0 0 4px">Камера → проектор</h1>
+        <p class="cps-lead">Режим телефона: камера и отправка контуров.</p>
+      </header>
+      <div class="cps-phone-controls">
+        <label>Режим
+          <select data-cps-mode>
+            <option value="edges">Контуры (Sobel)</option>
+            <option value="gradient">Градиент поля</option>
+          </select>
+        </label>
+        <label>Порог = <span data-cps-threshold-val>48</span>
+          <input type="range" data-cps-threshold min="16" max="120" value="48">
+        </label>
+        <button type="button" data-cps-start>Старт</button>
+        <button type="button" data-cps-stop disabled>Стоп</button>
+      </div>
+      <canvas class="cps-phone-preview"></canvas>
+      <p class="cps-status" aria-live="polite">—</p>
+    </div>
+  </div>
+  <script src="assets/js/camera-projector-sync.js"></script>
+</body>
+</html>
