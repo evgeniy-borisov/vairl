@@ -64,12 +64,19 @@
     return m && +m[1] >= 16 && +m[1] <= 31;
   }
 
+  function isFirefox() {
+    return /Firefox\//i.test(navigator.userAgent);
+  }
+
   function isMdnsHost(host) {
     return typeof host === 'string' && host.endsWith('.local');
   }
 
   function hostFromIceLine(line) {
-    if (!line || !line.includes(' typ host ')) return null;
+    if (!line) return null;
+    const m = line.match(/(?:\s|^)(\S+)\s+\d+\s+typ\s+host\b/i);
+    if (m) return m[1];
+    if (!line.includes(' typ host ')) return null;
     const parts = line.trim().split(/\s+/);
     const typIdx = parts.findIndex((p) => p === 'typ');
     if (typIdx < 5) return null;
@@ -127,6 +134,11 @@
         resolve(finalizeIpResult(result));
       };
       pc.createDataChannel('cps-ip-probe');
+      if (pc.addTransceiver) {
+        try {
+          pc.addTransceiver('video', { direction: 'inactive' });
+        } catch (_) { /* ignore */ }
+      }
       pc.onicecandidate = (ev) => {
         if (!ev.candidate) {
           finish();
@@ -134,10 +146,13 @@
         }
         ingestIceCandidate(result, ev.candidate);
       };
+      pc.onicegatheringstatechange = () => {
+        if (pc.iceGatheringState === 'complete') finish();
+      };
       pc.createOffer()
         .then((o) => pc.setLocalDescription(o))
         .catch(finish);
-      setTimeout(finish, 5000);
+      setTimeout(finish, isFirefox() ? 8000 : 5000);
     });
   }
 
@@ -170,21 +185,52 @@
     return pc ? ipsFromRtcStats(pc) : { ips: [], mdns: [] };
   }
 
-  function formatIpList(result, roleLabel) {
+  function formatIpList(result, roleLabel, extraLine) {
     const ips = result?.ips || (Array.isArray(result) ? result : []);
     const mdns = result?.mdns || [];
-    if (ips.length) return `${roleLabel}: ${ips.join(', ')}`;
-    if (mdns.length) {
-      return `${roleLabel}: ${mdns.join(', ')} · IP скрыт (mDNS). Смотрите Wi‑Fi → детали сети`;
+    let line;
+    if (ips.length) line = `${roleLabel}: ${ips.join(', ')}`;
+    else if (mdns.length) {
+      line = `${roleLabel}: ${mdns.join(', ')} · IP скрыт (mDNS). Смотрите Wi‑Fi → детали сети`;
+    } else if (isFirefox() && roleLabel === 'Проектор') {
+      line = `${roleLabel}: в Firefox IP часто виден после подключения телефона · Wi‑Fi → детали сети`;
+    } else if (isFirefox() && roleLabel === 'Телефон') {
+      line = `${roleLabel}: нажмите «Старт» и разрешите камеру — тогда Firefox покажет IP`;
+    } else {
+      line = `${roleLabel}: IP недоступен в браузере на HTTPS · Wi‑Fi → детали сети на устройстве`;
     }
-    return `${roleLabel}: IP недоступен в браузере на HTTPS · Wi‑Fi → детали сети на устройстве`;
+    if (extraLine) line += ` · ${extraLine}`;
+    return line;
+  }
+
+  function parsePhoneIpMeta(bytes) {
+    if (!bytes || bytes.length < 3 || bytes[0] !== 0xff || bytes[1] !== 0 || bytes[2] !== 2) return null;
+    const text = new TextDecoder().decode(bytes.subarray(3));
+    return text.split(',').map((s) => s.trim()).filter((ip) => isPrivateIp(ip));
+  }
+
+  function buildPhoneIpMeta(ips) {
+    const payload = new TextEncoder().encode((ips || []).join(','));
+    const buf = new Uint8Array(3 + payload.length);
+    buf[0] = 0xff;
+    buf[1] = 0;
+    buf[2] = 2;
+    buf.set(payload, 3);
+    return buf;
+  }
+
+  function sendPhoneIpMeta(transport, ips) {
+    if (!transport?.open || !ips?.length) return;
+    try {
+      transport.send(buildPhoneIpMeta(ips));
+    } catch (_) { /* ignore */ }
   }
 
   function primaryIp(result) {
     return result?.ips?.[0] || null;
   }
 
-  async function updateLocalIpsEl(el, roleLabel, conn) {
+  async function updateLocalIpsEl(el, roleLabel, conn, extraLine) {
     if (!el) return { ips: [], mdns: [] };
     el.textContent = `${roleLabel}: определяем…`;
     let merged = await gatherLocalIPs();
@@ -192,7 +238,7 @@
       const fromConn = await ipsFromDataConnection(conn);
       merged = mergeIpResults(merged, fromConn);
     }
-    el.textContent = formatIpList(merged, roleLabel);
+    el.textContent = formatIpList(merged, roleLabel, extraLine);
     return merged;
   }
 
@@ -671,10 +717,19 @@
     let wsTransport = null;
     let projectorPeer = null;
     let activeConn = null;
+    let phoneIpsFromPeer = [];
     if (relayInput && !relayInput.value && networkMode === 'vpn') relayInput.value = relayBase;
     updateNetworkPanels(root, networkMode);
 
-    updateLocalIpsEl(localIpsEl, 'Проектор').then((probe) => {
+    function phoneIpExtra() {
+      return phoneIpsFromPeer.length ? `Телефон: ${phoneIpsFromPeer.join(', ')}` : '';
+    }
+
+    function refreshProjectorIpLine(conn) {
+      return updateLocalIpsEl(localIpsEl, 'Проектор', conn, phoneIpExtra());
+    }
+
+    refreshProjectorIpLine().then((probe) => {
       const ip = primaryIp(probe);
       if (networkMode === 'lan' && ip && relayInput && !relayInput.value) {
         relayInput.placeholder = `ws://${ip}:${DEFAULT_RELAY_PORT}`;
@@ -706,6 +761,12 @@
     });
 
     function ingestFrame(bytes) {
+      const phoneIps = parsePhoneIpMeta(bytes);
+      if (phoneIps?.length) {
+        phoneIpsFromPeer = phoneIps;
+        refreshProjectorIpLine(activeConn);
+        return;
+      }
       const parsed = applyFrameBytes(bytes);
       if (!parsed) return;
       frame = parsed.frame;
@@ -933,7 +994,11 @@
           const ch = networkMode === 'lan' ? 'WebRTC (локальная сеть)' : 'WebRTC + TURN';
           setChannel(ch);
           setStatus('Телефон подключён. Тяните углы для совмещения с экраном.');
-          updateLocalIpsEl(localIpsEl, 'Проектор', incoming);
+          refreshProjectorIpLine(incoming);
+          if (isFirefox()) {
+            setTimeout(() => refreshProjectorIpLine(incoming), 1500);
+            setTimeout(() => refreshProjectorIpLine(incoming), 4500);
+          }
           try {
             incoming.send(new Uint8Array([0xff, 0, 1]));
           } catch (_) { /* ignore */ }
@@ -1021,6 +1086,12 @@
     }
     updateLocalIpsEl(localIpsEl, 'Телефон');
 
+    async function publishPhoneIps() {
+      const probe = await updateLocalIpsEl(localIpsEl, 'Телефон', transport?.conn);
+      sendPhoneIpMeta(transport, probe.ips);
+      return probe;
+    }
+
     async function maintainTransport() {
       while (running) {
         if (transport?.open) {
@@ -1039,7 +1110,7 @@
               ? 'WebRTC (локальная сеть)'
               : 'WebRTC + TURN';
           setStatus(`Трансляция («${room}»). ${modeLabel}`);
-          if (transport.conn) updateLocalIpsEl(localIpsEl, 'Телефон', transport.conn);
+          await publishPhoneIps();
         } catch (err) {
           setStatus(`${err.message} Повтор через 3 с…`);
           await sleep(3000);
@@ -1141,6 +1212,7 @@
         running = true;
         setButtons(true);
         setStatus('Камера включена. Подключение к проектору…');
+        updateLocalIpsEl(localIpsEl, 'Телефон');
         drawPreviewLoop();
         sendLoop();
         maintainTransport();
