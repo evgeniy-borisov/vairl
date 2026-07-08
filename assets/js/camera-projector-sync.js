@@ -11,6 +11,120 @@
   const QR_CDN = 'https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js';
   const CONN_OPTS = { reliable: true, serialization: 'binary' };
   const PEER_SCRIPT = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+  const DEFAULT_RELAY_PORT = 8765;
+
+  /** STUN + public TURN — нужно за VPN / symmetric NAT, когда прямой P2P не проходит. */
+  const ICE_SERVERS = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    {
+      urls: [
+        'turn:openrelay.metered.ca:80',
+        'turn:openrelay.metered.ca:443',
+        'turn:openrelay.metered.ca:443?transport=tcp',
+      ],
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+  ];
+
+  function peerJsOptions() {
+    return {
+      host: PEER_HOST,
+      port: 443,
+      secure: true,
+      path: '/',
+      config: { iceServers: ICE_SERVERS },
+    };
+  }
+
+  function parseTransportMode() {
+    const t = new URLSearchParams(window.location.search).get('transport') || 'auto';
+    return t === 'webrtc' || t === 'ws' ? t : 'auto';
+  }
+
+  function parseRelayParam() {
+    return new URLSearchParams(window.location.search).get('relay') || '';
+  }
+
+  function normalizeRelayBase(relay) {
+    let u = (relay || '').trim();
+    if (!u) return '';
+    if (u.startsWith('http://')) u = 'ws://' + u.slice(7);
+    else if (u.startsWith('https://')) u = 'wss://' + u.slice(8);
+    else if (!u.startsWith('ws')) u = 'ws://' + u;
+    return u.replace(/\/$/, '');
+  }
+
+  function defaultRelayHint() {
+    const host = window.location.hostname || 'localhost';
+    return `ws://${host}:${DEFAULT_RELAY_PORT}`;
+  }
+
+  function relayWsUrl(relayBase, room, role) {
+    const base = normalizeRelayBase(relayBase);
+    const url = new URL(base.includes('://') ? base : `ws://${base}`);
+    url.searchParams.set('room', room);
+    url.searchParams.set('role', role);
+    return url.toString();
+  }
+
+  function applyFrameBytes(bytes) {
+    if (!bytes || bytes.length < 2) return null;
+    if (bytes.length >= 3 && bytes[0] === 0xff) return null;
+    const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    const view = new DataView(buf);
+    const w = view.getUint8(0);
+    const h = view.getUint8(1);
+    const mode = view.byteLength > 2 + w * h ? view.getUint8(2) : 0;
+    if (mode === 1) {
+      return { frame: gradientToImageData(new Uint8Array(buf, 3), w, h), frameIsGradient: true };
+    }
+    return { frame: edgesToImageData(new Uint8Array(buf, 2), w, h), frameIsGradient: false };
+  }
+
+  function createWsTransport(relayBase, room, role, handlers) {
+    let ws = null;
+    const transport = {
+      mode: 'ws-relay',
+      get open() {
+        return ws && ws.readyState === WebSocket.OPEN;
+      },
+      send(buf) {
+        if (transport.open) ws.send(buf);
+      },
+      close() {
+        try { ws?.close(); } catch (_) { /* ignore */ }
+        ws = null;
+      },
+      connect() {
+        return new Promise((resolve, reject) => {
+          const url = relayWsUrl(relayBase, room, role);
+          ws = new WebSocket(url);
+          ws.binaryType = 'arraybuffer';
+          const timer = setTimeout(() => reject(new Error('WebSocket relay timeout')), 12000);
+          ws.onopen = () => {
+            clearTimeout(timer);
+            handlers.onOpen?.('ws-relay');
+            resolve(transport);
+          };
+          ws.onmessage = (ev) => {
+            if (ev.data instanceof ArrayBuffer) {
+              handlers.onData(new Uint8Array(ev.data));
+            }
+          };
+          ws.onclose = () => {
+            handlers.onClose?.();
+          };
+          ws.onerror = () => {
+            clearTimeout(timer);
+            reject(new Error('WebSocket relay error'));
+          };
+        });
+      },
+    };
+    return transport;
+  }
 
   function sleep(ms) {
     return new Promise((r) => setTimeout(r, ms));
@@ -36,36 +150,66 @@
     });
   }
 
-  /** Phone: connect to projector peer with retries (mobile Safari often misses first open). */
-  async function connectPhoneToProjector(room, onStatus) {
+  /** Phone: WebRTC + TURN to projector peer. */
+  async function connectPhoneWebrtc(room, onStatus) {
     await loadPeerJs();
     const peer = await new Promise((resolve, reject) => {
-      const p = new window.Peer(undefined, {
-        host: PEER_HOST,
-        port: 443,
-        secure: true,
-        path: '/',
-      });
+      const p = new window.Peer(undefined, peerJsOptions());
       p.on('open', () => resolve(p));
       p.on('error', reject);
     });
 
-    const attempts = 10;
-    for (let i = 0; i < attempts; i++) {
-      if (onStatus) onStatus(`Подключение к проектору… (${i + 1}/${attempts})`);
+    for (let i = 0; i < 6; i++) {
+      if (onStatus) onStatus(`WebRTC… (${i + 1}/6, TURN при VPN)`);
       try {
         const conn = peer.connect(room, CONN_OPTS);
-        await waitConnOpen(conn, 10000);
-        try {
-          conn.send(new Uint8Array([0xff, 0, 0]));
-        } catch (_) { /* handshake optional */ }
-        return { peer, conn };
+        await waitConnOpen(conn, 12000);
+        try { conn.send(new Uint8Array([0xff, 0, 0])); } catch (_) { /* ignore */ }
+        const transport = {
+          mode: 'webrtc',
+          peer,
+          conn,
+          get open() { return conn.open; },
+          send(buf) { conn.send(buf); },
+          close() {
+            try { conn.close(); } catch (_) { /* ignore */ }
+            try { peer.destroy(); } catch (_) { /* ignore */ }
+          },
+        };
+        return transport;
       } catch (_) {
         await sleep(2000);
       }
     }
-    peer.destroy();
-    throw new Error('Не удалось подключиться к проектору. Убедитесь, что страница проектора открыта.');
+    try { peer.destroy(); } catch (_) { /* ignore */ }
+    throw new Error('WebRTC не подключился');
+  }
+
+  async function connectPhoneTransport(room, transportMode, relayBase, onStatus) {
+    if (transportMode === 'ws') {
+      if (!relayBase) throw new Error('Укажите relay=ws://… (VPN режим)');
+      const t = createWsTransport(relayBase, room, 'phone', {});
+      await t.connect();
+      onStatus?.('Канал: WebSocket relay');
+      return t;
+    }
+    if (transportMode === 'webrtc') {
+      const t = await connectPhoneWebrtc(room, onStatus);
+      onStatus?.('Канал: WebRTC');
+      return t;
+    }
+    try {
+      const t = await connectPhoneWebrtc(room, onStatus);
+      onStatus?.('Канал: WebRTC');
+      return t;
+    } catch (webrtcErr) {
+      if (!relayBase) throw webrtcErr;
+      onStatus?.('WebRTC не вышел, пробуем WebSocket relay…');
+      const t = createWsTransport(relayBase, room, 'phone', {});
+      await t.connect();
+      onStatus?.('Канал: WebSocket relay (VPN fallback)');
+      return t;
+    }
   }
 
   function loadScript(src) {
@@ -111,18 +255,23 @@
   }
 
   /** Phone opens standalone PoC page when widget is embedded in a blog post. */
-  function phoneJoinUrl(room, root) {
+  function phoneJoinUrl(room, root, relayBase, transportMode) {
     const pocPage = root?.dataset?.phonePage;
+    const transport = transportMode || parseTransportMode();
+    const relay = relayBase || parseRelayParam() || root?.querySelector('[data-cps-relay-url]')?.value?.trim() || '';
+    let u;
     if (pocPage) {
-      const u = new URL(pocPage, window.location.origin);
-      u.searchParams.set('role', 'phone');
-      u.searchParams.set('room', room);
-      return u.toString();
+      u = new URL(pocPage, window.location.origin);
+    } else if (root?.classList?.contains('cps-fullpage')) {
+      u = new URL(window.location.href);
+    } else {
+      u = new URL(window.location.href);
     }
-    if (root?.classList?.contains('cps-fullpage')) {
-      return joinUrl('phone', room);
-    }
-    return joinUrl('phone', room);
+    u.searchParams.set('role', 'phone');
+    u.searchParams.set('room', room);
+    u.searchParams.set('transport', transport);
+    if (relay) u.searchParams.set('relay', normalizeRelayBase(relay));
+    return u.toString();
   }
 
   async function renderQr(canvas, url) {
@@ -354,6 +503,36 @@
     const canvas = projPanel?.querySelector('.cps-projector-canvas') || root.querySelector('.cps-projector-canvas');
     const btnReset = projPanel?.querySelector('[data-cps-reset-corners]') || root.querySelector('[data-cps-reset-corners]');
     const btnFs = projPanel?.querySelector('[data-cps-fullscreen]') || root.querySelector('[data-cps-fullscreen]');
+    const relayInput = projPanel?.querySelector('[data-cps-relay-url]') || root.querySelector('[data-cps-relay-url]');
+    const channelEl = projPanel?.querySelector('.cps-channel') || root.querySelector('.cps-channel');
+
+    const transportMode = parseTransportMode();
+    let relayBase = parseRelayParam() || relayInput?.value?.trim() || defaultRelayHint();
+    if (relayInput && !relayInput.value) relayInput.value = relayBase;
+
+    function ingestFrame(bytes) {
+      const parsed = applyFrameBytes(bytes);
+      if (!parsed) return;
+      frame = parsed.frame;
+      frameIsGradient = parsed.frameIsGradient;
+      draw();
+    }
+
+    function setChannel(label) {
+      if (channelEl) channelEl.textContent = label ? `Канал: ${label}` : '';
+    }
+
+    function refreshPhoneLink() {
+      relayBase = relayInput?.value?.trim() || relayBase || defaultRelayHint();
+      const phoneUrl = phoneJoinUrl(room, root, relayBase, transportMode);
+      if (linkEl) {
+        linkEl.href = phoneUrl;
+        linkEl.textContent = phoneUrl;
+      }
+      if (qrCanvas) {
+        renderQr(qrCanvas, phoneUrl).catch((err) => console.error(err));
+      }
+    }
 
     const ctx = canvas.getContext('2d');
     let corners = loadCorners(room) || defaultCorners(window.innerWidth, window.innerHeight);
@@ -476,12 +655,14 @@
       canvas.requestFullscreen?.().catch(() => {});
     });
 
-    const phoneUrl = phoneJoinUrl(room, root);
+    const phoneUrl = phoneJoinUrl(room, root, relayBase, transportMode);
     if (roomEl) roomEl.textContent = room;
     if (linkEl) {
       linkEl.href = phoneUrl;
       linkEl.textContent = phoneUrl;
     }
+    relayInput?.addEventListener('change', refreshPhoneLink);
+    relayInput?.addEventListener('input', refreshPhoneLink);
     try {
       await renderQr(qrCanvas, phoneUrl);
     } catch (err) {
@@ -489,20 +670,57 @@
       setStatus(`QR не загрузился: ${err.message}. Используйте ссылку ниже.`);
     }
 
+    let wsTransport = null;
+
+    async function startWsRelay() {
+      if (transportMode === 'webrtc' || !relayBase) return;
+      try {
+        wsTransport = createWsTransport(relayBase, room, 'projector', {
+          onOpen: () => {
+            setChannel('WebSocket relay');
+            setStatus('Relay готов. Телефон может слать кадры (VPN).');
+          },
+          onData: (bytes) => {
+            setStatus('Телефон подключён (relay). Тяните углы.');
+            ingestFrame(bytes);
+          },
+          onClose: () => {
+            setChannel('');
+            setStatus('Relay отключён. Переподключение…');
+            wsTransport = null;
+            setTimeout(startWsRelay, 3000);
+          },
+        });
+        await wsTransport.connect();
+      } catch (err) {
+        setStatus(`Relay: ${err.message}. Запустите node scripts/cps-ws-relay.js`);
+        setTimeout(startWsRelay, 5000);
+      }
+    }
+
     setStatus('Подключение к сигнальному серверу PeerJS…');
     await loadPeerJs();
+    startWsRelay();
 
     let activeConn = null;
 
-    const peer = new window.Peer(room, {
-      host: PEER_HOST,
-      port: 443,
-      secure: true,
-      path: '/',
-    });
+    const peer = new window.Peer(room, peerJsOptions());
 
-    peer.on('open', () => setStatus(`Комната «${room}». Отсканируйте QR на телефоне.`));
-    peer.on('error', (err) => setStatus(`PeerJS: ${err.type || err.message}`));
+    peer.on('open', () => {
+      setStatus(`Комната «${room}». QR ниже. VPN: запустите relay и укажите ws://IP:${DEFAULT_RELAY_PORT}`);
+    });
+    peer.on('disconnected', () => {
+      setStatus('Сигнализация потеряна. Переподключение PeerJS…');
+      if (!peer.destroyed) peer.reconnect();
+    });
+    peer.on('error', (err) => {
+      const t = err.type || err.message || String(err);
+      if (t === 'server-error' && wsTransport?.open) {
+        setStatus('PeerJS cloud недоступен — используйте WebSocket relay (VPN).');
+      } else {
+        setStatus(`PeerJS: ${t}. При VPN — relay + transport=auto`);
+      }
+    });
 
     peer.on('connection', (incoming) => {
       if (activeConn && activeConn !== incoming) {
@@ -511,6 +729,7 @@
       activeConn = incoming;
 
       incoming.on('open', () => {
+        setChannel('WebRTC');
         setStatus('Телефон подключён. Тяните углы для совмещения с экраном.');
         try {
           incoming.send(new Uint8Array([0xff, 0, 1]));
@@ -523,21 +742,8 @@
           : data instanceof Uint8Array
             ? data
             : null;
-        if (!bytes || bytes.length < 2) return;
-        if (bytes.length >= 3 && bytes[0] === 0xff) return;
-        const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-        const view = new DataView(buf);
-        const w = view.getUint8(0);
-        const h = view.getUint8(1);
-        const mode = view.byteLength > 2 + w * h ? view.getUint8(2) : 0;
-        if (mode === 1) {
-          frame = gradientToImageData(new Uint8Array(buf, 3), w, h);
-          frameIsGradient = true;
-        } else {
-          frame = edgesToImageData(new Uint8Array(buf, 2), w, h);
-          frameIsGradient = false;
-        }
-        draw();
+        setStatus('Телефон подключён (WebRTC). Тяните углы.');
+        ingestFrame(bytes);
       });
 
       incoming.on('close', () => {
@@ -576,8 +782,7 @@
     procCanvas.width = GRID_W;
     procCanvas.height = GRID_H;
     const procCtx = procCanvas.getContext('2d', { willReadFrequently: true });
-    let conn = null;
-    let phonePeer = null;
+    let transport = null;
     let running = false;
     let lastSend = 0;
     let raf = 0;
@@ -595,25 +800,22 @@
       if (thresholdVal) thresholdVal.textContent = thresholdRange.value;
     });
 
-    async function maintainPeerLink() {
+    const transportMode = parseTransportMode();
+    const relayBase = parseRelayParam() || defaultRelayHint();
+
+    async function maintainTransport() {
       while (running) {
-        if (conn?.open) {
+        if (transport?.open) {
           await sleep(2000);
           continue;
         }
         try {
-          if (phonePeer) {
-            try { phonePeer.destroy(); } catch (_) { /* ignore */ }
-            phonePeer = null;
+          if (transport) {
+            try { transport.close(); } catch (_) { /* ignore */ }
+            transport = null;
           }
-          const link = await connectPhoneToProjector(room, setStatus);
-          phonePeer = link.peer;
-          conn = link.conn;
-          conn.on('close', () => {
-            if (conn) conn = null;
-            setStatus('Связь с проектором потеряна. Переподключение…');
-          });
-          setStatus(`Трансляция в комнату «${room}». Наведите камеру на объект.`);
+          transport = await connectPhoneTransport(room, transportMode, relayBase, setStatus);
+          setStatus(`Трансляция («${room}»). ${transport.mode === 'ws-relay' ? 'VPN relay' : 'WebRTC'}`);
         } catch (err) {
           setStatus(`${err.message} Повтор через 3 с…`);
           await sleep(3000);
@@ -675,11 +877,11 @@
       previewCtx.drawImage(procCanvas, 0, 0, pw, ph);
       previewCtx.globalAlpha = 1;
 
-      if (conn?.open) {
+      if (transport?.open) {
         try {
-          conn.send(payload);
+          transport.send(payload);
         } catch (_) {
-          conn = null;
+          transport = null;
         }
       }
     }
@@ -717,7 +919,7 @@
         setStatus('Камера включена. Подключение к проектору…');
         drawPreviewLoop();
         sendLoop();
-        maintainPeerLink();
+        maintainTransport();
       } catch (err) {
         running = false;
         setButtons(false);
@@ -732,12 +934,8 @@
       if (stream) stream.getTracks().forEach((t) => t.stop());
       stream = null;
       video.srcObject = null;
-      conn?.close();
-      conn = null;
-      if (phonePeer) {
-        try { phonePeer.destroy(); } catch (_) { /* ignore */ }
-        phonePeer = null;
-      }
+      transport?.close();
+      transport = null;
       setButtons(false);
       previewCtx.clearRect(0, 0, preview.width, preview.height);
       setStatus('Остановлено.');
@@ -756,8 +954,13 @@
 
     if (role === 'projector' && !room) {
       room = randomRoomId();
-      const url = joinUrl('projector', room);
-      window.history.replaceState({}, '', url);
+    }
+    if (role === 'projector') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('role', 'projector');
+      url.searchParams.set('room', room);
+      if (!url.searchParams.get('transport')) url.searchParams.set('transport', 'auto');
+      window.history.replaceState({}, '', url.toString());
     }
 
     root.dataset.role = role;

@@ -21,6 +21,10 @@
           <canvas class="cps-qr" width="160" height="160" aria-label="QR для телефона"></canvas>
           <p class="cps-label">Ссылка для телефона</p>
           <a class="cps-join-link" href="#" target="_blank" rel="noopener">—</a>
+          <p class="cps-label">VPN / relay (WebSocket)</p>
+          <input type="text" class="cps-relay-url" data-cps-relay-url placeholder="ws://IP:8765" aria-label="URL WebSocket relay">
+          <p class="cps-channel" aria-live="polite"></p>
+          <p class="cps-hint">При VPN: <code>npm install ws</code> → <code>node scripts/cps-ws-relay.js</code></p>
           <div class="cps-toolbar">
             <button type="button" data-cps-reset-corners>Сброс углов</button>
             <button type="button" data-cps-fullscreen>На весь экран</button>

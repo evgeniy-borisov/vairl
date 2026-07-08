@@ -74,6 +74,10 @@ flowchart LR
         <canvas class="cps-qr" width="160" height="160" aria-label="QR для телефона"></canvas>
         <p class="cps-label">Ссылка для телефона</p>
         <a class="cps-join-link" href="#" target="_blank" rel="noopener">—</a>
+        <p class="cps-label">VPN / relay (WebSocket)</p>
+        <input type="text" class="cps-relay-url" data-cps-relay-url placeholder="ws://IP:8765" aria-label="URL WebSocket relay">
+        <p class="cps-channel" aria-live="polite"></p>
+        <p class="cps-hint">При VPN: <code>npm install ws</code> → <code>node scripts/cps-ws-relay.js</code></p>
         <div class="cps-toolbar">
           <button type="button" data-cps-reset-corners>Сброс углов</button>
           <button type="button" data-cps-fullscreen>На весь экран</button>
@@ -107,9 +111,13 @@ flowchart LR
 ## Ограничения PoC
 
 - Нужен **HTTPS** (или localhost) для камеры и WebRTC.
-- **PeerJS cloud** (`0.peerjs.com`) — внешняя зависимость; при `server-error` проектор не регистрирует комнату. Для продакшена — свой signaling / TURN.
-- Задержка 100–300 ms в зависимости от Wi‑Fi; в одной сети P2P часто идёт по локальным адресам.
-- Нет калибровки «объект ↔ проекция» — только ручной warp.
+- **PeerJS cloud** (`0.peerjs.com`) — внешняя зависимость; при `server-error` проектор не регистрирует комнату.
+- **VPN / NAT:** прямой P2P часто не проходит. Решения (в порядке «малых переделок»):
+  1. **TURN** (уже в демо) — трафик WebRTC через relay Metered Open Relay.
+  2. **`transport=auto`** — сначала WebRTC+TURN, затем fallback на **WebSocket relay**.
+  3. **Локальный relay** на ноутбуке с проектором: `node scripts/cps-ws-relay.js` → в поле «VPN / relay» указать `ws://IP-ноутбука:8765` (оба устройства стучатся наружу на relay).
+- Задержка 100–500 ms (WebRTC) или чуть выше на WS-relay.
+- Нет автокалибровки — только ручной warp.
 - Один телефон на комнату.
 
 ---
