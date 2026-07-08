@@ -3,9 +3,10 @@
  * Projector: perspective warp with draggable corners.
  */
 (function () {
-  const GRID_W = 96;
-  const GRID_H = 72;
-  const SEND_FPS = 12;
+  const GRID_W = 128;
+  const GRID_H = 96;
+  const SEND_FPS = 15;
+  const GRADIENT_GAIN = 14;
   const PEER_HOST = '0.peerjs.com';
   const QR_CDN = 'https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js';
 
@@ -106,19 +107,50 @@
     return out;
   }
 
-  function gradientField(gray, w, h) {
+  function hsvToRgb(h, s, v) {
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
+    let r = 0;
+    let g = 0;
+    let b = 0;
+    switch (i % 6) {
+      case 0: r = v; g = t; b = p; break;
+      case 1: r = q; g = v; b = p; break;
+      case 2: r = p; g = v; b = t; break;
+      case 3: r = p; g = q; b = v; break;
+      case 4: r = t; g = p; b = v; break;
+      default: r = v; g = p; b = q;
+    }
+    return [(r * 255) | 0, (g * 255) | 0, (b * 255) | 0];
+  }
+
+  /** Gradient field as heatmap: hue = direction, brightness = |∇I|. */
+  function gradientHeatmap(gray, w, h, gain) {
     const out = new Uint8Array(w * h * 3);
+    const g = gain ?? GRADIENT_GAIN;
     for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
         const dx = gray[y * w + x + 1] - gray[y * w + x - 1];
         const dy = gray[(y + 1) * w + x] - gray[(y - 1) * w + x];
+        const mag = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx);
+        const hue = (angle + Math.PI) / (2 * Math.PI);
+        const val = Math.min(1, mag * g);
+        const [r, g, b] = hsvToRgb(hue, 0.92, Math.max(0.08, val));
         const i = (y * w + x) * 3;
-        out[i] = Math.min(255, Math.abs(dx) * 600);
-        out[i + 1] = Math.min(255, Math.abs(dy) * 600);
-        out[i + 2] = Math.min(255, Math.hypot(dx, dy) * 420);
+        out[i] = r;
+        out[i + 1] = g;
+        out[i + 2] = b;
       }
     }
     return out;
+  }
+
+  function gradientField(gray, w, h) {
+    return gradientHeatmap(gray, w, h, GRADIENT_GAIN);
   }
 
   function packEdges(edges) {
@@ -175,7 +207,7 @@
       img.data[o] = rgb[s];
       img.data[o + 1] = rgb[s + 1];
       img.data[o + 2] = rgb[s + 2];
-      img.data[o + 3] = Math.max(rgb[s], rgb[s + 1], rgb[s + 2]) > 8 ? 220 : 0;
+      img.data[o + 3] = 255;
     }
     return img;
   }
@@ -273,6 +305,7 @@
     let corners = loadCorners(room) || defaultCorners(window.innerWidth, window.innerHeight);
     let drag = null;
     let frame = null;
+    let frameIsGradient = true;
     let sourceCanvas = document.createElement('canvas');
     sourceCanvas.width = GRID_W;
     sourceCanvas.height = GRID_H;
@@ -306,10 +339,16 @@
       if (frame) {
         sourceCtx.putImageData(frame, 0, 0);
         ctx.save();
-        ctx.globalCompositeOperation = 'screen';
-        ctx.shadowColor = '#66e0ff';
-        ctx.shadowBlur = 6;
-        drawWarpedImage(ctx, sourceCanvas, corners, 18);
+        ctx.imageSmoothingEnabled = true;
+        if (frameIsGradient) {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = 1;
+        } else {
+          ctx.globalCompositeOperation = 'screen';
+          ctx.shadowColor = '#66e0ff';
+          ctx.shadowBlur = 6;
+        }
+        drawWarpedImage(ctx, sourceCanvas, corners, 20);
         ctx.restore();
       } else {
         ctx.fillStyle = '#334';
@@ -419,8 +458,10 @@
         const mode = view.byteLength > 2 + w * h ? view.getUint8(2) : 0;
         if (mode === 1) {
           frame = gradientToImageData(new Uint8Array(data, 3), w, h);
+          frameIsGradient = true;
         } else {
           frame = edgesToImageData(new Uint8Array(data, 2), w, h);
+          frameIsGradient = false;
         }
         draw();
       });
@@ -501,22 +542,21 @@
       procCtx.drawImage(video, 0, 0, GRID_W, GRID_H);
       const img = procCtx.getImageData(0, 0, GRID_W, GRID_H);
       const gray = grayscaleFromImageData(img.data, GRID_W, GRID_H);
-      const mode = modeSelect?.value || 'edges';
-      const threshold = Number(thresholdRange?.value || 48);
+      const mode = modeSelect?.value || 'gradient';
+      const sliderVal = Number(thresholdRange?.value || GRADIENT_GAIN);
 
       let payload;
-      if (mode === 'gradient') {
-        const rgb = gradientField(gray, GRID_W, GRID_H);
-        payload = packGradient(rgb);
-        const overlay = gradientToImageData(rgb, GRID_W, GRID_H);
-        procCtx.putImageData(overlay, 0, 0);
-      } else {
-        const edges = sobelEdges(gray, GRID_W, GRID_H, threshold);
+      if (mode === 'edges') {
+        const edges = sobelEdges(gray, GRID_W, GRID_H, sliderVal * 3);
         payload = packEdges(edges);
         procCtx.putImageData(edgesToImageData(edges, GRID_W, GRID_H), 0, 0);
+      } else {
+        const rgb = gradientHeatmap(gray, GRID_W, GRID_H, sliderVal);
+        payload = packGradient(rgb);
+        procCtx.putImageData(gradientToImageData(rgb, GRID_W, GRID_H), 0, 0);
       }
 
-      previewCtx.globalAlpha = 0.55;
+      previewCtx.globalAlpha = 0.72;
       previewCtx.drawImage(procCanvas, 0, 0, pw, ph);
       previewCtx.globalAlpha = 1;
 
