@@ -9,6 +9,64 @@
   const GRADIENT_GAIN = 14;
   const PEER_HOST = '0.peerjs.com';
   const QR_CDN = 'https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js';
+  const CONN_OPTS = { reliable: true, serialization: 'binary' };
+  const PEER_SCRIPT = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+
+  function sleep(ms) {
+    return new Promise((r) => setTimeout(r, ms));
+  }
+
+  async function loadPeerJs() {
+    await loadScript(PEER_SCRIPT);
+    if (!window.Peer) throw new Error('PeerJS не загрузился');
+  }
+
+  function waitConnOpen(conn, ms) {
+    if (conn.open) return Promise.resolve(conn);
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('open timeout')), ms);
+      conn.on('open', () => {
+        clearTimeout(timer);
+        resolve(conn);
+      });
+      conn.on('error', (err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+    });
+  }
+
+  /** Phone: connect to projector peer with retries (mobile Safari often misses first open). */
+  async function connectPhoneToProjector(room, onStatus) {
+    await loadPeerJs();
+    const peer = await new Promise((resolve, reject) => {
+      const p = new window.Peer(undefined, {
+        host: PEER_HOST,
+        port: 443,
+        secure: true,
+        path: '/',
+      });
+      p.on('open', () => resolve(p));
+      p.on('error', reject);
+    });
+
+    const attempts = 10;
+    for (let i = 0; i < attempts; i++) {
+      if (onStatus) onStatus(`Подключение к проектору… (${i + 1}/${attempts})`);
+      try {
+        const conn = peer.connect(room, CONN_OPTS);
+        await waitConnOpen(conn, 10000);
+        try {
+          conn.send(new Uint8Array([0xff, 0, 0]));
+        } catch (_) { /* handshake optional */ }
+        return { peer, conn };
+      } catch (_) {
+        await sleep(2000);
+      }
+    }
+    peer.destroy();
+    throw new Error('Не удалось подключиться к проектору. Убедитесь, что страница проектора открыта.');
+  }
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -432,7 +490,9 @@
     }
 
     setStatus('Подключение к сигнальному серверу PeerJS…');
-    await loadScript('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js');
+    await loadPeerJs();
+
+    let activeConn = null;
 
     const peer = new window.Peer(room, {
       host: PEER_HOST,
@@ -444,24 +504,48 @@
     peer.on('open', () => setStatus(`Комната «${room}». Отсканируйте QR на телефоне.`));
     peer.on('error', (err) => setStatus(`PeerJS: ${err.type || err.message}`));
 
-    peer.on('connection', (conn) => {
-      setStatus('Телефон подключён. Тяните углы для совмещения с экраном.');
-      conn.on('data', (data) => {
-        if (!(data instanceof ArrayBuffer)) return;
-        const view = new DataView(data);
+    peer.on('connection', (incoming) => {
+      if (activeConn && activeConn !== incoming) {
+        try { activeConn.close(); } catch (_) { /* ignore */ }
+      }
+      activeConn = incoming;
+
+      incoming.on('open', () => {
+        setStatus('Телефон подключён. Тяните углы для совмещения с экраном.');
+        try {
+          incoming.send(new Uint8Array([0xff, 0, 1]));
+        } catch (_) { /* ignore */ }
+      });
+
+      incoming.on('data', (data) => {
+        const bytes = data instanceof ArrayBuffer
+          ? new Uint8Array(data)
+          : data instanceof Uint8Array
+            ? data
+            : null;
+        if (!bytes || bytes.length < 2) return;
+        if (bytes.length >= 3 && bytes[0] === 0xff) return;
+        const buf = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+        const view = new DataView(buf);
         const w = view.getUint8(0);
         const h = view.getUint8(1);
         const mode = view.byteLength > 2 + w * h ? view.getUint8(2) : 0;
         if (mode === 1) {
-          frame = gradientToImageData(new Uint8Array(data, 3), w, h);
+          frame = gradientToImageData(new Uint8Array(buf, 3), w, h);
           frameIsGradient = true;
         } else {
-          frame = edgesToImageData(new Uint8Array(data, 2), w, h);
+          frame = edgesToImageData(new Uint8Array(buf, 2), w, h);
           frameIsGradient = false;
         }
         draw();
       });
-      conn.on('close', () => setStatus('Телефон отключился.'));
+
+      incoming.on('close', () => {
+        if (activeConn === incoming) {
+          activeConn = null;
+          setStatus('Телефон отключился. Ждём повторное подключение…');
+        }
+      });
     });
 
     window.addEventListener('resize', resize);
@@ -493,6 +577,7 @@
     procCanvas.height = GRID_H;
     const procCtx = procCanvas.getContext('2d', { willReadFrequently: true });
     let conn = null;
+    let phonePeer = null;
     let running = false;
     let lastSend = 0;
     let raf = 0;
@@ -510,43 +595,30 @@
       if (thresholdVal) thresholdVal.textContent = thresholdRange.value;
     });
 
-    async function connectPeer(timeoutMs) {
-      await loadScript('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js');
-      return new Promise((resolve, reject) => {
-        let peer = null;
-        const timer = setTimeout(() => {
-          peer?.destroy();
-          reject(new Error('Таймаут подключения к проектору. Откройте страницу проектора и попробуйте снова.'));
-        }, timeoutMs || 15000);
-
-        peer = new window.Peer(undefined, {
-          host: PEER_HOST,
-          port: 443,
-          secure: true,
-          path: '/',
-        });
-        peer.on('error', (err) => {
-          clearTimeout(timer);
-          reject(err);
-        });
-        peer.on('open', () => {
-          const c = peer.connect(room, { reliable: false });
-          c.on('open', () => {
-            clearTimeout(timer);
-            resolve(c);
+    async function maintainPeerLink() {
+      while (running) {
+        if (conn?.open) {
+          await sleep(2000);
+          continue;
+        }
+        try {
+          if (phonePeer) {
+            try { phonePeer.destroy(); } catch (_) { /* ignore */ }
+            phonePeer = null;
+          }
+          const link = await connectPhoneToProjector(room, setStatus);
+          phonePeer = link.peer;
+          conn = link.conn;
+          conn.on('close', () => {
+            if (conn) conn = null;
+            setStatus('Связь с проектором потеряна. Переподключение…');
           });
-          c.on('error', (err) => {
-            clearTimeout(timer);
-            reject(err);
-          });
-          c.on('close', () => {
-            if (conn === c) {
-              conn = null;
-              setStatus('Связь с проектором потеряна.');
-            }
-          });
-        });
-      });
+          setStatus(`Трансляция в комнату «${room}». Наведите камеру на объект.`);
+        } catch (err) {
+          setStatus(`${err.message} Повтор через 3 с…`);
+          await sleep(3000);
+        }
+      }
     }
 
     function sizePreviewCanvas() {
@@ -606,7 +678,9 @@
       if (conn?.open) {
         try {
           conn.send(payload);
-        } catch (_) { /* drop frame */ }
+        } catch (_) {
+          conn = null;
+        }
       }
     }
 
@@ -640,16 +714,10 @@
         sizePreviewCanvas();
         running = true;
         setButtons(true);
+        setStatus('Камера включена. Подключение к проектору…');
         drawPreviewLoop();
         sendLoop();
-        setStatus('Камера включена. Подключение к проектору…');
-
-        try {
-          conn = await connectPeer(15000);
-          setStatus(`Трансляция в комнату «${room}». Наведите камеру на объект.`);
-        } catch (peerErr) {
-          setStatus(`Камера работает. Проектор: ${peerErr.message || peerErr.type || peerErr}`);
-        }
+        maintainPeerLink();
       } catch (err) {
         running = false;
         setButtons(false);
@@ -666,6 +734,10 @@
       video.srcObject = null;
       conn?.close();
       conn = null;
+      if (phonePeer) {
+        try { phonePeer.destroy(); } catch (_) { /* ignore */ }
+        phonePeer = null;
+      }
       setButtons(false);
       previewCtx.clearRect(0, 0, preview.width, preview.height);
       setStatus('Остановлено.');
