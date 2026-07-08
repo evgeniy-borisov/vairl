@@ -148,11 +148,6 @@
     }
     return out;
   }
-
-  function gradientField(gray, w, h) {
-    return gradientHeatmap(gray, w, h, GRADIENT_GAIN);
-  }
-
   function packEdges(edges) {
     const buf = new ArrayBuffer(2 + edges.length);
     const view = new DataView(buf);
@@ -293,13 +288,14 @@
   }
 
   async function initProjector(root, room) {
-    const statusEl = root.querySelector('.cps-status');
-    const roomEl = root.querySelector('.cps-room-id');
-    const qrCanvas = root.querySelector('.cps-qr');
-    const linkEl = root.querySelector('.cps-join-link');
-    const canvas = root.querySelector('.cps-projector-canvas');
-    const btnReset = root.querySelector('[data-cps-reset-corners]');
-    const btnFs = root.querySelector('[data-cps-fullscreen]');
+    const projPanel = root.querySelector('.cps-panel-projector');
+    const statusEl = projPanel?.querySelector('.cps-status') || root.querySelector('.cps-status');
+    const roomEl = projPanel?.querySelector('.cps-room-id') || root.querySelector('.cps-room-id');
+    const qrCanvas = projPanel?.querySelector('.cps-qr') || root.querySelector('.cps-qr');
+    const linkEl = projPanel?.querySelector('.cps-join-link') || root.querySelector('.cps-join-link');
+    const canvas = projPanel?.querySelector('.cps-projector-canvas') || root.querySelector('.cps-projector-canvas');
+    const btnReset = projPanel?.querySelector('[data-cps-reset-corners]') || root.querySelector('[data-cps-reset-corners]');
+    const btnFs = projPanel?.querySelector('[data-cps-fullscreen]') || root.querySelector('[data-cps-fullscreen]');
 
     const ctx = canvas.getContext('2d');
     let corners = loadCorners(room) || defaultCorners(window.innerWidth, window.innerHeight);
@@ -473,13 +469,19 @@
   }
 
   async function initPhone(root, room) {
-    const statusEl = root.querySelector('.cps-status');
-    const preview = root.querySelector('.cps-phone-preview');
-    const btnStart = root.querySelector('[data-cps-start]');
-    const btnStop = root.querySelector('[data-cps-stop]');
-    const modeSelect = root.querySelector('[data-cps-mode]');
-    const thresholdRange = root.querySelector('[data-cps-threshold]');
-    const thresholdVal = root.querySelector('[data-cps-threshold-val]');
+    const phonePanel = root.querySelector('.cps-panel-phone');
+    const statusEl = phonePanel?.querySelector('.cps-status') || root.querySelector('.cps-status');
+    const preview = phonePanel?.querySelector('.cps-phone-preview') || root.querySelector('.cps-phone-preview');
+    const btnStart = phonePanel?.querySelector('[data-cps-start]') || root.querySelector('[data-cps-start]');
+    const btnStop = phonePanel?.querySelector('[data-cps-stop]') || root.querySelector('[data-cps-stop]');
+    const modeSelect = phonePanel?.querySelector('[data-cps-mode]') || root.querySelector('[data-cps-mode]');
+    const thresholdRange = phonePanel?.querySelector('[data-cps-threshold]') || root.querySelector('[data-cps-threshold]');
+    const thresholdVal = phonePanel?.querySelector('[data-cps-threshold-val]') || root.querySelector('[data-cps-threshold-val]');
+
+    if (!preview) {
+      if (statusEl) statusEl.textContent = 'Ошибка: нет элемента превью камеры.';
+      return;
+    }
 
     const previewCtx = preview.getContext('2d');
     let stream = null;
@@ -508,36 +510,76 @@
       if (thresholdVal) thresholdVal.textContent = thresholdRange.value;
     });
 
-    async function connectPeer() {
+    async function connectPeer(timeoutMs) {
       await loadScript('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js');
       return new Promise((resolve, reject) => {
-        const peer = new window.Peer(undefined, {
+        let peer = null;
+        const timer = setTimeout(() => {
+          peer?.destroy();
+          reject(new Error('Таймаут подключения к проектору. Откройте страницу проектора и попробуйте снова.'));
+        }, timeoutMs || 15000);
+
+        peer = new window.Peer(undefined, {
           host: PEER_HOST,
           port: 443,
           secure: true,
           path: '/',
         });
-        peer.on('error', (err) => reject(err));
+        peer.on('error', (err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
         peer.on('open', () => {
           const c = peer.connect(room, { reliable: false });
-          c.on('open', () => resolve(c));
-          c.on('error', reject);
+          c.on('open', () => {
+            clearTimeout(timer);
+            resolve(c);
+          });
+          c.on('error', (err) => {
+            clearTimeout(timer);
+            reject(err);
+          });
+          c.on('close', () => {
+            if (conn === c) {
+              conn = null;
+              setStatus('Связь с проектором потеряна.');
+            }
+          });
         });
       });
     }
 
+    function sizePreviewCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = preview.getBoundingClientRect();
+      const cssW = Math.max(rect.width, preview.clientWidth, 280);
+      const cssH = Math.max(rect.height, 200, Math.min(window.innerHeight * 0.45, 360));
+      preview.width = Math.round(cssW * dpr);
+      preview.height = Math.round(cssH * dpr);
+      preview.style.width = `${cssW}px`;
+      preview.style.height = `${cssH}px`;
+      previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function drawPreviewLoop() {
+      if (!running) return;
+      raf = requestAnimationFrame(drawPreviewLoop);
+      if (!video.videoWidth) return;
+      const pw = preview.width / (window.devicePixelRatio || 1);
+      const ph = preview.height / (window.devicePixelRatio || 1);
+      previewCtx.drawImage(video, 0, 0, pw, ph);
+    }
+
     function processFrame() {
       if (!running) return;
-      raf = requestAnimationFrame(processFrame);
       if (!video.videoWidth) return;
 
       const now = performance.now();
       if (now - lastSend < 1000 / SEND_FPS) return;
       lastSend = now;
 
-      const pw = preview.width;
-      const ph = preview.height;
-      previewCtx.drawImage(video, 0, 0, pw, ph);
+      const pw = preview.width / (window.devicePixelRatio || 1);
+      const ph = preview.height / (window.devicePixelRatio || 1);
 
       procCtx.drawImage(video, 0, 0, GRID_W, GRID_H);
       const img = procCtx.getImageData(0, 0, GRID_W, GRID_H);
@@ -556,6 +598,7 @@
         procCtx.putImageData(gradientToImageData(rgb, GRID_W, GRID_H), 0, 0);
       }
 
+      previewCtx.drawImage(video, 0, 0, pw, ph);
       previewCtx.globalAlpha = 0.72;
       previewCtx.drawImage(procCanvas, 0, 0, pw, ph);
       previewCtx.globalAlpha = 1;
@@ -567,36 +610,51 @@
       }
     }
 
+    function sendLoop() {
+      if (!running) return;
+      processFrame();
+      setTimeout(sendLoop, 1000 / SEND_FPS);
+    }
+
     btnStart?.addEventListener('click', async () => {
       if (!room) {
         setStatus('Нет room ID. Откройте ссылку с проектора.');
         return;
       }
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setStatus('Камера недоступна: нужен HTTPS и современный браузер.');
+        return;
+      }
       setStatus('Запрос камеры…');
+      btnStart.disabled = true;
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
         });
         video.srcObject = stream;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
         await video.play();
 
-        const dpr = window.devicePixelRatio || 1;
-        const rect = preview.getBoundingClientRect();
-        preview.width = rect.width * dpr;
-        preview.height = rect.height * dpr;
-        preview.style.width = `${rect.width}px`;
-        preview.style.height = `${rect.height}px`;
-        previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        setStatus('Подключение к проектору…');
-        conn = await connectPeer();
+        sizePreviewCanvas();
         running = true;
         setButtons(true);
-        setStatus(`Трансляция в комнату «${room}». Наведите камеру на объект.`);
-        processFrame();
+        drawPreviewLoop();
+        sendLoop();
+        setStatus('Камера включена. Подключение к проектору…');
+
+        try {
+          conn = await connectPeer(15000);
+          setStatus(`Трансляция в комнату «${room}». Наведите камеру на объект.`);
+        } catch (peerErr) {
+          setStatus(`Камера работает. Проектор: ${peerErr.message || peerErr.type || peerErr}`);
+        }
       } catch (err) {
-        setStatus(`Ошибка: ${err.message || err.type || err}`);
+        running = false;
+        setButtons(false);
+        btnStart.disabled = false;
+        setStatus(`Ошибка камеры: ${err.message || err.name || err}`);
       }
     });
 

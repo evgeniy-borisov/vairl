@@ -2879,6 +2879,7 @@ footer {
 .camera-projector-sync-widget .cps-phone-preview {
     display: block;
     width: 100%;
+    min-height: 220px;
     max-height: 55vh;
     border-radius: 10px;
     background: #111;
