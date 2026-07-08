@@ -130,7 +130,7 @@
   /** Gradient field as heatmap: hue = direction, brightness = |∇I|. */
   function gradientHeatmap(gray, w, h, gain) {
     const out = new Uint8Array(w * h * 3);
-    const g = gain ?? GRADIENT_GAIN;
+    const gainMul = gain ?? GRADIENT_GAIN;
     for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
         const dx = gray[y * w + x + 1] - gray[y * w + x - 1];
@@ -138,12 +138,12 @@
         const mag = Math.hypot(dx, dy);
         const angle = Math.atan2(dy, dx);
         const hue = (angle + Math.PI) / (2 * Math.PI);
-        const val = Math.min(1, mag * g);
-        const [r, g, b] = hsvToRgb(hue, 0.92, Math.max(0.08, val));
+        const val = Math.min(1, mag * gainMul);
+        const [rv, gv, bv] = hsvToRgb(hue, 0.92, Math.max(0.08, val));
         const i = (y * w + x) * 3;
-        out[i] = r;
-        out[i + 1] = g;
-        out[i + 2] = b;
+        out[i] = rv;
+        out[i + 1] = gv;
+        out[i + 2] = bv;
       }
     }
     return out;
