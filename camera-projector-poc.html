@@ -18,13 +18,30 @@
         <aside class="cps-sidebar">
           <p class="cps-label">Комната</p>
           <p class="cps-room-id">—</p>
+          <p class="cps-label">Режим сети</p>
+          <div class="cps-network-switch" role="radiogroup" aria-label="Режим сети">
+            <label class="cps-switch-opt">
+              <input type="radio" name="cps-network" value="lan" checked>
+              <span>Локальная сеть</span>
+            </label>
+            <label class="cps-switch-opt">
+              <input type="radio" name="cps-network" value="vpn">
+              <span>VPN / интернет</span>
+            </label>
+          </div>
+          <div class="cps-lan-panel">
+            <p class="cps-local-ips">Определяем IP…</p>
+            <p class="cps-hint">Ноутбук и телефон в одной Wi‑Fi. Прямой WebRTC без relay.</p>
+          </div>
+          <div class="cps-vpn-panel" hidden>
+            <p class="cps-label">WebSocket relay</p>
+            <input type="text" class="cps-relay-url" data-cps-relay-url placeholder="ws://IP:8765" aria-label="URL WebSocket relay">
+            <p class="cps-hint">При VPN: <code>npm install ws</code> → <code>node scripts/cps-ws-relay.js</code></p>
+          </div>
           <canvas class="cps-qr" width="160" height="160" aria-label="QR для телефона"></canvas>
           <p class="cps-label">Ссылка для телефона</p>
           <a class="cps-join-link" href="#" target="_blank" rel="noopener">—</a>
-          <p class="cps-label">VPN / relay (WebSocket)</p>
-          <input type="text" class="cps-relay-url" data-cps-relay-url placeholder="ws://IP:8765" aria-label="URL WebSocket relay">
           <p class="cps-channel" aria-live="polite"></p>
-          <p class="cps-hint">При VPN: <code>npm install ws</code> → <code>node scripts/cps-ws-relay.js</code></p>
           <div class="cps-toolbar">
             <button type="button" data-cps-reset-corners>Сброс углов</button>
             <button type="button" data-cps-fullscreen>На весь экран</button>
@@ -43,6 +60,8 @@
         <p class="cps-lead">Режим телефона: камера и отправка контуров.</p>
       </header>
       <div class="cps-phone-controls">
+        <p class="cps-network-badge">—</p>
+        <p class="cps-local-ips">Определяем IP…</p>
         <label>Режим
           <select data-cps-mode>
             <option value="gradient" selected>Градиент (теплокарта)</option>

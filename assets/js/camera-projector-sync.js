@@ -13,10 +13,14 @@
   const PEER_SCRIPT = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
   const DEFAULT_RELAY_PORT = 8765;
 
-  /** STUN + public TURN — нужно за VPN / symmetric NAT, когда прямой P2P не проходит. */
-  const ICE_SERVERS = [
+  /** LAN: STUN + прямые host-кандидаты в одной Wi‑Fi. VPN: + TURN и WS-relay. */
+  const ICE_SERVERS_LAN = [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+  ];
+
+  const ICE_SERVERS_VPN = [
+    ...ICE_SERVERS_LAN,
     {
       urls: [
         'turn:openrelay.metered.ca:80',
@@ -28,19 +32,79 @@
     },
   ];
 
-  function peerJsOptions() {
+  function peerJsOptions(networkMode) {
     return {
       host: PEER_HOST,
       port: 443,
       secure: true,
       path: '/',
-      config: { iceServers: ICE_SERVERS },
+      config: {
+        iceServers: networkMode === 'vpn' ? ICE_SERVERS_VPN : ICE_SERVERS_LAN,
+      },
     };
   }
 
-  function parseTransportMode() {
-    const t = new URLSearchParams(window.location.search).get('transport') || 'auto';
-    return t === 'webrtc' || t === 'ws' ? t : 'auto';
+  function parseNetworkMode(root) {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('network');
+    if (fromUrl === 'lan' || fromUrl === 'vpn') return fromUrl;
+    const legacy = params.get('transport');
+    if (legacy === 'webrtc') return 'lan';
+    if (legacy === 'ws' || legacy === 'auto') return 'vpn';
+    const checked = root?.querySelector('[name="cps-network"]:checked');
+    if (checked?.value === 'lan' || checked?.value === 'vpn') return checked.value;
+    return 'lan';
+  }
+
+  function isPrivateIp(ip) {
+    if (!ip || ip.startsWith('127.')) return false;
+    if (ip.startsWith('10.')) return true;
+    if (ip.startsWith('192.168.')) return true;
+    const m = ip.match(/^172\.(\d+)\./);
+    return m && +m[1] >= 16 && +m[1] <= 31;
+  }
+
+  function gatherLocalIPs() {
+    return new Promise((resolve) => {
+      const ips = new Set();
+      if (!window.RTCPeerConnection) {
+        resolve([]);
+        return;
+      }
+      const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS_LAN });
+      pc.createDataChannel('cps-ip-probe');
+      const finish = () => {
+        try { pc.close(); } catch (_) { /* ignore */ }
+        resolve([...ips]);
+      };
+      pc.onicecandidate = (ev) => {
+        if (!ev.candidate) {
+          finish();
+          return;
+        }
+        const found = ev.candidate.candidate.match(/\b(\d+\.\d+\.\d+\.\d+)\b/g);
+        if (found) found.forEach((ip) => { if (isPrivateIp(ip)) ips.add(ip); });
+      };
+      pc.createOffer()
+        .then((o) => pc.setLocalDescription(o))
+        .catch(finish);
+      setTimeout(finish, 3500);
+    });
+  }
+
+  function formatIpList(ips, roleLabel) {
+    if (!ips.length) return `${roleLabel}: локальный IP не определён (разрешите WebRTC)`;
+    return `${roleLabel}: ${ips.join(', ')}`;
+  }
+
+  function updateNetworkPanels(root, networkMode) {
+    const lanPanel = root.querySelector('.cps-lan-panel');
+    const vpnPanel = root.querySelector('.cps-vpn-panel');
+    if (lanPanel) lanPanel.hidden = networkMode !== 'lan';
+    if (vpnPanel) vpnPanel.hidden = networkMode !== 'vpn';
+    root.querySelectorAll('[name="cps-network"]').forEach((el) => {
+      el.checked = el.value === networkMode;
+    });
   }
 
   function parseRelayParam() {
@@ -150,23 +214,24 @@
     });
   }
 
-  /** Phone: WebRTC + TURN to projector peer. */
-  async function connectPhoneWebrtc(room, onStatus) {
+  /** Phone: WebRTC к проектору (ICE зависит от режима сети). */
+  async function connectPhoneWebrtc(room, networkMode, onStatus) {
     await loadPeerJs();
     const peer = await new Promise((resolve, reject) => {
-      const p = new window.Peer(undefined, peerJsOptions());
+      const p = new window.Peer(undefined, peerJsOptions(networkMode));
       p.on('open', () => resolve(p));
       p.on('error', reject);
     });
 
+    const label = networkMode === 'lan' ? 'локальная сеть' : 'VPN + TURN';
     for (let i = 0; i < 6; i++) {
-      if (onStatus) onStatus(`WebRTC… (${i + 1}/6, TURN при VPN)`);
+      if (onStatus) onStatus(`WebRTC (${label})… ${i + 1}/6`);
       try {
         const conn = peer.connect(room, CONN_OPTS);
         await waitConnOpen(conn, 12000);
         try { conn.send(new Uint8Array([0xff, 0, 0])); } catch (_) { /* ignore */ }
-        const transport = {
-          mode: 'webrtc',
+        return {
+          mode: networkMode === 'lan' ? 'webrtc-lan' : 'webrtc-vpn',
           peer,
           conn,
           get open() { return conn.open; },
@@ -176,7 +241,6 @@
             try { peer.destroy(); } catch (_) { /* ignore */ }
           },
         };
-        return transport;
       } catch (_) {
         await sleep(2000);
       }
@@ -185,29 +249,22 @@
     throw new Error('WebRTC не подключился');
   }
 
-  async function connectPhoneTransport(room, transportMode, relayBase, onStatus) {
-    if (transportMode === 'ws') {
-      if (!relayBase) throw new Error('Укажите relay=ws://… (VPN режим)');
-      const t = createWsTransport(relayBase, room, 'phone', {});
-      await t.connect();
-      onStatus?.('Канал: WebSocket relay');
-      return t;
-    }
-    if (transportMode === 'webrtc') {
-      const t = await connectPhoneWebrtc(room, onStatus);
-      onStatus?.('Канал: WebRTC');
+  async function connectPhoneTransport(room, networkMode, relayBase, onStatus) {
+    if (networkMode === 'lan') {
+      const t = await connectPhoneWebrtc(room, 'lan', onStatus);
+      onStatus?.('Канал: WebRTC (локальная сеть)');
       return t;
     }
     try {
-      const t = await connectPhoneWebrtc(room, onStatus);
-      onStatus?.('Канал: WebRTC');
+      const t = await connectPhoneWebrtc(room, 'vpn', onStatus);
+      onStatus?.('Канал: WebRTC + TURN');
       return t;
-    } catch (webrtcErr) {
-      if (!relayBase) throw webrtcErr;
+    } catch (_) {
+      if (!relayBase) throw new Error('VPN: укажите relay ws://… и запустите cps-ws-relay.js');
       onStatus?.('WebRTC не вышел, пробуем WebSocket relay…');
       const t = createWsTransport(relayBase, room, 'phone', {});
       await t.connect();
-      onStatus?.('Канал: WebSocket relay (VPN fallback)');
+      onStatus?.('Канал: WebSocket relay (VPN)');
       return t;
     }
   }
@@ -255,22 +312,24 @@
   }
 
   /** Phone opens standalone PoC page when widget is embedded in a blog post. */
-  function phoneJoinUrl(room, root, relayBase, transportMode) {
+  function phoneJoinUrl(room, root, relayBase, networkMode) {
     const pocPage = root?.dataset?.phonePage;
-    const transport = transportMode || parseTransportMode();
-    const relay = relayBase || parseRelayParam() || root?.querySelector('[data-cps-relay-url]')?.value?.trim() || '';
+    const network = networkMode || parseNetworkMode(root);
+    const relay = network === 'vpn'
+      ? (relayBase || parseRelayParam() || root?.querySelector('[data-cps-relay-url]')?.value?.trim() || '')
+      : '';
     let u;
     if (pocPage) {
       u = new URL(pocPage, window.location.origin);
-    } else if (root?.classList?.contains('cps-fullpage')) {
-      u = new URL(window.location.href);
     } else {
       u = new URL(window.location.href);
     }
     u.searchParams.set('role', 'phone');
     u.searchParams.set('room', room);
-    u.searchParams.set('transport', transport);
+    u.searchParams.set('network', network);
+    u.searchParams.delete('transport');
     if (relay) u.searchParams.set('relay', normalizeRelayBase(relay));
+    else u.searchParams.delete('relay');
     return u.toString();
   }
 
@@ -505,10 +564,47 @@
     const btnFs = projPanel?.querySelector('[data-cps-fullscreen]') || root.querySelector('[data-cps-fullscreen]');
     const relayInput = projPanel?.querySelector('[data-cps-relay-url]') || root.querySelector('[data-cps-relay-url]');
     const channelEl = projPanel?.querySelector('.cps-channel') || root.querySelector('.cps-channel');
+    const localIpsEl = projPanel?.querySelector('.cps-local-ips') || root.querySelector('.cps-local-ips');
+    const networkSwitch = projPanel?.querySelector('.cps-network-switch') || root.querySelector('.cps-network-switch');
 
-    const transportMode = parseTransportMode();
+    let networkMode = parseNetworkMode(root);
     let relayBase = parseRelayParam() || relayInput?.value?.trim() || defaultRelayHint();
-    if (relayInput && !relayInput.value) relayInput.value = relayBase;
+    let wsTransport = null;
+    let projectorPeer = null;
+    let activeConn = null;
+    if (relayInput && !relayInput.value && networkMode === 'vpn') relayInput.value = relayBase;
+    updateNetworkPanels(root, networkMode);
+
+    gatherLocalIPs().then((ips) => {
+      if (localIpsEl) localIpsEl.textContent = formatIpList(ips, 'Проектор');
+      if (networkMode === 'lan' && ips[0] && relayInput && !relayInput.value) {
+        relayInput.placeholder = `ws://${ips[0]}:${DEFAULT_RELAY_PORT}`;
+      }
+    });
+
+    function setNetworkMode(mode) {
+      networkMode = mode;
+      updateNetworkPanels(root, mode);
+      const url = new URL(window.location.href);
+      url.searchParams.set('network', mode);
+      url.searchParams.delete('transport');
+      window.history.replaceState({}, '', url.toString());
+      refreshPhoneLink();
+      if (mode === 'vpn') {
+        startWsRelay();
+      } else if (wsTransport) {
+        try { wsTransport.close(); } catch (_) { /* ignore */ }
+        wsTransport = null;
+        setChannel('');
+      }
+      startProjectorPeer();
+    }
+
+    networkSwitch?.querySelectorAll('[name="cps-network"]').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        if (radio.checked) setNetworkMode(radio.value);
+      });
+    });
 
     function ingestFrame(bytes) {
       const parsed = applyFrameBytes(bytes);
@@ -524,7 +620,7 @@
 
     function refreshPhoneLink() {
       relayBase = relayInput?.value?.trim() || relayBase || defaultRelayHint();
-      const phoneUrl = phoneJoinUrl(room, root, relayBase, transportMode);
+      const phoneUrl = phoneJoinUrl(room, root, relayBase, networkMode);
       if (linkEl) {
         linkEl.href = phoneUrl;
         linkEl.textContent = phoneUrl;
@@ -655,7 +751,7 @@
       canvas.requestFullscreen?.().catch(() => {});
     });
 
-    const phoneUrl = phoneJoinUrl(room, root, relayBase, transportMode);
+    const phoneUrl = phoneJoinUrl(room, root, relayBase, networkMode);
     if (roomEl) roomEl.textContent = room;
     if (linkEl) {
       linkEl.href = phoneUrl;
@@ -670,10 +766,8 @@
       setStatus(`QR не загрузился: ${err.message}. Используйте ссылку ниже.`);
     }
 
-    let wsTransport = null;
-
     async function startWsRelay() {
-      if (transportMode === 'webrtc' || !relayBase) return;
+      if (networkMode !== 'vpn' || !relayBase) return;
       try {
         wsTransport = createWsTransport(relayBase, room, 'projector', {
           onOpen: () => {
@@ -700,59 +794,71 @@
 
     setStatus('Подключение к сигнальному серверу PeerJS…');
     await loadPeerJs();
-    startWsRelay();
+    if (networkMode === 'vpn') startWsRelay();
 
-    let activeConn = null;
-
-    const peer = new window.Peer(room, peerJsOptions());
-
-    peer.on('open', () => {
-      setStatus(`Комната «${room}». QR ниже. VPN: запустите relay и укажите ws://IP:${DEFAULT_RELAY_PORT}`);
-    });
-    peer.on('disconnected', () => {
-      setStatus('Сигнализация потеряна. Переподключение PeerJS…');
-      if (!peer.destroyed) peer.reconnect();
-    });
-    peer.on('error', (err) => {
-      const t = err.type || err.message || String(err);
-      if (t === 'server-error' && wsTransport?.open) {
-        setStatus('PeerJS cloud недоступен — используйте WebSocket relay (VPN).');
-      } else {
-        setStatus(`PeerJS: ${t}. При VPN — relay + transport=auto`);
+    function startProjectorPeer() {
+      if (projectorPeer && !projectorPeer.destroyed) {
+        try { projectorPeer.destroy(); } catch (_) { /* ignore */ }
       }
-    });
+      activeConn = null;
+      projectorPeer = new window.Peer(room, peerJsOptions(networkMode));
 
-    peer.on('connection', (incoming) => {
-      if (activeConn && activeConn !== incoming) {
-        try { activeConn.close(); } catch (_) { /* ignore */ }
-      }
-      activeConn = incoming;
-
-      incoming.on('open', () => {
-        setChannel('WebRTC');
-        setStatus('Телефон подключён. Тяните углы для совмещения с экраном.');
-        try {
-          incoming.send(new Uint8Array([0xff, 0, 1]));
-        } catch (_) { /* ignore */ }
+      projectorPeer.on('open', () => {
+        const hint = networkMode === 'lan'
+          ? 'Локальная сеть: телефон и ноутбук в одном Wi‑Fi. Отсканируйте QR.'
+          : 'VPN: при сбое WebRTC запустите relay и укажите ws://IP:8765';
+        setStatus(`Комната «${room}». ${hint}`);
       });
-
-      incoming.on('data', (data) => {
-        const bytes = data instanceof ArrayBuffer
-          ? new Uint8Array(data)
-          : data instanceof Uint8Array
-            ? data
-            : null;
-        setStatus('Телефон подключён (WebRTC). Тяните углы.');
-        ingestFrame(bytes);
+      projectorPeer.on('disconnected', () => {
+        setStatus('Сигнализация потеряна. Переподключение PeerJS…');
+        if (!projectorPeer.destroyed) projectorPeer.reconnect();
       });
-
-      incoming.on('close', () => {
-        if (activeConn === incoming) {
-          activeConn = null;
-          setStatus('Телефон отключился. Ждём повторное подключение…');
+      projectorPeer.on('error', (err) => {
+        const t = err.type || err.message || String(err);
+        if (t === 'server-error' && networkMode === 'vpn' && wsTransport?.open) {
+          setStatus('PeerJS cloud недоступен — используйте WebSocket relay.');
+        } else if (networkMode === 'lan') {
+          setStatus(`PeerJS: ${t}. Убедитесь, что оба устройства в одной Wi‑Fi.`);
+        } else {
+          setStatus(`PeerJS: ${t}. Переключите «VPN / интернет» и настройте relay.`);
         }
       });
-    });
+
+      projectorPeer.on('connection', (incoming) => {
+        if (activeConn && activeConn !== incoming) {
+          try { activeConn.close(); } catch (_) { /* ignore */ }
+        }
+        activeConn = incoming;
+
+        incoming.on('open', () => {
+          const ch = networkMode === 'lan' ? 'WebRTC (локальная сеть)' : 'WebRTC + TURN';
+          setChannel(ch);
+          setStatus('Телефон подключён. Тяните углы для совмещения с экраном.');
+          try {
+            incoming.send(new Uint8Array([0xff, 0, 1]));
+          } catch (_) { /* ignore */ }
+        });
+
+        incoming.on('data', (data) => {
+          const bytes = data instanceof ArrayBuffer
+            ? new Uint8Array(data)
+            : data instanceof Uint8Array
+              ? data
+              : null;
+          setStatus('Телефон подключён (WebRTC). Тяните углы.');
+          ingestFrame(bytes);
+        });
+
+        incoming.on('close', () => {
+          if (activeConn === incoming) {
+            activeConn = null;
+            setStatus('Телефон отключился. Ждём повторное подключение…');
+          }
+        });
+      });
+    }
+
+    startProjectorPeer();
 
     window.addEventListener('resize', resize);
     resize();
@@ -800,8 +906,22 @@
       if (thresholdVal) thresholdVal.textContent = thresholdRange.value;
     });
 
-    const transportMode = parseTransportMode();
-    const relayBase = parseRelayParam() || defaultRelayHint();
+    const networkModeEl = phonePanel?.querySelector('.cps-network-badge') || root.querySelector('.cps-network-badge');
+    const localIpsEl = phonePanel?.querySelector('.cps-local-ips') || root.querySelector('.cps-local-ips');
+
+    const networkMode = parseNetworkMode(root);
+    const relayBase = networkMode === 'vpn'
+      ? (parseRelayParam() || defaultRelayHint())
+      : '';
+
+    if (networkModeEl) {
+      networkModeEl.textContent = networkMode === 'lan'
+        ? 'Сеть: локальная Wi‑Fi (прямой P2P)'
+        : 'Сеть: VPN / интернет (TURN + relay)';
+    }
+    gatherLocalIPs().then((ips) => {
+      if (localIpsEl) localIpsEl.textContent = formatIpList(ips, 'Телефон');
+    });
 
     async function maintainTransport() {
       while (running) {
@@ -814,8 +934,13 @@
             try { transport.close(); } catch (_) { /* ignore */ }
             transport = null;
           }
-          transport = await connectPhoneTransport(room, transportMode, relayBase, setStatus);
-          setStatus(`Трансляция («${room}»). ${transport.mode === 'ws-relay' ? 'VPN relay' : 'WebRTC'}`);
+          transport = await connectPhoneTransport(room, networkMode, relayBase, setStatus);
+          const modeLabel = transport.mode === 'ws-relay'
+            ? 'WebSocket relay'
+            : transport.mode === 'webrtc-lan'
+              ? 'WebRTC (локальная сеть)'
+              : 'WebRTC + TURN';
+          setStatus(`Трансляция («${room}»). ${modeLabel}`);
         } catch (err) {
           setStatus(`${err.message} Повтор через 3 с…`);
           await sleep(3000);
@@ -959,7 +1084,8 @@
       const url = new URL(window.location.href);
       url.searchParams.set('role', 'projector');
       url.searchParams.set('room', room);
-      if (!url.searchParams.get('transport')) url.searchParams.set('transport', 'auto');
+      if (!url.searchParams.get('network')) url.searchParams.set('network', 'lan');
+      url.searchParams.delete('transport');
       window.history.replaceState({}, '', url.toString());
     }
 

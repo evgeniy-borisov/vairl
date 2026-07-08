@@ -2840,9 +2840,56 @@ footer {
 .camera-projector-sync-widget .cps-hint code {
     font-size: 0.68rem;
 }
+
+.camera-projector-sync-widget .cps-join-link {
     font-size: 0.75rem;
     word-break: break-all;
     color: var(--accent, #667eea);
+}
+
+.camera-projector-sync-widget .cps-network-switch {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.camera-projector-sync-widget .cps-switch-opt {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    padding: 0.35rem 0.45rem;
+    border: 1px solid var(--border, #e0e0e8);
+    border-radius: 8px;
+    background: var(--bg, #fafafa);
+}
+
+.camera-projector-sync-widget .cps-switch-opt:has(input:checked) {
+    border-color: var(--accent, #667eea);
+    background: rgba(102, 126, 234, 0.08);
+}
+
+.camera-projector-sync-widget .cps-local-ips,
+.camera-projector-sync-widget .cps-network-badge {
+    font-family: ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted, #555);
+    margin: 0.25rem 0 0.5rem;
+    line-height: 1.35;
+    word-break: break-all;
+}
+
+.camera-projector-sync-widget .cps-network-badge {
+    width: 100%;
+    font-size: 0.78rem;
+    color: var(--accent, #667eea);
+}
+
+.camera-projector-sync-widget .cps-lan-panel,
+.camera-projector-sync-widget .cps-vpn-panel {
+    margin-bottom: 0.5rem;
 }
 
 .camera-projector-sync-widget .cps-status {

@@ -43,11 +43,14 @@ flowchart LR
 
 ## Как запустить
 
-1. На ноутбуке с проектором откройте **[полноэкранное демо](/vairl/camera-projector-poc.html?role=projector)** (или встроенный виджет ниже). Дождитесь «Комната … Отсканируйте QR».
-2. На экране появится **QR** и код комнаты.
-3. На телефоне отсканируйте QR — откроется `camera-projector-poc.html?role=phone&room=…`.
-4. На телефоне — **Старт** (разрешите камеру). По умолчанию режим **«Градиент (теплокарта)»**.
-5. На проекторе **тяните углы** синей рамки, пока картинка не ляжет на нужную поверхность.
+1. На ноутбуке с проектором откройте **[полноэкранное демо](/vairl/camera-projector-poc.html?role=projector&network=lan)** (или встроенный виджет ниже).
+2. Выберите **режим сети** в боковой панели:
+   - **Локальная сеть** — ноутбук и телефон в одной Wi‑Fi (аудитория, домашний роутер). Прямой WebRTC P2P.
+   - **VPN / интернет** — устройства в разных сетях, корпоративный VPN, мобильный интернет. WebRTC через TURN + запасной WebSocket relay.
+3. Дождитесь появления **локального IP** (если браузер разрешил WebRTC) и QR с кодом комнаты.
+4. На телефоне отсканируйте QR — в ссылке уже зашит `network=lan` или `network=vpn`.
+5. На телефоне — **Старт** (разрешите камеру). По умолчанию режим **«Градиент (теплокарта)»**.
+6. На проекторе **тяните углы** синей рамки, пока картинка не ляжет на нужную поверхность.
 
 Кнопка «На весь экран» разворачивает холст проектора, не боковую панель с QR.
 
@@ -71,13 +74,30 @@ flowchart LR
       <aside class="cps-sidebar">
         <p class="cps-label">Комната</p>
         <p class="cps-room-id">—</p>
+        <p class="cps-label">Режим сети</p>
+        <div class="cps-network-switch" role="radiogroup" aria-label="Режим сети">
+          <label class="cps-switch-opt">
+            <input type="radio" name="cps-network" value="lan" checked>
+            <span>Локальная сеть</span>
+          </label>
+          <label class="cps-switch-opt">
+            <input type="radio" name="cps-network" value="vpn">
+            <span>VPN / интернет</span>
+          </label>
+        </div>
+        <div class="cps-lan-panel">
+          <p class="cps-local-ips">Определяем IP…</p>
+          <p class="cps-hint">Ноутбук и телефон в одной Wi‑Fi. Прямой WebRTC без relay.</p>
+        </div>
+        <div class="cps-vpn-panel" hidden>
+          <p class="cps-label">WebSocket relay</p>
+          <input type="text" class="cps-relay-url" data-cps-relay-url placeholder="ws://IP:8765" aria-label="URL WebSocket relay">
+          <p class="cps-hint">При VPN: <code>npm install ws</code> → <code>node scripts/cps-ws-relay.js</code></p>
+        </div>
         <canvas class="cps-qr" width="160" height="160" aria-label="QR для телефона"></canvas>
         <p class="cps-label">Ссылка для телефона</p>
         <a class="cps-join-link" href="#" target="_blank" rel="noopener">—</a>
-        <p class="cps-label">VPN / relay (WebSocket)</p>
-        <input type="text" class="cps-relay-url" data-cps-relay-url placeholder="ws://IP:8765" aria-label="URL WebSocket relay">
         <p class="cps-channel" aria-live="polite"></p>
-        <p class="cps-hint">При VPN: <code>npm install ws</code> → <code>node scripts/cps-ws-relay.js</code></p>
         <div class="cps-toolbar">
           <button type="button" data-cps-reset-corners>Сброс углов</button>
           <button type="button" data-cps-fullscreen>На весь экран</button>
@@ -93,7 +113,78 @@ flowchart LR
 
 <script src="{{ '/assets/js/camera-projector-sync.js' | relative_url }}"></script>
 
-Полноэкранно (удобно для проектора): [camera-projector-poc.html]({{ '/camera-projector-poc.html' | relative_url }}?role=projector).
+Полноэкранно (удобно для проектора): [camera-projector-poc.html]({{ '/camera-projector-poc.html' | relative_url }}?role=projector&network=lan).
+
+---
+
+## Режимы соединения: что вообще бывает
+
+Браузерный «телефон → проектор» — это не один протокол, а **стек слоёв**. В PoC явно разделены два сценария переключателем; ниже — полная карта вариантов, которые встречаются в таких системах.
+
+### Слои стека
+
+| Слой | Задача | В PoC |
+|------|--------|-------|
+| **Сигнализация** | Обмен SDP/ICE, «знакомство» пиров | PeerJS cloud (`0.peerjs.com`) |
+| **NAT traversal** | Пробить firewall, найти маршрут | STUN (LAN), STUN+TURN (VPN) |
+| **Транспорт данных** | Доставка кадров | WebRTC DataChannel; fallback — WebSocket relay |
+| **Семантика** | Что именно шлём | Бинарные кадры 128×96, ~15 fps |
+
+Сигнализация идёт через интернет (PeerJS), но **сами кадры после рукопожатия** в идеале не проходят через облако — только P2P или ваш relay.
+
+### Вариант A — локальная сеть (режим по умолчанию)
+
+**Условие:** ноутбук и телефон в одной подсети Wi‑Fi (типичная аудитория).
+
+```
+Телефон ──host candidate 192.168.x.x──► Ноутбук
+         (STUN только для определения внешнего IP)
+```
+
+- ICE: Google STUN, **без TURN** — трафик остаётся в LAN.
+- Задержка минимальна (часто &lt; 50 ms).
+- На панели показывается **локальный IP** устройства (через ICE gathering), чтобы убедиться, что оба в одной сети.
+- Если не коннектится: гостевой Wi‑Fi с **AP isolation**, firewall на ноутбуке — тогда переключите **VPN / интернет**.
+
+### Вариант B — VPN / разные сети (второй переключатель)
+
+**Условие:** корпоративный VPN, телефон на LTE, устройства за symmetric NAT.
+
+```
+Телефон ──► TURN relay (Metered Open Relay) ──► Ноутбук
+     или
+Телефон ──► ws://ноутбук:8765 (cps-ws-relay) ──► Ноутбук
+```
+
+1. **WebRTC + публичный TURN** — кадры идут через relay-провайдера (в демо — Metered Open Relay).
+2. **WebSocket relay на ноутбуке** — `node scripts/cps-ws-relay.js`; оба клиента стучатся на `ws://IP-ноутбука:8765`. Удобно, когда TURN заблокирован, но VPN пропускает исходящий WS на ваш IP.
+
+Порядок в коде: сначала WebRTC+TURN, при неудаче — WS relay (если URL указан).
+
+### Другие варианты (не в PoC, но в экосистеме)
+
+| Вариант | Когда | Плюсы / минусы |
+|---------|-------|----------------|
+| **Свой PeerServer** | Нельзя зависеть от `0.peerjs.com` | Полный контроль сигнализации; нужен хостинг |
+| **Сигнализация через WebSocket** | Custom signaling без PeerJS | Гибко; писать SDP/ICE вручную |
+| **MQTT / SSE / long-poll** | IoT, слабые клиенты | Просто; выше задержка, не P2P |
+| **WebTransport / QUIC** | Низкая задержка, datagrams | Современно; поддержка браузеров ещё растёт |
+| **Локальный WS relay в LAN** | P2P не проходит, но relay на той же Wi‑Fi | Кадры не уходят в интернет; нужен процесс на ноутбуке |
+| **Облачный медиа-сервер** | Много зрителей, запись | SFU (Janus, mediasoup); избыточно для 1:1 кадров |
+| **Нативное приложение** | Нужен UDP без ограничений браузера | Максимум контроля; установка на телефон |
+
+Для **статического Jekyll-сайта** разумный компромисс: PeerJS cloud + LAN P2P + TURN + опциональный локальный WS relay — без своего бэкенда в обычном сценарии.
+
+### Сравнение двух режимов PoC
+
+| | Локальная сеть | VPN / интернет |
+|--|----------------|----------------|
+| Переключатель | «Локальная сеть» | «VPN / интернет» |
+| URL | `network=lan` | `network=vpn` |
+| ICE | STUN only | STUN + TURN |
+| Fallback | — | WebSocket relay |
+| IP на панели | Да (192.168.x.x) | Да + поле `ws://…` |
+| Типичный кейс | Проектор в аудитории | Удалённое демо, VPN |
 
 ---
 
@@ -111,12 +202,10 @@ flowchart LR
 ## Ограничения PoC
 
 - Нужен **HTTPS** (или localhost) для камеры и WebRTC.
-- **PeerJS cloud** (`0.peerjs.com`) — внешняя зависимость; при `server-error` проектор не регистрирует комнату.
-- **VPN / NAT:** прямой P2P часто не проходит. Решения (в порядке «малых переделок»):
-  1. **TURN** (уже в демо) — трафик WebRTC через relay Metered Open Relay.
-  2. **`transport=auto`** — сначала WebRTC+TURN, затем fallback на **WebSocket relay**.
-  3. **Локальный relay** на ноутбуке с проектором: `node scripts/cps-ws-relay.js` → в поле «VPN / relay» указать `ws://IP-ноутбука:8765` (оба устройства стучатся наружу на relay).
-- Задержка 100–500 ms (WebRTC) или чуть выше на WS-relay.
+- **PeerJS cloud** (`0.peerjs.com`) — внешняя зависимость для сигнализации; кадры через него не идут.
+- **Режим сети** выбирайте **до** сканирования QR; переключатель обновляет ссылку и пересоздаёт Peer на проекторе.
+- **Локальный IP** виден только если браузер разрешил ICE; на iOS иногда список короче.
+- Задержка: LAN ~50–150 ms; VPN/TURN/relay — 100–500 ms и выше.
 - Нет автокалибровки — только ручной warp.
 - Один телефон на комнату.
 
