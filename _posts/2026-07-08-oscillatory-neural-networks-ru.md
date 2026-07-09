@@ -83,56 +83,7 @@ $$\text{resonance}(z_i, z_j) = |z_i| \cdot |z_j| \cdot \cos(\theta_i - \theta_j)
   <p class="od-caption">Клик по полю — добавить осциллятор. Согласованные источники дают устойчивый узор, рассинхронизированные — шум.</p>
 </div>
 
-### Интерактив: текст через осцилляторную сеть (p5.js)
-
-Каждое слово — гиперфазор; слова по одному входят в сеть (**поток**), связываются по Курамото, вдоль цепочки бежит волна SRA, внизу появляются **phase-locked** кластеры. Наведите на слово — мини-комплексная плоскость. Полноэкранно: [oscillatory-text-network.html]({{ '/oscillatory-text-network.html' | relative_url }}).
-
-<div id="oscillatory-network-demo" class="oscillatory-network-widget phase-portrait-widget">
-  <p class="onn-intro">Введите фразу или выберите пример. Увеличьте <strong>K</strong>, чтобы ускорить синхронизацию фаз.</p>
-  <div class="onn-pipeline" aria-hidden="true">
-    <span data-onn-stage class="onn-stage-on">① Ввод</span>
-    <span data-onn-stage>② Гиперфазоры</span>
-    <span data-onn-stage>③ Coupling</span>
-    <span data-onn-stage>④ SRA волна</span>
-    <span data-onn-stage>⑤ Phase lock</span>
-  </div>
-  <div class="onn-controls">
-    <input type="text" data-onn-input value="нейросеть синхронизирует фазы слов" maxlength="80" aria-label="Текст для осцилляторной сети" />
-    <select data-onn-preset aria-label="Пример фразы">
-      <option value="">Пример…</option>
-      <option value="осциллятор резонирует с текстом">Резонанс</option>
-      <option value="курамото фаза волна внимание">Курамото</option>
-      <option value="active inference phase locking">Active inference</option>
-      <option value="project omega hyperphasor latent">Project Omega</option>
-    </select>
-    <button type="button" data-onn-play class="active">⏸ Пауза</button>
-    <button type="button" data-onn-reset>↺ Сброс</button>
-    <label>K = <span data-onn-k-val>1.4</span>
-      <input type="range" data-onn-k min="0.2" max="3" step="0.1" value="1.4" />
-    </label>
-    <label>Скорость
-      <input type="range" data-onn-speed min="0.3" max="2.5" step="0.1" value="1" />
-    </label>
-  </div>
-  <div class="onn-sketch-host" aria-label="Визуализация осцилляторной сети"></div>
-  <div class="onn-legend" aria-hidden="true">
-    <span class="leg-inp">● ввод / активация</span>
-    <span class="leg-phase">● фаза θ</span>
-    <span class="leg-res">● резонанс cos(Δθ)</span>
-    <span class="leg-wave">● волна SRA</span>
-  </div>
-  <p class="phase-portrait-caption">p5.js · Kuramoto coupling · Spectral Resonance Attention · наведите на слово для фазора в ℂ</p>
-</div>
-
-<script src="{{ '/assets/js/oscillatory-text-network.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/oscillatory-demos.js' | relative_url }}"></script>
-
-| Этап | Что видно на демо |
-|------|-------------------|
-| **Поток** | Слова активируются по одному — как токены, входящие в latent |
-| **Coupling** | Зелёные связи — сильный резонанс; соседние слова связаны сильнее |
-| **SRA** | Фиолетовая волна — сумма осцилляторов без матрицы attention |
-| **Phase lock** | Группы слов с выровненной фазой (binding без slots) |
 
 ---
 
