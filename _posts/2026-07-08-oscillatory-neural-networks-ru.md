@@ -45,6 +45,19 @@ $$\dot{\theta}_i = \omega_i + \frac{K}{N}\sum_{j=1}^{N} \sin(\theta_j - \theta_i
 
 Оригинал: [Kuramoto, 1984](https://doi.org/10.1016/0378-4371(84)90039-X).
 
+**Демо 1. Фазовое кольцо Курамото.** Точки на окружности — фазы $\theta_i$, цвет — собственная частота $\omega_i$. Стрелка в центре — order parameter $r e^{i\psi}$. Двигайте $K$: при малом $K$ фазы разбегаются ($r \to 0$), при большом — слипаются в сгусток ($r \to 1$). Это фазовый переход синхронизации.
+
+<div class="od-widget od-kuramoto-ring">
+  <div class="od-controls">
+    <label>K = <span data-k-val>1.5</span>
+      <input type="range" data-k min="0" max="4" step="0.1" value="1.5" />
+    </label>
+    <button type="button" data-reset>↺ Перемешать фазы</button>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Order parameter $r$ измеряет глобальную согласованность: $r=1$ — полная синхронизация, $r\approx 0$ — хаос.</p>
+</div>
+
 ### Гиперфазоры (hyperphasors)
 
 Вместо скалярного нейрона — комплексный осциллятор $z = r \cdot e^{i\theta}$ в $d$-мерном пространстве (часто $d = 128$). Амплитуда $r$ кодирует «силу» признака, фаза $\theta$ — его **контекстуальное положение** в семантическом поле. Несколько измерений дают **гиперфазор** — обобщение фазора на многомерный latent space.
@@ -58,6 +71,17 @@ $$\dot{\theta}_i = \omega_i + \frac{K}{N}\sum_{j=1}^{N} \sin(\theta_j - \theta_i
 $$\text{resonance}(z_i, z_j) = |z_i| \cdot |z_j| \cdot \cos(\theta_i - \theta_j)$$
 
 Интерференция волн заменяет квадратичный тензор внимания. Сложность по памяти может оставаться **O(n)** при потоковой передаче волны вдоль последовательности — принцип Spectral Resonance Attention (SRA), описанный ниже.
+
+**Демо 2. Интерференционное поле.** Каждый концепт — источник круговых волн (своя частота и фаза). Поле складывает волны: светлые полосы — конструктивная интерференция, тёмные — гашение. Клик добавляет источник. Порядок добавления не меняет итоговый узор — это визуальная суть **Abelian Cognitive Merge**.
+
+<div class="od-widget od-interference">
+  <div class="od-controls">
+    <button type="button" data-add>+ источник</button>
+    <button type="button" data-reset>↺ Сброс</button>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Клик по полю — добавить осциллятор. Согласованные источники дают устойчивый узор, рассинхронизированные — шум.</p>
+</div>
 
 ### Интерактив: текст через осцилляторную сеть (p5.js)
 
@@ -101,6 +125,7 @@ $$\text{resonance}(z_i, z_j) = |z_i| \cdot |z_j| \cdot \cos(\theta_i - \theta_j)
 </div>
 
 <script src="{{ '/assets/js/oscillatory-text-network.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/oscillatory-demos.js' | relative_url }}"></script>
 
 | Этап | Что видно на демо |
 |------|-------------------|
@@ -265,6 +290,19 @@ V-JEPA 2-AC rollout в latent для robot MPC — **forward dynamics** в embed
 - **rollout** (V-JEPA-AC): «что будет, если действую так»;
 - **phase relaxation** (ONN): «к какому знакомому состоянию это относится».
 
+**Демо 8. Ассоциативная память на фазах.** Три паттерна (T, O, X) хранятся как phase-locked конфигурации. Выберите паттерн — на вход подаётся зашумлённая версия, и сеть **релаксирует** к ближайшему аттрактору. Retrieval здесь — скатывание фаз в устойчивое равновесие, как в Hopfield, но на торе фаз.
+
+<div class="od-widget od-assoc-memory">
+  <div class="od-controls">
+    <button type="button" data-p0>Паттерн «T»</button>
+    <button type="button" data-p1>Паттерн «O»</button>
+    <button type="button" data-p2>Паттерн «X»</button>
+    <button type="button" data-reset>Очистить</button>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Яркость клетки = фаза (in-phase → светлая). Шум исчезает по мере сходимости к запомненному паттерну.</p>
+</div>
+
 ### Сводная карта экосистемы
 
 ```mermaid
@@ -336,6 +374,19 @@ flowchart TB
 
 Статья: [AKOrN (ICLR 2025, arXiv:2410.13821)](https://arxiv.org/abs/2410.13821) · [код](https://github.com/autonomousvision/akorn) · [project page](https://takerum.github.io/akorn_project_page/).
 
+**Демо 3. Binding через синхронизацию.** Сетка осцилляторов поверх простой сцены из нескольких фигур. Coupling локальный: соседи внутри одной фигуры тянут фазы друг к другу, между фигурами — отталкиваются. Цвет = фаза. Объекты «проявляются» разными цветами **без разметки** — так AKOrN находит объекты без slots.
+
+<div class="od-widget od-binding">
+  <div class="od-controls">
+    <label>K = <span data-k-val>1.2</span>
+      <input type="range" data-k min="0.2" max="3" step="0.1" value="1.2" />
+    </label>
+    <button type="button" data-reset>↺ Новая сцена</button>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Каждая клетка — осциллятор. Синхронные (одинаковый цвет) = один объект. Это object discovery как самоорганизация фаз.</p>
+</div>
+
 **KomplexNet** добавляет иерархию комплексных слоёв с Kuramoto-синхронизацией на первом уровне и top-down feedback для уточнения фаз: [arXiv:2502.21077](https://arxiv.org/abs/2502.21077).
 
 ### Графы и GNN
@@ -348,11 +399,34 @@ flowchart TB
 
 **Selective Synchronization Attention (SSA)** — closed-form оператор из steady-state Курамото; каждый токен — осциллятор с learnable $\omega_i$ и $\theta_i$; естественная sparsity из phase-locking condition: [arXiv:2602.14445](https://arxiv.org/html/2602.14445) · [OSN implementation](https://github.com/HasiHays/OSN).
 
+**Демо 4. Softmax O(n²) против резонанса O(n).** Слева матрица attention заполняется квадратично: $n^2$ ячеек и памяти. Справа волна SRA пробегает линейно: $n$ операций, память константна. Двигайте длину последовательности $n$ — левая панель растёт квадратично, правая линейно.
+
+<div class="od-widget od-attn-compare">
+  <div class="od-controls">
+    <label>n = <span data-n-val>8</span>
+      <input type="range" data-n min="3" max="20" step="1" value="8" />
+    </label>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Наглядно, почему осцилляторное внимание привлекательно для длинных последовательностей и энергоограниченного железа.</p>
+</div>
+
 **Attention by Synchronization** — fixed-query oscillator attention для energy-constrained hardware; на keyword spotting и subject-verb agreement обгоняет softmax при $d_{osc}=2$: [arXiv:2606.12059](https://arxiv.org/html/2606.12059).
 
 ### Спайковые сети и временная обработка
 
 **Rhythm-SNN** (Nature Communications, 2025) модулирует динамику нейронов **внешними осцилляциями** разных частот — улучшает long-sequence processing, энергоэффективность и робастность: [s41467-025-63771-x](https://www.nature.com/articles/s41467-025-63771-x).
+
+**Демо 9. Детектор аномалий во временном ряде.** Сверху — сигнал (регулярный синус + шум). Осцилляторы захватывают его фазу, order parameter $r$ (снизу) держится высоким. Нажмите «Вбросить аномалию» — синхронизация рвётся, $r$ резко падает ниже порога. Детектор аномалий **без обучения и без порогов на сырых данных**.
+
+<div class="od-widget od-anomaly">
+  <div class="od-controls">
+    <button type="button" data-inject>⚡ Вбросить аномалию</button>
+    <button type="button" data-reset>↺ Сброс</button>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Пока ряд регулярен — фазовый захват (r высокий); сбой рвёт синхронизацию (r падает).</p>
+</div>
 
 **SpikeVideoFormer** — spike-driven video Transformer с Hamming attention, линейная сложность по времени O(T): [PMLR 267](https://proceedings.mlr.press/v267/zou25b.html).
 
@@ -365,6 +439,17 @@ flowchart TB
 - Active inference и free energy: [Friston et al.](https://arxiv.org/pdf/2304.07094)
 
 **Обучение через phase locking** (без backprop в reasoning loop) — это минимизация variational free energy: внутренние осцилляторы подстраивают фазу под входящий стимул (текст, зрение, код), снижая «энтропию» представления.
+
+**Демо 5. Phase locking как обучение.** Оранжевая стрелка — стимул (сенсор) с фиксированной фазой. Голубые осцилляторы постепенно захватывают его фазу; график свободной энергии (рассогласования) падает. Кнопка «Сменить стимул» — система переучивается **без backprop**, просто перезахватывая фазу.
+
+<div class="od-widget od-phase-learn">
+  <div class="od-controls">
+    <button type="button" data-stim>⟳ Сменить стимул</button>
+    <button type="button" data-reset>↺ Сброс</button>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Active inference: минимизация $F$ через синхронизацию внутренних осцилляторов с входом.</p>
+</div>
 
 ---
 
@@ -442,6 +527,39 @@ PRISM достигает до **96% acquisition** новых концептов 
 
 **Практический вывод для NLP:** осцилляторные модели сегодня сильны в **sample efficiency**, **concept plasticity** и **малых моделях**; для frontier-scale LM пока выигрывает softmax + scale. Но тренд ясен: phase как первоклассная величина наряду с amplitude/rate.
 
+### Демо 7. Кластеризация текста без эмбеддингов
+
+Слова — осцилляторы; coupling выше между словами с общим корнем и близкой частотой. Синхронизировавшиеся слова получают одинаковую фазу (цвет) — темы возникают как **phase-locked группы**, без предобученных эмбеддингов. Введите свой текст.
+
+<div class="od-widget od-text-cluster">
+  <div class="od-controls">
+    <input type="text" data-input value="фаза волна резонанс синхронизация фаза волна нейрон спайк частота нейрон спайк" maxlength="120" aria-label="Текст для кластеризации" />
+    <label>K = <span data-k-val>1.6</span>
+      <input type="range" data-k min="0.3" max="3.5" step="0.1" value="1.6" />
+    </label>
+    <button type="button" data-reset>↺ Пересобрать</button>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Зелёные линии — in-phase пары. Topic clustering как физический процесс синхронизации.</p>
+</div>
+
+### Демо 10. Осцилляторный секвенсор: текст → звук
+
+Самое буквальное представление резонанса: фазы и частоты слов озвучиваются через Web Audio. Синхронизация слышна как **консонанс**, рассинхрон — как **биения**. Detune каждой ноты пропорционален отклонению её фазы от средней. Нажмите «Играть» (нужен звук).
+
+<div class="od-widget od-sequencer">
+  <div class="od-controls">
+    <input type="text" data-input value="осциллятор резонанс фаза волна синхрон" maxlength="80" aria-label="Текст для секвенсора" />
+    <button type="button" data-play>▶ Играть</button>
+    <label>K = <span data-k-val>1.2</span>
+      <input type="range" data-k min="0" max="3" step="0.1" value="1.2" />
+    </label>
+    <button type="button" data-reset>↺ Пересобрать</button>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Резонанс становится слышимым: при высоком K ноты сближаются по фазе → чище звучание.</p>
+</div>
+
 ---
 
 ## Project Omega и Ed v1.0 — архитектура Edward
@@ -470,6 +588,17 @@ PRISM достигает до **96% acquisition** новых концептов 
 2. **Inference Energy** — инновация из цикла рассуждения, независимая от начального входа.
 
 Это переносит winner-take-all динамику Курамото на уровень **action selection**: «синхронизировавшийся» инструмент побеждает и исполняется.
+
+**Демо 6. Action selection по энергии.** Пять инструментов копят энергию: синяя часть — Pragmatic (мгновенный рефлекс от запроса), оранжевая — Inference (капает из цикла рассуждения). Кто первым перешёл красный порог — «срабатывает» (вспышка) и обнуляется. Никакого промпт-роутинга: чистый winner-take-all.
+
+<div class="od-widget od-action-energy">
+  <div class="od-controls">
+    <button type="button" data-query>+ Новый запрос</button>
+    <button type="button" data-reset>↺ Сброс</button>
+  </div>
+  <div class="od-host"></div>
+  <p class="od-caption">Ed v1.0: действие эмерджентно возникает при достижении энергетического порога, а не выбирается роутером.</p>
+</div>
 
 ```mermaid
 flowchart TB

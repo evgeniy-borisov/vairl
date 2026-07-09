@@ -656,6 +656,90 @@ nav a {
     color: #8b9cff;
 }
 
+/* Oscillatory demos (p5.js) — общий каркас виджетов */
+.od-widget {
+    margin: 28px 0 24px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--widget-bg);
+    overflow: hidden;
+}
+
+.od-widget .od-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--widget-controls);
+}
+
+.od-widget .od-controls label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.od-widget .od-controls input[type="text"] {
+    flex: 1;
+    min-width: 160px;
+    padding: 6px 10px;
+    border: 1px solid var(--widget-btn-border);
+    border-radius: 6px;
+    background: var(--widget-btn-bg);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: inherit;
+}
+
+.od-widget .od-controls button {
+    padding: 6px 12px;
+    border: 1px solid var(--widget-btn-border);
+    border-radius: 6px;
+    background: var(--widget-btn-bg);
+    color: var(--widget-btn-text);
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.od-widget .od-controls button.active {
+    background: var(--btn-active-bg);
+    color: var(--btn-active-text);
+    border-color: var(--accent);
+}
+
+.od-widget .od-controls input[type="range"] {
+    width: 100px;
+    accent-color: var(--accent);
+}
+
+.od-widget .od-host {
+    background: #0a0f1a;
+    min-height: 300px;
+}
+
+.od-widget .od-host canvas {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+}
+
+.od-widget .od-caption {
+    margin: 0;
+    padding: 8px 14px 12px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+[data-theme="dark"] .od-widget .od-host {
+    background: #060a12;
+}
+
 /* Oscillatory text network (p5.js) */
 .oscillatory-network-widget {
     margin: 32px 0 28px;
