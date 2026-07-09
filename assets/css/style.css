@@ -656,6 +656,132 @@ nav a {
     color: #8b9cff;
 }
 
+/* Oscillatory text network (p5.js) */
+.oscillatory-network-widget {
+    margin: 32px 0 28px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--widget-bg);
+    overflow: hidden;
+}
+
+.oscillatory-network-widget .onn-intro {
+    padding: 12px 14px 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin: 0;
+}
+
+.oscillatory-network-widget .onn-pipeline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 6px;
+    padding: 10px 14px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.oscillatory-network-widget .onn-pipeline span {
+    padding: 4px 8px;
+    background: var(--bg-secondary);
+    border-radius: 5px;
+    border-left: 3px solid var(--border);
+}
+
+.oscillatory-network-widget .onn-pipeline span.onn-stage-on {
+    border-left-color: var(--accent);
+    color: var(--text-secondary);
+}
+
+.oscillatory-network-widget .onn-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: center;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    background: var(--widget-controls);
+}
+
+.oscillatory-network-widget .onn-controls label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.oscillatory-network-widget .onn-controls input[type="text"] {
+    flex: 1;
+    min-width: 160px;
+    padding: 6px 10px;
+    border: 1px solid var(--widget-btn-border);
+    border-radius: 6px;
+    background: var(--widget-btn-bg);
+    color: var(--text);
+    font-size: 0.85rem;
+}
+
+.oscillatory-network-widget .onn-controls select,
+.oscillatory-network-widget .onn-controls button {
+    padding: 6px 12px;
+    border: 1px solid var(--widget-btn-border);
+    border-radius: 6px;
+    background: var(--widget-btn-bg);
+    color: var(--widget-btn-text);
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.oscillatory-network-widget .onn-controls button.active {
+    background: var(--btn-active-bg);
+    color: var(--btn-active-text);
+    border-color: var(--accent);
+}
+
+.oscillatory-network-widget .onn-controls input[type="range"] {
+    width: 80px;
+    accent-color: var(--accent);
+}
+
+.oscillatory-network-widget .onn-sketch-host {
+    background: #0a0f1a;
+    min-height: 320px;
+}
+
+.oscillatory-network-widget .onn-sketch-host canvas {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+}
+
+.oscillatory-network-widget .onn-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding: 10px 14px 12px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-light);
+}
+
+.oscillatory-network-widget .onn-legend .leg-inp { color: #22d3ee; }
+.oscillatory-network-widget .onn-legend .leg-phase { color: #f59e0b; }
+.oscillatory-network-widget .onn-legend .leg-res { color: #34d399; }
+.oscillatory-network-widget .onn-legend .leg-wave { color: #a78bfa; }
+
+.oscillatory-network-widget .phase-portrait-caption {
+    margin: 0;
+    padding: 0 14px 12px;
+}
+
+[data-theme="dark"] .oscillatory-network-widget .onn-sketch-host {
+    background: #060a12;
+}
+
 /* Fullscreen */
 .nn-phylogeny-widget:fullscreen,
 .nn-phylogeny-widget.nn-is-fullscreen:-webkit-full-screen {

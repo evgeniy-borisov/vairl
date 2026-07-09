@@ -2,7 +2,7 @@
 layout: post
 title: "Осцилляторные нейросети: синхронизация Курамото, гиперфазоры и волновое внимание"
 date: 2026-07-08 18:00:00 +0300
-excerpt: "Обзор нейросетей на базе осцилляций: принципы, архитектуры, SOTA 2024–2026, задачи и отдельный разбор генерации текста. От AKOrN и KoPE до Spectral Resonance Attention и Active Inference."
+excerpt: "Осцилляторные нейросети: как фаза распространяет информацию, связь с V-JEPA и world models, Курамото, гиперфазоры, KoPE и волновое внимание. SOTA 2024–2026."
 lang: ru
 image: /assets/images/oscillatory-neural-networks.svg
 visibility: public
@@ -12,7 +12,9 @@ review_status: draft
 
 Стандартный нейрон — пороговый переключатель: входы суммируются, проходят через нелинейность, выход — скаляр. Но в биологии нейроны часто ведут себя как **осцилляторы**: у них есть фаза, частота, амплитуда, и смысл кодируется не только «сколько сработало», но и **когда** и **в какой фазе** относительно соседей. Последние два года это перестало быть только нейробиологической метафорой: появились масштабируемые архитектуры, где синхронизация Курамото, комплексные фазоры и волновое внимание конкурируют с softmax-attention на реальных задачах.
 
-Ниже — принципы, варианты реализации, текущая обстановка (SOTA), ссылки на ключевые статьи, перечень решаемых задач и отдельный раздел про **генерацию текста**. В конце — архитектура [**Edward**](https://www.linkedin.com/in/edward2006/): Project Omega (гиперфазоры в 128D latent space, Spectral Resonance Attention) и биологический слой Ed v1.0.
+Ниже — принципы, **как именно распространяется информация** в осцилляторных сетях, связь с **world models и V-JEPA**, варианты реализации, текущая обстановка (SOTA), ссылки на ключевые статьи, перечень решаемых задач и отдельный раздел про **генерацию текста**. В конце — архитектура [**Edward**](https://www.linkedin.com/in/edward2006/): Project Omega (гиперфазоры в 128D latent space, Spectral Resonance Attention) и биологический слой Ed v1.0.
+
+Связанные материалы: [Mamba и world models](/vairl/blog/2026/07/06/mamba-world-models-ru/), [фазовый портрет агента](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/), [критичность и фазовые переходы](/vairl/blog/2026/07/04/criticality-neurons-jamming-phase-transitions-ru/).
 
 <figure style="margin: 2em auto; text-align: center;">
   <img src="/vairl/assets/images/oscillatory-neural-networks.svg" alt="Схема осцилляторных нейросетей: гиперфазор, синхронизация Курамото, Spectral Resonance Attention, Active Inference" style="max-width: 100%; height: auto; display: block; margin: 0 auto 0.75em;" />
@@ -56,6 +58,252 @@ $$\dot{\theta}_i = \omega_i + \frac{K}{N}\sum_{j=1}^{N} \sin(\theta_j - \theta_i
 $$\text{resonance}(z_i, z_j) = |z_i| \cdot |z_j| \cdot \cos(\theta_i - \theta_j)$$
 
 Интерференция волн заменяет квадратичный тензор внимания. Сложность по памяти может оставаться **O(n)** при потоковой передаче волны вдоль последовательности — принцип Spectral Resonance Attention (SRA), описанный ниже.
+
+### Интерактив: текст через осцилляторную сеть (p5.js)
+
+Каждое слово — гиперфазор; слова по одному входят в сеть (**поток**), связываются по Курамото, вдоль цепочки бежит волна SRA, внизу появляются **phase-locked** кластеры. Наведите на слово — мини-комплексная плоскость. Полноэкранно: [oscillatory-text-network.html]({{ '/oscillatory-text-network.html' | relative_url }}).
+
+<div id="oscillatory-network-demo" class="oscillatory-network-widget phase-portrait-widget">
+  <p class="onn-intro">Введите фразу или выберите пример. Увеличьте <strong>K</strong>, чтобы ускорить синхронизацию фаз.</p>
+  <div class="onn-pipeline" aria-hidden="true">
+    <span data-onn-stage class="onn-stage-on">① Ввод</span>
+    <span data-onn-stage>② Гиперфазоры</span>
+    <span data-onn-stage>③ Coupling</span>
+    <span data-onn-stage>④ SRA волна</span>
+    <span data-onn-stage>⑤ Phase lock</span>
+  </div>
+  <div class="onn-controls">
+    <input type="text" data-onn-input value="нейросеть синхронизирует фазы слов" maxlength="80" aria-label="Текст для осцилляторной сети" />
+    <select data-onn-preset aria-label="Пример фразы">
+      <option value="">Пример…</option>
+      <option value="осциллятор резонирует с текстом">Резонанс</option>
+      <option value="курамото фаза волна внимание">Курамото</option>
+      <option value="active inference phase locking">Active inference</option>
+      <option value="project omega hyperphasor latent">Project Omega</option>
+    </select>
+    <button type="button" data-onn-play class="active">⏸ Пауза</button>
+    <button type="button" data-onn-reset>↺ Сброс</button>
+    <label>K = <span data-onn-k-val>1.4</span>
+      <input type="range" data-onn-k min="0.2" max="3" step="0.1" value="1.4" />
+    </label>
+    <label>Скорость
+      <input type="range" data-onn-speed min="0.3" max="2.5" step="0.1" value="1" />
+    </label>
+  </div>
+  <div class="onn-sketch-host" aria-label="Визуализация осцилляторной сети"></div>
+  <div class="onn-legend" aria-hidden="true">
+    <span class="leg-inp">● ввод / активация</span>
+    <span class="leg-phase">● фаза θ</span>
+    <span class="leg-res">● резонанс cos(Δθ)</span>
+    <span class="leg-wave">● волна SRA</span>
+  </div>
+  <p class="phase-portrait-caption">p5.js · Kuramoto coupling · Spectral Resonance Attention · наведите на слово для фазора в ℂ</p>
+</div>
+
+<script src="{{ '/assets/js/oscillatory-text-network.js' | relative_url }}"></script>
+
+| Этап | Что видно на демо |
+|------|-------------------|
+| **Поток** | Слова активируются по одному — как токены, входящие в latent |
+| **Coupling** | Зелёные связи — сильный резонанс; соседние слова связаны сильнее |
+| **SRA** | Фиолетовая волна — сумма осцилляторов без матрицы attention |
+| **Phase lock** | Группы слов с выровненной фазой (binding без slots) |
+
+---
+
+## Как распространяется информация
+
+В feedforward-сети сигнал проходит **слой за слоем**: $h^{(l+1)} = \sigma(W h^{(l)})$. В осцилляторной сети информация — это не скаляр на выходе нейрона, а **эволюция фазового состояния** всей системы. Распространение — физический процесс на многообразии фаз $(S^1)^N$ или $\mathbb{C}^d$.
+
+### Три механизма передачи
+
+| Механизм | Уравнение / идея | Что несёт | Аналог в ML |
+|----------|------------------|-----------|-------------|
+| **Фазовое стягивание** | $\dot\theta_i \propto \sum_j K_{ij}\sin(\theta_j - \theta_i)$ | «Похожие» узлы выравнивают фазу → binding | Softmax attention, slot binding |
+| **Частотная селекция** | Осцилляторы с близкими $\omega_i$ синхронизируются первыми | Кластеризация по «ритму» признака | KuramotoGNN frequency sync |
+| **Бегущие волны** | Градиент фазы $\nabla\theta$ по пространству/слоям | Направленная передача без all-to-all | Causal conv, SSM scan |
+
+```mermaid
+flowchart LR
+  subgraph input ["Вход"]
+    STIM[Стимул / токены]
+  end
+  subgraph propagate ["Распространение"]
+    PC[Phase coupling\nK_ij sin Δθ]
+    PL[Phase locking\nк аттрактору]
+    TW[Traveling wave\nградиент фазы]
+  end
+  subgraph readout ["Считывание"]
+    BIND[Bound object\nin-phase cluster]
+    MEM[Attractor memory\nphase-locked pattern]
+    OUT[Resonance score\nΣ cos Δθ_ij]
+  end
+  STIM --> PC --> PL --> BIND
+  PC --> TW --> OUT
+  PL --> MEM
+```
+
+### Пошаговая динамика (один forward pass)
+
+1. **Инициализация.** Каждый узел $i$ получает $(r_i, \theta_i, \omega_i)$ из входа: пиксель, токен, latent-вектор проецируется в амплитуду и фазу (KoPE, AKOrN) или в гиперфазор $z_i \in \mathbb{C}^d$.
+
+2. **Локальное coupling.** Соседи тянут фазы друг к другу через $\sin(\theta_j - \theta_i)$. Сила $K_{ij}$ learnable (матрица связей, attention-mask, граф). Информация **не телепортируется** за один шаг — она **диффундирует** по сети, как тепло по решётке.
+
+3. **Релаксация к равновесию.** Вместо фиксированного числа слоёв — интеграция ОДУ до steady state (SSA даёт **closed-form** этого равновесия, обходя дорогой ODE-solver). Смысл: сеть **релаксирует** к конфигурации минимальной «энергии» связей — прямой родственник [Hopfield network](https://arxiv.org/abs/1410.3831) и oscillatory Hopfield ([Kuramoto associative memory](https://www.arxiv.org/pdf/2604.01469)).
+
+4. **Считывание.** После сходимости:
+   - **кластеры in-phase** → связанные признаки (object);
+   - **разность фаз** $\Delta\theta_{ij}$ → отношение между концептами;
+   - **амплитуда** $r_i$ → salience / confidence.
+
+### Что кодируется: не rate, а отношение
+
+В классической нейронауке firing rate кодирует «сколько». В ONN ключевой канал — **межфазовая корреляция**:
+
+- два осциллятора **in-phase** ($\Delta\theta \approx 0$) → «принадлежат одному объекту»;
+- **anti-phase** ($\Delta\theta \approx \pi$) → конкуренция, взаимное подавление;
+- **phase lag** $\Delta\theta = \text{const}$ → упорядоченная последовательность (синтаксис, причинность).
+
+Это **относительное** кодирование: абсолютная фаза не важна (gauge symmetry), важны **разности** — как в фазовом пространстве ОДУ важны не координаты, а траектория и attractor geometry.
+
+### Скорость и дальность распространения
+
+| Параметр | Эффект |
+|----------|--------|
+| $K$ (сила связи) | Выше $K$ → быстрее sync, но риск **over-smoothing** (все фазы слиплись) |
+| Число шагов интеграции | Больше шагов → дальше по графу «доходит» сигнал |
+| $\omega_i$ dispersion | Разброс частот → selective sync только похожих; сохраняет различимость |
+| Asymmetric $K_{ij}$ | Направленный поток (AKOrN: symmetry-breaking term $\mathbf{C}$) |
+| Top-down feedback | KomplexNet, predictive coding — медленная волна «предсказания» модулирует быструю «ошибку» |
+
+**Order parameter** Курамото $r e^{i\psi} = \frac{1}{N}\sum_j e^{i\theta_j}$: при $r \to 1$ информация **глобально** согласована; при $r \ll 1$ — распределённая, локальная. Это измеримый аналог «насколько контекст слипся» — родственник метрик coherence в [agent control loops](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/).
+
+### Отличие от Transformer forward pass
+
+| | Transformer | Осцилляторная сеть |
+|---|-------------|-------------------|
+| **Один шаг** | $O(n^2)$ attention over all pairs | Локальный coupling; глобальность через итерации |
+| **Память** | KV-cache растёт с $n$ | Фазовое состояние фиксированного размера $N$ |
+| **Семантика связи** | $\exp(q \cdot k)$ | $\cos(\theta_i - \theta_j)$, phase-lock |
+| **Динамика** | Feedforward depth = discrete layers | Continuous relaxation / equilibration |
+| **Аттракторы** | Неявные в весах | Явные phase-locked patterns (память) |
+
+---
+
+## Связь с world models, V-JEPA и фазовым пространством
+
+Осцилляторные сети и [V-JEPA](https://ai.meta.com/vjepa/) решают **смежные** задачи на разных координатах одного и того же фазового портрета.
+
+### Общая постановка
+
+Любая модель мира ищет координаты $s$, в которых динамика **маркoва**:
+
+$$s_{t+1} = F(s_t, a_t) \quad \text{или} \quad \dot{s} = f(s, u)$$
+
+| Парадигма | Что такое $s$ | Как учится $F$ |
+|-----------|---------------|----------------|
+| **Takens / delay embedding** | $(y_t, y_{t-\tau}, \ldots)$ | Теорема, не learn |
+| **Neural ODE** | $z \in \mathbb{R}^n$ | $\dot{z} = f_\theta(z)$ |
+| **V-JEPA** | ViT embedding patches | Mask-prediction в rep. space |
+| **Neural operator (FNO)** | Latent field on grid | Operator $G: u \mapsto v$ |
+| **ONN / Kuramoto** | $(r_i, \theta_i)$ на торе | Phase coupling → attractor |
+
+Все — попытки **сжать** высокомерное наблюдение в пространство, где **траектория предсказуема**. Подробнее про линию Takens → JEPA: раздел JEPA в [Mamba и world models](/vairl/blog/2026/07/06/mamba-world-models-ru/).
+
+### V-JEPA = амплитуда; ONN = фаза
+
+**V-JEPA 2** (Meta FAIR, LeCun et al.) строит **«глаза»**: encoder выучивает representation video-patches, predictor — динамику в embedding space без реконструкции пикселей. Это world model в **слабом** смысле: есть $z_{t+1} \approx P(z_t)$, но координаты $z$ — скалярные векторы в $\mathbb{R}^D$, без явной **фазовой** структуры.
+
+**Осцилляторные сети** добавляют вторую ось: $z_i = r_i e^{i\theta_i}$. Фаза $\theta_i$ кодирует **положение на attractor** относительно соседей — binding, порядок, синхронизацию. В терминах [фазового портрета](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/):
+
+- V-JEPA latent — точка в $\mathbb{R}^D$ (положение на многообразии наблюдений);
+- ONN state — точка на **торе** $(S^1)^N$ (относительные углы между компонентами).
+
+### KoPE: прямой мост ViT ↔ Курамото
+
+**KoPE** ([Microsoft, arXiv:2604.07904](https://arxiv.org/html/2604.07904)) — буквально вставляет Kuramoto dynamics **внутрь ViT**: фазы токенов эволюционируют с data-dependent coupling и модулируют attention через комплексные вращения. Backbone V-JEPA — тоже ViT. Стек:
+
+```
+Video → ViT patches (V-JEPA encoder) → embeddings z_i
+              ↓ + KoPE / phase head
+        (r_i, θ_i) с Kuramoto coupling → binding + propagation
+              ↓
+        V-JEPA 2-AC predictor → planning в latent
+```
+
+«Eyes» (V-JEPA) дают **что** видно; фазовый слой (KoPE/ONN) — **как связаны** части сцены во времени и пространстве.
+
+### Predictive coding: одна иерархия, два ритма
+
+В [predictive coding с осцилляциями](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1013469) медленные ритмы (theta/alpha) несут **top-down prediction**, быстрые (gamma) — **prediction error**. Это изоморфно JEPA:
+
+| Predictive coding | JEPA / V-JEPA |
+|-------------------|---------------|
+| Медленное предсказание | Predictor $P_\phi$ в latent |
+| Быстрая ошибка | Loss на masked / unpredicted regions |
+| Phase-amplitude coupling | Взвешивание precision ошибки |
+| Free energy minimization | Stop-gradient + EMA target (anti-collapse) |
+
+Информация в такой иерархии распространяется **волнами**: prediction спускается сверху (медленная фаза), error поднимается снизу (быстрая). ONN формализует этот message passing как **coupled oscillators**; V-JEPA — как **masked representation prediction** на web-scale video.
+
+### Neural ODE vs Kuramoto ODE
+
+[JEPA + Neural ODE](https://arxiv.org/html/2508.10489) (Ulmen et al., 2025): predictor внутри ODE-integrator, contractive loss на latent — **гладкое** фазовое пространство для маятника из images.
+
+Kuramoto — другой vector field на том же многообразии:
+
+$$\dot{\theta}_i = \omega_i + \sum_j K_{ij} \sin(\theta_j - \theta_i)$$
+
+Оба — **continuous-time dynamics** в latent; Kuramoto добавляет **синхронизацию** как attractor mechanism, Neural ODE — произвольный $f_\theta$. Гибрид: amplitude dynamics (Neural ODE / V-JEPA-AC) + phase binding (Kuramoto layer).
+
+### Ассоциативная память и world model rollout
+
+Oscillatory Hopfield ([arXiv:2604.01469](https://www.arxiv.org/pdf/2604.01469)): память = **stable phase-locked configuration**; noisy input **релаксирует** к ближайшему attractor — как retrieval в Hopfield, но на торе фаз.
+
+V-JEPA 2-AC rollout в latent для robot MPC — **forward dynamics** в embedding space. ONN retrieval — **inverse**: по частичному наблюдению найти attractor (полный pattern). Вместе:
+
+- **rollout** (V-JEPA-AC): «что будет, если действую так»;
+- **phase relaxation** (ONN): «к какому знакомому состоянию это относится».
+
+### Сводная карта экосистемы
+
+```mermaid
+flowchart TB
+  subgraph observe ["Наблюдение"]
+    VID[Video / sensors]
+  end
+  subgraph latent ["Latent / фазовое пространство"]
+    VJEPA[V-JEPA encoder\nz ∈ ℝ^D]
+    PHASE[KoPE / Kuramoto\nθ on S¹]
+  end
+  subgraph dynamics ["Динамика"]
+    NODE[Neural ODE\nẋ = f_θ]
+    VAC[V-JEPA 2-AC\nz_t+1 = P(z_t,a_t)]
+    KUR[Kuramoto coupling\nphase relaxation]
+  end
+  subgraph act ["Действие"]
+    MPC[MPC planning]
+    BIND[Object binding]
+  end
+  VID --> VJEPA --> PHASE
+  VJEPA --> VAC --> MPC
+  PHASE --> KUR --> BIND
+  VJEPA --> NODE
+```
+
+### Практический вывод
+
+Осцилляторные сети — не конкурент V-JEPA, а **комplement**: world model учит **предсказуемую динамику** в amplitude-latent; ONN учит **как информация связывается и распространяется** через phase coupling. Для агентного стека 2026 разумная схема:
+
+| Слой | Технология | Функция |
+|------|------------|---------|
+| Perception | V-JEPA encoder | «Глаза», $z_t$ из video |
+| Binding / context | KoPE, AKOrN, SSA | Phase propagation, object glue |
+| Dynamics | V-JEPA 2-AC / Mamba / Neural ODE | Rollout, «что будет» |
+| Reasoning | LLM | Язык, цели, decomposition |
+| Control | MPC + FSM | Безопасное исполнение |
+
+Связь с [критичностью](/vairl/blog/2026/07/04/criticality-neurons-jamming-phase-transitions-ru/): сеть осцилляторов у **критической** силы связи $K \approx K_c$ максимизирует дальность корреляций — тот же принцип, что у коры на границе фазового перехода и у agent control loop на границе устойчивости.
 
 ---
 
@@ -268,6 +516,10 @@ flowchart TB
 | PRISM — Language as Wave | 2025 | [arXiv:2512.01208](https://arxiv.org/html/2512.01208) |
 | COLM — Complex Oscillating LM | 2026 | [GitHub](https://github.com/Eden-Eldith/COLM) |
 | CVNN for Signal Processing | 2023 | [arXiv:2309.07948](https://arxiv.org/abs/2309.07948) |
+| V-JEPA 2 — world model Meta FAIR | 2025 | [arXiv:2506.09985](https://arxiv.org/abs/2506.09985) |
+| JEPA + Neural ODE state-space | 2025 | [arXiv:2508.10489](https://arxiv.org/html/2508.10489) |
+| Oscillatory Hopfield / Kuramoto memory | 2026 | [arXiv:2604.01469](https://www.arxiv.org/pdf/2604.01469) |
+| Computing with oscillators (обзор) | 2024 | [npj Unconventional Computing](https://www.nature.com/articles/s44335-024-00015-z) |
 | Predictive coding oscillations | 2024 | [PLOS Comp Biol](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1013469) |
 | Alpha waves & predictive coding | 2019 | [PLOS Biology](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3000487) |
 | Project Omega, Ed v1.0, SRA, Hyperphasors | — | [Edward (LinkedIn)](https://www.linkedin.com/in/edward2006/) |
@@ -276,7 +528,7 @@ flowchart TB
 
 ## Выводы
 
-Осцилляторные нейросети — не маргинальная ветвь, а **перезагрузка примитива нейрона**: от порога к фазе. В 2024–2026 это уже даёт измеримые выигрыши в object discovery (AKOrN), efficiency ViT (KoPE), графах (KuramotoGNN), temporal SNN (Rhythm-SNN) и — самое интригующее — в **генерации текста** через комплексные осцилляторы (COLM, PRISM) и oscillator attention.
+Осцилляторные нейросети — не маргинальная ветвь, а **перезагрузка примитива нейрона**: от порога к фазе. Информация здесь распространяется не матричным умножением, а **phase coupling, relaxation к attractor и интерференцией** — механизм, который на стыке с [V-JEPA](/vairl/blog/2026/07/06/mamba-world-models-ru/) и [фазовым пространством динамических систем](/vairl/blog/2026/06/29/agent-control-loop-stability-ru/) даёт полный agent stack: perception (amplitude-latent) + binding (phase) + dynamics (rollout) + reasoning (LLM).
 
 Главные преимущества: binding без slots, линейная или линеаритмическая сложность, естественная sparsity, совместимость с физическими вычислителями, связь с predictive coding и active inference.
 
