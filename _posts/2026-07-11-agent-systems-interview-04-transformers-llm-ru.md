@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Этап 1: трансформеры и LLM"
-date: 2026-07-11 10:00:00 +0300
+date: 2026-07-10 10:00:00 +0300
 excerpt: "Блиц-вопросы по attention, decoding, hallucination и оценке LLM в агентных системах."
 lang: ru
 image: /assets/images/best-ai-agent-specialist.svg
@@ -12,7 +12,7 @@ series: agent-systems-interview
 series_part: 4
 ---
 
-*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/11/agent-systems-interview-ru/) · часть 4 из 12*
+*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 4 из 12*
 
 Эта часть нужна для уверенных ответов про внутреннюю механику LLM и практические ограничения, влияющие на дизайн агентных систем.
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Этап 2: проектирование agentic-паттернов"
-date: 2026-07-11 10:00:00 +0300
+date: 2026-07-10 10:00:00 +0300
 excerpt: "Design-кейсы: ReAct, рефлексия, супервайзер и мультиагентные дебаты."
 lang: ru
 image: /assets/images/best-ai-agent-specialist.svg
@@ -12,7 +12,7 @@ series: agent-systems-interview
 series_part: 9
 ---
 
-*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/11/agent-systems-interview-ru/) · часть 9 из 12*
+*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 9 из 12*
 
 Эта подстатья тренирует выбор и композицию паттернов (ReAct, рефлексия, супервайзер, дебаты, планирование) под конкретную задачу и бюджет.
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Этап 1: Python, asyncio, typing, dataclasses, Pydantic"
-date: 2026-07-11 10:00:00 +0300
+date: 2026-07-10 10:00:00 +0300
 excerpt: "Блиц-вопросы по Python для платформы агентных систем: asyncio, typing, Pydantic, таймауты."
 lang: ru
 image: /assets/images/best-ai-agent-specialist.svg
@@ -12,7 +12,7 @@ series: agent-systems-interview
 series_part: 1
 ---
 
-*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/11/agent-systems-interview-ru/) · часть 1 из 12*
+*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 1 из 12*
 
 Цель этой подстатьи — отработать блиц-ответы по Python-основе, которая напрямую нужна для реализации генератора пайплайнов, оркестратора и агентных микросервисов.
 

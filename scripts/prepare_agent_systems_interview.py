@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL = ROOT / "publications/local/agent-systems-interview"
 PUBLIC = ROOT / "publications/public"
-DATE = "2026-07-11"
+DATE = "2026-07-10"
 TIME_BASE = "10:00:00 +0300"
 IMAGE = "/assets/images/best-ai-agent-specialist.svg"
 INDEX_SLUG = "agent-systems-interview-ru"
@@ -110,21 +110,21 @@ FILES = [
 ]
 
 LINK_MAP = {
-    "./01-python-async-typing-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-01-python-async-typing-ru/",
-    "./02-data-structures-hash-tables-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-02-data-structures-hash-tables-ru/",
-    "./03-ml-metrics-algorithms-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-03-ml-metrics-algorithms-ru/",
-    "./04-transformers-llm-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-04-transformers-llm-ru/",
-    "./05-docker-infra-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-05-docker-infra-ru/",
-    "./06-pipeline-generator-design-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-06-pipeline-generator-design-ru/",
-    "./07-dag-orchestrator-design-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-07-dag-orchestrator-design-ru/",
-    "./08-evolutionary-engine-design-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-08-evolutionary-engine-design-ru/",
-    "./09-agentic-patterns-design-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-09-agentic-patterns-design-ru/",
-    "./10-memory-rag-design-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-10-memory-rag-design-ru/",
-    "./11-tool-use-design-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-11-tool-use-design-ru/",
-    "./12-evaluation-benchmarking-design-ru.md": f"/vairl/blog/2026/07/11/agent-systems-interview-12-evaluation-benchmarking-design-ru/",
+    "./01-python-async-typing-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-01-python-async-typing-ru/",
+    "./02-data-structures-hash-tables-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-02-data-structures-hash-tables-ru/",
+    "./03-ml-metrics-algorithms-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-03-ml-metrics-algorithms-ru/",
+    "./04-transformers-llm-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-04-transformers-llm-ru/",
+    "./05-docker-infra-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-05-docker-infra-ru/",
+    "./06-pipeline-generator-design-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-06-pipeline-generator-design-ru/",
+    "./07-dag-orchestrator-design-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-07-dag-orchestrator-design-ru/",
+    "./08-evolutionary-engine-design-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-08-evolutionary-engine-design-ru/",
+    "./09-agentic-patterns-design-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-09-agentic-patterns-design-ru/",
+    "./10-memory-rag-design-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-10-memory-rag-design-ru/",
+    "./11-tool-use-design-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-11-tool-use-design-ru/",
+    "./12-evaluation-benchmarking-design-ru.md": f"/vairl/blog/2026/07/10/agent-systems-interview-12-evaluation-benchmarking-design-ru/",
 }
 
-INDEX_URL = f"/vairl/blog/2026/07/11/{INDEX_SLUG}/"
+INDEX_URL = f"/vairl/blog/2026/07/10/{INDEX_SLUG}/"
 
 
 def strip_front_matter(text: str) -> str:

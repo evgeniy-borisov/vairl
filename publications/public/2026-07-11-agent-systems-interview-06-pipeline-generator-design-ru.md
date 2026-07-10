@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Этап 2: проектирование генератора агентных пайплайнов"
-date: 2026-07-11 10:00:00 +0300
+date: 2026-07-10 10:00:00 +0300
 excerpt: "Design-кейсы: NL → исполняемый pipeline и repair-loop невалидного плана."
 lang: ru
 image: /assets/images/best-ai-agent-specialist.svg
@@ -12,7 +12,7 @@ series: agent-systems-interview
 series_part: 6
 ---
 
-*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/11/agent-systems-interview-ru/) · часть 6 из 12*
+*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 6 из 12*
 
 Эта подстатья тренирует проектирование контура `NL -> исполняемый pipeline`, что является ядром роли инженера агентных систем.
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Этап 2: проектирование evaluation и benchmarking"
-date: 2026-07-11 10:00:00 +0300
+date: 2026-07-10 10:00:00 +0300
 excerpt: "Design-кейсы: benchmark-контур, release gates и Pareto-анализ."
 lang: ru
 image: /assets/images/best-ai-agent-specialist.svg
@@ -12,7 +12,7 @@ series: agent-systems-interview
 series_part: 12
 ---
 
-*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/11/agent-systems-interview-ru/) · часть 12 из 12*
+*Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 12 из 12*
 
 Подстатья закрывает контур измерения качества: как честно сравнивать версии агентных пайплайнов и безопасно выкатывать улучшения.
 
