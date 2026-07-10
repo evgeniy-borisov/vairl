@@ -150,8 +150,12 @@ def build_front_matter(title: str, excerpt: str, part: int) -> str:
         "review_status: approved",
         "series: agent-systems-interview",
         f"series_part: {part}",
-        "---",
     ]
+    if part == 0:
+        lines.append("listed: true")
+    else:
+        lines.extend(["listed: false", "feed: false"])
+    lines.append("---")
     return "\n".join(lines)
 
 

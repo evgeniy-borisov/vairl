@@ -10,6 +10,8 @@ review_track: blog
 review_status: approved
 series: agent-systems-interview
 series_part: 2
+listed: false
+feed: false
 ---
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 2 из 12*
