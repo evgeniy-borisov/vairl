@@ -3218,3 +3218,83 @@ footer {
     color: var(--widget-btn-text);
 }
 
+/* Python async evolution (p5.js) */
+.python-async-widget {
+    margin: 28px 0 32px;
+    border: 1px solid var(--widget-btn-border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--widget-bg);
+}
+
+.python-async-widget .python-async-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: var(--widget-header);
+    border-bottom: 1px solid var(--widget-btn-border);
+}
+
+.python-async-widget .phase-portrait-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 10px 12px;
+    border: 0;
+    background: transparent;
+}
+
+.python-async-widget .phase-portrait-controls button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 11px;
+    border: 1px solid var(--widget-btn-border);
+    border-radius: 6px;
+    background: var(--widget-btn-bg);
+    color: var(--widget-btn-text);
+    cursor: pointer;
+}
+
+.python-async-widget .phase-portrait-controls button:hover,
+.python-async-widget .phase-portrait-controls button.active {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.python-async-widget .phase-portrait-controls button.active {
+    background: var(--accent-soft);
+    font-weight: 600;
+}
+
+.python-async-widget .python-async-status {
+    padding: 10px 13px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.python-async-widget .python-async-canvas {
+    min-height: 250px;
+    background: var(--widget-canvas-bg);
+}
+
+.python-async-widget .python-async-canvas canvas {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+}
+
+.python-async-widget .phase-portrait-caption {
+    margin: 0;
+    padding: 10px 13px 13px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+    border-top: 1px solid var(--widget-btn-border);
+}
+
+@media (max-width: 540px) {
+    .python-async-widget .python-async-toolbar { align-items: flex-start; }
+    .python-async-widget .python-async-status { padding-top: 0; }
+}
