@@ -29,6 +29,16 @@
     --shadow: rgba(102, 126, 234, 0.06);
     --gradient-accent: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.1));
     --transition: 0.2s ease;
+    --code-text: #24292f;
+    --code-keyword: #cf222e;
+    --code-string: #0a3069;
+    --code-comment: #6e7781;
+    --code-function: #8250df;
+    --code-class: #953800;
+    --code-builtin: #0550ae;
+    --code-number: #0550ae;
+    --code-decorator: #8250df;
+    --code-operator: #24292f;
 }
 
 [data-theme="dark"] {
@@ -60,6 +70,16 @@
     --widget-canvas-bg: #0e0e14;
     --shadow: rgba(0, 0, 0, 0.35);
     --gradient-accent: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.15));
+    --code-text: #e6edf3;
+    --code-keyword: #ff7b72;
+    --code-string: #a5d6ff;
+    --code-comment: #8b949e;
+    --code-function: #d2a8ff;
+    --code-class: #ffa657;
+    --code-builtin: #79c0ff;
+    --code-number: #79c0ff;
+    --code-decorator: #ffa657;
+    --code-operator: #e6edf3;
 }
 
 /* Reset and base styles */
@@ -407,6 +427,126 @@ nav a {
 .post-content pre code {
     background-color: transparent;
     padding: 0;
+}
+
+/* Rouge / Pygments syntax highlighting (Jekyll kramdown) */
+.post-content .highlighter-rouge {
+    margin: 20px 0;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--bg-code);
+}
+
+.post-content .highlighter-rouge .highlight {
+    background-color: transparent;
+    margin: 0;
+}
+
+.post-content .highlighter-rouge pre {
+    margin: 0;
+    padding: 18px 20px;
+    overflow-x: auto;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.post-content .highlighter-rouge pre code {
+    display: block;
+    background-color: transparent;
+    padding: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.84em;
+    line-height: 1.55;
+    color: var(--code-text);
+    tab-size: 4;
+}
+
+.post-content .highlight .c,
+.post-content .highlight .c1,
+.post-content .highlight .cm,
+.post-content .highlight .cp,
+.post-content .highlight .cs {
+    color: var(--code-comment);
+    font-style: italic;
+}
+
+.post-content .highlight .k,
+.post-content .highlight .kd,
+.post-content .highlight .kn,
+.post-content .highlight .kp,
+.post-content .highlight .kr,
+.post-content .highlight .kt {
+    color: var(--code-keyword);
+    font-weight: 600;
+}
+
+.post-content .highlight .s,
+.post-content .highlight .s1,
+.post-content .highlight .s2,
+.post-content .highlight .sb,
+.post-content .highlight .sc,
+.post-content .highlight .sd,
+.post-content .highlight .se,
+.post-content .highlight .sh,
+.post-content .highlight .si,
+.post-content .highlight .sr,
+.post-content .highlight .ss,
+.post-content .highlight .sx {
+    color: var(--code-string);
+}
+
+.post-content .highlight .nf,
+.post-content .highlight .fm {
+    color: var(--code-function);
+}
+
+.post-content .highlight .nc,
+.post-content .highlight .nn,
+.post-content .highlight .ne {
+    color: var(--code-class);
+    font-weight: 600;
+}
+
+.post-content .highlight .nb,
+.post-content .highlight .bp {
+    color: var(--code-builtin);
+}
+
+.post-content .highlight .m,
+.post-content .highlight .mi,
+.post-content .highlight .mf,
+.post-content .highlight .mh,
+.post-content .highlight .mo,
+.post-content .highlight .il {
+    color: var(--code-number);
+}
+
+.post-content .highlight .nd {
+    color: var(--code-decorator);
+}
+
+.post-content .highlight .o,
+.post-content .highlight .ow {
+    color: var(--code-operator);
+}
+
+.post-content .highlight .na,
+.post-content .highlight .nv,
+.post-content .highlight .vc,
+.post-content .highlight .vg,
+.post-content .highlight .vi {
+    color: var(--code-text);
+}
+
+.post-content .highlight .err {
+    color: var(--code-keyword);
+    background-color: var(--accent-soft);
+}
+
+.post-content .highlight .hll {
+    background-color: var(--accent-soft);
 }
 
 /* Embedding phase portrait (p5.js) */
