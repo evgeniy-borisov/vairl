@@ -271,8 +271,10 @@ def build_front_matter(title: str, excerpt: str, part: int, kind: str) -> str:
 
 
 def replace_local_links(body: str, url_by_local: dict[str, str]) -> str:
+    # Longer paths first so `./topic-ru.md` never shadows `./topic-code-ru.md`.
     for local_name, url in sorted(url_by_local.items(), key=lambda x: -len(x[0])):
-        body = body.replace(f"](./{local_name})", f"]({url})")
+        pattern = re.compile(rf"\]\(\./{re.escape(local_name)}\)")
+        body = pattern.sub(f"]({url})", body)
     return body
 
 
