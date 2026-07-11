@@ -1,4 +1,8 @@
-/** Interactive concurrency maps for the Python async evolution article. */
+/**
+ * Interactive Gantt-style concurrency demos for the Python async evolution article.
+ * Shared visual language: solid = CPU work, striped = I/O wait, gray = overhead,
+ * dashed = queued. Bottom occupancy row shows who owns the thread / GIL / loop.
+ */
 (function () {
   'use strict';
 
@@ -7,189 +11,456 @@
     { label: 'Поиск', color: '#22a06b' },
     { label: 'Календарь', color: '#e67e22' },
   ];
-  const EVOLUTION_TASKS = [
+  const RACE_TASKS = [
     { label: 'LLM', color: '#667eea' },
     { label: 'Поиск', color: '#22a06b' },
     { label: 'Policy', color: '#d3548c' },
   ];
-  const MODE_TITLES = {
-    sync: 'Последовательно: ожидания складываются',
-    threads: 'Потоки: I/O ждёт параллельно',
-    processes: 'Процессы: изолированные воркеры на ядрах',
-    asyncio: 'asyncio: один loop, много ожиданий',
-    actors: 'Акторы: mailbox и один владелец состояния',
-  };
 
   function palette() {
     const styles = getComputedStyle(document.documentElement);
+    const val = (name, fallback) => (styles.getPropertyValue(name).trim() || fallback);
     return {
-      bg: styles.getPropertyValue('--widget-canvas-bg').trim() || '#fafbfd',
-      panel: styles.getPropertyValue('--widget-header').trim() || '#f7f7f9',
-      text: styles.getPropertyValue('--text').trim() || '#111',
-      muted: styles.getPropertyValue('--text-muted').trim() || '#666',
-      border: styles.getPropertyValue('--border').trim() || '#e5e5e5',
-      accent: styles.getPropertyValue('--accent').trim() || '#667eea',
+      bg: val('--widget-canvas-bg', '#fafbfd'),
+      panel: val('--widget-header', '#f7f7f9'),
+      text: val('--text', '#111111'),
+      muted: val('--text-muted', '#666666'),
+      border: val('--border', '#e5e5e5'),
+      accent: val('--accent', '#667eea'),
+      dark: document.documentElement.getAttribute('data-theme') === 'dark',
     };
+  }
+
+  /* ---------- simulation models (seconds) ---------- */
+  // One I/O task: 0.1s CPU prep + 0.8s network wait + 0.1s CPU parse.
+
+  function ioTaskSegs(task, cpuStart, ioStart, parseStart) {
+    return [
+      { t0: cpuStart, t1: cpuStart + 0.1, kind: 'cpu', color: task.color },
+      { t0: ioStart, t1: ioStart + 0.8, kind: 'io', color: task.color },
+      { t0: parseStart, t1: parseStart + 0.1, kind: 'cpu', color: task.color },
+    ];
+  }
+
+  function buildSync() {
+    const rows = TASKS.map((task, i) => ({
+      label: task.label,
+      segs: ioTaskSegs(task, i, i + 0.1, i + 0.9),
+    }));
+    const occ = { label: 'Поток main', segs: rows.flatMap((r) => r.segs) };
+    return {
+      T: 3.25, wall: 3.0, cores: 1, rows, occ,
+      note: 'Пока поток ждёт сеть, он не делает ничего: задержки трёх вызовов складываются.',
+    };
+  }
+
+  function buildThreads() {
+    const rows = TASKS.map((task, i) => {
+      const segs = [];
+      if (i > 0) segs.push({ t0: 0, t1: i * 0.1, kind: 'q', color: task.color, qlabel: 'ждёт GIL' });
+      segs.push(...ioTaskSegs(task, i * 0.1, i * 0.1 + 0.1, 0.9 + i * 0.1));
+      return { label: `Поток ${i + 1} · ${task.label}`, segs };
+    });
+    const occ = {
+      label: 'GIL',
+      segs: rows.flatMap((r) => r.segs.filter((s) => s.kind === 'cpu')),
+    };
+    return {
+      T: 1.45, wall: 1.2, cores: 1, rows, occ,
+      note: 'Ожидания I/O перекрылись, но CPU-кусочки по-прежнему идут по одному: GIL передаётся между потоками.',
+    };
+  }
+
+  function buildProcesses() {
+    const rows = TASKS.map((task, i) => ({
+      label: `Процесс ${i + 1} · ядро ${i + 1}`,
+      segs: [
+        { t0: 0, t1: 0.2, kind: 'ov', color: task.color, ovlabel: 'spawn' },
+        { t0: 0.2, t1: 1.2, kind: 'cpu', color: task.color },
+        { t0: 1.2, t1: 1.35, kind: 'ov', color: task.color, ovlabel: 'IPC' },
+      ],
+    }));
+    const occ = {
+      label: '1 поток (сравнение)',
+      segs: [{ t0: 0, t1: 3.0, kind: 'ghost', color: '#999999' }],
+      ghostText: 'тот же объём CPU-работы последовательно ≈ 3.0 c',
+    };
+    return {
+      T: 3.25, wall: 1.35, cores: 3, rows, occ, cpuBound: true,
+      note: 'CPU-bound работа действительно идёт параллельно на трёх ядрах; цена — запуск процессов и сериализация данных.',
+    };
+  }
+
+  function buildAsyncio() {
+    const rows = TASKS.map((task, i) => {
+      const s = i * 0.06;
+      const ioEnd = s + 0.06 + 0.85;
+      const resume = 0.91 + i * 0.06;
+      return {
+        label: `coroutine ${task.label}`,
+        segs: [
+          { t0: s, t1: s + 0.06, kind: 'cpu', color: task.color },
+          { t0: s + 0.06, t1: ioEnd, kind: 'io', color: task.color, iolabel: 'await' },
+          { t0: resume, t1: resume + 0.06, kind: 'cpu', color: task.color },
+        ],
+      };
+    });
+    const occ = {
+      label: 'Event loop',
+      segs: rows.flatMap((r) => r.segs.filter((s) => s.kind === 'cpu')),
+      idleGap: { t0: 0.18, t1: 0.91, text: 'loop свободен — все корутины в await' },
+    };
+    return {
+      T: 1.3, wall: 1.09, cores: 1, rows, occ,
+      note: 'Один поток. Корутины отдают управление в await, loop подхватывает следующую готовую.',
+    };
+  }
+
+  function buildActors() {
+    const msg = 0.65; // 0.1 CPU + 0.45 I/O + 0.1 CPU
+    const rows = TASKS.map((task) => ({
+      label: `actor ${task.label}`,
+      segs: [
+        { t0: 0, t1: 0.1, kind: 'cpu', color: task.color },
+        { t0: 0.1, t1: 0.55, kind: 'io', color: task.color },
+        { t0: 0.55, t1: 0.65, kind: 'cpu', color: task.color },
+        { t0: 0, t1: msg, kind: 'q2', color: task.color, qlabel: 'mailbox: сообщение №2 ждёт' },
+        { t0: msg, t1: msg + 0.1, kind: 'cpu', color: task.color },
+        { t0: msg + 0.1, t1: msg + 0.55, kind: 'io', color: task.color },
+        { t0: msg + 0.55, t1: 2 * msg, kind: 'cpu', color: task.color },
+      ],
+    }));
+    return {
+      T: 1.55, wall: 1.3, cores: 1, rows, occ: null, noCpu: true,
+      note: 'Внутри актора сообщения строго по одному (второе ждёт в mailbox); разные акторы работают параллельно.',
+    };
+  }
+
+  function buildEvolution() {
+    const mk = (label, key, wall, segs) => ({ label, key, wall, segs });
+    const rows = [
+      mk('Sync', 'sync', 3.0, [0, 1, 2].flatMap((i) => [
+        { t0: i, t1: i + 0.1, kind: 'cpu', color: RACE_TASKS[i].color },
+        { t0: i + 0.1, t1: i + 0.9, kind: 'io', color: RACE_TASKS[i].color },
+        { t0: i + 0.9, t1: i + 1, kind: 'cpu', color: RACE_TASKS[i].color },
+      ])),
+      mk('Threads', 'threads', 1.2, [
+        { t0: 0, t1: 0.3, kind: 'cpu', color: '#8f7ee7' },
+        { t0: 0.3, t1: 0.9, kind: 'io', color: '#8f7ee7' },
+        { t0: 0.9, t1: 1.2, kind: 'cpu', color: '#8f7ee7' },
+      ]),
+      mk('asyncio', 'asyncio', 1.09, [
+        { t0: 0, t1: 0.18, kind: 'cpu', color: '#2f9e8f' },
+        { t0: 0.18, t1: 0.91, kind: 'io', color: '#2f9e8f' },
+        { t0: 0.91, t1: 1.09, kind: 'cpu', color: '#2f9e8f' },
+      ]),
+      mk('Actors', 'actors', 1.0, [
+        { t0: 0, t1: 0.1, kind: 'cpu', color: '#d3548c' },
+        { t0: 0.1, t1: 0.9, kind: 'io', color: '#d3548c' },
+        { t0: 0.9, t1: 1.0, kind: 'cpu', color: '#d3548c' },
+      ]),
+    ];
+    return { T: 3.25, race: true, rows, cores: 1, note: 'Одна и та же тройка вызовов. Финишный флажок — wall-clock время подхода.' };
+  }
+
+  const BUILDERS = {
+    sync: buildSync, threads: buildThreads, processes: buildProcesses,
+    asyncio: buildAsyncio, actors: buildActors, evolution: buildEvolution,
+  };
+
+  /* ---------- helpers ---------- */
+
+  function cpuUtilization(model, now) {
+    const t = Math.min(now, model.wall || model.T);
+    if (t <= 0.02) return 0;
+    let busy = 0;
+    model.rows.forEach((row) => row.segs.forEach((s) => {
+      if (s.kind !== 'cpu') return;
+      busy += Math.max(0, Math.min(t, s.t1) - s.t0);
+    }));
+    return Math.min(1, busy / (t * model.cores));
   }
 
   function setupWidget(root) {
     const mode = root.dataset.asyncMode;
+    const build = BUILDERS[mode];
+    if (!build) return;
+    const model = build();
     const host = root.querySelector('.python-async-canvas');
-    const play = root.querySelector('[data-async-play]');
-    const step = root.querySelector('[data-async-step]');
-    const reset = root.querySelector('[data-async-reset]');
+    const playBtn = root.querySelector('[data-async-play]');
+    const stepBtn = root.querySelector('[data-async-step]');
+    const resetBtn = root.querySelector('[data-async-reset]');
     const status = root.querySelector('.python-async-status');
-    let running = false;
-    let progress = 0;
-    let selected = 'sync';
-    let sketch;
 
-    function label() {
-      const shown = mode === 'evolution' ? selected : mode;
-      if (progress >= 1) return `${MODE_TITLES[shown] || shown}: завершено`;
-      return `${MODE_TITLES[shown] || shown}: ${Math.round(progress * 100)}%`;
+    let running = false;
+    let progress = 0; // [0,1] over model.T
+    let selected = 'sync';
+
+    const now = () => progress * model.T;
+
+    function statusText() {
+      const t = now().toFixed(2);
+      if (model.race || model.noCpu) return `t = ${t} c`;
+      const util = Math.round(cpuUtilization(model, now()) * 100);
+      const coreTxt = model.cores > 1 ? `${model.cores} ядра` : '1 ядро';
+      return `t = ${t} c · CPU (${coreTxt}): ${util}% занято`;
     }
-    function refreshControls() {
-      play.textContent = running ? '❚❚ Пауза' : (progress >= 1 ? '▶ Снова' : '▶ Старт');
-      status.textContent = label();
-      root.querySelectorAll('[data-async-variant]').forEach((button) => {
-        button.classList.toggle('active', button.dataset.asyncVariant === selected);
+    function refresh() {
+      playBtn.textContent = running ? '❚❚ Пауза' : (progress >= 1 ? '▶ Снова' : '▶ Старт');
+      status.textContent = statusText();
+      root.querySelectorAll('[data-async-variant]').forEach((b) => {
+        b.classList.toggle('active', b.dataset.asyncVariant === selected);
       });
     }
-    function resetSim() { running = false; progress = 0; refreshControls(); }
-    play.addEventListener('click', () => {
+
+    playBtn.addEventListener('click', () => {
       if (progress >= 1) progress = 0;
       running = !running;
-      refreshControls();
+      refresh();
     });
-    step.addEventListener('click', () => { running = false; progress = Math.min(1, progress + 0.17); refreshControls(); });
-    reset.addEventListener('click', resetSim);
-    root.querySelectorAll('[data-async-variant]').forEach((button) => {
-      button.addEventListener('click', () => { selected = button.dataset.asyncVariant; resetSim(); });
+    stepBtn.addEventListener('click', () => {
+      running = false;
+      progress = Math.min(1, progress + 1 / 6);
+      refresh();
+    });
+    resetBtn.addEventListener('click', () => { running = false; progress = 0; refresh(); });
+    root.querySelectorAll('[data-async-variant]').forEach((b) => {
+      b.addEventListener('click', () => { selected = b.dataset.asyncVariant; refresh(); });
     });
 
-    sketch = new p5((p) => {
+    const HEIGHT = model.race ? 250 : 280;
+
+    new p5((p) => {
       let width = 0;
-      const height = 250;
-      const t = () => Math.min(1, progress);
-      const text = (value, x, y, size, color, align) => {
-        p.push(); p.noStroke(); p.fill(color); p.textSize(size); p.textAlign(align || p.LEFT, p.CENTER); p.text(value, x, y); p.pop();
+
+      const LEFT = 150;
+      const RIGHT = 22;
+      const xOf = (t) => LEFT + (t / model.T) * (width - LEFT - RIGHT);
+
+      function stripedRect(x, y, w, h, color) {
+        const colors = palette();
+        p.push();
+        p.noStroke();
+        p.fill(p.color(color));
+        p.drawingContext.save();
+        p.drawingContext.globalAlpha = colors.dark ? 0.22 : 0.16;
+        p.rect(x, y, w, h, 4);
+        p.drawingContext.globalAlpha = colors.dark ? 0.5 : 0.45;
+        p.drawingContext.beginPath();
+        p.drawingContext.rect(x, y, w, h);
+        p.drawingContext.clip();
+        p.stroke(p.color(color));
+        p.strokeWeight(1.4);
+        for (let sx = x - h; sx < x + w; sx += 7) p.line(sx, y + h, sx + h, y);
+        p.drawingContext.restore();
+        p.pop();
+      }
+
+      function label(txt, x, y, size, color, align) {
+        p.push(); p.noStroke(); p.fill(color); p.textSize(size);
+        p.textAlign(align || p.LEFT, p.CENTER); p.text(txt, x, y); p.pop();
+      }
+
+      function drawSeg(seg, y, h, upTo) {
+        const colors = palette();
+        const t1 = Math.min(seg.t1, upTo);
+        if (t1 <= seg.t0 && seg.kind !== 'q' && seg.kind !== 'q2') return;
+        const x0 = xOf(seg.t0);
+        const x1 = xOf(Math.max(seg.t0, t1));
+        const wFull = xOf(seg.t1) - x0;
+
+        if (seg.kind === 'cpu') {
+          p.push(); p.noStroke(); p.fill(p.color(seg.color)); p.rect(x0, y, x1 - x0, h, 4); p.pop();
+        } else if (seg.kind === 'io') {
+          if (t1 > seg.t0) stripedRect(x0, y, x1 - x0, h, seg.color);
+          if (seg.iolabel && upTo >= seg.t0 + 0.1 && wFull > 46) {
+            label(seg.iolabel, x0 + wFull / 2, y + h / 2, 10, colors.muted, p.CENTER);
+          }
+        } else if (seg.kind === 'ov') {
+          if (t1 > seg.t0) {
+            p.push(); p.noStroke();
+            p.fill(colors.dark ? 'rgba(160,160,175,0.45)' : 'rgba(130,130,145,0.35)');
+            p.rect(x0, y, x1 - x0, h, 4); p.pop();
+            if (seg.ovlabel && wFull > 34) label(seg.ovlabel, x0 + wFull / 2, y + h / 2, 9, colors.dark ? '#ccc' : '#555', p.CENTER);
+          }
+        } else if (seg.kind === 'ghost') {
+          p.push(); p.noFill(); p.stroke(colors.border); p.strokeWeight(1.2);
+          p.rect(x0, y, wFull, h, 4); p.pop();
+          if (t1 > seg.t0) {
+            p.push(); p.noStroke();
+            p.fill(colors.dark ? 'rgba(150,150,165,0.28)' : 'rgba(140,140,155,0.22)');
+            p.rect(x0, y, x1 - x0, h, 4); p.pop();
+          }
+        } else if (seg.kind === 'q' || seg.kind === 'q2') {
+          // queued: dashed outline, only until its end or playhead
+          const qEnd = Math.min(seg.t1, upTo);
+          if (upTo <= seg.t0) return;
+          const qh = seg.kind === 'q2' ? 12 : h;
+          const qy = seg.kind === 'q2' ? y - 18 : y;
+          p.push(); p.noFill(); p.stroke(p.color(seg.color));
+          p.strokeWeight(1.1); p.drawingContext.setLineDash([4, 4]);
+          p.rect(xOf(seg.t0), qy, xOf(qEnd) - xOf(seg.t0), qh, 3);
+          p.drawingContext.setLineDash([]); p.pop();
+          if (seg.qlabel && upTo > seg.t0 + 0.08 && (seg.kind === 'q2' || upTo < seg.t1)) {
+            const txt = seg.kind === 'q2' && upTo >= seg.t1 ? `${seg.qlabel} → обработано` : seg.qlabel;
+            label(txt, xOf(seg.t0) + 6, qy + qh / 2, 9, palette().muted);
+          }
+        }
+      }
+
+      function drawAxis(yBottom) {
+        const colors = palette();
+        p.push(); p.stroke(colors.border); p.line(LEFT, yBottom, width - RIGHT, yBottom); p.pop();
+        for (let t = 0; t <= model.T + 0.001; t += 0.5) {
+          const x = xOf(t);
+          p.push(); p.stroke(colors.border); p.line(x, yBottom, x, yBottom + 4); p.pop();
+          if (x < width - RIGHT - 52) label(`${t.toFixed(1)}`, x, yBottom + 12, 9, colors.muted, p.CENTER);
+        }
+        label('секунды', width - RIGHT, yBottom + 12, 9, colors.muted, p.RIGHT);
+      }
+
+      function drawLegend(y) {
+        const colors = palette();
+        let x = LEFT;
+        p.push(); p.noStroke(); p.fill(colors.accent); p.rect(x, y - 5, 14, 10, 2); p.pop();
+        label('CPU-работа', x + 19, y, 10, colors.muted); x += 100;
+        stripedRect(x, y - 5, 14, 10, colors.accent);
+        label('ожидание I/O', x + 19, y, 10, colors.muted); x += 112;
+        if (mode === 'processes') {
+          p.push(); p.noStroke(); p.fill(colors.dark ? 'rgba(160,160,175,0.45)' : 'rgba(130,130,145,0.35)');
+          p.rect(x, y - 5, 14, 10, 2); p.pop();
+          label('overhead', x + 19, y, 10, colors.muted);
+        } else if (mode === 'threads' || mode === 'actors') {
+          p.push(); p.noFill(); p.stroke(colors.muted); p.drawingContext.setLineDash([4, 4]);
+          p.rect(x, y - 5, 14, 10, 2); p.drawingContext.setLineDash([]); p.pop();
+          label('в очереди', x + 19, y, 10, colors.muted);
+        }
+      }
+
+      function drawPlayhead(yTop, yBottom) {
+        const colors = palette();
+        const x = xOf(now());
+        p.push(); p.stroke(colors.accent); p.strokeWeight(1.4); p.line(x, yTop, x, yBottom); p.pop();
+        p.push(); p.noStroke(); p.fill(colors.accent); p.triangle(x - 5, yTop - 6, x + 5, yTop - 6, x, yTop); p.pop();
+      }
+
+      function drawStandard() {
+        const colors = palette();
+        const upTo = now();
+        drawLegend(20);
+        const laneH = 26;
+        const gap = mode === 'actors' ? 28 : 12;
+        const top = mode === 'actors' ? 58 : 40;
+        const rows = model.rows;
+        rows.forEach((row, i) => {
+          const y = top + i * (laneH + gap);
+          label(row.label, LEFT - 10, y + laneH / 2, 11.5, colors.text, p.RIGHT);
+          p.push(); p.noFill(); p.stroke(colors.border); p.rect(LEFT, y, width - LEFT - RIGHT, laneH, 4); p.pop();
+          row.segs.forEach((s) => drawSeg(s, y, laneH, upTo));
+        });
+        let y = top + rows.length * (laneH + gap) - (mode === 'actors' ? gap - 12 : 0);
+        if (model.occ) {
+          label(model.occ.label, LEFT - 10, y + laneH / 2, 11.5, colors.accent, p.RIGHT);
+          p.push(); p.noFill(); p.stroke(colors.accent); p.strokeWeight(1); p.rect(LEFT, y, width - LEFT - RIGHT, laneH, 4); p.pop();
+          model.occ.segs.forEach((s) => drawSeg(s, y, laneH, upTo));
+          if (model.occ.idleGap && upTo > model.occ.idleGap.t0 + 0.1) {
+            const g = model.occ.idleGap;
+            label(g.text, (xOf(g.t0) + xOf(g.t1)) / 2, y + laneH / 2, 9.5, colors.muted, p.CENTER);
+          }
+          if (model.occ.ghostText) {
+            label(model.occ.ghostText, xOf(1.5), y + laneH / 2, 9.5, colors.muted, p.CENTER);
+          }
+          y += laneH + gap;
+        }
+        drawAxis(y + 2);
+        drawPlayhead(34, y + 2);
+        // wall time marker
+        if (upTo >= model.wall) {
+          const x = xOf(model.wall);
+          p.push(); p.stroke(colors.text); p.strokeWeight(1); p.drawingContext.setLineDash([3, 3]);
+          p.line(x, 34, x, y + 2); p.drawingContext.setLineDash([]); p.pop();
+          if (x + 90 > width - RIGHT) {
+            label(`готово: ${model.wall.toFixed(2)} c`, x - 6, 30, 10.5, colors.text, p.RIGHT);
+          } else {
+            label(`готово: ${model.wall.toFixed(2)} c`, x + 6, 30, 10.5, colors.text);
+          }
+        }
+        label(model.note, LEFT, HEIGHT - 12, 10.5, colors.muted);
+      }
+
+      function drawRace() {
+        const colors = palette();
+        const upTo = now();
+        drawLegend(18);
+        const laneH = 24;
+        const gap = 14;
+        const top = 36;
+        model.rows.forEach((row, i) => {
+          const y = top + i * (laneH + gap);
+          const hot = selected === row.key;
+          label(row.label, LEFT - 10, y + laneH / 2, hot ? 12.5 : 11.5, hot ? colors.accent : colors.text, p.RIGHT);
+          p.push(); p.noFill(); p.stroke(hot ? colors.accent : colors.border);
+          p.strokeWeight(hot ? 1.6 : 1); p.rect(LEFT, y, width - LEFT - RIGHT, laneH, 4); p.pop();
+          row.segs.forEach((s) => drawSeg(s, y, laneH, upTo));
+          if (upTo >= row.wall) {
+            const x = xOf(row.wall);
+            p.push(); p.stroke(colors.text); p.strokeWeight(1.2);
+            p.line(x, y - 3, x, y + laneH + 3);
+            p.noStroke(); p.fill(colors.text);
+            p.triangle(x, y - 3, x + 9, y + 1, x, y + 5);
+            p.pop();
+            if (x + 60 > width - RIGHT) {
+              label(`${row.wall.toFixed(2)} c`, x - 8, y + laneH / 2, 11, colors.text, p.RIGHT);
+            } else {
+              label(`${row.wall.toFixed(2)} c`, x + 12, y + laneH / 2, 11, colors.text);
+            }
+          }
+        });
+        const yAxis = top + model.rows.length * (laneH + gap) + 2;
+        drawAxis(yAxis);
+        drawPlayhead(30, yAxis);
+        label(model.note, LEFT, HEIGHT - 10, 10.5, colors.muted);
+      }
+
+      p.setup = () => {
+        width = Math.max(320, host.clientWidth);
+        p.createCanvas(width, HEIGHT).parent(host);
+        p.textFont('system-ui, sans-serif');
+        p.noLoop();
       };
-      const round = (x, y, w, h, fill, stroke, radius) => {
-        p.push(); p.fill(fill); p.stroke(stroke); p.strokeWeight(1); p.rect(x, y, w, h, radius || 8); p.pop();
+      p.draw = () => {
+        const colors = palette();
+        p.background(colors.bg);
+        if (model.race) drawRace(); else drawStandard();
       };
-      const arrow = (x1, y1, x2, y2, color, weight) => {
-        const a = p.atan2(y2 - y1, x2 - x1);
-        p.push(); p.stroke(color); p.strokeWeight(weight || 2); p.line(x1, y1, x2, y2);
-        p.translate(x2, y2); p.rotate(a); p.noStroke(); p.fill(color); p.triangle(0, 0, -8, -4, -8, 4); p.pop();
-      };
-      const taskBar = (task, x, y, w, active, done) => {
-        round(x, y, w, 28, active ? task.color : '#00000000', active ? task.color : palette().border, 6);
-        if (active) { p.fill(task.color); p.noStroke(); p.rect(x, y, w * done, 28, 6); }
-        text(task.label, x + 10, y + 14, 12, active ? '#ffffff' : palette().text);
+      p.windowResized = () => {
+        const next = Math.max(320, host.clientWidth);
+        if (next !== width) { width = next; p.resizeCanvas(width, HEIGHT); }
       };
 
-      function drawSync(colors) {
-        text('Timeline', 16, 26, 13, colors.muted);
-        const x = 82, w = width - x - 20, segment = w / 3;
-        p.stroke(colors.border); p.line(x, 55, x + w, 55);
-        TASKS.forEach((task, i) => {
-          const start = i / 3, amount = p.constrain((t() - start) * 3, 0, 1);
-          text(task.label, 16, 88 + i * 44, 13, colors.text);
-          taskBar(task, x + i * segment, 74 + i * 44, segment - 6, amount > 0, amount);
-          text(`${i + 1} c`, x + i * segment, 48, 11, colors.muted, p.CENTER);
-        });
-        text('≈ 3 секунды wall time: следующая задача стартует только после предыдущей.', width / 2, 222, 12, colors.muted, p.CENTER);
-      }
-      function drawThreads(colors) {
-        round(14, 18, 125, 42, colors.panel, colors.border); text('Один процесс', 76, 39, 13, colors.text, p.CENTER);
-        p.push(); p.noFill(); p.stroke(colors.accent); p.strokeWeight(2); p.arc(112, 39, 16, 16, 180, 360); p.line(104, 39, 120, 39); p.pop();
-        text('GIL', 112, 67, 10, colors.accent, p.CENTER);
-        const x = 165, w = width - x - 20;
-        TASKS.forEach((task, i) => {
-          const y = 24 + i * 62, amount = p.constrain(t() * 1.25, 0, 1);
-          arrow(139, 39, x - 10, y + 14, colors.border, 1);
-          taskBar(task, x, y, w, true, amount);
-          text('I/O wait', x + w - 12, y + 14, 11, '#ffffff', p.RIGHT);
-        });
-        text('I/O освобождает GIL: три ожидания перекрываются, ≈ 1 секунда.', width / 2, 222, 12, colors.muted, p.CENTER);
-      }
-      function drawProcesses(colors) {
-        const gap = 12, boxW = (width - 32 - gap * 2) / 3;
-        TASKS.forEach((task, i) => {
-          const x = 16 + i * (boxW + gap), active = p.constrain(t() * 1.15, 0, 1);
-          round(x, 28, boxW, 126, colors.panel, task.color);
-          text(`Процесс ${i + 1}`, x + boxW / 2, 52, 13, colors.text, p.CENTER);
-          round(x + 17, 70, boxW - 34, 42, task.color, task.color); text(task.label, x + boxW / 2, 91, 12, '#fff', p.CENTER);
-          p.noStroke(); p.fill(task.color); p.circle(x + boxW / 2, 130, 10 + active * 14);
-          text(`CPU core ${i + 1}`, x + boxW / 2, 173, 11, colors.muted, p.CENTER);
-        });
-        TASKS.forEach((task, i) => arrow(width / 2, 205, 16 + i * (boxW + gap) + boxW / 2, 160, colors.muted, 1));
-        text('IPC: данные пересекают границы адресных пространств.', width / 2, 226, 12, colors.muted, p.CENTER);
-      }
-      function drawAsync(colors) {
-        const cx = 80, cy = 124, r = 42, spin = t() * p.TWO_PI * 2;
-        p.push(); p.noFill(); p.stroke(colors.accent); p.strokeWeight(3); p.circle(cx, cy, r * 2); p.rotate(spin); p.line(cx + r - 7, cy, cx + r + 7, cy); p.pop();
-        text('event loop', cx, cy, 12, colors.text, p.CENTER);
-        TASKS.forEach((task, i) => {
-          const y = 34 + i * 61, phase = (t() * 1.15 - i * 0.14 + 1) % 1;
-          const x = 155 + phase * (width - 215);
-          arrow(cx + r, cy, 150, y + 14, colors.border, 1);
-          round(155, y, width - 175, 28, colors.panel, colors.border);
-          text(`coroutine: ${task.label}`, 165, y + 14, 12, colors.text);
-          p.noStroke(); p.fill(task.color); p.circle(x, y + 14, 12);
-          text(phase < 0.68 ? 'await' : 'работа', width - 27, y + 14, 10, colors.muted, p.RIGHT);
-        });
-        text('Один поток переключается только в точках await.', width / 2, 222, 12, colors.muted, p.CENTER);
-      }
-      function drawActors(colors) {
-        const xs = [18, width / 2 - 54, width - 126];
-        TASKS.forEach((task, i) => {
-          const x = xs[i], queued = Math.min(3, Math.ceil(t() * 4 - i * 0.3));
-          round(x, 39, 108, 38, colors.panel, colors.border); text('mailbox', x + 54, 58, 12, colors.text, p.CENTER);
-          for (let q = 0; q < Math.max(0, queued); q++) { p.noStroke(); p.fill(task.color); p.rect(x + 12 + q * 18, 85, 13, 13, 3); }
-          arrow(x + 54, 103, x + 54, 132, task.color, 2);
-          round(x, 136, 108, 44, task.color, task.color); text(`actor: ${task.label}`, x + 54, 158, 12, '#fff', p.CENTER);
-          text('по одному сообщению', x + 54, 198, 10, colors.muted, p.CENTER);
-        });
-        text('Очередь задаёт порядок; состояние меняет только его владелец.', width / 2, 228, 12, colors.muted, p.CENTER);
-      }
-      function drawEvolution(colors) {
-        const variants = ['sync', 'threads', 'asyncio', 'actors'];
-        const titles = { sync: 'Sync', threads: 'Threads', asyncio: 'asyncio', actors: 'Actors' };
-        const colW = (width - 26) / 4;
-        variants.forEach((variant, index) => {
-          const x = 8 + index * colW, active = selected === variant;
-          round(x, 20, colW - 6, 170, active ? colors.panel : colors.bg, active ? colors.accent : colors.border);
-          text(titles[variant], x + (colW - 6) / 2, 43, 13, active ? colors.accent : colors.text, p.CENTER);
-          EVOLUTION_TASKS.forEach((task, taskIndex) => {
-            let start = variant === 'sync' ? taskIndex / 3 : 0;
-            let amount = p.constrain((t() - start) * (variant === 'sync' ? 3 : 1.2), 0, 1);
-            if (variant === 'actors') amount = p.constrain((t() - taskIndex * 0.06) * 1.2, 0, 1);
-            const y = 67 + taskIndex * 32;
-            p.noStroke(); p.fill(task.color); p.rect(x + 11, y, (colW - 28) * amount, 18, 4);
-            p.noFill(); p.stroke(task.color); p.rect(x + 11, y, colW - 28, 18, 4);
-            text(task.label, x + (colW - 6) / 2, y + 9, 10, amount > 0.45 ? '#fff' : colors.text, p.CENTER);
-          });
-          text(variant === 'sync' ? '≈ 1.2 c' : '≈ 0.4 c', x + (colW - 6) / 2, 170, 11, colors.muted, p.CENTER);
-        });
-        text('Один сценарий: у Sync задержки складываются; остальные варианты перекрывают ожидание.', width / 2, 222, 12, colors.muted, p.CENTER);
-      }
-      p.setup = () => { width = Math.max(280, host.clientWidth); p.createCanvas(width, height).parent(host); p.textFont('system-ui, sans-serif'); p.noLoop(); };
-      p.draw = () => {
-        const colors = palette(); p.background(colors.bg);
-        if (mode === 'sync') drawSync(colors);
-        else if (mode === 'threads') drawThreads(colors);
-        else if (mode === 'processes') drawProcesses(colors);
-        else if (mode === 'asyncio') drawAsync(colors);
-        else if (mode === 'actors') drawActors(colors);
-        else drawEvolution(colors);
+      let dirty = true;
+      const markDirty = () => { dirty = true; };
+      [playBtn, stepBtn, resetBtn].forEach((b) => b.addEventListener('click', markDirty));
+      root.querySelectorAll('[data-async-variant]').forEach((b) => b.addEventListener('click', markDirty));
+      new MutationObserver(markDirty).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+      let last = performance.now();
+      const tick = (ts) => {
+        const dt = ts - last;
+        last = ts;
+        if (running) {
+          progress = Math.min(1, progress + dt / 8000);
+          if (progress >= 1) running = false;
+          refresh();
+          dirty = true;
+        }
+        if (dirty) { dirty = false; p.redraw(); }
+        requestAnimationFrame(tick);
       };
-      p.windowResized = () => { const next = Math.max(280, host.clientWidth); if (next !== width) { width = next; p.resizeCanvas(width, height); } };
-      const tick = () => { if (running) { progress = Math.min(1, progress + 0.004); if (progress >= 1) running = false; refreshControls(); } p.redraw(); requestAnimationFrame(tick); };
       requestAnimationFrame(tick);
     });
-    refreshControls();
+
+    refresh();
   }
 
   function init() {

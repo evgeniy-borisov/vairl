@@ -64,7 +64,7 @@ print(f"Прошло: {perf_counter() - started:.2f} c")
     <span class="python-async-status" aria-live="polite"></span>
   </div>
   <div class="python-async-canvas phase-portrait-canvas"></div>
-  <p class="phase-portrait-caption">Sync запускает LLM, поиск и календарь строго друг за другом.</p>
+  <p class="phase-portrait-caption">Сплошные блоки — CPU-работа, штриховка — ожидание сети. Главный поток почти всё время простаивает, а задержки складываются в 3 секунды.</p>
 </div>
 
 Здесь нет полезной работы во время `sleep`: процесс ждёт. В реальном приложении вместо него будут сокет, DNS, HTTP или драйвер базы. Если вызовы независимы, последовательность превращает сумму задержек в пользовательскую задержку. Если же шаг B требует результат A, никакая магия конкурентности не отменит причинность — сначала нужно правильно нарисовать DAG.
@@ -103,7 +103,7 @@ print(f"Прошло: {perf_counter() - started:.2f} c")
     <span class="python-async-status" aria-live="polite"></span>
   </div>
   <div class="python-async-canvas phase-portrait-canvas"></div>
-  <p class="phase-portrait-caption">Потоки хорошо перекрывают ожидание внешнего I/O; это не параллелизм Python-кода на ядрах.</p>
+  <p class="phase-portrait-caption">Ожидания I/O перекрылись и время упало с 3 до ~1.2 с. Но строка «GIL» внизу показывает: CPU-кусочки Python-кода по-прежнему идут строго по одному.</p>
 </div>
 
 Время близко к максимальной, а не суммарной задержке. Но GIL означает, что два Python-потока не исполняют Python bytecode одновременно. Потоки не являются универсальным ускорителем CPU-задач: контекстные переключения и борьба за GIL могут сделать их даже хуже одного потока. Они также разделяют память — значит, нужны блокировки, очереди и дисциплина владения состоянием.
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     <span class="python-async-status" aria-live="polite"></span>
   </div>
   <div class="python-async-canvas phase-portrait-canvas"></div>
-  <p class="phase-portrait-caption">Process pool даёт настоящее CPU-параллельное выполнение, но платит за изоляцию и сериализацию.</p>
+  <p class="phase-portrait-caption">Три ядра считают одновременно — сплошные блоки идут параллельно. Серые сегменты — цена spawn и IPC, а контур внизу показывает тот же объём работы в одном потоке (~3 c).</p>
 </div>
 
 Не отправляйте в процесс гигабайтный dataframe ради десяти миллисекунд расчёта: IPC съест выгоду. Для долгоживущих eval workers разумнее держать пул процессов и передавать компактные задания или ссылки на данные. А для запуска недоверенного инструмента процесс — только начальный рубеж: требуются лимиты ресурсов, отдельные права и, часто, контейнерная изоляция.
@@ -199,7 +199,7 @@ asyncio.run(main())
     <span class="python-async-status" aria-live="polite"></span>
   </div>
   <div class="python-async-canvas phase-portrait-canvas"></div>
-  <p class="phase-portrait-caption">Event loop не ждёт простаивая: в каждой точке await он может продолжить другую корутину.</p>
+  <p class="phase-portrait-caption">Строка «Event loop» занята лишь короткими CPU-вставками — всё остальное время корутины ждут в await, и один поток обслуживает всех.</p>
 </div>
 
 В production-коде предпочтительнее структурированная конкурентность. `asyncio.TaskGroup` связывает жизненный цикл дочерних задач с блоком: если одна задача завершилась ошибкой, остальные отменяются, а вызывающий код получает `ExceptionGroup`. Это особенно полезно для fan-out ветвей агентного плана.
@@ -328,7 +328,7 @@ asyncio.run(main())
     <span class="python-async-status" aria-live="polite"></span>
   </div>
   <div class="python-async-canvas phase-portrait-canvas"></div>
-  <p class="phase-portrait-caption">Mailbox сериализует входящие команды, поэтому актор меняет своё состояние без внешнего Lock.</p>
+  <p class="phase-portrait-caption">Пунктирная рамка — сообщение №2 ждёт в mailbox, пока актор обрабатывает первое. Внутри актора всё строго последовательно, между акторами — параллельно.</p>
 </div>
 
 ## Одна задача, четыре эволюции
@@ -434,7 +434,7 @@ asyncio.run(main())
 
 Эта версия длиннее — и это честный сигнал. Она окупится, если каждый инструмент хранит очередь, rate-limit, состояние авторизации или политику рестарта. Если состояния нет, берите `TaskGroup`.
 
-Интерактивная схема ниже позволяет проиграть один сценарий с тремя tool calls и сравнить, где задержки складываются, а где перекрываются.
+Интерактивная схема ниже запускает все четыре подхода наперегонки на одном и том же сценарии из трёх tool calls: LLM, поиск и Policy.
 
 <div class="python-async-widget phase-portrait-widget" data-async-mode="evolution">
   <div class="python-async-toolbar">
@@ -450,7 +450,7 @@ asyncio.run(main())
     <span class="python-async-status" aria-live="polite"></span>
   </div>
   <div class="python-async-canvas phase-portrait-canvas"></div>
-  <p class="phase-portrait-caption">Переключайте режим и запускайте одну и ту же тройку вызовов: LLM, поиск и Policy.</p>
+  <p class="phase-portrait-caption">Все подходы стартуют одновременно; метка у каждой строки — финиш по wall-clock. Кнопки подсвечивают выбранный подход.</p>
 </div>
 
 ## Практические рекомендации для agent platform
