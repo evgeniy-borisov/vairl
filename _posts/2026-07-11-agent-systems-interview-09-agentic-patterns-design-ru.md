@@ -10,11 +10,14 @@ review_track: blog
 review_status: approved
 series: agent-systems-interview
 series_part: 9
+article_kind: theory
 listed: false
 feed: false
 ---
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 9 из 12*
+
+*Практика: [задачи с кодом на Python](/vairl/blog/2026/07/10/agent-systems-interview-09-agentic-patterns-design-code-ru/)*
 
 Эта подстатья тренирует выбор и композицию паттернов (ReAct, рефлексия, супервайзер, дебаты, планирование) под конкретную задачу и бюджет.
 

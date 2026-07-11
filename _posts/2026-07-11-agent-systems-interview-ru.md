@@ -2,7 +2,7 @@
 layout: post
 title: "Инженер агентных систем: подготовка к собеседованию"
 date: 2026-07-10 10:00:00 +0300
-excerpt: "Иерархический набор для подготовки к собеседованию инженера агентных систем: блиц-опрос и design-кейсы по пайплайнам, оркестрации, эволюции, памяти и evaluation."
+excerpt: "Иерархический набор для подготовки к собеседованию инженера агентных систем: блиц-опрос, design-кейсы и Python-практика."
 lang: ru
 image: /assets/images/best-ai-agent-specialist.svg
 visibility: public
@@ -10,6 +10,7 @@ review_track: blog
 review_status: approved
 series: agent-systems-interview
 series_part: 0
+article_kind: index
 listed: true
 ---
 
@@ -31,21 +32,36 @@ listed: true
 
 ### Этап 1 — блиц-опрос (короткие ответы 2-3 предложения)
 
-- [01 — Python: asyncio, typing, dataclasses, Pydantic](/vairl/blog/2026/07/10/agent-systems-interview-01-python-async-typing-ru/)
-- [02 — Структуры данных и хэш-таблицы](/vairl/blog/2026/07/10/agent-systems-interview-02-data-structures-hash-tables-ru/)
-- [03 — ML-метрики и алгоритмы](/vairl/blog/2026/07/10/agent-systems-interview-03-ml-metrics-algorithms-ru/)
-- [04 — Трансформеры и LLM](/vairl/blog/2026/07/10/agent-systems-interview-04-transformers-llm-ru/)
-- [05 — Docker и инфраструктура](/vairl/blog/2026/07/10/agent-systems-interview-05-docker-infra-ru/)
+- [01 — Python: asyncio, typing, dataclasses, Pydantic](/vairl/blog/2026/07/10/agent-systems-interview-01-python-async-typing-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-01-python-async-typing-code-ru/)
+- [02 — Структуры данных и хэш-таблицы](/vairl/blog/2026/07/10/agent-systems-interview-02-data-structures-hash-tables-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-02-data-structures-hash-tables-code-ru/)
+- [03 — ML-метрики и алгоритмы](/vairl/blog/2026/07/10/agent-systems-interview-03-ml-metrics-algorithms-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-03-ml-metrics-algorithms-code-ru/)
+- [04 — Трансформеры и LLM](/vairl/blog/2026/07/10/agent-systems-interview-04-transformers-llm-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-04-transformers-llm-code-ru/)
+- [05 — Docker и инфраструктура](/vairl/blog/2026/07/10/agent-systems-interview-05-docker-infra-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-05-docker-infra-code-ru/)
 
 ### Этап 2 — проектирование agentic-систем
 
-- [06 — Проектирование генератора пайплайнов](/vairl/blog/2026/07/10/agent-systems-interview-06-pipeline-generator-design-ru/)
-- [07 — Проектирование DAG-оркестратора](/vairl/blog/2026/07/10/agent-systems-interview-07-dag-orchestrator-design-ru/)
-- [08 — Проектирование эволюционного движка](/vairl/blog/2026/07/10/agent-systems-interview-08-evolutionary-engine-design-ru/)
-- [09 — Проектирование agentic-паттернов](/vairl/blog/2026/07/10/agent-systems-interview-09-agentic-patterns-design-ru/)
-- [10 — Проектирование памяти и RAG](/vairl/blog/2026/07/10/agent-systems-interview-10-memory-rag-design-ru/)
-- [11 — Проектирование tool use слоя](/vairl/blog/2026/07/10/agent-systems-interview-11-tool-use-design-ru/)
-- [12 — Проектирование evaluation и benchmarking](/vairl/blog/2026/07/10/agent-systems-interview-12-evaluation-benchmarking-design-ru/)
+- [06 — Проектирование генератора пайплайнов](/vairl/blog/2026/07/10/agent-systems-interview-06-pipeline-generator-design-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-06-pipeline-generator-design-code-ru/)
+- [07 — Проектирование DAG-оркестратора](/vairl/blog/2026/07/10/agent-systems-interview-07-dag-orchestrator-design-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-07-dag-orchestrator-design-code-ru/)
+- [08 — Проектирование эволюционного движка](/vairl/blog/2026/07/10/agent-systems-interview-08-evolutionary-engine-design-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-08-evolutionary-engine-design-code-ru/)
+- [09 — Проектирование agentic-паттернов](/vairl/blog/2026/07/10/agent-systems-interview-09-agentic-patterns-design-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-09-agentic-patterns-design-code-ru/)
+- [10 — Проектирование памяти и RAG](/vairl/blog/2026/07/10/agent-systems-interview-10-memory-rag-design-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-10-memory-rag-design-code-ru/)
+- [11 — Проектирование tool use слоя](/vairl/blog/2026/07/10/agent-systems-interview-11-tool-use-design-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-11-tool-use-design-code-ru/)
+- [12 — Проектирование evaluation и benchmarking](/vairl/blog/2026/07/10/agent-systems-interview-12-evaluation-benchmarking-design-code-ru/) · [код](/vairl/blog/2026/07/10/agent-systems-interview-12-evaluation-benchmarking-design-code-ru/)
+
+## Примеры кода (Python)
+
+- [01 — asyncio, typing и модели данных](/vairl/blog/2026/07/10/agent-systems-interview-01-python-async-typing-code-ru/)
+- [02 — структуры данных и кэш](/vairl/blog/2026/07/10/agent-systems-interview-02-data-structures-hash-tables-code-ru/)
+- [03 — ML-метрики и алгоритмы](/vairl/blog/2026/07/10/agent-systems-interview-03-ml-metrics-algorithms-code-ru/)
+- [04 — трансформеры и LLM](/vairl/blog/2026/07/10/agent-systems-interview-04-transformers-llm-code-ru/)
+- [05 — Docker и инфраструктура](/vairl/blog/2026/07/10/agent-systems-interview-05-docker-infra-code-ru/)
+- [06 — генератор пайплайнов](/vairl/blog/2026/07/10/agent-systems-interview-06-pipeline-generator-design-code-ru/)
+- [07 — DAG-оркестратор](/vairl/blog/2026/07/10/agent-systems-interview-07-dag-orchestrator-design-code-ru/)
+- [08 — эволюционный движок](/vairl/blog/2026/07/10/agent-systems-interview-08-evolutionary-engine-design-code-ru/)
+- [09 — agentic-паттерны](/vairl/blog/2026/07/10/agent-systems-interview-09-agentic-patterns-design-code-ru/)
+- [10 — память и RAG](/vairl/blog/2026/07/10/agent-systems-interview-10-memory-rag-design-code-ru/)
+- [11 — tool use слой](/vairl/blog/2026/07/10/agent-systems-interview-11-tool-use-design-code-ru/)
+- [12 — evaluation и benchmarking](/vairl/blog/2026/07/10/agent-systems-interview-12-evaluation-benchmarking-design-code-ru/)
 
 ## Карта ключевых компетенций
 

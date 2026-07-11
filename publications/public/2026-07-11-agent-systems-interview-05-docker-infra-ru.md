@@ -10,11 +10,14 @@ review_track: blog
 review_status: approved
 series: agent-systems-interview
 series_part: 5
+article_kind: theory
 listed: false
 feed: false
 ---
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 5 из 12*
+
+*Практика: [задачи с кодом на Python](/vairl/blog/2026/07/10/agent-systems-interview-05-docker-infra-code-ru/)*
 
 Подстатья закрывает инфраструктурный минимум для обсуждения изолированного исполнения агентных пайплайнов и надежной работы микросервисной платформы.
 

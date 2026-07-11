@@ -10,11 +10,14 @@ review_track: blog
 review_status: approved
 series: agent-systems-interview
 series_part: 1
+article_kind: theory
 listed: false
 feed: false
 ---
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 1 из 12*
+
+*Практика: [задачи с кодом на Python](/vairl/blog/2026/07/10/agent-systems-interview-01-python-async-typing-code-ru/)*
 
 Цель этой подстатьи — отработать блиц-ответы по Python-основе, которая напрямую нужна для реализации генератора пайплайнов, оркестратора и агентных микросервисов.
 

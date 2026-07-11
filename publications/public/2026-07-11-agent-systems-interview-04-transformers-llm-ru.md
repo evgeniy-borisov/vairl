@@ -10,11 +10,14 @@ review_track: blog
 review_status: approved
 series: agent-systems-interview
 series_part: 4
+article_kind: theory
 listed: false
 feed: false
 ---
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 4 из 12*
+
+*Практика: [задачи с кодом на Python](/vairl/blog/2026/07/10/agent-systems-interview-04-transformers-llm-code-ru/)*
 
 Эта часть нужна для уверенных ответов про внутреннюю механику LLM и практические ограничения, влияющие на дизайн агентных систем.
 

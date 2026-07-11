@@ -10,11 +10,14 @@ review_track: blog
 review_status: approved
 series: agent-systems-interview
 series_part: 10
+article_kind: theory
 listed: false
 feed: false
 ---
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 10 из 12*
+
+*Практика: [задачи с кодом на Python](/vairl/blog/2026/07/10/agent-systems-interview-10-memory-rag-design-code-ru/)*
 
 Подстатья про память и retrieval в агентной платформе: как сделать ответы устойчивыми к hallucination и полезными в многосессионной работе.
 

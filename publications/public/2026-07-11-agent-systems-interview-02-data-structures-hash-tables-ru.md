@@ -10,11 +10,14 @@ review_track: blog
 review_status: approved
 series: agent-systems-interview
 series_part: 2
+article_kind: theory
 listed: false
 feed: false
 ---
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · часть 2 из 12*
+
+*Практика: [задачи с кодом на Python](/vairl/blog/2026/07/10/agent-systems-interview-02-data-structures-hash-tables-code-ru/)*
 
 Эта подстатья закрывает вопросы по структурам данных, которые регулярно всплывают при проектировании кешей, индексов памяти и планировщиков шагов на агентной платформе.
 
