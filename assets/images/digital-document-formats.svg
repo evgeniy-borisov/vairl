@@ -1,0 +1,116 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dfG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#b71c1c"/>
+      <stop offset="100%" style="stop-color:#e53935"/>
+    </linearGradient>
+    <linearGradient id="dfG2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1565c0"/>
+      <stop offset="100%" style="stop-color:#42a5f5"/>
+    </linearGradient>
+    <linearGradient id="dfG3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2e7d32"/>
+      <stop offset="100%" style="stop-color:#66bb6a"/>
+    </linearGradient>
+    <linearGradient id="dfG4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a148c"/>
+      <stop offset="100%" style="stop-color:#7b1fa2"/>
+    </linearGradient>
+    <linearGradient id="dfG5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e65100"/>
+      <stop offset="100%" style="stop-color:#ff9800"/>
+    </linearGradient>
+    <filter id="dfGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="#f8f9fc"/>
+
+  <text x="600" y="58" text-anchor="middle" fill="#1a237e" font-family="system-ui,sans-serif" font-size="30" font-weight="700">$>@<0BK F8D@>2KE B5:AB>2</text>
+  <text x="600" y="92" text-anchor="middle" fill="#616161" font-family="system-ui,sans-serif" font-size="16">PDF � EPUB � FB2 � DjVu � MOBI � DOCX � HTML � LaTeX</text>
+
+  <!-- PDF -->
+  <g transform="translate(90, 150)" filter="url(#dfGlow)">
+    <rect x="0" y="0" width="130" height="170" rx="8" fill="url(#dfG1)" opacity="0.92"/>
+    <text x="65" y="55" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="22" font-weight="700">PDF</text>
+    <text x="65" y="85" text-anchor="middle" fill="#ffcdd2" font-family="system-ui,sans-serif" font-size="11">D8:A8@>20==0O</text>
+    <text x="65" y="105" text-anchor="middle" fill="#ffcdd2" font-family="system-ui,sans-serif" font-size="11">2Q@AB:0</text>
+    <text x="65" y="140" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="10">Adobe � 1993</text>
+  </g>
+
+  <!-- EPUB -->
+  <g transform="translate(250, 150)" filter="url(#dfGlow)">
+    <rect x="0" y="0" width="130" height="170" rx="8" fill="url(#dfG2)" opacity="0.92"/>
+    <text x="65" y="55" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="20" font-weight="700">EPUB</text>
+    <text x="65" y="85" text-anchor="middle" fill="#bbdefb" font-family="system-ui,sans-serif" font-size="11">reflow</text>
+    <text x="65" y="105" text-anchor="middle" fill="#bbdefb" font-family="system-ui,sans-serif" font-size="11">ZIP+XHTML</text>
+    <text x="65" y="140" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="10">IDPF � W3C</text>
+  </g>
+
+  <!-- FB2 -->
+  <g transform="translate(410, 150)" filter="url(#dfGlow)">
+    <rect x="0" y="0" width="130" height="170" rx="8" fill="url(#dfG3)" opacity="0.92"/>
+    <text x="65" y="55" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="20" font-weight="700">FB2</text>
+    <text x="65" y="85" text-anchor="middle" fill="#c8e6c9" font-family="system-ui,sans-serif" font-size="11">XML</text>
+    <text x="65" y="105" text-anchor="middle" fill="#c8e6c9" font-family="system-ui,sans-serif" font-size="11">inline images</text>
+    <text x="65" y="140" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="10"> >AA8O � 2004</text>
+  </g>
+
+  <!-- DjVu -->
+  <g transform="translate(570, 150)" filter="url(#dfGlow)">
+    <rect x="0" y="0" width="130" height="170" rx="8" fill="url(#dfG4)" opacity="0.92"/>
+    <text x="65" y="55" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="20" font-weight="700">DjVu</text>
+    <text x="65" y="85" text-anchor="middle" fill="#e1bee7" font-family="system-ui,sans-serif" font-size="11">A:0=K</text>
+    <text x="65" y="105" text-anchor="middle" fill="#e1bee7" font-family="system-ui,sans-serif" font-size="11">wavelet+JB2</text>
+    <text x="65" y="140" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="10">AT&amp;T � LeCun</text>
+  </g>
+
+  <!-- MOBI -->
+  <g transform="translate(730, 150)" filter="url(#dfGlow)">
+    <rect x="0" y="0" width="130" height="170" rx="8" fill="url(#dfG5)" opacity="0.92"/>
+    <text x="65" y="55" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="20" font-weight="700">MOBI</text>
+    <text x="65" y="85" text-anchor="middle" fill="#ffe0b2" font-family="system-ui,sans-serif" font-size="11">Kindle</text>
+    <text x="65" y="105" text-anchor="middle" fill="#ffe0b2" font-family="system-ui,sans-serif" font-size="11">PalmDOC</text>
+    <text x="65" y="140" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="10">Amazon</text>
+  </g>
+
+  <!-- DOCX -->
+  <g transform="translate(890, 150)" filter="url(#dfGlow)">
+    <rect x="0" y="0" width="130" height="170" rx="8" fill="#1565c0" opacity="0.88"/>
+    <text x="65" y="55" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="18" font-weight="700">DOCX</text>
+    <text x="65" y="85" text-anchor="middle" fill="#bbdefb" font-family="system-ui,sans-serif" font-size="11">OOXML</text>
+    <text x="65" y="105" text-anchor="middle" fill="#bbdefb" font-family="system-ui,sans-serif" font-size="11">ZIP+XML</text>
+    <text x="65" y="140" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="10">Microsoft</text>
+  </g>
+
+  <!-- Bottom row: markup formats -->
+  <g transform="translate(170, 380)" filter="url(#dfGlow)">
+    <rect x="0" y="0" width="200" height="90" rx="10" fill="#37474f" opacity="0.9"/>
+    <text x="100" y="38" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="16" font-weight="700">HTML / Markdown</text>
+    <text x="100" y="62" text-anchor="middle" fill="#b0bec5" font-family="system-ui,sans-serif" font-size="11">251-AB0BL8 � @07<5B:0</text>
+  </g>
+
+  <g transform="translate(420, 380)" filter="url(#dfGlow)">
+    <rect x="0" y="0" width="200" height="90" rx="10" fill="#5d4037" opacity="0.9"/>
+    <text x="100" y="38" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="16" font-weight="700">LaTeX / TeX</text>
+    <text x="100" y="62" text-anchor="middle" fill="#d7ccc8" font-family="system-ui,sans-serif" font-size="11">Knuth � Lamport � =0C:0</text>
+  </g>
+
+  <g transform="translate(670, 380)" filter="url(#dfGlow)">
+    <rect x="0" y="0" width="200" height="90" rx="10" fill="#455a64" opacity="0.9"/>
+    <text x="100" y="38" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="16" font-weight="700">CBZ / CBR</text>
+    <text x="100" y="62" text-anchor="middle" fill="#cfd8dc" font-family="system-ui,sans-serif" font-size="11">:><8:AK � ZIP/RAR</text>
+  </g>
+
+  <!-- Arrows between formats -->
+  <g stroke="#9e9e9e" stroke-width="1.5" fill="none" opacity="0.6">
+    <path d="M 220 235 L 250 235"/>
+    <path d="M 380 235 L 410 235"/>
+    <path d="M 540 235 L 570 235"/>
+    <path d="M 700 235 L 730 235"/>
+    <path d="M 860 235 L 890 235"/>
+  </g>
+
+  <text x="600" y="560" text-anchor="middle" fill="#757575" font-family="system-ui,sans-serif" font-size="13">:>=25@B5@K: Calibre � Pandoc � Ghostscript � LibreOffice � djvulibre</text>
+</svg>
