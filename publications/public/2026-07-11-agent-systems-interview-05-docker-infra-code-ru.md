@@ -17,7 +17,7 @@ feed: false
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · практика к части 5*
 
-Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-05-docker-infra-code-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
+Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-05-docker-infra-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
 
 Упражнения описывают безопасную упаковку и запуск агентного worker.
 

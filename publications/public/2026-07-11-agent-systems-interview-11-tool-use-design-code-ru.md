@@ -17,7 +17,7 @@ feed: false
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · практика к части 11*
 
-Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-11-tool-use-design-code-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
+Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-11-tool-use-design-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
 
 Упражнения задают схему вызова, allowlist и адаптер инструмента.
 

@@ -17,7 +17,7 @@ feed: false
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · практика к части 1*
 
-Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-01-python-async-typing-code-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
+Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-01-python-async-typing-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
 
 Небольшие упражнения проверяют безопасную конкуррентность и ясные контракты данных.
 

@@ -17,7 +17,7 @@ feed: false
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · практика к части 3*
 
-Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-03-ml-metrics-algorithms-code-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
+Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-03-ml-metrics-algorithms-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
 
 Упражнения связывают качество ответов, стоимость и отбор кандидатов.
 

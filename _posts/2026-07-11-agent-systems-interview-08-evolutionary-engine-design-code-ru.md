@@ -17,7 +17,7 @@ feed: false
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · практика к части 8*
 
-Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-08-evolutionary-engine-design-code-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
+Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-08-evolutionary-engine-design-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
 
 Код показывает компактный цикл поиска конфигураций.
 

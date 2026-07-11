@@ -17,7 +17,7 @@ feed: false
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · практика к части 2*
 
-Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-02-data-structures-hash-tables-code-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
+Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-02-data-structures-hash-tables-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
 
 Задачи моделируют кэш, дедупликацию и индекс памяти агента.
 

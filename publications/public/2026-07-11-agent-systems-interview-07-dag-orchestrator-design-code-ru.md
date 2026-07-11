@@ -17,7 +17,7 @@ feed: false
 
 *Серия «Инженер агентных систем». [← Индекс серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/) · практика к части 7*
 
-Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-07-dag-orchestrator-design-code-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
+Связано с [теорией](/vairl/blog/2026/07/10/agent-systems-interview-07-dag-orchestrator-design-ru/) и [индексом серии](/vairl/blog/2026/07/10/agent-systems-interview-ru/).
 
 Задачи покрывают порядок выполнения, циклы и передачу результатов.
 

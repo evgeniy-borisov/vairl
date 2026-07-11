@@ -273,7 +273,6 @@ def build_front_matter(title: str, excerpt: str, part: int, kind: str) -> str:
 def replace_local_links(body: str, url_by_local: dict[str, str]) -> str:
     for local_name, url in sorted(url_by_local.items(), key=lambda x: -len(x[0])):
         body = body.replace(f"](./{local_name})", f"]({url})")
-        body = body.replace(f"](./{local_name.replace('-code', '')})", f"]({url})")
     return body
 
 
