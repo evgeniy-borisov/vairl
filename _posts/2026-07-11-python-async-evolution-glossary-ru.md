@@ -15,7 +15,7 @@ listed: false
 feed: false
 ---
 
-*Статья «[От sync к акторам](/vairl/blog/2026/07/10/python-async-evolution-actors-ru/)» · глоссарий терминов*
+*Статья «[От sync к акторам](/vairl/blog/2026/07/10/python-async-evolution-actors-ru/)» · глоссарий · [архитектуры coding agents](/vairl/blog/2026/07/10/python-async-evolution-coding-agents-ru/)*
 
 Краткая таблица технических слов, сокращений и принятого сленга, которые встречаются в обсуждении Python-конкурентности и оркестрации агентных систем.
 
@@ -133,6 +133,44 @@ feed: false
 | **resource limits** | Лимиты CPU, памяти, файловых дескрипторов, сетевых соединений для воркера или sandbox. |
 | **race condition / гонка** | Ошибка из-за недетерминированного порядка доступа к общему состоянию без синхронизации. |
 | **queue depth** | Длина очереди ожидающих задач; ранний индикатор backpressure и будущей деградации. |
+
+## Сети Петри
+
+| Термин | Значение |
+|--------|----------|
+| **Petri net / сеть Петри** | Формальная модель: позиции, переходы и фишки описывают состояние и конкурентность системы. |
+| **place / позиция** | Узел-состояние; в нём лежат фишки (очередь, слот, бюджет, «готово к запуску»). |
+| **transition / переход** | Событие, которое срабатывает при достаточном числе входных фишек и перекладывает их на выходы. |
+| **token / фишка (Петри)** | Дискретная единица работы или ресурса в формальной модели; не путать с LLM-token без контекста. |
+| **marking / маркировка** | Распределение фишек по позициям в данный момент; снимок состояния сети. |
+| **firing / срабатывание** | Активация перехода: consume на входах, produce на выходах. |
+| **enabled transition** | Переход, для которого хватает фишек во всех входных позициях; аналог «корутина готова после await». |
+| **reachability / достижимость** | Может ли сеть попасть из одной маркировки в другую; проверка сценариев и тупиков. |
+| **boundedness / ограниченность** | Верхняя граница числа фишек в каждой позиции; защита от бесконечной очереди. |
+| **liveness / живучесть** | Каждый переход может снова сработать; отсутствие «вечной блокировки» ветви. |
+| **deadlock (в сети Петри)** | Маркировка, где ни один переход не enabled; формальный deadlock оркестратора. |
+| **token economy** | Несколько «экономик» ресурсов в агенте: слоты concurrency, rate limit, LLM context budget. |
+| **context_budget (как позиция)** | Позиция с фишками LLM-токенов; переход `call_llm` потребляет k фишек при firing. |
+
+## Coding agents (Claude Code, Cursor, Codex, OpenCode, Aider)
+
+| Термин | Значение |
+|--------|----------|
+| **agent harness** | Прослойка вокруг LLM: loop, tools, permissions, compaction — не сама модель. |
+| **agent loop** | Цикл «inference → tool call → result → inference» до завершения задачи. |
+| **tool router** | Компонент, выбирающий и исполняющий tool calls по policy и sandbox. |
+| **compaction** | Сжатие истории сессии (summary, prune, encrypted compact) при переполнении context window. |
+| **subagent / Task tool** | Изолированный агент со своим context; parent получает только summary. |
+| **permission ruleset** | allow / deny / ask на уровне tool; в OpenCode — capability model профиля. |
+| **sandbox** | Ограничение FS/network/process для shell tool (Codex Seatbelt, workspace-write). |
+| **MCP** | Model Context Protocol — стандарт подключения внешних tools к harness. |
+| **repo map** | Graph + PageRank контекст кодовой базы (Aider); автоматический structural memory. |
+| **semantic index** | Embedding-поиск по чанкам репо (Cursor) для @-context без ручного grep. |
+| **AGENTS.md / CLAUDE.md** | File-based project memory: правила и контекст в markdown в репозитории. |
+| **SessionProcessor** | OpenCode: потребляет LLM stream, пишет parts, запускает tools. |
+| **doom loop detection** | Защита от повторяющихся идентичных tool calls подряд. |
+| **execpolicy** | Codex: DSL-правила одобрения shell-команд в `*.rules`. |
+| **worktree isolation** | Parallel agents Cursor в отдельных git worktrees без конфликтов файлов. |
 
 ## Сокращения и жаргон
 
