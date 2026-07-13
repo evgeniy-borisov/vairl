@@ -1,0 +1,32 @@
+---
+layout: default
+---
+
+{% capture private_body %}
+<article class="post private-post">
+    <header class="post-header">
+        {% if page.image %}
+        <div class="post-image">
+            <img src="{{ page.image | relative_url }}" alt="" />
+        </div>
+        {% endif %}
+        <h1 class="post-title">{{ page.title }}</h1>
+        <p class="post-date">{% if page.lang == "ru" %}{{ page.date | date: "%d %B %Y, %H:%M" }} MSK{% else %}{{ page.date | date: "%B %d, %Y, %H:%M" }} MSK{% endif %}</p>
+        <p class="private-badge">🔒 Private</p>
+    </header>
+
+    <div class="post-content">
+        {{ content }}
+    </div>
+
+    <footer class="post-footer">
+        <a href="{{ '/private/' | relative_url }}" class="back-link">← приватный раздел</a>
+    </footer>
+</article>
+
+{% include math-katex.html %}
+{% include mermaid.html %}
+<script defer src="{{ '/assets/js/table-wrap.js' | relative_url }}"></script>
+{% endcapture %}
+
+{% include private-gate.html include_content=private_body %}
