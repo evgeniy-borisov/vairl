@@ -35,7 +35,7 @@ review_status: approved
 6. [Мультиагентная архитектура](#multi-agent) — 9 специализированных агентов
 7. [Математические модели](#math-models) — полная таблица моделей
 8. [Конвейер](#pipeline) — как фазы связаны в pipeline
-9. [Классификация задач](#task-classification) — router, L×D, eval
+9. [Классификация задач](#task-classification) — три оси и маршрутизация (кратко; полный разбор — часть 2)
 10. [Куда движется индустрия](#industry-trends) — три тренда
 
 </div>
@@ -429,9 +429,9 @@ flowchart LR
 
 ## Классификация задач инвестиционного агента {#task-classification}
 
-Один и тот же запрос «помоги с инвестициями» может означать десяток разных задач: объяснить просадку, пересчитать портфель, смоделировать покупку квартиры или просто ответить на вопрос про дивиденды. Без классификатора оркестратор либо отправит всё в LLM, либо вызовет portfolio optimizer там, где нужен только RAG.
+Иван пишет ассистенту «помоги с инвестициями» — но это десяток разных задач: объяснить просадку, пересчитать портфель, смоделировать покупку квартиры или ответить на вопрос про дивиденды. Без классификатора оркестратор либо отправит всё в LLM, либо вызовет portfolio optimizer там, где нужен только RAG.
 
-Ниже — разметка типовых задач **AI Wealth Management Platform** тремя осями VAIRL:
+Поэтому router wealth-платформы работает **до** agent loop: запрос размечается тремя осями, и по результату выбирается исполнитель.
 
 | Ось | Классификатор | Вопрос |
 |-----|---------------|--------|
@@ -439,239 +439,19 @@ flowchart LR
 | **2. Исполнение** | Матрица L × D (автономность × детерминизм) | *Как* решать: автономность и детерминизм? |
 | **3. Постановка** | [U–S–Y](/vairl/blog/2026/07/02/systems-theory-task-types-ru/) | *Что* задано, *что* найти? |
 
-```mermaid
-flowchart LR
-  subgraph axis1 ["Ось 1: Предмет"]
-    AM["Domain → Model → Method"]
-  end
-  subgraph axis2 ["Ось 2: Исполнение"]
-    MX["family · L · D"]
-  end
-  subgraph axis3 ["Ось 3: Постановка"]
-    USY["U–S–Y type"]
-  end
-  Q["Запрос клиента"] --> C["Классификатор"]
-  axis1 --> C
-  axis2 --> C
-  axis3 --> C
-  C --> R["Router → агент / solver / LLM"]
-```
+Результат классификации — маршрут до конкретного агента с нужным pipeline и верификатором:
 
-Router wealth-платформы работает **до** agent loop: сначала классификация, потом выбор Portfolio Agent, Simulation Agent или Communication Agent с нужным pipeline.
+| Классификация | Агент | Pipeline |
+|---------------|-------|----------|
+| `attribution` · symbolic | Portfolio Agent | Brinson engine |
+| `convex_optimization` · symbolic | Recommendation Agent | Markowitz / BL solver |
+| `monte_carlo` · hybrid | Simulation Agent | LLM slots → MC → report |
+| `cep_monitoring` · symbolic · L4 | Monitoring Agent | Kafka → rules → trigger |
+| `explanation` / `dialogue` | Communication Agent | RAG → LLM → Compliance |
 
-### Пять уровней: от домена к методу
+Два принципа, которые держат систему в рамках банковской регуляторики: **зона риска L4–L5 × neural** (автономная торговля без human approve) в банках закрыта — сделки живут в L2–L3 × symbolic/hybrid; а классификация хранится как **данные** (`task_record` в базе задач), к которым симметрично привязана база бенчмарков с CI-гейтами.
 
-Иерархия сжимает запрос по лестнице абстракций — одна запись «mean-variance optimization + convex solver» обслуживает и ребалансировку портфеля, и план накоплений на пенсию.
-
-```mermaid
-flowchart TB
-  D["1. Домен: Wealth Management / Fintech"]
-  P["2. Бизнес-задача: язык клиента"]
-  A["3. Абстрактная модель: математическая суть"]
-  S["4. Раздел науки"]
-  M["5. Метод решения"]
-  D --> P --> A --> S --> M
-```
-
-**Домен** здесь почти всегда `wealth_management` или `retail_banking` — от него зависят compliance-политики (MiFID II, suitability), набор tools и RAG-корпус.
-
-**Бизнес-задача** — формулировка клиента: «почему упал портфель», «хватит ли на квартиру», «предложи ребалансировку».
-
-**Абстрактная модель** — канонический тип: attribution, convex optimization, Monte Carlo, CEP, knapsack (распределение свободного кэша), classification (риск-профиль), explanation generation.
-
-**Раздел науки** — portfolio theory, financial econometrics, operations research, stochastic processes.
-
-**Метод** — конкретный инструмент: Brinson, Markowitz, Kafka+CEP, RAG+LLM.
-
-### Каталог задач по фазам жизненного цикла
-
-Каждая из пяти фаз платформы порождает свой набор задач с разной природой:
-
-| Фаза | Бизнес-задача (пример) | Абстрактная модель | Метод (primary) |
-|------|------------------------|-------------------|-----------------|
-| **1. Ретроспектива** | «Почему портфель вырос на 12%?» | Attribution / decomposition | Brinson Attribution + SHAP |
-| **1. Ретроспектива** | «Какие решения были ошибочными?» | Counterfactual analysis | Counterfactual explanations |
-| **2. Диагностика** | «Соответствует ли портфель риск-профилю?» | Constraint validation | Risk Engine + rule check |
-| **2. Диагностика** | «Где отклонение от целевой структуры?» | Drift detection | Covariance + threshold rules |
-| **2. Диагностика** | «Сколько свободного кэша?» | Cash flow aggregation | SQL + Feature Store |
-| **3. Прогнозирование** | «Что если куплю квартиру через 3 года?» | Monte Carlo simulation | Digital Twin + MC |
-| **3. Прогнозирование** | «Как изменятся доходы при инфляции 15%?» | Scenario analysis | Macro scenarios + VAR |
-| **3. Прогнозирование** | «Когда достигну цели по накоплениям?» | Goal reach probability | GBI + Monte Carlo |
-| **4. Планирование** | «Сформируй план на пенсию» | Convex optimization | Markowitz / Black–Litterman |
-| **4. Планирование** | «Куда вложить 500 000 ₽?» | Knapsack / allocation | Portfolio Optimizer + constraints |
-| **4. Планирование** | «Объясни план простым языком» | Explanation generation | LLM + structured facts |
-| **5. Мониторинг** | «Отклонение > 5% от целевой структуры» | Complex event processing | Kafka + CEP + triggers |
-| **5. Мониторинг** | «Достигнута цель накоплений» | State transition / milestone | Rule engine |
-| **5. Мониторинг** | «Персонализированное уведомление» | NL generation | LLM + client context |
-
-Обратите внимание на **many-to-one**: «план на пенсию» и «распределение свободного кэша» сходятся к одной абстрактной модели — **convex optimization с constraints** — но различаются доменными ограничениями и горизонтом.
-
-### Сквозные цепочки: три примера
-
-**Пример 1 — Ретроспектива (symbolic)**
-
-> **Домен:** Wealth Management → **Бизнес-задача:** объяснить просадку портфеля за квартал → **Модель:** attribution analysis → **Раздел науки:** financial econometrics → **Метод:** Brinson Attribution + benchmark compare.
-
-**Пример 2 — Планирование (hybrid)**
-
-> **Домен:** Wealth Management → **Бизнес-задача:** составить план накоплений на квартиру → **Модель:** goal-based investing + convex optimization → **Раздел науки:** operations research, portfolio theory → **Метод:** GBI pipeline → Markowitz solver → LLM explain.
-
-**Пример 3 — Коммуникация (neural)**
-
-> **Домен:** Wealth Management → **Бизнес-задача:** ответить «стоит ли сейчас докупать?» → **Модель:** explanation generation + retrieval → **Раздел науки:** NLP → **Метод:** RAG (аналитика + портфель) → LLM → Compliance verify.
-
-Цепочки 1 и 2 имеют **проверяемый ответ** (числа, constraints). Цепочка 3 — субъективная интерпретация, но с жёстким compliance-слоем на выходе.
-
-### Матрица L × D: как исполнять
-
-Вторая ось (матрица L × D) отвечает не «о чём», а «как решать и насколько автономно»:
-
-| | Symbolic (D ≥ 0.75) | Hybrid (0.30–0.85) | Neural (D ≤ 0.40) |
-|---|---------------------|--------------------|--------------------|
-| **L0–L2** | Brinson batch, cron-ребаланс | n8n: событие → rule → CRM | — |
-| **L3** | Tool-agent: SQL → Risk Engine | LLM parse intent → optimizer → verify | Диалог + RAG |
-| **L4–L5** | Monitoring Agent + CEP | Проактивный rebalance + approve | Проактивные push-уведомления |
-
-Размещение типовых wealth-задач на матрице:
-
-| Задача | L | D | `computation_family` | Pipeline |
-|--------|---|---|------------------------|----------|
-| Brinson Attribution за квартал | L0–L2 | 0.95 | symbolic | SQL → attribution engine → report |
-| Проверка риск-профиля | L2 | 0.90 | symbolic | Feature Store → rule engine → enum |
-| Portfolio optimization | L2–L3 | 0.85 | symbolic | Constraints → convex solver → audit log |
-| Monte Carlo «что если» | L3 | 0.75 | hybrid | LLM parse scenario → MC engine → charts |
-| Объяснение рекомендации | L3 | 0.35 | hybrid | SHAP facts → LLM narrative → Compliance |
-| Диалог «почему упал рынок?» | L3 | 0.20 | neural | RAG → LLM → citation check |
-| Фоновый мониторинг drift | L4 | 0.90 | symbolic | Kafka → CEP → trigger → notify |
-| Проактивный rebalance | L4 | 0.80 | hybrid | Monitoring → optimizer → **human approve** → execute |
-
-**Зона риска** — правый верхний угол (L4–L5 × neural): проактивная торговля без human approve. В банках допускается только с audit log, dry-run и kill switch. Инвестиционные **решения** (сделки) почти всегда остаются в зоне L2–L3 × symbolic/hybrid.
-
-Паттерн «LLM classify → Switch по enum → L0-действия» хорошо ложится на wealth: LLM понимает intent («хочу меньше риска»), rule engine мапит на enum `risk_profile: conservative`, дальше — детерминированный optimizer без LLM.
-
-### U–S–Y: что задано, что найти
-
-[Третья ось](/vairl/blog/2026/07/02/systems-theory-task-types-ru/) ортогональна первым двум — фиксирует постановку:
-
-| U–S–Y тип | Задано | Найти | Wealth-пример |
-|-----------|--------|-------|---------------|
-| **Анализ** | U + S | Y | Портфель + рынок за Q1 → доходность и attribution |
-| **Синтез** | U + Y | S | Цель «квартира 2030» + бюджет → инвестиционный план (S) |
-| **Идентификация** | S + Y | U | Факт просадки −8% → какие события (U) её вызвали |
-| **Управление** | S + Y(t) | U(t) | Целевая траектория накоплений → пополнения и rebalance |
-
-| Фаза цикла | Доминирующий U–S–Y тип |
-|------------|------------------------|
-| Ретроспектива | Анализ + идентификация |
-| Диагностика | Анализ |
-| Прогнозирование | Анализ (forward simulation) |
-| Планирование | **Синтез** |
-| Мониторинг | Управление + идентификация (отклонения) |
-
-На этапе **Contract** ([постановка задачи агента](/vairl/blog/2026/07/04/agent-task-specification-ru/)) Communication Agent переформулирует постановку — не только Y («целевая доходность 8%»), но и `abstract_model`: «понимаю, это задача goal-based investing с горизонтом 15 лет — верно?»
-
-### Маршрутизация: задача → агент → pipeline
-
-Сводная таблица маршрутизации для оркестратора:
-
-| Классификация | Агент | Pipeline | Verifier |
-|---------------|-------|----------|----------|
-| `attribution` · symbolic · L≤2 | Portfolio Agent | Brinson engine | Benchmark diff = 0 |
-| `convex_optimization` · symbolic | Recommendation Agent | Markowitz / BL solver | Constraints + MiFID rules |
-| `monte_carlo` · hybrid · L3 | Simulation Agent | LLM slots → MC → report | Schema + statistical sanity |
-| `cep_monitoring` · symbolic · L4 | Monitoring Agent | Kafka → rules → trigger | State diff oracle |
-| `explanation` · hybrid · L3 | Communication Agent | SHAP/RAG → LLM → Compliance | Compliance Agent + citation |
-| `dialogue` · neural · L3 | Communication Agent | RAG → LLM | Rubric + must-not-advise-oracle |
-| любая · pre-trade | Compliance Agent | Rule engine | Must-not-act oracle |
-
-```mermaid
-flowchart TD
-  Q["Запрос клиента"] --> T["Таксономия:<br/>model + method"]
-  Q --> M["Матрица:<br/>family + L + D"]
-  Q --> U["U–S–Y type"]
-
-  T --> R{Router}
-  M --> R
-  U --> R
-
-  R -->|attribution, symbolic| PA["Portfolio Agent<br/>Brinson pipeline"]
-  R -->|optimization, symbolic| RA["Recommendation Agent<br/>solver"]
-  R -->|simulation, hybrid| SA["Simulation Agent<br/>MC + Digital Twin"]
-  R -->|monitoring, L4| MA["Monitoring Agent<br/>CEP + triggers"]
-  R -->|explanation / dialogue| CA["Communication Agent<br/>RAG + LLM"]
-
-  RA --> COMP["Compliance Agent"]
-  SA --> COMP
-  COMP --> CA
-  PA --> CA
-  MA -->|proactive| CA
-```
-
-### Запись в базе задач (task_record)
-
-Пример разметки для production-классификатора:
-
-```yaml
-id: task-wm-rebalance-001
-domain: wealth_management
-business_problem: "Ребалансировка портфеля при drift > 5%"
-abstract_model: convex_optimization
-disciplines: [portfolio_theory, operations_research]
-methods: [markowitz, black_litterman]
-
-# Ось 2: исполнение
-computation_family: hybrid
-autonomy_level: L4
-determinism_score: 0.82
-determinism_band: D3
-execution_pipeline:
-  - cep: drift_detect          # symbolic
-  - optimizer: portfolio       # symbolic
-  - compliance: suitability    # symbolic
-  - llm: client_notification   # neural
-  - human: approve_trade       # gate
-
-# Ось 3: постановка
-u_s_y_type: control
-lifecycle_phase: monitoring
-
-# Связь с платформой
-assigned_agent: recommendation_agent
-compliance_required: true
-regulatory_framework: [mifid_ii, cb_rf_suitability]
-```
-
-### Capability и eval
-
-Для [генерации бенчмарков](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/) wealth-задачи группируются по `abstract_model × domain`:
-
-| `abstract_model` | Capability | Схема верификации | Пример бенчмарка |
-|------------------|------------|-------------------|------------------|
-| `convex_optimization` | optimize | S3 optimal compare | Портфель vs OR-tools эталон |
-| `attribution` | analyze | S2 constraint check | Brinson sum = total return |
-| `monte_carlo` | simulate | H2 seeded stochastic | Fixed seed → CI bounds |
-| `explanation` | search + generate | H4 + compliance oracle | Must-not-advise violations = 0 |
-| `cep_monitoring` | analyze | S4 state diff | Trigger fires on injected event |
-
-**Gates в CI** wealth-платформы:
-
-| Gate | Задачи | Условие |
-|------|--------|---------|
-| Smoke | attribution, risk check | pass@1 на 10 клиентских профилях |
-| Nightly | optimization, MC, CEP | pass^k, regression pack |
-| Release | compliance oracle | 0 must-not-act violations |
-
-### Типичные ошибки классификации
-
-| Ошибка | Почему опасно | Как избежать |
-|--------|---------------|--------------|
-| Отдать optimization чистому LLM | Галлюцинация весов, нарушение constraints | `family=symbolic` → solver, LLM только explain |
-| Схлопнуть «объясни» и «оптимизируй» | Один pipeline для разных моделей | Разные `abstract_model`, разные агенты |
-| L4 monitoring без approve на trade | Автономная сделка без контроля | Trade execution → L2 + human gate |
-| Игнорировать domain compliance | Один solver, разная регуляторика | `domain` → policy layer поверх router |
-| Классифицировать только LLM | Неверная модель → неверный solver | LLM propose + lookup + rule verify |
-
-Классификатор — **первый шаг control loop** wealth-платформы. Без него мультиагентная архитектура из предыдущих разделов превращается в «один LLM на всё» — дорого, рискованно и не проходит regulatory review.
+Полный разбор — шкалы L0–L5 и D0–D5, каталог задач по фазам, схема базы задач и решений и «бенчмарк как сервис» — во второй части: [**«Классификация задач инвестиционного агента: база задач, матрица L×D и бенчмарк как сервис»**](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/).
 
 ---
 

@@ -1,0 +1,86 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tcG1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d47a1"/>
+      <stop offset="100%" stop-color="#1976d2"/>
+    </linearGradient>
+    <linearGradient id="tcG2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1b5e20"/>
+      <stop offset="100%" stop-color="#43a047"/>
+    </linearGradient>
+    <linearGradient id="tcG3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a148c"/>
+      <stop offset="100%" stop-color="#7b1fa2"/>
+    </linearGradient>
+    <linearGradient id="tcRisk" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fff3e0"/>
+      <stop offset="100%" stop-color="#ffcdd2"/>
+    </linearGradient>
+    <marker id="tcArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#546e7a"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="630" fill="#f5f7fb"/>
+
+  <text x="600" y="52" text-anchor="middle" fill="#1a237e" font-family="system-ui,sans-serif" font-size="27" font-weight="700">Классификация задач инвестиционного агента</text>
+  <text x="600" y="84" text-anchor="middle" fill="#616161" font-family="system-ui,sans-serif" font-size="15">Таксономия &#183; Матрица L&#215;D &#183; U&#8211;S&#8211;Y &#183; База задач &#183; Бенчмарк как сервис</text>
+
+  <g transform="translate(60, 130)">
+    <rect x="0" y="0" width="300" height="80" rx="10" fill="url(#tcG1)" opacity="0.92"/>
+    <text x="150" y="32" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="14" font-weight="700">Ось 1: Предмет</text>
+    <text x="150" y="56" text-anchor="middle" fill="#bbdefb" font-family="system-ui,sans-serif" font-size="12">Domain &#8594; Model &#8594; Method</text>
+  </g>
+  <g transform="translate(60, 230)">
+    <rect x="0" y="0" width="300" height="80" rx="10" fill="url(#tcG2)" opacity="0.92"/>
+    <text x="150" y="32" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="14" font-weight="700">Ось 2: Исполнение</text>
+    <text x="150" y="56" text-anchor="middle" fill="#c8e6c9" font-family="system-ui,sans-serif" font-size="12">family &#183; L0&#8211;L5 &#183; D0&#8211;D5</text>
+  </g>
+  <g transform="translate(60, 330)">
+    <rect x="0" y="0" width="300" height="80" rx="10" fill="url(#tcG3)" opacity="0.92"/>
+    <text x="150" y="32" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="14" font-weight="700">Ось 3: Постановка</text>
+    <text x="150" y="56" text-anchor="middle" fill="#e1bee7" font-family="system-ui,sans-serif" font-size="12">U&#8211;S&#8211;Y: анализ / синтез / управление</text>
+  </g>
+
+  <g transform="translate(440, 230)">
+    <rect x="0" y="0" width="180" height="80" rx="10" fill="#37474f" opacity="0.92"/>
+    <text x="90" y="35" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="15" font-weight="700">Router</text>
+    <text x="90" y="58" text-anchor="middle" fill="#b0bec5" font-family="system-ui,sans-serif" font-size="11">классификация до agent loop</text>
+  </g>
+
+  <line x1="360" y1="170" x2="440" y2="250" stroke="#546e7a" stroke-width="2" marker-end="url(#tcArrow)"/>
+  <line x1="360" y1="270" x2="440" y2="270" stroke="#546e7a" stroke-width="2" marker-end="url(#tcArrow)"/>
+  <line x1="360" y1="370" x2="440" y2="290" stroke="#546e7a" stroke-width="2" marker-end="url(#tcArrow)"/>
+
+  <g transform="translate(700, 130)">
+    <rect x="0" y="0" width="440" height="280" rx="10" fill="#fff" stroke="#90a4ae" stroke-width="2"/>
+    <text x="220" y="30" text-anchor="middle" fill="#37474f" font-family="system-ui,sans-serif" font-size="14" font-weight="700">Матрица L &#215; D</text>
+
+    <rect x="290" y="50" width="130" height="80" rx="6" fill="url(#tcRisk)" stroke="#e53935" stroke-width="1.5" stroke-dasharray="5 3"/>
+    <text x="355" y="83" text-anchor="middle" fill="#c62828" font-family="system-ui,sans-serif" font-size="11" font-weight="700">зона риска</text>
+    <text x="355" y="102" text-anchor="middle" fill="#e57373" font-family="system-ui,sans-serif" font-size="10">L4&#8211;L5 &#215; neural</text>
+
+    <rect x="30" y="150" width="200" height="90" rx="6" fill="#e8f5e9" stroke="#43a047" stroke-width="1.5"/>
+    <text x="130" y="188" text-anchor="middle" fill="#2e7d32" font-family="system-ui,sans-serif" font-size="11" font-weight="700">сделки: L2&#8211;L3</text>
+    <text x="130" y="207" text-anchor="middle" fill="#66bb6a" font-family="system-ui,sans-serif" font-size="10">symbolic / hybrid</text>
+
+    <text x="220" y="265" text-anchor="middle" fill="#78909c" font-family="system-ui,sans-serif" font-size="11">детерминизм D &#8594;</text>
+    <text x="14" y="150" text-anchor="middle" fill="#78909c" font-family="system-ui,sans-serif" font-size="11" transform="rotate(-90 14 150)">автономность L &#8594;</text>
+  </g>
+
+  <line x1="620" y1="270" x2="700" y2="270" stroke="#546e7a" stroke-width="2" marker-end="url(#tcArrow)"/>
+
+  <g transform="translate(120, 470)">
+    <rect x="0" y="0" width="440" height="110" rx="10" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/>
+    <text x="220" y="30" text-anchor="middle" fill="#37474f" font-family="system-ui,sans-serif" font-size="14" font-weight="700">База задач (task_record)</text>
+    <text x="220" y="56" text-anchor="middle" fill="#546e7a" font-family="monospace" font-size="11">abstract_model &#183; methods &#183; L &#183; D</text>
+    <text x="220" y="80" text-anchor="middle" fill="#78909c" font-family="monospace" font-size="11">compliance_required &#183; assigned_agent</text>
+  </g>
+  <g transform="translate(640, 470)">
+    <rect x="0" y="0" width="440" height="110" rx="10" fill="#eceff1" stroke="#90a4ae" stroke-width="2"/>
+    <text x="220" y="30" text-anchor="middle" fill="#37474f" font-family="system-ui,sans-serif" font-size="14" font-weight="700">Бенчмарк как сервис (benchmark_record)</text>
+    <text x="220" y="56" text-anchor="middle" fill="#546e7a" font-family="monospace" font-size="11">verifier &#183; pass^k &#183; smoke / nightly / release</text>
+    <text x="220" y="80" text-anchor="middle" fill="#78909c" font-family="monospace" font-size="11">null-agent must fail &#183; frozen</text>
+  </g>
+  <line x1="560" y1="525" x2="640" y2="525" stroke="#546e7a" stroke-width="2" marker-end="url(#tcArrow)"/>
+  <text x="600" y="515" text-anchor="middle" fill="#78909c" font-family="system-ui,sans-serif" font-size="10">M:N</text>
+</svg>
