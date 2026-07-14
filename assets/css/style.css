@@ -477,6 +477,96 @@ nav a {
     background-color: var(--accent-soft);
 }
 
+/* TL;DR + table of contents at article top */
+.post-content .post-tldr {
+    margin: 0 0 1.5em;
+    padding: 1.1em 1.25em 1.15em;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    background-color: var(--bg-secondary);
+    box-shadow: 0 1px 2px var(--shadow);
+}
+
+.post-content .post-tldr > :first-child {
+    margin-top: 0;
+}
+
+.post-content .post-tldr > :last-child {
+    margin-bottom: 0;
+}
+
+.post-content .post-tldr h2,
+.post-content .post-tldr h3 {
+    margin: 0 0 0.65em;
+    font-size: 1.05em;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text);
+}
+
+.post-content .post-tldr p {
+    margin: 0 0 0.75em;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.post-content .post-tldr ul {
+    margin: 0;
+    padding-left: 1.25em;
+    color: var(--text-secondary);
+}
+
+.post-content .post-tldr li {
+    margin: 0.35em 0;
+    line-height: 1.55;
+}
+
+.post-content .post-tldr li strong {
+    color: var(--text);
+}
+
+.post-content .post-toc {
+    margin: 0 0 2em;
+    padding: 1em 1.15em 1.05em;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background-color: var(--bg-tertiary);
+}
+
+.post-content .post-toc > :first-child {
+    margin-top: 0;
+}
+
+.post-content .post-toc > :last-child {
+    margin-bottom: 0;
+}
+
+.post-content .post-toc p {
+    margin: 0 0 0.75em;
+    font-size: 0.95em;
+    color: var(--text-secondary);
+}
+
+.post-content .post-toc ol {
+    margin: 0;
+    padding-left: 1.35em;
+}
+
+.post-content .post-toc li {
+    margin: 0.45em 0;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.post-content .post-toc a {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.post-content .post-toc a:hover {
+    text-decoration: underline;
+}
+
 /* Column width hints — keep grid aligned across all rows */
 .post-content table:has(tr > :nth-child(2):last-child) th:first-child,
 .post-content table:has(tr > :nth-child(2):last-child) td:first-child {
