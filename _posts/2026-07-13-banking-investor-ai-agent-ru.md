@@ -389,31 +389,31 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    subgraph Past ["1. Прошлое"]
+    subgraph Past ["Фаза 1 — Прошлое"]
         DW["Data Warehouse"]
         BA["Brinson Attribution"]
         XAI["SHAP / LIME"]
     end
 
-    subgraph Present ["2. Настоящее"]
+    subgraph Present ["Фаза 2 — Настоящее"]
         FS["Feature Store"]
         RE["Risk Engine"]
         C360["Customer 360"]
     end
 
-    subgraph Future ["3. Будущее"]
+    subgraph Future ["Фаза 3 — Будущее"]
         MC["Monte Carlo"]
         DT["Digital Twin"]
         BL["Black-Litterman"]
     end
 
-    subgraph Plan ["4. Планирование"]
+    subgraph Plan ["Фаза 4 — Планирование"]
         GBI["Goal-Based Investing"]
         PO["Portfolio Optimizer"]
         LLM["LLM Explain"]
     end
 
-    subgraph Monitor ["5. Мониторинг"]
+    subgraph Monitor ["Фаза 5 — Мониторинг"]
         K["Kafka / CEP"]
         TR["Триггеры"]
         NS["Notifications"]
