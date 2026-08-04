@@ -67,6 +67,37 @@
     const gleftEl = root.querySelector("[data-cc-gleft]");
     const playBtn = root.querySelector("[data-cc-play]");
     const scrub = root.querySelector("[data-cc-scrub]");
+    const fsBtn = root.querySelector("[data-cc-fullscreen]");
+
+    let resizeCanvas = null;
+
+    function isFullscreen() {
+      return document.fullscreenElement === root;
+    }
+
+    function toggleFullscreen() {
+      if (isFullscreen()) {
+        (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+      } else {
+        (root.requestFullscreen || root.webkitRequestFullscreen)?.call(root);
+      }
+    }
+
+    function onFullscreenChange() {
+      const on = isFullscreen();
+      root.classList.toggle("cc-is-fullscreen", on);
+      if (fsBtn) {
+        fsBtn.title = on ? "Выйти из полноэкранного режима" : "Полный экран";
+        fsBtn.setAttribute("aria-label", fsBtn.title);
+        fsBtn.classList.toggle("active", on);
+        fsBtn.textContent = on ? "⛶" : "⛶";
+      }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (typeof resizeCanvas === "function") resizeCanvas();
+        });
+      });
+    }
 
     function series() {
       return data.cards[cardKey].series[policy];
@@ -89,12 +120,32 @@
 
     const sketch = (p) => {
       let W = 920;
-      const H = 420;
+      let H = 420;
       const pad = { l: 56, r: 18, t: 36, b: 42 };
 
-      p.setup = function () {
+      function measureHost() {
         const wrap = document.getElementById(CANVAS_ID);
-        W = Math.min(920, (wrap && wrap.clientWidth) || 920);
+        const fs = isFullscreen();
+        const maxW = fs ? window.innerWidth : 920;
+        W = Math.min(maxW, (wrap && wrap.clientWidth) || maxW);
+        if (fs && wrap) {
+          // canvas fills remaining viewport under toolbar/stats/scrub
+          const top = wrap.getBoundingClientRect().top;
+          const caption = root.querySelector(".cc-grace-caption");
+          const captionH = caption ? caption.getBoundingClientRect().height + 8 : 24;
+          H = Math.max(360, Math.floor(window.innerHeight - top - captionH - 12));
+        } else {
+          H = 420;
+        }
+      }
+
+      resizeCanvas = function () {
+        measureHost();
+        p.resizeCanvas(W, H);
+      };
+
+      p.setup = function () {
+        measureHost();
         const cnv = p.createCanvas(W, H);
         cnv.parent(CANVAS_ID);
         p.textFont("system-ui, -apple-system, sans-serif");
@@ -103,9 +154,7 @@
       };
 
       p.windowResized = function () {
-        const wrap = document.getElementById(CANVAS_ID);
-        W = Math.min(920, (wrap && wrap.clientWidth) || 920);
-        p.resizeCanvas(W, H);
+        resizeCanvas();
       };
 
       function plotBox() {
@@ -343,6 +392,17 @@
       playing = false;
       syncDom();
     });
+
+    fsBtn?.addEventListener("click", toggleFullscreen);
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => {
+        if (typeof resizeCanvas === "function") resizeCanvas();
+      });
+      ro.observe(root);
+    }
 
     // eslint-disable-next-line no-new
     new p5(sketch);

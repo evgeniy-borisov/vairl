@@ -254,6 +254,7 @@ Strategy Agent перебирает политики (один и тот же le
     <label class="cc-grace-speed">Скорость
       <input type="range" data-cc-speed min="0.5" max="8" step="0.5" value="2" />
     </label>
+    <button type="button" data-cc-fullscreen title="Полный экран" aria-label="Полный экран">⛶</button>
   </div>
   <div class="cc-grace-stats">
     <div><span>День</span><strong data-cc-day>0</strong></div>
@@ -270,7 +271,7 @@ Strategy Agent перебирает политики (один и тот же le
   <p class="cc-grace-caption">
     Зелёная зона — долг ещё под грейсом; красная — уже капает APR.
     Фиолетовая кривая — накопленный client cost (проценты + комиссии).
-    Ряды из <code>credit-card-grace-series.json</code> · p5.js.
+    Ряды из <code>credit-card-grace-series.json</code> · p5.js · ⛶ полноэкранный режим.
   </p>
 </div>
 

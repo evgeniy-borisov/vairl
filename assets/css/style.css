@@ -3695,9 +3695,60 @@ footer {
     font-size: 14px;
 }
 
+.cc-grace-widget .cc-grace-toolbar button[data-cc-fullscreen] {
+    font-size: 15px;
+    padding: 5px 10px;
+    line-height: 1;
+    margin-left: auto;
+}
+
+.cc-grace-widget:fullscreen,
+.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    max-width: none;
+    background: #fcfcfd;
+}
+
+.cc-grace-widget:fullscreen .cc-grace-toolbar,
+.cc-grace-widget:fullscreen .cc-grace-stats,
+.cc-grace-widget:fullscreen .cc-grace-scrub,
+.cc-grace-widget:fullscreen .cc-grace-caption,
+.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen .cc-grace-toolbar,
+.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen .cc-grace-stats,
+.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen .cc-grace-scrub,
+.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen .cc-grace-caption {
+    flex-shrink: 0;
+}
+
+.cc-grace-widget:fullscreen #cc-grace-canvas,
+.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen #cc-grace-canvas {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: 0 8px;
+}
+
+.cc-grace-widget:fullscreen #cc-grace-canvas canvas,
+.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen #cc-grace-canvas canvas {
+    width: 100% !important;
+    height: auto !important;
+}
+
 @media (max-width: 640px) {
     .cc-grace-widget .cc-grace-toolbar {
         align-items: flex-start;
+    }
+
+    .cc-grace-widget .cc-grace-toolbar button[data-cc-fullscreen] {
+        margin-left: 0;
     }
 }
 
