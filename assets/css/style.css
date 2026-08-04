@@ -3741,8 +3741,14 @@ footer {
 
 .cc-grace-widget #cc-grace-canvas canvas {
     display: block;
-    width: 100% !important;
-    height: auto !important;
+    width: 100%;
+    height: auto;
+}
+
+.cc-grace-widget.cc-fs-fallback #cc-grace-canvas,
+.cc-grace-widget:fullscreen #cc-grace-canvas,
+.cc-grace-widget:-webkit-full-screen #cc-grace-canvas {
+    min-height: 0 !important;
 }
 
 .cc-grace-widget .cc-grace-caption {

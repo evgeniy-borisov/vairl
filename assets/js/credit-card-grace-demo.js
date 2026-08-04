@@ -310,11 +310,21 @@
       resizeCanvas = function () {
         measureHost();
         p.resizeCanvas(W, H);
-        // Не даём CSS растягивать bitmap (иначе «ломаный» fullscreen).
         if (p.canvas) {
-          p.canvas.style.width = W + "px";
-          p.canvas.style.height = H + "px";
-          p.canvas.style.maxWidth = "100%";
+          const fs = isFullscreen();
+          if (fs) {
+            p.canvas.style.setProperty("width", W + "px", "important");
+            p.canvas.style.setProperty("height", H + "px", "important");
+            p.canvas.style.setProperty("max-width", "100%", "important");
+            p.canvas.style.setProperty("max-height", "100%", "important");
+          } else {
+            p.canvas.style.removeProperty("width");
+            p.canvas.style.removeProperty("height");
+            p.canvas.style.removeProperty("max-width");
+            p.canvas.style.removeProperty("max-height");
+            p.canvas.style.width = "100%";
+            p.canvas.style.height = "auto";
+          }
           p.canvas.style.display = "block";
         }
       };
