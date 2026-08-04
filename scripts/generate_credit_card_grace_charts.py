@@ -78,7 +78,7 @@ def chart_debt_policies(card, out: Path):
             linewidth=st["lw"],
             linestyle=st.get("ls", "-"),
         )
-    style_ax(ax, f"Долг во времени — {card.label}", "Долг, ₽")
+    style_ax(ax, f"Долг во времени — {card.label}", "Долг, руб.")
     ax.legend(frameon=False, fontsize=9, ncol=2)
     fig.tight_layout()
     fig.savefig(out, format="svg", bbox_inches="tight")
@@ -98,7 +98,7 @@ def chart_cost_cum(card, out: Path):
             linewidth=st["lw"],
             linestyle=st.get("ls", "-"),
         )
-    style_ax(ax, f"Накопленный client cost (%% + fees) — {card.label}", "Cost, ₽")
+    style_ax(ax, f"Накопленный client cost (%% + fees) — {card.label}", "Cost, руб.")
     ax.legend(frameon=False, fontsize=9, ncol=2)
     fig.tight_layout()
     fig.savefig(out, format="svg", bbox_inches="tight")
@@ -125,7 +125,7 @@ def chart_grace_split(card, policy: str, out: Path):
         alpha=0.65,
         label="уже капают %",
     )
-    style_ax(ax, f"Структура долга — {card.label} / {policy}", "₽")
+    style_ax(ax, f"Структура долга — {card.label} / {policy}", "руб.")
     ax.legend(frameon=False, fontsize=9)
     fig.tight_layout()
     fig.savefig(out, format="svg", bbox_inches="tight")
@@ -148,7 +148,7 @@ def chart_banks_min_trap(out: Path):
                 label=label,
                 linewidth=2.0,
             )
-        style_ax(ax, f"min_trap — {card.label}", "₽")
+        style_ax(ax, f"min_trap — {card.label}", "руб.")
         ax.legend(frameon=False, fontsize=9)
     fig.suptitle("Один ledger, два календаря грейса: политика «только минималка»", fontsize=13, y=1.02)
     fig.tight_layout()
