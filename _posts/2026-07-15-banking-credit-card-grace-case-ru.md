@@ -568,4 +568,4 @@ def agent_rank(card: CardModel) -> list[dict]:
 
 **Вывод кейса:** кредитка с длинным маркетинговым «до 120 дней» не спасает, если агент (или человек) оптимизирует «не получить штраф за просрочку» вместо «не потерять грейс». Клиентский агент измеряет второе — на временном графике и через nudges с подтверждением, а не только в push «внесите минимум».
 
-Продолжение линии: [часть 1 — DCF/NPV и сторона клиента](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/) · [часть 2 — классификация задач](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/).
+Продолжение линии: [бриф для руководителей](/vairl/blog/2026/07/16/client-money-agent-exec-brief-ru/) · [часть 1 — DCF/NPV и сторона клиента](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/) · [часть 2 — классификация задач](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/).

@@ -683,6 +683,7 @@ LLM, если появится, вызывает `explain_channel` / читае�
 
 **Куда дальше на VAIRL:**
 
+- [Бриф для руководителей: зачем запускать клиентский money-агент](/vairl/blog/2026/07/16/client-money-agent-exec-brief-ru/);
 - [Кейс: кредитка Сбера/Т-Банка, грейс и поиск стратегии агентами](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/);
 - [Часть 2 — классификация задач, L×D, бенчмарк как сервис](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/);
 - [Постановка задачи агенту](/vairl/blog/2026/07/04/agent-task-specification-ru/);

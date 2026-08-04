@@ -1,0 +1,29 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f2744"/>
+      <stop offset="55%" stop-color="#1a3a5c"/>
+      <stop offset="100%" stop-color="#0d4f3c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="80" y="120" fill="#8ecae6" font-family="Georgia,serif" font-size="22">VAIRL · 4;O @C:>2>48B5;59</text>
+  <text x="80" y="200" fill="#ffffff" font-family="Georgia,serif" font-size="42" font-weight="700">;85=BA:89 AI-035=B</text>
+  <text x="80" y="255" fill="#ffffff" font-family="Georgia,serif" font-size="42" font-weight="700">45=53 8 48AF8?;8=K</text>
+  <text x="80" y="330" fill="#b8c9d9" font-family="system-ui,sans-serif" font-size="22">0G5< · :><C · go / no-go · GB> 40QB 70?CA:</text>
+  <g transform="translate(80, 400)">
+    <rect width="280" height="100" rx="10" fill="#ffffff" opacity="0.1"/>
+    <text x="24" y="42" fill="#fff" font-family="system-ui,sans-serif" font-size="18" font-weight="700">Dashboard</text>
+    <text x="24" y="72" fill="#a8dadc" font-family="system-ui,sans-serif" font-size="15">Streamlit · p5.js · Python</text>
+  </g>
+  <g transform="translate(400, 400)">
+    <rect width="280" height="100" rx="10" fill="#ffffff" opacity="0.1"/>
+    <text x="24" y="42" fill="#fff" font-family="system-ui,sans-serif" font-size="18" font-weight="700">Discipline</text>
+    <text x="24" y="72" fill="#a8dadc" font-family="system-ui,sans-serif" font-size="15">Telegram · :0;5=40@L · email + ACK</text>
+  </g>
+  <g transform="translate(720, 400)">
+    <rect width="400" height="100" rx="10" fill="#2a9d8f" opacity="0.85"/>
+    <text x="24" y="42" fill="#fff" font-family="system-ui,sans-serif" font-size="18" font-weight="700">Objective :;85=B0</text>
+    <text x="24" y="72" fill="#e9f5f3" font-family="system-ui,sans-serif" font-size="15">=5 10=:>2A:89 NPV · =5 upsell</text>
+  </g>
+</svg>
