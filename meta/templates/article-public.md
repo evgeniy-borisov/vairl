@@ -41,3 +41,13 @@ review_status: draft
 ## Первый раздел {#section-id-1}
 
 Текст статьи.
+
+Display-формулы — блок `typst-math` (SVG при `python scripts/publish_article.py`, нужен `brew install typst`):
+
+````markdown
+```typst-math
+$ "PV" = sum_(t=0)^T ("CF"_t)/((1+r)^t) $
+```
+````
+
+Инлайн: KaTeX, `\(x\)` или `$x$`.
