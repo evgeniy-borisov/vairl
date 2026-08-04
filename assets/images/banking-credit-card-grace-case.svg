@@ -1,0 +1,48 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8f0f7"/>
+      <stop offset="100%" stop-color="#f7f3ea"/>
+    </linearGradient>
+    <linearGradient id="grace" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2e7d32"/>
+      <stop offset="100%" stop-color="#66bb6a"/>
+    </linearGradient>
+    <linearGradient id="interest" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c62828"/>
+      <stop offset="100%" stop-color="#ef6c00"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <text x="600" y="58" text-anchor="middle" fill="#1b2838" font-family="Georgia,serif" font-size="32" font-weight="700">59A: :@548B:0 8 3@59A</text>
+  <text x="600" y="96" text-anchor="middle" fill="#546e7a" font-family="system-ui,sans-serif" font-size="16">!15@ · "-0=: · A8<C;OF8O · 035=BK 8ICB AB@0B538N</text>
+
+  <!-- Timeline -->
+  <text x="80" y="160" fill="#37474f" font-family="system-ui,sans-serif" font-size="14" font-weight="700">@5<5==0O >AL ?>:C?:8</text>
+  <line x1="80" y1="220" x2="1120" y2="220" stroke="#90a4ae" stroke-width="3"/>
+  <circle cx="160" cy="220" r="10" fill="#1565c0"/>
+  <text x="160" y="250" text-anchor="middle" fill="#1565c0" font-family="system-ui,sans-serif" font-size="13">B@0B0</text>
+  <rect x="200" y="195" width="520" height="50" rx="8" fill="url(#grace)" opacity="0.85"/>
+  <text x="460" y="226" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="15" font-weight="700">grace / ;L3>B=K9 ?5@8>4</text>
+  <rect x="720" y="195" width="360" height="50" rx="8" fill="url(#interest)" opacity="0.9"/>
+  <text x="900" y="226" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="15" font-weight="700">% A 1-3> 4=O ?@>A@>G:8 3@59A0</text>
+
+  <!-- Two cards -->
+  <g transform="translate(80, 310)">
+    <rect width="480" height="220" rx="14" fill="#fff" stroke="#cfd8dc" stroke-width="2"/>
+    <text x="24" y="42" fill="#0d47a1" font-family="system-ui,sans-serif" font-size="20" font-weight="700">!15@0@B0</text>
+    <text x="24" y="78" fill="#455a64" font-family="system-ui,sans-serif" font-size="15">4> 120 4=59 · <5AOF ?>:C?>: + 90 4=59</text>
+    <text x="24" y="112" fill="#455a64" font-family="system-ui,sans-serif" font-size="15">AB02:0 (<>45;L): ~49.8%+</text>
+    <text x="24" y="146" fill="#455a64" font-family="system-ui,sans-serif" font-size="15">min payment: 4> 10%</text>
+    <text x="24" y="190" fill="#78909c" font-family="system-ui,sans-serif" font-size="13">8AB>G=8:: banki.ru / card/8481</text>
+  </g>
+  <g transform="translate(640, 310)">
+    <rect width="480" height="220" rx="14" fill="#fff" stroke="#cfd8dc" stroke-width="2"/>
+    <text x="24" y="42" fill="#f57c00" font-family="system-ui,sans-serif" font-size="20" font-weight="700">"-0=: ;0B8=C<</text>
+    <text x="24" y="78" fill="#455a64" font-family="system-ui,sans-serif" font-size="15">4> 55 4=59 =0 ?>:C?:8</text>
+    <text x="24" y="112" fill="#455a64" font-family="system-ui,sans-serif" font-size="15">4> 120 4=59 =0 @5D8=0=A8@>20=85</text>
+    <text x="24" y="146" fill="#455a64" font-family="system-ui,sans-serif" font-size="15">min payment: 4> 814%</text>
+    <text x="24" y="190" fill="#78909c" font-family="system-ui,sans-serif" font-size="13">8AB>G=8:: banki.ru / card/675 · 8813</text>
+  </g>
+</svg>

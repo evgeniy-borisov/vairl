@@ -67,8 +67,9 @@ review_status: approved
 11. [Пять фаз под клиентский NPV](#lifecycle)
 12. [Мультиагенты и модели](#multi-agent)
 13. [Код: от PV до оркестратора](#code-ladder) — примеры Python по нарастающей
-14. [Классификация задач](#task-classification) — [часть 2](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/)
-15. [Выводы](#lessons)
+14. [Кейс: кредитка и грейс](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/) — Сбер / Т-Банк, симуляция
+15. [Классификация задач](#task-classification) — [часть 2](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/)
+16. [Выводы](#lessons)
 
 </div>
 
@@ -680,6 +681,7 @@ LLM, если появится, вызывает `explain_channel` / читае�
 
 **Куда дальше на VAIRL:**
 
+- [Кейс: кредитка Сбера/Т-Банка, грейс и поиск стратегии агентами](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/);
 - [Часть 2 — классификация задач, L×D, бенчмарк как сервис](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/);
 - [Постановка задачи агенту](/vairl/blog/2026/07/04/agent-task-specification-ru/);
 - [Генерация бенчмарков](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/);
