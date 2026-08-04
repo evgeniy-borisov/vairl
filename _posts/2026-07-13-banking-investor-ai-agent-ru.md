@@ -301,7 +301,7 @@ def conflict_on_fee(aum: float, fee_aum: float, years: int = 5, r: float = 0.08)
 
 
 print(conflict_on_fee(5_000_000, 0.01))
-# → {'npv_bank': 199635.0, 'npv_client': -199635.0}  — зеркало
+# → {'npv_bank': 199636.0, 'npv_client': -199636.0}  — зеркало
 ```
 
 Пока objective агента задаётся банковским KPI-деревом, модель честно оптимизирует \(NPV_{bank}\). Можно добавить ethics layer и suitability — они ограничивают худшие злоупотребления, но **не меняют знак целевой функции**.
