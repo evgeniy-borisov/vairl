@@ -84,6 +84,7 @@
     const tipEl = root.querySelector("[data-cc-tooltip]");
 
     let resizeCanvas = null;
+    let fsPlaceholder = null;
 
     function nativeFsElement() {
       return (
@@ -108,24 +109,47 @@
       fsBtn.textContent = on ? "✕" : "⛶";
     }
 
+    function scheduleResize() {
+      const run = () => {
+        if (typeof resizeCanvas === "function") resizeCanvas();
+      };
+      run();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          run();
+          setTimeout(run, 60);
+          setTimeout(run, 200);
+        });
+      });
+    }
+
     function enterCssFullscreen() {
+      if (!fsPlaceholder) {
+        fsPlaceholder = document.createElement("div");
+        fsPlaceholder.className = "cc-fs-placeholder";
+        fsPlaceholder.setAttribute("aria-hidden", "true");
+      }
+      fsPlaceholder.style.height = root.offsetHeight + "px";
+      if (!fsPlaceholder.parentNode && root.parentNode) {
+        root.parentNode.insertBefore(fsPlaceholder, root);
+      }
       root.classList.add("cc-fs-fallback", "cc-is-fullscreen");
       document.documentElement.classList.add("cc-fs-lock");
       document.body.classList.add("cc-fs-lock");
+      if (tipEl) tipEl.hidden = true;
       syncFsButton();
-      requestAnimationFrame(() => {
-        if (typeof resizeCanvas === "function") resizeCanvas();
-      });
+      scheduleResize();
     }
 
     function exitCssFullscreen() {
       root.classList.remove("cc-fs-fallback", "cc-is-fullscreen");
       document.documentElement.classList.remove("cc-fs-lock");
       document.body.classList.remove("cc-fs-lock");
+      if (fsPlaceholder && fsPlaceholder.parentNode) {
+        fsPlaceholder.parentNode.removeChild(fsPlaceholder);
+      }
       syncFsButton();
-      requestAnimationFrame(() => {
-        if (typeof resizeCanvas === "function") resizeCanvas();
-      });
+      scheduleResize();
     }
 
     function exitNativeFullscreen() {
@@ -144,28 +168,11 @@
       }
     }
 
-    function enterNativeFullscreen() {
-      const req =
-        root.requestFullscreen ||
-        root.webkitRequestFullscreen ||
-        root.webkitRequestFullScreen ||
-        root.msRequestFullscreen;
-      if (!req) return Promise.reject(new Error("no fullscreen API"));
-      try {
-        const ret = req.call(root);
-        return ret && typeof ret.then === "function" ? ret : Promise.resolve();
-      } catch (err) {
-        return Promise.reject(err);
-      }
-    }
-
     function toggleFullscreen(ev) {
       if (ev) {
         ev.preventDefault();
         ev.stopPropagation();
       }
-      // Для встроенного демо надёжнее CSS-overlay на весь viewport:
-      // Element.requestFullscreen на Safari/iOS часто недоступен или молча no-op.
       if (isFullscreen()) {
         if (nativeFsElement() === root) exitNativeFullscreen();
         exitCssFullscreen();
@@ -175,16 +182,15 @@
     }
 
     function onFullscreenChange() {
-      // left native FS without our fallback
-      if (!nativeFsElement() && root.classList.contains("cc-is-fullscreen") && !root.classList.contains("cc-fs-fallback")) {
+      if (
+        !nativeFsElement() &&
+        root.classList.contains("cc-is-fullscreen") &&
+        !root.classList.contains("cc-fs-fallback")
+      ) {
         root.classList.remove("cc-is-fullscreen");
       }
       syncFsButton();
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (typeof resizeCanvas === "function") resizeCanvas();
-        });
-      });
+      scheduleResize();
     }
 
     function onFsKey(e) {
@@ -280,21 +286,37 @@
       function measureHost() {
         const wrap = document.getElementById(CANVAS_ID);
         const fs = isFullscreen();
-        const maxW = fs ? Math.max(window.innerWidth, (wrap && wrap.clientWidth) || 0) : 920;
-        W = Math.max(320, Math.min(maxW, (wrap && wrap.clientWidth) || maxW));
-        if (fs) {
-          const top = wrap ? wrap.getBoundingClientRect().top : 120;
-          const caption = root.querySelector(".cc-grace-caption");
-          const cap = caption ? Math.min(caption.offsetHeight || 40, 56) : 24;
-          H = Math.max(320, Math.floor(window.innerHeight - top - cap - 8));
-        } else {
+        if (!fs) {
+          W = Math.max(320, Math.min(920, (wrap && wrap.clientWidth) || 920));
           H = 420;
+          return;
         }
+        // В fullscreen canvas — flex:1; берём фактический box после layout.
+        W = Math.max(320, Math.floor((wrap && wrap.clientWidth) || window.innerWidth));
+        let h = wrap ? wrap.clientHeight : 0;
+        if (h < 220) {
+          let chrome = 0;
+          Array.prototype.forEach.call(root.children, (el) => {
+            if (el.id === CANVAS_ID) return;
+            if (el.classList.contains("cc-grace-tooltip")) return;
+            if (el.classList.contains("cc-grace-caption")) return; // скрыт в FS
+            chrome += el.getBoundingClientRect().height;
+          });
+          h = window.innerHeight - chrome - 8;
+        }
+        H = Math.max(260, Math.floor(h));
       }
 
       resizeCanvas = function () {
         measureHost();
         p.resizeCanvas(W, H);
+        // Не даём CSS растягивать bitmap (иначе «ломаный» fullscreen).
+        if (p.canvas) {
+          p.canvas.style.width = W + "px";
+          p.canvas.style.height = H + "px";
+          p.canvas.style.maxWidth = "100%";
+          p.canvas.style.display = "block";
+        }
       };
 
       p.setup = function () {
