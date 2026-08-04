@@ -463,7 +463,7 @@ Eval-pack обязан ломать агента, который «для удо
 | Personal Policy | Must-not, риск, ESG (*environmental, social, governance*) |
 | Communication | Объяснение без upsell |
 | Monitoring | Рынок + тарифы + цели |
-| **Dashboard** | Расчёты → Starlight + p5.js + Python-viz ([кейс](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/#dashboard-discipline)) |
+| **Dashboard** | Расчёты → Streamlit + p5.js + Python-viz ([кейс](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/#dashboard-discipline)) |
 | **Discipline** | Telegram / календарь / email + обязательный ACK шага |
 
 На горячем пути моделей — те же Markowitz / BL (*Black–Litterman*) / MC / GARCH (*generalized autoregressive conditional heteroskedasticity*) / SHAP (*SHapley Additive exPlanations*) / логрег для *личного* propensity «уйти с дорогого тарифа», а не для take-up банковского баннера.

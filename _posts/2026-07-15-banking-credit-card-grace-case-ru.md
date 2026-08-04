@@ -2,7 +2,7 @@
 layout: post
 title: "Кейс: кредитка Сбера или Т-Банка — грейс, проценты и как агенты ищут стратегию"
 date: 2026-07-15 12:00:00 +0300
-excerpt: "Подстатья к клиентскому investment-агенту: грейс Сбера/Т-Банка, симуляция политик, p5-дашборд; Dashboard Agent (Starlight + p5 + Python) и Discipline Agent (Telegram / календарь / email с ACK)."
+excerpt: "Подстатья к клиентскому investment-агенту: грейс Сбера/Т-Банка, симуляция политик, p5-дашборд; Dashboard Agent (Streamlit + p5 + Python) и Discipline Agent (Telegram / календарь / email с ACK)."
 lang: ru
 image: /assets/images/banking-credit-card-grace-case.svg
 visibility: public
@@ -21,7 +21,7 @@ review_status: approved
 - **Ловушка:** минимальный платёж ≠ сохранение грейса. Платите «как удобно» — и \(CF\) клиента уходит в проценты.
 - **Агенты** не «советуют в чате»: Ledger → Grace Calendar → Cost → Strategy search → Policy → объяснение. Objective — **минимизировать client cost** (проценты + комиссии), не take-up банка.
 - **Входы:** учебные **PDF-выписки** → парсер → ledger; выходы — **p5.js-динамика** по дням (+ SVG-снимки).
-- **Два прикладных агента поверх расчёта:** **Dashboard Agent** (Starlight + p5.js + Python-viz) и **Discipline Agent** (Telegram / календарь / email с обязательным подтверждением шага).
+- **Два прикладных агента поверх расчёта:** **Dashboard Agent** (Streamlit + p5.js + Python-viz) и **Discipline Agent** (Telegram / календарь / email с обязательным подтверждением шага).
 
 </div>
 
@@ -357,7 +357,7 @@ flowchart TB
 | **Strategy Search** | перебор политик + what-if | `min_trap` … `payday_clear`, BT |
 | **Personal Policy** | `must_not` | не рекомендовать снятие наличных «для кэшбэка»; не обещать 0% без календаря |
 | **Simulation** | `run_daily` 30–180 дней | JSON-ряды → **p5.js** анимация / SVG |
-| **Dashboard Agent** | расчёты → дашборд | Starlight-страница + p5 + Python-viz |
+| **Dashboard Agent** | расчёты → дашборд | Streamlit-приложение + p5 + Python-viz |
 | **Discipline Agent** | nudge + confirm | Telegram / календарь / email до шага |
 | **Communication** | LLM *только* narrative | «на графике красная зона с дня N» |
 
@@ -390,15 +390,15 @@ flowchart LR
   Sim["Simulation / Cost JSON"]
   DA["1. Dashboard Agent"]
   DI["2. Discipline Agent"]
-  Star["Starlight site"]
+  ST["Streamlit app"]
   P5["p5.js виджеты"]
-  Py["Python viz\nmatplotlib / plotly / altair"]
+  Py["matplotlib / plotly / altair"]
   TG["Telegram"]
   Cal["Календарь"]
   Mail["Email"]
   ACK["Confirm / ACK"]
 
-  Sim --> DA --> Star
+  Sim --> DA --> ST
   DA --> P5
   DA --> Py
   Sim --> DI
@@ -415,17 +415,17 @@ flowchart LR
 
 | Слой | Зачем |
 |------|--------|
-| **[Starlight](https://starlight.astro.build/)** (Astro) | Оболочка дашборда: страницы «Карта», «Грейс», «Политики», «Журнал nudges»; версионируемые docs-like экраны, поиск, тёмная тема |
-| **p5.js** | Живая динамика: playhead по дням, hover по событиям, fullscreen — как виджет выше |
-| **Python viz** | Доработка и batch-экспорт: `matplotlib` → SVG для печати/постов; `plotly` / `altair` — интерактивные срезы в ноутбуке; при необходимости [Streamlit](/vairl/blog/2026/07/08/streamlit-folium-geospatial-ru/) как песочница what-if до публикации в Starlight |
+| **[Streamlit](https://streamlit.io/)** | Оболочка дашборда: вкладки «Карта», «Грейс», «Политики», «Журнал nudges»; слайдеры what-if, `st.metric` / `st.dataframe`, деплой на Streamlit Cloud ([обзор на VAIRL](/vairl/blog/2026/07/08/streamlit-folium-geospatial-ru/)) |
+| **p5.js** | Живая динамика внутри Streamlit (`components.html` / iframe): playhead по дням, hover, fullscreen — как виджет выше |
+| **Python viz** | Доработка и экспорт: `matplotlib` → SVG для печати/постов; `plotly` / `altair` → `st.plotly_chart` / Vega в том же приложении |
 
 **Что обязан уметь:**
 
 1. Подписаться на артефакты солверов (`credit-card-grace-series.json`, outcomes политик).  
-2. Собрать **views**: долг / cost / структура грейса / сравнение банков.  
-3. Обновить Starlight-страницу (SSG или preview) и встроить p5-хост с `data-series-url`.  
-4. При смене политики или новой PDF-выписке — пересобрать графики без ручного копипаста.  
-5. Хранить **snapshot** («дашборд на 2026-08-04») для audit.
+2. Собрать **views** в Streamlit: долг / cost / структура грейса / сравнение банков.  
+3. Встроить p5-хост (`data-series-url`) рядом с `st.line_chart` / Plotly.  
+4. При смене политики или новой PDF-выписке — перезапустить скрипт / `@st.cache_data` без ручного копипаста.  
+5. Хранить **snapshot** («дашборд на 2026-08-04») для audit (session state + выгрузка JSON/SVG).
 
 Контракт:
 
@@ -434,15 +434,15 @@ id: dashboard-agent
 role: render_analytics
 inputs: [sim_series_json, markers, policy_outcomes, narrative_blocks]
 outputs:
-  - starlight_pages: [grace-overview, policy-compare, event-journal]
+  - streamlit_app: [grace-overview, policy-compare, event-journal]
   - p5_widgets: [cc-grace-demo]
   - static_exports: [svg, optional_pdf_report]
-tools: [matplotlib, plotly, altair, optional_streamlit_sandbox]
+tools: [streamlit, matplotlib, plotly, altair]
 must_not: [change_objective, invent_apr, hide_grace_end_markers]
-refresh: on_new_statement | on_policy_change | nightly
+refresh: on_new_statement | on_policy_change | on_rerun
 ```
 
-Идея: человек смотрит **один** дашборд (Starlight), а не чат с таблицами. p5 отвечает за ощущение времени; Python — за точность картинки и пакетную перерисовку.
+Идея: человек смотрит **один** дашборд (Streamlit), а не чат с таблицами. p5 отвечает за ощущение времени; Plotly/matplotlib — за точность срезов и пакетную перерисовку.
 
 ### 2. Discipline Agent — дисциплина и уведомления
 
@@ -454,7 +454,7 @@ refresh: on_new_statement | on_policy_change | nightly
 |-------|--------|----------------|
 | **Telegram** | быстрый push + inline-кнопки | «До конца грейса 5 дн. Нужно 48 200 ₽. Подтверди план.» |
 | **Календарь** (CalDAV / Google / Apple) | якорь в дне человека | событие «Платёж для грейса» + reminder −3д / −1д / утром |
-| **Email** | длинный audit-след и вложения | письмо + ICS + ссылка на дашборд Starlight |
+| **Email** | длинный audit-след и вложения | письмо + ICS + ссылка на Streamlit-дашборд |
 
 **Обязательное подтверждение (ACK).** Без ACK шаг считается *не выполненным*, даже если уведомление ушло. Иначе это просто шум.
 
@@ -564,7 +564,7 @@ def agent_rank(card: CardModel) -> list[dict]:
 | Оркестратор + `must_not` | запрет cash advance и пустых обещаний 0% |
 | Eval на тарифах | сценарии `min_trap` vs `payday_clear` |
 | Код: PV → Monte Carlo → orch | PDF ledger → календарь грейса → SVG / p5 ряды |
-| Оркестратор агентов | **Dashboard Agent** (Starlight + p5 + Python) и **Discipline Agent** (Telegram / календарь / email + ACK) |
+| Оркестратор агентов | **Dashboard Agent** (Streamlit + p5 + Python) и **Discipline Agent** (Telegram / календарь / email + ACK) |
 
 **Вывод кейса:** кредитка с длинным маркетинговым «до 120 дней» не спасает, если агент (или человек) оптимизирует «не получить штраф за просрочку» вместо «не потерять грейс». Клиентский агент измеряет второе — на временном графике и через nudges с подтверждением, а не только в push «внесите минимум».
 
