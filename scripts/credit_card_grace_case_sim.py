@@ -171,6 +171,7 @@ def run(
     payday_offset: int,
     start_cash: float,
     policy: str,
+    collect_daily: bool = False,
 ) -> dict:
     """
     policy:
@@ -187,6 +188,7 @@ def run(
 
     paydays = {payday_offset + 30 * m for m in range(horizon // 30 + 2)}
     snapshots = []
+    daily: list[dict] = []
 
     for day in range(horizon):
         state.day = day
@@ -237,7 +239,26 @@ def run(
                 }
             )
 
-    return {
+        if collect_daily:
+            under = sum(p.principal for p in state.positions if p.under_grace)
+            over = sum(p.principal for p in state.positions if not p.under_grace)
+            nearest = min((p.grace_end for p in state.positions if p.under_grace), default=None)
+            daily.append(
+                {
+                    "day": day,
+                    "debt": round(debt(state), 2),
+                    "debt_under_grace": round(under, 2),
+                    "debt_accruing": round(over, 2),
+                    "interest_cum": round(state.interest_accrued, 2),
+                    "fees_cum": round(state.fees_paid, 2),
+                    "client_cost_cum": round(state.interest_accrued + state.fees_paid, 2),
+                    "cash": round(cash, 2),
+                    "nearest_grace_end": nearest,
+                    "days_to_grace_end": (nearest - day) if nearest is not None else None,
+                }
+            )
+
+    out = {
         "card": card.name,
         "label": card.label,
         "policy": policy,
@@ -250,6 +271,14 @@ def run(
         "snapshots": snapshots,
         "source": card.source,
     }
+    if collect_daily:
+        out["daily"] = daily
+    return out
+
+
+def run_daily(card: CardModel, ledger: list[LedgerLine], **kwargs) -> dict:
+    """То же, что run, но с дневным рядом для графиков."""
+    return run(card, ledger, collect_daily=True, **kwargs)
 
 
 def persona_spending() -> list[LedgerLine]:

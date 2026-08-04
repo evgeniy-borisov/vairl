@@ -20,6 +20,7 @@ review_status: approved
 - **Т-Банк Платинум:** до **55 дней** на покупки, до **120 дней** на рефинансирование других карт; ставка в модели **~29.9%+**, min до **8–14%**.
 - **Ловушка:** минимальный платёж ≠ сохранение грейса. Платите «как удобно» — и \(CF\) клиента уходит в проценты.
 - **Агенты** не «советуют в чате»: Ledger → Grace Calendar → Cost → Strategy search → Policy → объяснение. Objective — **минимизировать client cost** (проценты + комиссии), не take-up банка.
+- **Входы:** учебные **PDF-выписки** → парсер → ledger; выходы симуляции — **SVG time-series** (вектор для Jekyll).
 
 </div>
 
@@ -38,12 +39,14 @@ review_status: approved
 1. [Зачем этот кейс](#why)
 2. [Что скачали с Банки.ру](#banki)
 3. [Модели грейса](#models)
-4. [Персона и временная динамика трат](#persona)
-5. [Симуляция политик](#sim)
-6. [Как агенты ищут стратегию](#agents)
-7. [Рефинансирование / balance transfer](#refinance)
-8. [Код и воспроизведение](#code)
-9. [Связь с частью 1](#link)
+4. [PDF-выписки → Ledger Agent](#pdf)
+5. [Персона и временная динамика трат](#persona)
+6. [Симуляция политик](#sim)
+7. [Временные графики (SVG)](#charts)
+8. [Как агенты ищут стратегию](#agents)
+9. [Рефинансирование / balance transfer](#refinance)
+10. [Код и воспроизведение](#code)
+11. [Связь с частью 1](#link)
 
 </div>
 
@@ -111,6 +114,56 @@ grace_days(purchase_day_in_cycle) = (30 − day) + 25
 
 ---
 
+## PDF-выписки → Ledger Agent {#pdf}
+
+Реальный контур клиента начинается не с YAML персоны, а с **файла выписки**. В кейсе — синтетические PDF (не документы банка), с **стабильными маркерами** для парсера:
+
+| Маркер | Смысл |
+|--------|--------|
+| `BANK:` / `CARD:` | какой продукт / календарь грейса подключить |
+| `STATEMENT_PERIOD:` | границы расчётного периода |
+| `PAYMENT_DUE:` / `GRACE_PAYMENT:` / `MIN_PAYMENT:` | даты и суммы из «шапки» |
+| `APR_PURCHASES:` | ставка модели для Cost Agent |
+| `=== OPERATIONS ===` | строки `DATE KIND AMOUNT DESCRIPTION` |
+
+Файлы в репозитории:
+
+- [anna-month1-sber.pdf](/vairl/assets/data/credit-card-statements/anna-month1-sber.pdf)
+- [anna-month1-tbank.pdf](/vairl/assets/data/credit-card-statements/anna-month1-tbank.pdf)
+- рядом `.parsed.json` и `.ledger.json` — выход Ledger Agent
+
+Пайплайн:
+
+```text
+PDF (PyMuPDF generate / банк export)
+  → pypdf extract_text
+  → regex markers
+  → StatementMeta + operations[]
+  → relative-day ledger
+  → grace sim / charts
+```
+
+```bash
+python scripts/credit_card_statement_pdf.py generate
+python scripts/credit_card_statement_pdf.py parse \
+  --pdf assets/data/credit-card-statements/anna-month1-sber.pdf
+```
+
+Фрагмент парсера:
+
+```python
+def parse_statement_pdf(pdf_path: Path) -> dict:
+    text = extract_text(pdf_path)  # pypdf
+    # BANK:, PAYMENT_DUE:, блок OPERATIONS → meta + ops
+    ...
+```
+
+Почему **PDF**, а не сразу CSV: в жизни клиент чаще тащит именно PDF/скан из ЛК. Агент обязан уметь текст слой; OCR — следующий слой (вне демо). Контракт маркеров отделяет «как банк сверстал» от «что симулятор ест».
+
+На выписке Сбера за месяц 1 парсер поднимает: `grace_payment = 120 000`, `payment_due = 2026-04-30`, три покупки → ledger с `day` 3/10/20 относительно начала периода.
+
+---
+
 ## Персона и временная динамика трат {#persona}
 
 **Анна**, зарплата 120 000 ₽ 5-го числа, стартовый кэш 20 000 ₽.
@@ -175,6 +228,62 @@ Strategy Agent перебирает политики (один и тот же le
 
 ---
 
+## Временные графики (SVG) {#charts}
+
+Таблицы дают итог на день 180. Агенту и читателю нужна **динамика**. Формат для статического Jekyll — **SVG** (вектор, без JS, тот же подход, что у зарплатных распределений на VAIRL): `matplotlib` → `.svg` в `assets/images/`.
+
+Симулятор пишет дневной ряд (`run_daily`): `debt`, `debt_under_grace`, `debt_accruing`, `client_cost_cum`, …
+
+### Долг по политикам
+
+<figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-debt-sber.svg" alt="Долг во времени, СберКарта, четыре политики" style="max-width: 100%; height: auto;" />
+  <figcaption style="font-size: 0.9em; color: #666;">Сбер: длинный грейс — «воздух» дольше, но min_trap всё равно раздувает долг</figcaption>
+</figure>
+
+<figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-debt-tbank.svg" alt="Долг во времени, Т-Банк Платинум, четыре политики" style="max-width: 100%; height: auto;" />
+  <figcaption style="font-size: 0.9em; color: #666;">Т-Банк: короткий грейс — раньше расходятся кривые min_trap и payday_clear</figcaption>
+</figure>
+
+### Накопленный client cost
+
+<figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-cost-sber.svg" alt="Накопленный client cost, Сбер" style="max-width: 100%; height: auto;" />
+</figure>
+
+<figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-cost-tbank.svg" alt="Накопленный client cost, Т-Банк" style="max-width: 100%; height: auto;" />
+  <figcaption style="font-size: 0.9em; color: #666;">Cost = проценты + комиссии; payday_clear ≈ 0, cash_then_min — худший хвост</figcaption>
+</figure>
+
+### Когда долг уже «вне грейса»
+
+<figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-split-sber-min.svg" alt="Структура долга под грейсом и с процентами, Сбер min_trap" style="max-width: 100%; height: auto;" />
+</figure>
+
+<figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-split-tbank-min.svg" alt="Структура долга под грейсом и с процентами, Т-Банк min_trap" style="max-width: 100%; height: auto;" />
+  <figcaption style="font-size: 0.9em; color: #666;">Зелёный — ещё под грейсом; красный — уже капает APR. На коротком календаре красная зона появляется раньше</figcaption>
+</figure>
+
+### Один ledger — два банка (min_trap)
+
+<figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-min-trap-compare.svg" alt="Сравнение min_trap Сбер vs Т-Банк" style="max-width: 100%; height: auto;" />
+</figure>
+
+Пересборка графиков:
+
+```bash
+python scripts/generate_credit_card_grace_charts.py
+```
+
+Почему не Plotly/HTML-виджет: пост должен открываться на GitHub Pages без рантайма; SVG кэшируется, печатается, масштабируется. Интерактив — отдельный Streamlit/dashboard слой, не блог.
+
+---
+
 ## Как агенты ищут стратегию {#agents}
 
 ```mermaid
@@ -195,13 +304,13 @@ flowchart TB
 
 | Агент | Метод | В этом кейсе |
 |-------|-------|--------------|
-| **Ledger** | парсинг выписки / open banking | делит операции на `purchase` / `cash` / `payment` |
+| **Ledger** | PDF / open banking → ops | маркеры выписки → `purchase` / `cash` / `payment` |
 | **Grace Calendar** | детерминированный календарь | считает `grace_end` по модели карты |
-| **Cost** | дневной DCF / сумма %% | `client_cost = interest + fees` |
+| **Cost** | дневной ряд + сумма %% | `client_cost = interest + fees` |
 | **Strategy Search** | перебор политик + what-if | `min_trap` … `payday_clear`, BT |
 | **Personal Policy** | `must_not` | не рекомендовать снятие наличных «для кэшбэка»; не обещать 0% без календаря |
-| **Simulation** | forward 30–180 дней | кривая долга по месяцам |
-| **Communication** | LLM *только* narrative | «грейс по покупке 3-го дня кончается …; минималка его не спасает» |
+| **Simulation** | `run_daily` 30–180 дней | кривые долга / cost → SVG |
+| **Communication** | LLM *только* narrative | «грейс кончается …; на графике красная зона с дня N» |
 
 Контракт задачи (как в части 1):
 
@@ -241,18 +350,23 @@ llm_role: narrative_only
 
 ## Код и воспроизведение {#code}
 
-Снимок условий:
-
 ```bash
-# JSON с Банки.ру (уже в репозитории)
+# 1) условия с Банки.ру (снимок)
 cat assets/data/banki-credit-cards-sber-tbank-2026-08.json
-```
 
-Симуляция:
+# 2) PDF-выписки + parse
+python scripts/credit_card_statement_pdf.py generate
+python scripts/credit_card_statement_pdf.py parse \
+  --pdf assets/data/credit-card-statements/anna-month1-sber.pdf
 
-```bash
+# 3) симуляция политик
 python scripts/credit_card_grace_case_sim.py
+
+# 4) SVG time-series
+python scripts/generate_credit_card_grace_charts.py
 ```
+
+Зависимости скриптов: `pymupdf`, `pypdf`, `matplotlib` (уже типичный scientific stack).
 
 Фрагмент ранжирования стратегий:
 
@@ -267,7 +381,7 @@ def agent_rank(card: CardModel) -> list[dict]:
     return sorted(rows, key=lambda r: (r["client_cost"], r["final_debt"]))
 ```
 
-Дальше по лестнице сложности (к части 1): налоги не нужны, но можно добавить точные statement dates из PDF выписки, несколько карт сразу, CEP-алерты «до grace_end осталось 5 дней», eval-пак «агент не предложил cash advance».
+Дальше по лестнице: OCR сканов, несколько карт в одном personal vault, CEP «до grace_end 5 дней», eval «агент не предложил cash advance».
 
 ---
 
@@ -279,8 +393,8 @@ def agent_rank(card: CardModel) -> list[dict]:
 | Fee / cost слой в архитектуре | Grace Calendar + Cost Agent |
 | Оркестратор + `must_not` | запрет cash advance и пустых обещаний 0% |
 | Eval на тарифах | сценарии `min_trap` vs `payday_clear` |
-| Код: PV → Monte Carlo → orch | здесь: календарь грейса → перебор политик |
+| Код: PV → Monte Carlo → orch | PDF ledger → календарь грейса → SVG ряды |
 
-**Вывод кейса:** кредитка с длинным маркетинговым «до 120 дней» не спасает, если агент (или человек) оптимизирует «не получить штраф за просрочку» вместо «не потерять грейс». Клиентский агент измеряет второе.
+**Вывод кейса:** кредитка с длинным маркетинговым «до 120 дней» не спасает, если агент (или человек) оптимизирует «не получить штраф за просрочку» вместо «не потерять грейс». Клиентский агент измеряет второе — и показывает это на временном графике, а не только в push «внесите минимум».
 
 Продолжение линии: [часть 1 — DCF/NPV и сторона клиента](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/) · [часть 2 — классификация задач](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/).

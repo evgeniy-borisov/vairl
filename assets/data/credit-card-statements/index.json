@@ -1,0 +1,18 @@
+{
+  "anna-month1-sber.pdf": {
+    "pdf": "assets/data/credit-card-statements/anna-month1-sber.pdf",
+    "parsed": "assets/data/credit-card-statements/anna-month1-sber.parsed.json",
+    "ledger": "assets/data/credit-card-statements/anna-month1-sber.ledger.json",
+    "n_ops": 3,
+    "grace_payment": 120000.0,
+    "payment_due": "2026-04-30"
+  },
+  "anna-month1-tbank.pdf": {
+    "pdf": "assets/data/credit-card-statements/anna-month1-tbank.pdf",
+    "parsed": "assets/data/credit-card-statements/anna-month1-tbank.parsed.json",
+    "ledger": "assets/data/credit-card-statements/anna-month1-tbank.ledger.json",
+    "n_ops": 3,
+    "grace_payment": 120000.0,
+    "payment_due": "2026-02-24"
+  }
+}

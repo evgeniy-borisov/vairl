@@ -1,0 +1,20 @@
+[
+  {
+    "day": 3,
+    "kind": "purchase",
+    "amount": 80000.0,
+    "note": "Мебель / магазин"
+  },
+  {
+    "day": 10,
+    "kind": "purchase",
+    "amount": 25000.0,
+    "note": "Супермаркет"
+  },
+  {
+    "day": 20,
+    "kind": "purchase",
+    "amount": 15000.0,
+    "note": "Аптека и быт"
+  }
+]
