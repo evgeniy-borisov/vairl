@@ -381,12 +381,12 @@ Eval-pack обязан ломать агента, который «для удо
 | Communication | Объяснение без upsell |
 | Monitoring | Рынок + тарифы + цели |
 
-На горячем пути моделей — те же Markowitz / BL (*Black–Litterman*) / MC / GARCH / SHAP (*SHapley Additive exPlanations*) / логрег для *личного* propensity «уйти с дорогого тарифа», а не для take-up банковского баннера.
+На горячем пути моделей — те же Markowitz / BL (*Black–Litterman*) / MC / GARCH (*generalized autoregressive conditional heteroskedasticity*) / SHAP (*SHapley Additive exPlanations*) / логрег для *личного* propensity «уйти с дорогого тарифа», а не для take-up банковского баннера.
 
 <details markdown="1">
 <summary>Сжатый каталог моделей</summary>
 
-Портфель: Markowitz, Black–Litterman, Risk Parity. Риск: VaR (*value at risk*) / CVaR (*conditional value at risk*), Max DD (*maximum drawdown*). Сценарии: Monte Carlo. Цель: GBI. Издержки: явный PV комиссий в objective. XAI (*explainable AI*): SHAP. Ряды: ARIMA/GARCH/Prophet по необходимости.
+Портфель: Markowitz, Black–Litterman, Risk Parity. Риск: VaR (*value at risk*) / CVaR (*conditional value at risk*), Max DD (*maximum drawdown*). Сценарии: Monte Carlo. Цель: GBI. Издержки: явный PV комиссий в objective. XAI (*explainable AI*): SHAP. Ряды: ARIMA (*autoregressive integrated moving average*) / GARCH / Prophet по необходимости.
 
 </details>
 
