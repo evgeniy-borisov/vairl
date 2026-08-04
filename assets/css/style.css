@@ -3734,20 +3734,25 @@ footer {
     margin: 2px 0;
 }
 
-.cc-grace-widget #cc-grace-canvas {
+.cc-grace-widget #cc-grace-canvas,
+.cc-grace-widget #cc-grace-edges-canvas {
     min-height: 420px;
     padding: 0 4px 8px;
 }
 
-.cc-grace-widget #cc-grace-canvas canvas {
+.cc-grace-widget #cc-grace-canvas canvas,
+.cc-grace-widget #cc-grace-edges-canvas canvas {
     display: block;
     width: 100%;
     height: auto;
 }
 
 .cc-grace-widget.cc-fs-fallback #cc-grace-canvas,
+.cc-grace-widget.cc-fs-fallback #cc-grace-edges-canvas,
 .cc-grace-widget:fullscreen #cc-grace-canvas,
-.cc-grace-widget:-webkit-full-screen #cc-grace-canvas {
+.cc-grace-widget:fullscreen #cc-grace-edges-canvas,
+.cc-grace-widget:-webkit-full-screen #cc-grace-canvas,
+.cc-grace-widget:-webkit-full-screen #cc-grace-edges-canvas {
     min-height: 0 !important;
 }
 
@@ -3866,8 +3871,11 @@ body.cc-fs-lock {
 }
 
 .cc-grace-widget:fullscreen #cc-grace-canvas,
+.cc-grace-widget:fullscreen #cc-grace-edges-canvas,
 .cc-grace-widget:-webkit-full-screen #cc-grace-canvas,
-.cc-grace-widget.cc-fs-fallback #cc-grace-canvas {
+.cc-grace-widget:-webkit-full-screen #cc-grace-edges-canvas,
+.cc-grace-widget.cc-fs-fallback #cc-grace-canvas,
+.cc-grace-widget.cc-fs-fallback #cc-grace-edges-canvas {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     height: auto !important;
@@ -3879,8 +3887,11 @@ body.cc-fs-lock {
 }
 
 .cc-grace-widget:fullscreen #cc-grace-canvas canvas,
+.cc-grace-widget:fullscreen #cc-grace-edges-canvas canvas,
 .cc-grace-widget:-webkit-full-screen #cc-grace-canvas canvas,
-.cc-grace-widget.cc-fs-fallback #cc-grace-canvas canvas {
+.cc-grace-widget:-webkit-full-screen #cc-grace-edges-canvas canvas,
+.cc-grace-widget.cc-fs-fallback #cc-grace-canvas canvas,
+.cc-grace-widget.cc-fs-fallback #cc-grace-edges-canvas canvas {
     /* размеры задаёт p5 через style.width/height — не растягиваем CSS */
     max-width: 100%;
     max-height: 100%;

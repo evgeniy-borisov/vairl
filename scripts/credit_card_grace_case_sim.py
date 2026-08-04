@@ -88,6 +88,10 @@ class Position:
     grace_end: int
     under_grace: bool = True
     tag: str = "purchase"
+    start_day: int = 0
+    edge_id: str = ""
+    card_name: str = ""
+    note: str = ""
 
 
 @dataclass
@@ -97,6 +101,7 @@ class SimState:
     interest_accrued: float = 0.0
     fees_paid: float = 0.0
     paid_total: float = 0.0
+    edge_seq: int = 0
 
 
 def daily_rate(apr: float) -> float:
@@ -139,16 +144,47 @@ def pay(state: SimState, amount: float) -> float:
     return used
 
 
-def add_purchase(state: SimState, card: CardModel, amount: float) -> None:
+def add_purchase(
+    state: SimState,
+    card: CardModel,
+    amount: float,
+    note: str = "",
+) -> Position:
     d = state.day % card.cycle_len
     end = state.day + card.grace_days_fn(d) - 1
-    state.positions.append(Position(amount, end, True, "purchase"))
+    state.edge_seq += 1
+    edge_id = f"{card.name}-e{state.edge_seq}"
+    pos = Position(
+        principal=amount,
+        grace_end=end,
+        under_grace=True,
+        tag="purchase",
+        start_day=state.day,
+        edge_id=edge_id,
+        card_name=card.name,
+        note=note or "purchase",
+    )
+    state.positions.append(pos)
+    return pos
 
 
-def add_cash(state: SimState, card: CardModel, amount: float) -> None:
+def add_cash(state: SimState, card: CardModel, amount: float) -> Position:
     fee = amount * card.cash_fee_rate + card.cash_fee_fixed
     state.fees_paid += fee
-    state.positions.append(Position(amount + fee, state.day - 1, False, "cash"))
+    state.edge_seq += 1
+    edge_id = f"{card.name}-cash-e{state.edge_seq}"
+    pos = Position(
+        principal=amount + fee,
+        grace_end=state.day - 1,
+        under_grace=False,
+        tag="cash",
+        start_day=state.day,
+        edge_id=edge_id,
+        card_name=card.name,
+        note="cash",
+    )
+    state.positions.append(pos)
+    return pos
 
 
 def min_due(state: SimState, card: CardModel) -> float:
@@ -160,6 +196,47 @@ def min_due(state: SimState, card: CardModel) -> float:
 
 def is_payment_day(card: CardModel, day: int) -> bool:
     return (day % card.cycle_len) == card.payment_day_in_cycle
+
+
+def positions_to_edges(positions: list[Position], horizon: int) -> list[dict]:
+    """Каждый край грейса — отдельная полоска (lane)."""
+    edges = []
+    for p in positions:
+        if p.tag == "cash":
+            continue
+        edges.append(
+            {
+                "id": p.edge_id,
+                "card": p.card_name,
+                "note": p.note,
+                "start": p.start_day,
+                "end": min(p.grace_end, horizon - 1),
+                "amount": round(p.principal, 2) if p.principal > 0 else None,
+                "lane_key": p.edge_id,
+            }
+        )
+    # dedupe by id keeping first definition (amount at open)
+    return edges
+
+
+def snapshot_edges(state: SimState, horizon: int) -> list[dict]:
+    out = []
+    for p in state.positions:
+        if p.tag == "cash":
+            continue
+        out.append(
+            {
+                "id": p.edge_id,
+                "card": p.card_name,
+                "note": p.note,
+                "start": p.start_day,
+                "end": min(p.grace_end, horizon - 1),
+                "amount": round(p.principal, 2),
+                "under": p.under_grace and state.day <= p.grace_end,
+                "days_left": max(0, p.grace_end - state.day),
+            }
+        )
+    return out
 
 
 def run(
@@ -191,14 +268,18 @@ def run(
     daily: list[dict] = []
     events: list[dict] = []
     markers: list[dict] = []  # вертикали на графике
+    edges_opened: list[dict] = []  # полоски: каждый край грейса отдельно
     seen_marker_keys: set[tuple] = set()
 
-    def add_marker(day: int, kind: str, label: str) -> None:
-        key = (day, kind)
+    def add_marker(day: int, kind: str, label: str, edge_id: str | None = None) -> None:
+        key = (day, kind, edge_id) if edge_id else (day, kind)
         if key in seen_marker_keys or day < 0 or day >= horizon:
             return
         seen_marker_keys.add(key)
-        markers.append({"day": day, "kind": kind, "label": label})
+        m = {"day": day, "kind": kind, "label": label}
+        if edge_id:
+            m["edge_id"] = edge_id
+        markers.append(m)
 
     def add_event(day: int, kind: str, label: str, amount: float | None = None) -> None:
         ev = {"day": day, "kind": kind, "label": label}
@@ -222,7 +303,12 @@ def run(
         # позиции, у которых сегодня истекает грейс
         for p in list(state.positions):
             if p.under_grace and day == p.grace_end:
-                add_marker(day, "grace_end", "Конец грейса по корзине")
+                add_marker(
+                    day,
+                    "grace_end",
+                    f"Конец грейса · {p.edge_id or 'корзина'}",
+                    edge_id=p.edge_id or None,
+                )
                 add_event(
                     day,
                     "grace_end",
@@ -248,11 +334,25 @@ def run(
         day_ledger = by_day.get(day, [])
         for line in day_ledger:
             if line.kind == OpKind.PURCHASE:
-                add_purchase(state, card, line.amount)
+                pos = add_purchase(state, card, line.amount, note=line.note or "purchase")
                 add_event(day, "purchase", f"Покупка: {line.note or 'purchase'}", line.amount)
-                # маркер конца грейса этой покупки
-                pos = state.positions[-1]
-                add_marker(pos.grace_end, "grace_end", "Конец грейса (покупка)")
+                edges_opened.append(
+                    {
+                        "id": pos.edge_id,
+                        "card": card.name,
+                        "note": pos.note,
+                        "start": pos.start_day,
+                        "end": min(pos.grace_end, horizon - 1),
+                        "amount": round(line.amount, 2),
+                        "lane_key": pos.edge_id,
+                    }
+                )
+                add_marker(
+                    pos.grace_end,
+                    "grace_end",
+                    f"Конец грейса · {pos.edge_id}",
+                    edge_id=pos.edge_id,
+                )
             elif line.kind == OpKind.CASH:
                 add_cash(state, card, line.amount)
                 fee = state.fees_paid - fees_before
@@ -334,6 +434,7 @@ def run(
                     "cash": round(cash, 2),
                     "nearest_grace_end": nearest,
                     "days_to_grace_end": (nearest - day) if nearest is not None else None,
+                    "edges": snapshot_edges(state, horizon),
                     "events": [
                         {"kind": e["kind"], "label": e["label"], "amount": e.get("amount")}
                         for e in day_evs
@@ -355,6 +456,7 @@ def run(
         "source": card.source,
         "markers": sorted(markers, key=lambda m: (m["day"], m["kind"])),
         "events": events,
+        "edges": edges_opened,
     }
     if collect_daily:
         out["daily"] = daily
@@ -373,6 +475,220 @@ def persona_spending() -> list[LedgerLine]:
         lines.append(LedgerLine(b + 10, OpKind.PURCHASE, 25_000, "жизнь"))
         lines.append(LedgerLine(b + 20, OpKind.PURCHASE, 15_000, "жизнь"))
     return lines
+
+
+def multicard_ledger() -> list[tuple[str, LedgerLine]]:
+    """Покупки разнесены по двум картам: длинный грейс (Сбер) + короткий (Т-Банк)."""
+    rows: list[tuple[str, LedgerLine]] = [
+        ("sber", LedgerLine(3, OpKind.PURCHASE, 80_000, "мебель · Сбер")),
+        ("tbank", LedgerLine(8, OpKind.PURCHASE, 35_000, "техника · Т-Банк")),
+    ]
+    for m in range(6):
+        b = m * 30
+        rows.append(("sber", LedgerLine(b + 12, OpKind.PURCHASE, 18_000, "жизнь · Сбер")))
+        rows.append(("tbank", LedgerLine(b + 18, OpKind.PURCHASE, 12_000, "жизнь · Т-Банк")))
+    return rows
+
+
+def run_multicard_grace_float(
+    *,
+    horizon: int = 180,
+    salary: float = 120_000,
+    payday_offset: int = 5,
+    start_cash: float = 50_000,
+    deposit_apr: float = 0.16,
+) -> dict:
+    """
+    Несколько карт в грейсе + кэш на вкладе под deposit_apr.
+    Политика: до края грейса не гасим покупку (деньги работают %),
+    в день grace_end — полное гашение позиции с депозита/кэша.
+    Минималки на платёжных датах — чтобы не сорвать условия банка до края.
+    """
+    cards = {"sber": SBER, "tbank": TBANK}
+    states = {name: SimState() for name in cards}
+    deposit = start_cash
+    deposit_interest = 0.0
+    by_day: dict[int, list[tuple[str, LedgerLine]]] = {}
+    for card_name, line in multicard_ledger():
+        by_day.setdefault(line.day, []).append((card_name, line))
+
+    paydays = {payday_offset + 30 * m for m in range(horizon // 30 + 2)}
+    edges_opened: list[dict] = []
+    events: list[dict] = []
+    daily: list[dict] = []
+    markers: list[dict] = []
+    seen_m: set[tuple] = set()
+
+    def add_marker(day: int, kind: str, label: str, edge_id: str | None = None) -> None:
+        key = (day, kind, edge_id)
+        if key in seen_m or day < 0 or day >= horizon:
+            return
+        seen_m.add(key)
+        m = {"day": day, "kind": kind, "label": label}
+        if edge_id:
+            m["edge_id"] = edge_id
+        markers.append(m)
+
+    def add_event(day: int, kind: str, label: str, amount: float | None = None) -> None:
+        ev = {"day": day, "kind": kind, "label": label}
+        if amount is not None:
+            ev["amount"] = round(amount, 2)
+        events.append(ev)
+
+    for d in range(horizon):
+        for c in cards.values():
+            if (d % c.cycle_len) == (c.cycle_len - 1):
+                add_marker(d, "statement", f"Выписка · {c.name}")
+            if is_payment_day(c, d):
+                add_marker(d, "payment_due", f"Платёж · {c.name}")
+
+    for day in range(horizon):
+        # депозит капает каждый день
+        di = deposit * daily_rate(deposit_apr)
+        deposit += di
+        deposit_interest += di
+
+        for name, card in cards.items():
+            st = states[name]
+            st.day = day
+            accrue(st, card)
+
+        # край грейса: гасим позицию целиком с депозита
+        for name, card in cards.items():
+            st = states[name]
+            for p in list(st.positions):
+                if p.tag == "cash":
+                    continue
+                if day == p.grace_end and p.principal > 0.01:
+                    need = p.principal
+                    take = min(need, deposit)
+                    if take > 0:
+                        deposit -= take
+                        pay(st, take)
+                        add_event(
+                            day,
+                            "grace_pay",
+                            f"Гашение на краю грейса · {p.edge_id}",
+                            take,
+                        )
+                    add_marker(
+                        day,
+                        "grace_end",
+                        f"Край грейса · {p.edge_id}",
+                        edge_id=p.edge_id,
+                    )
+
+        if day in paydays:
+            deposit += salary
+            add_event(day, "salary", "Зарплата → депозит", salary)
+
+        for card_name, line in by_day.get(day, []):
+            card = cards[card_name]
+            st = states[card_name]
+            if line.kind == OpKind.PURCHASE:
+                pos = add_purchase(st, card, line.amount, note=line.note or "purchase")
+                edges_opened.append(
+                    {
+                        "id": pos.edge_id,
+                        "card": card_name,
+                        "note": pos.note,
+                        "start": pos.start_day,
+                        "end": min(pos.grace_end, horizon - 1),
+                        "amount": round(line.amount, 2),
+                        "lane_key": pos.edge_id,
+                    }
+                )
+                add_event(day, "purchase", f"Покупка · {pos.note}", line.amount)
+                add_marker(
+                    pos.grace_end,
+                    "grace_end",
+                    f"Край · {pos.edge_id}",
+                    edge_id=pos.edge_id,
+                )
+
+        # минималки в платёжные дни (если что-то ещё висит)
+        for name, card in cards.items():
+            st = states[name]
+            if is_payment_day(card, day):
+                md = min_due(st, card)
+                if md > 0 and deposit > 0:
+                    take = min(md, deposit)
+                    deposit -= take
+                    pay(st, take)
+                    add_event(day, "payment", f"Минималка · {name}", take)
+
+        total_debt = sum(debt(st) for st in states.values())
+        under = sum(
+            p.principal
+            for st in states.values()
+            for p in st.positions
+            if p.under_grace
+        )
+        over = sum(
+            p.principal
+            for st in states.values()
+            for p in st.positions
+            if not p.under_grace
+        )
+        all_edges = []
+        for st in states.values():
+            all_edges.extend(snapshot_edges(st, horizon))
+        day_evs = [e for e in events if e["day"] == day]
+        nearest = min((e["end"] for e in all_edges if e["under"]), default=None)
+        daily.append(
+            {
+                "day": day,
+                "debt": round(total_debt, 2),
+                "debt_under_grace": round(under, 2),
+                "debt_accruing": round(over, 2),
+                "deposit": round(deposit, 2),
+                "deposit_interest_cum": round(deposit_interest, 2),
+                "float_pnl": round(deposit_interest, 2),
+                "interest_cum": round(sum(st.interest_accrued for st in states.values()), 2),
+                "fees_cum": round(sum(st.fees_paid for st in states.values()), 2),
+                "client_cost_cum": round(
+                    sum(st.interest_accrued + st.fees_paid for st in states.values()),
+                    2,
+                ),
+                "cash": round(deposit, 2),
+                "nearest_grace_end": nearest,
+                "days_to_grace_end": (nearest - day) if nearest is not None else None,
+                "edges": all_edges,
+                "events": [
+                    {"kind": e["kind"], "label": e["label"], "amount": e.get("amount")}
+                    for e in day_evs
+                ],
+            }
+        )
+
+    total_interest = sum(st.interest_accrued for st in states.values())
+    total_fees = sum(st.fees_paid for st in states.values())
+    return {
+        "mode": "multicard_grace_float",
+        "deposit_apr": deposit_apr,
+        "horizon": horizon,
+        "cards": {n: c.label for n, c in cards.items()},
+        "final_debt": round(sum(debt(st) for st in states.values())),
+        "interest": round(total_interest),
+        "fees": round(total_fees),
+        "client_cost": round(total_interest + total_fees),
+        "deposit_interest": round(deposit_interest),
+        "final_deposit": round(deposit),
+        "net_client_pnl": round(deposit_interest - total_interest - total_fees),
+        "edges": edges_opened,
+        "markers": sorted(markers, key=lambda m: (m["day"], m["kind"])),
+        "events": events,
+        "daily": daily,
+        "narrative": {
+            "title": "Мультикарта + float на вкладе",
+            "summary": (
+                "Покупки на Сбере и Т-Банке живут в беспроцентных грейсах; "
+                "кэш лежит на вкладе (~16% годовых в модели). "
+                "На каждом краю грейса — полное гашение этой полоски. "
+                "Каждый край рисуется отдельной lane."
+            ),
+        },
+    }
 
 
 def agent_rank(card: CardModel) -> list[dict]:
@@ -417,6 +733,15 @@ def main() -> None:
 
     print("BT what-if 150_000 @ Sber APR → T-Bank 120d:")
     print(" ", refinance_bridge(150_000, SBER.apr, TBANK.bt_grace_days))
+    mc = run_multicard_grace_float()
+    print()
+    print("=== multicard grace float ===")
+    print(
+        f"  deposit_interest={mc['deposit_interest']} "
+        f"client_cost={mc['client_cost']} "
+        f"net_pnl={mc['net_client_pnl']} "
+        f"edges={len(mc['edges'])}"
+    )
 
 
 if __name__ == "__main__":

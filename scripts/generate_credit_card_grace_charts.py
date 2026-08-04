@@ -32,6 +32,7 @@ from credit_card_grace_case_sim import (  # noqa: E402
     TBANK,
     persona_spending,
     run_daily,
+    run_multicard_grace_float,
 )
 
 OUT = ROOT / "assets" / "images"
@@ -293,6 +294,7 @@ def export_series_json(out: Path) -> None:
                 for row in bundle["daily"]
             ]
             card_block["markers"][policy] = bundle.get("markers", [])
+            card_block.setdefault("edges", {})[policy] = bundle.get("edges", [])
             # итог для описания
             card_block.setdefault("outcomes", {})[policy] = {
                 "client_cost": bundle["client_cost"],
@@ -301,12 +303,125 @@ def export_series_json(out: Path) -> None:
                 "fees": bundle["fees"],
             }
         payload["cards"][card.name] = card_block
+
+    # мультикарта + float на вкладе: каждая полоска = край грейса
+    mc = run_multicard_grace_float()
+    payload["multicard_float"] = {
+        "mode": mc["mode"],
+        "deposit_apr": mc["deposit_apr"],
+        "horizon": mc["horizon"],
+        "cards": mc["cards"],
+        "narrative": mc["narrative"],
+        "outcomes": {
+            "client_cost": mc["client_cost"],
+            "final_debt": mc["final_debt"],
+            "interest": mc["interest"],
+            "fees": mc["fees"],
+            "deposit_interest": mc["deposit_interest"],
+            "final_deposit": mc["final_deposit"],
+            "net_client_pnl": mc["net_client_pnl"],
+        },
+        "edges": mc["edges"],
+        "markers": mc["markers"],
+        "series": [
+            {
+                "d": row["day"],
+                "debt": row["debt"],
+                "under": row["debt_under_grace"],
+                "accr": row["debt_accruing"],
+                "cost": row["client_cost_cum"],
+                "cash": row["cash"],
+                "dep": row["deposit"],
+                "dep_i": row["deposit_interest_cum"],
+                "float": row["float_pnl"],
+                "gleft": row["days_to_grace_end"],
+                "edges": row.get("edges", []),
+                "ev": [
+                    {
+                        "k": e["kind"],
+                        "l": e["label"],
+                        **({"a": e["amount"]} if e.get("amount") is not None else {}),
+                    }
+                    for e in row.get("events", [])
+                ],
+            }
+            for row in mc["daily"]
+        ],
+    }
+
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
         __import__("json").dumps(payload, ensure_ascii=False, separators=(",", ":")),
         encoding="utf-8",
     )
     print("wrote", out, "bytes", out.stat().st_size)
+
+
+def chart_multicard_edges(out: Path) -> None:
+    """Gantt: каждый край грейса — отдельная горизонтальная полоска."""
+    mc = run_multicard_grace_float()
+    edges = mc["edges"]
+    if not edges:
+        return
+    n = len(edges)
+    fig_h = max(4.5, 0.42 * n + 1.8)
+    fig, ax = plt.subplots(figsize=(11, fig_h), dpi=120)
+    colors = {"sber": "#1565c0", "tbank": "#6a1b9a"}
+    for i, e in enumerate(edges):
+        y = n - 1 - i
+        c = colors.get(e["card"], "#455a64")
+        ax.barh(
+            y,
+            e["end"] - e["start"] + 1,
+            left=e["start"],
+            height=0.72,
+            color=c,
+            alpha=0.85,
+            edgecolor="white",
+            linewidth=0.6,
+        )
+        # маркер края
+        ax.plot([e["end"], e["end"]], [y - 0.36, y + 0.36], color="#c62828", lw=1.6)
+        label = f"{e['note'][:22]} · {e['amount']/1000:.0f}k"
+        ax.text(
+            e["start"] + 1,
+            y,
+            label,
+            va="center",
+            ha="left",
+            fontsize=7.5,
+            color="white",
+            clip_on=True,
+        )
+    ax.set_yticks(range(n))
+    ax.set_yticklabels([e["id"] for e in reversed(edges)], fontsize=7)
+    ax.set_xlabel("День симуляции")
+    ax.set_xlim(0, mc["horizon"] - 1)
+    ax.set_title(
+        "Мультикарта + float: каждый край грейса — отдельная полоска",
+        fontsize=12,
+        pad=10,
+        color="#1b2838",
+    )
+    ax.grid(True, axis="x", alpha=0.25)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    # легенда
+    from matplotlib.patches import Patch
+
+    ax.legend(
+        handles=[
+            Patch(facecolor="#1565c0", label="Сбер (длинный грейс)"),
+            Patch(facecolor="#6a1b9a", label="Т-Банк (короткий грейс)"),
+        ],
+        loc="lower right",
+        fontsize=9,
+        framealpha=0.92,
+    )
+    fig.tight_layout()
+    fig.savefig(out, format="svg", bbox_inches="tight")
+    plt.close(fig)
+    print("wrote", out)
 
 
 def main() -> None:
@@ -318,6 +433,7 @@ def main() -> None:
     chart_grace_split(SBER, "min_trap", OUT / "credit-card-grace-split-sber-min.svg")
     chart_grace_split(TBANK, "min_trap", OUT / "credit-card-grace-split-tbank-min.svg")
     chart_banks_min_trap(OUT / "credit-card-grace-min-trap-compare.svg")
+    chart_multicard_edges(OUT / "credit-card-grace-edges-multicard.svg")
     export_series_json(ROOT / "assets" / "data" / "credit-card-grace-series.json")
 
 

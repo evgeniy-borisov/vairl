@@ -283,8 +283,65 @@ Strategy Agent перебирает политики (один и тот же le
 
 <script src="{{ '/assets/js/credit-card-grace-demo.js' | relative_url }}"></script>
 
+---
+
+## Мультикарта: грейс без % + деньги под процент {#multicard-float}
+
+Классический клиентский арбитраж (в модели, не «совет банка»):
+
+1. Траты разносим по **нескольким картам** с разными длинами беспроцентного периода (здесь — длинный Сбер и короткий Т-Банк).  
+2. Свободный кэш кладём на **вклад / накопительный** (`deposit_apr ≈ 16%` в симуляции).  
+3. Пока позиция в грейсе — банк не капает APR на покупку; клиент получает float на депозите.  
+4. В день **края грейса** (`grace_end`) агент гасит **именно эту** полоску целиком — иначе срывается условие и начинается дорогой APR.
+
+В симуляции `run_multicard_grace_float` на горизонте 180 дней: **14 краёв**, client cost карт ≈ 0, %% по вкладу ≈ **28.6k ₽**, net PnL ≈ **+28.6k ₽** (при дисциплине гашения на каждом краю). Это верхняя оценка при идеальном ACK; реальный банк требует ещё минималки и может менять правила грейса.
+
+Ниже — **отдельная визуализация**: каждая покупка = своя горизонтальная полоска до края грейса (не кривая долга).
+
+<div
+  class="cc-grace-widget"
+  id="cc-grace-edges-demo"
+  data-series-url="{{ '/assets/data/credit-card-grace-series.json' | relative_url }}"
+>
+  <div class="cc-grace-toolbar">
+    <button type="button" data-cc-play>⏸ Пауза</button>
+    <button type="button" data-cc-reset>↺ Сброс</button>
+    <label class="cc-grace-speed">Скорость
+      <input type="range" data-cc-speed min="0.5" max="8" step="0.5" value="2" />
+    </label>
+    <button type="button" data-cc-fullscreen title="Полный экран" aria-label="Полный экран">⛶</button>
+  </div>
+  <div class="cc-grace-stats">
+    <div><span>День</span><strong data-cc-day>0</strong></div>
+    <div><span>Долг карт</span><strong data-cc-debt>—</strong></div>
+    <div><span>Депозит</span><strong data-cc-deposit>—</strong></div>
+    <div><span>%% вклада</span><strong data-cc-float>—</strong></div>
+    <div><span>Cost карт</span><strong data-cc-cost>—</strong></div>
+    <div><span>До ближайшего края</span><strong data-cc-gleft>—</strong></div>
+  </div>
+  <div class="cc-grace-narrative" data-cc-narrative>
+    <p>Мультикарта + float: полоски появятся после загрузки рядов.</p>
+  </div>
+  <div class="cc-grace-scrub">
+    <input type="range" data-cc-scrub min="0" max="179" value="0" aria-label="День симуляции" />
+  </div>
+  <div id="cc-grace-edges-canvas"></div>
+  <div class="cc-grace-tooltip" data-cc-tooltip hidden></div>
+  <p class="cc-grace-caption">
+    Синий — Сбер (длинный грейс), фиолетовый — Т-Банк (короткий). Красная вертикаль на полоске — <code>grace_end</code> этой покупки.
+    Кэш на вкладе (~16%); в день края — гашение этой lane. · <code>multicard_float</code> в JSON · p5.js.
+  </p>
+</div>
+
+<script src="{{ '/assets/js/credit-card-grace-edges-demo.js' | relative_url }}"></script>
+
+<figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-edges-multicard.svg" alt="Полоски краёв грейса: Сбер и Т-Банк" style="max-width: 100%; height: auto;" />
+  <figcaption style="font-size: 0.9em; color: #666;">Статичный снимок тех же полосок</figcaption>
+</figure>
+
 <details markdown="1">
-<summary>Статичные SVG (снимок тех же рядов)</summary>
+<summary>Статичные SVG (долг / cost по одной карте)</summary>
 
 <figure style="margin: 1.5em auto; text-align: center;">
   <img src="/vairl/assets/images/credit-card-grace-debt-sber.svg" alt="Долг во времени, СберКарта, четыре политики" style="max-width: 100%; height: auto;" />
@@ -432,13 +489,13 @@ flowchart LR
 ```yaml
 id: dashboard-agent
 role: render_analytics
-inputs: [sim_series_json, markers, policy_outcomes, narrative_blocks]
+inputs: [sim_series_json, markers, edges, multicard_float, policy_outcomes, narrative_blocks]
 outputs:
-  - streamlit_app: [grace-overview, policy-compare, event-journal]
-  - p5_widgets: [cc-grace-demo]
+  - streamlit_app: [grace-overview, policy-compare, edge-lanes, event-journal]
+  - p5_widgets: [cc-grace-demo, cc-grace-edges-demo]
   - static_exports: [svg, optional_pdf_report]
 tools: [streamlit, matplotlib, plotly, altair]
-must_not: [change_objective, invent_apr, hide_grace_end_markers]
+must_not: [change_objective, invent_apr, hide_grace_end_markers, merge_edges_into_one_lane]
 refresh: on_new_statement | on_policy_change | on_rerun
 ```
 
