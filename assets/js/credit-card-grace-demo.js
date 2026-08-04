@@ -150,40 +150,14 @@
         ev.preventDefault();
         ev.stopPropagation();
       }
+      // Для встроенного демо надёжнее CSS-overlay на весь viewport:
+      // Element.requestFullscreen на Safari/iOS часто недоступен или молча no-op.
       if (isFullscreen()) {
-        if (root.classList.contains("cc-fs-fallback")) exitCssFullscreen();
-        else exitNativeFullscreen();
+        if (nativeFsElement() === root) exitNativeFullscreen();
+        exitCssFullscreen();
         return;
       }
-      // CSS overlay first — надёжно на Safari/iOS и при блокировке Fullscreen API.
-      // Native API пробуем параллельно, если доступен (доп. системный chrome).
-      const req =
-        root.requestFullscreen ||
-        root.webkitRequestFullscreen ||
-        root.webkitRequestFullScreen ||
-        root.msRequestFullscreen;
-      const canNative =
-        typeof req === "function" &&
-        !/iPad|iPhone|iPod/.test(navigator.userAgent) &&
-        !("ontouchend" in document && /Mac/.test(navigator.userAgent)); // iPadOS desktop UA
-
-      if (!canNative) {
-        enterCssFullscreen();
-        return;
-      }
-
-      enterNativeFullscreen()
-        .then(() => {
-          // если браузер не перешёл — подстраховываем CSS
-          setTimeout(() => {
-            if (!nativeFsElement()) enterCssFullscreen();
-            else {
-              syncFsButton();
-              if (typeof resizeCanvas === "function") resizeCanvas();
-            }
-          }, 120);
-        })
-        .catch(() => enterCssFullscreen());
+      enterCssFullscreen();
     }
 
     function onFullscreenChange() {
