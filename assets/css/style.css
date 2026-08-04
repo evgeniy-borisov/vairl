@@ -3702,7 +3702,9 @@ footer {
     margin-left: auto;
 }
 
+/* Native Fullscreen API */
 .cc-grace-widget:fullscreen,
+.cc-grace-widget:-webkit-full-screen,
 .cc-grace-widget.cc-is-fullscreen:-webkit-full-screen {
     display: flex;
     flex-direction: column;
@@ -3715,19 +3717,48 @@ footer {
     background: #fcfcfd;
 }
 
+/* CSS fallback (iOS / blocked native FS) */
+.cc-grace-widget.cc-fs-fallback {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 10000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    max-width: none !important;
+    background: #fcfcfd !important;
+    overflow: hidden !important;
+}
+
+html.cc-fs-lock,
+body.cc-fs-lock {
+    overflow: hidden !important;
+    touch-action: none;
+}
+
 .cc-grace-widget:fullscreen .cc-grace-toolbar,
 .cc-grace-widget:fullscreen .cc-grace-stats,
 .cc-grace-widget:fullscreen .cc-grace-scrub,
 .cc-grace-widget:fullscreen .cc-grace-caption,
-.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen .cc-grace-toolbar,
-.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen .cc-grace-stats,
-.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen .cc-grace-scrub,
-.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen .cc-grace-caption {
+.cc-grace-widget:-webkit-full-screen .cc-grace-toolbar,
+.cc-grace-widget:-webkit-full-screen .cc-grace-stats,
+.cc-grace-widget:-webkit-full-screen .cc-grace-scrub,
+.cc-grace-widget:-webkit-full-screen .cc-grace-caption,
+.cc-grace-widget.cc-fs-fallback .cc-grace-toolbar,
+.cc-grace-widget.cc-fs-fallback .cc-grace-stats,
+.cc-grace-widget.cc-fs-fallback .cc-grace-scrub,
+.cc-grace-widget.cc-fs-fallback .cc-grace-caption {
     flex-shrink: 0;
 }
 
 .cc-grace-widget:fullscreen #cc-grace-canvas,
-.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen #cc-grace-canvas {
+.cc-grace-widget:-webkit-full-screen #cc-grace-canvas,
+.cc-grace-widget.cc-fs-fallback #cc-grace-canvas {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
@@ -3737,9 +3768,10 @@ footer {
 }
 
 .cc-grace-widget:fullscreen #cc-grace-canvas canvas,
-.cc-grace-widget.cc-is-fullscreen:-webkit-full-screen #cc-grace-canvas canvas {
+.cc-grace-widget:-webkit-full-screen #cc-grace-canvas canvas,
+.cc-grace-widget.cc-fs-fallback #cc-grace-canvas canvas {
     width: 100% !important;
-    height: auto !important;
+    max-height: 100%;
 }
 
 @media (max-width: 640px) {
