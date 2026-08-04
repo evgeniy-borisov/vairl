@@ -3572,3 +3572,132 @@ footer {
     .python-async-widget .python-async-toolbar { align-items: flex-start; }
     .python-async-widget .python-async-status { padding-top: 0; }
 }
+
+/* Credit-card grace case — p5.js dynamics */
+.cc-grace-widget {
+    margin: 28px 0 32px;
+    border: 1px solid #e8e8ec;
+    border-radius: 10px;
+    background: #fcfcfd;
+    overflow: hidden;
+}
+
+.cc-grace-widget .cc-grace-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #f7f7f9;
+}
+
+.cc-grace-widget .cc-grace-toolbar button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 12px;
+    border: 1px solid #d8d8e0;
+    border-radius: 6px;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+}
+
+.cc-grace-widget .cc-grace-toolbar button:hover {
+    border-color: #2e7d32;
+    color: #1b5e20;
+}
+
+.cc-grace-widget .cc-grace-toolbar button.active {
+    border-color: #2e7d32;
+    background: rgba(46, 125, 50, 0.1);
+    color: #1b5e20;
+    font-weight: 600;
+}
+
+.cc-grace-widget .cc-grace-sep {
+    width: 1px;
+    height: 22px;
+    background: #d8d8e0;
+    margin: 0 4px;
+}
+
+.cc-grace-widget .cc-grace-speed {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.cc-grace-widget .cc-grace-speed input[type="range"] {
+    width: 90px;
+}
+
+.cc-grace-widget .cc-grace-scrub {
+    padding: 8px 14px 0;
+}
+
+.cc-grace-widget .cc-grace-scrub input[type="range"] {
+    width: 100%;
+}
+
+.cc-grace-widget .cc-grace-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid #ececf0;
+}
+
+.cc-grace-widget .cc-grace-stats div {
+    background: #fff;
+    border: 1px solid #ececf0;
+    border-radius: 6px;
+    padding: 8px 10px;
+}
+
+.cc-grace-widget .cc-grace-stats span {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 2px;
+}
+
+.cc-grace-widget .cc-grace-stats strong {
+    font-size: 14px;
+    color: #2d313c;
+}
+
+.cc-grace-widget #cc-grace-canvas {
+    min-height: 420px;
+    padding: 0 4px 8px;
+}
+
+.cc-grace-widget #cc-grace-canvas canvas {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+}
+
+.cc-grace-widget .cc-grace-caption {
+    margin: 0;
+    padding: 8px 14px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #666;
+}
+
+.cc-grace-widget .cc-grace-error {
+    padding: 12px 14px;
+    color: #c62828;
+    font-size: 14px;
+}
+
+@media (max-width: 640px) {
+    .cc-grace-widget .cc-grace-toolbar {
+        align-items: flex-start;
+    }
+}
+

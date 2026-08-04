@@ -20,7 +20,7 @@ review_status: approved
 - **Т-Банк Платинум:** до **55 дней** на покупки, до **120 дней** на рефинансирование других карт; ставка в модели **~29.9%+**, min до **8–14%**.
 - **Ловушка:** минимальный платёж ≠ сохранение грейса. Платите «как удобно» — и \(CF\) клиента уходит в проценты.
 - **Агенты** не «советуют в чате»: Ledger → Grace Calendar → Cost → Strategy search → Policy → объяснение. Objective — **минимизировать client cost** (проценты + комиссии), не take-up банка.
-- **Входы:** учебные **PDF-выписки** → парсер → ledger; выходы симуляции — **SVG time-series** (вектор для Jekyll).
+- **Входы:** учебные **PDF-выписки** → парсер → ledger; выходы — **p5.js-динамика** по дням (+ SVG-снимки).
 
 </div>
 
@@ -42,7 +42,7 @@ review_status: approved
 4. [PDF-выписки → Ledger Agent](#pdf)
 5. [Персона и временная динамика трат](#persona)
 6. [Симуляция политик](#sim)
-7. [Временные графики (SVG)](#charts)
+7. [Временные графики (p5.js)](#charts)
 8. [Как агенты ищут стратегию](#agents)
 9. [Рефинансирование / balance transfer](#refinance)
 10. [Код и воспроизведение](#code)
@@ -228,13 +228,56 @@ Strategy Agent перебирает политики (один и тот же le
 
 ---
 
-## Временные графики (SVG) {#charts}
+## Временные графики (p5.js) {#charts}
 
-Таблицы дают итог на день 180. Агенту и читателю нужна **динамика**. Формат для статического Jekyll — **SVG** (вектор, без JS, тот же подход, что у зарплатных распределений на VAIRL): `matplotlib` → `.svg` в `assets/images/`.
+Таблицы дают итог на день 180. Агенту и читателю нужна **динамика**. Ниже — интерактив на [p5.js](https://p5js.org/) (уже в layout VAIRL): проигрывание симуляции по дням, переключение банка и политики, площадь «под грейсом / уже %», пунктир остальных политик для сравнения.
 
-Симулятор пишет дневной ряд (`run_daily`): `debt`, `debt_under_grace`, `debt_accruing`, `client_cost_cum`, …
+Данные те же, что у Python-симулятора (`run_daily` → JSON). SVG-экспорт оставлен как статичный снимок для печати и офлайна.
 
-### Долг по политикам
+<div
+  class="cc-grace-widget"
+  id="cc-grace-demo"
+  data-series-url="{{ '/assets/data/credit-card-grace-series.json' | relative_url }}"
+>
+  <div class="cc-grace-toolbar">
+    <button type="button" data-cc-card="sber" class="active">Сбер</button>
+    <button type="button" data-cc-card="tbank">Т-Банк</button>
+    <span class="cc-grace-sep" aria-hidden="true"></span>
+    <button type="button" data-cc-policy="min_trap" class="active">min_trap</button>
+    <button type="button" data-cc-policy="grace_keeper">grace_keeper</button>
+    <button type="button" data-cc-policy="payday_clear">payday_clear</button>
+    <button type="button" data-cc-policy="cash_then_min">cash_then_min</button>
+    <span class="cc-grace-sep" aria-hidden="true"></span>
+    <button type="button" data-cc-play>⏸ Пауза</button>
+    <button type="button" data-cc-reset>↺ Сброс</button>
+    <button type="button" data-cc-compare class="active">Сравнение политик: вкл</button>
+    <label class="cc-grace-speed">Скорость
+      <input type="range" data-cc-speed min="0.5" max="8" step="0.5" value="2" />
+    </label>
+  </div>
+  <div class="cc-grace-stats">
+    <div><span>День</span><strong data-cc-day>0</strong></div>
+    <div><span>Долг</span><strong data-cc-debt>—</strong></div>
+    <div><span>Client cost</span><strong data-cc-cost>—</strong></div>
+    <div><span>Под грейсом</span><strong data-cc-under>—</strong></div>
+    <div><span>Уже %</span><strong data-cc-accr>—</strong></div>
+    <div><span>До ближайшего grace_end</span><strong data-cc-gleft>—</strong></div>
+  </div>
+  <div class="cc-grace-scrub">
+    <input type="range" data-cc-scrub min="0" max="179" value="0" aria-label="День симуляции" />
+  </div>
+  <div id="cc-grace-canvas"></div>
+  <p class="cc-grace-caption">
+    Зелёная зона — долг ещё под грейсом; красная — уже капает APR.
+    Фиолетовая кривая — накопленный client cost (проценты + комиссии).
+    Ряды из <code>credit-card-grace-series.json</code> · p5.js.
+  </p>
+</div>
+
+<script src="{{ '/assets/js/credit-card-grace-demo.js' | relative_url }}"></script>
+
+<details markdown="1">
+<summary>Статичные SVG (снимок тех же рядов)</summary>
 
 <figure style="margin: 1.5em auto; text-align: center;">
   <img src="/vairl/assets/images/credit-card-grace-debt-sber.svg" alt="Долг во времени, СберКарта, четыре политики" style="max-width: 100%; height: auto;" />
@@ -246,41 +289,32 @@ Strategy Agent перебирает политики (один и тот же le
   <figcaption style="font-size: 0.9em; color: #666;">Т-Банк: короткий грейс — раньше расходятся кривые min_trap и payday_clear</figcaption>
 </figure>
 
-### Накопленный client cost
-
 <figure style="margin: 1.5em auto; text-align: center;">
   <img src="/vairl/assets/images/credit-card-grace-cost-sber.svg" alt="Накопленный client cost, Сбер" style="max-width: 100%; height: auto;" />
 </figure>
 
 <figure style="margin: 1.5em auto; text-align: center;">
   <img src="/vairl/assets/images/credit-card-grace-cost-tbank.svg" alt="Накопленный client cost, Т-Банк" style="max-width: 100%; height: auto;" />
-  <figcaption style="font-size: 0.9em; color: #666;">Cost = проценты + комиссии; payday_clear ≈ 0, cash_then_min — худший хвост</figcaption>
-</figure>
-
-### Когда долг уже «вне грейса»
-
-<figure style="margin: 1.5em auto; text-align: center;">
-  <img src="/vairl/assets/images/credit-card-grace-split-sber-min.svg" alt="Структура долга под грейсом и с процентами, Сбер min_trap" style="max-width: 100%; height: auto;" />
 </figure>
 
 <figure style="margin: 1.5em auto; text-align: center;">
-  <img src="/vairl/assets/images/credit-card-grace-split-tbank-min.svg" alt="Структура долга под грейсом и с процентами, Т-Банк min_trap" style="max-width: 100%; height: auto;" />
-  <figcaption style="font-size: 0.9em; color: #666;">Зелёный — ещё под грейсом; красный — уже капает APR. На коротком календаре красная зона появляется раньше</figcaption>
+  <img src="/vairl/assets/images/credit-card-grace-split-sber-min.svg" alt="Структура долга, Сбер min_trap" style="max-width: 100%; height: auto;" />
 </figure>
 
-### Один ledger — два банка (min_trap)
+<figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-split-tbank-min.svg" alt="Структура долга, Т-Банк min_trap" style="max-width: 100%; height: auto;" />
+</figure>
 
 <figure style="margin: 1.5em auto; text-align: center;">
   <img src="/vairl/assets/images/credit-card-grace-min-trap-compare.svg" alt="Сравнение min_trap Сбер vs Т-Банк" style="max-width: 100%; height: auto;" />
 </figure>
 
-Пересборка графиков:
-
 ```bash
 python scripts/generate_credit_card_grace_charts.py
+# → SVG + assets/data/credit-card-grace-series.json для p5
 ```
 
-Почему не Plotly/HTML-виджет: пост должен открываться на GitHub Pages без рантайма; SVG кэшируется, печатается, масштабируется. Интерактив — отдельный Streamlit/dashboard слой, не блог.
+</details>
 
 ---
 
@@ -309,8 +343,8 @@ flowchart TB
 | **Cost** | дневной ряд + сумма %% | `client_cost = interest + fees` |
 | **Strategy Search** | перебор политик + what-if | `min_trap` … `payday_clear`, BT |
 | **Personal Policy** | `must_not` | не рекомендовать снятие наличных «для кэшбэка»; не обещать 0% без календаря |
-| **Simulation** | `run_daily` 30–180 дней | кривые долга / cost → SVG |
-| **Communication** | LLM *только* narrative | «грейс кончается …; на графике красная зона с дня N» |
+| **Simulation** | `run_daily` 30–180 дней | JSON-ряды → **p5.js** анимация / SVG |
+| **Communication** | LLM *только* narrative | «на графике красная зона с дня N» |
 
 Контракт задачи (как в части 1):
 
@@ -362,11 +396,11 @@ python scripts/credit_card_statement_pdf.py parse \
 # 3) симуляция политик
 python scripts/credit_card_grace_case_sim.py
 
-# 4) SVG time-series
+# 4) SVG + JSON для p5.js
 python scripts/generate_credit_card_grace_charts.py
 ```
 
-Зависимости скриптов: `pymupdf`, `pypdf`, `matplotlib` (уже типичный scientific stack).
+Зависимости скриптов: `pymupdf`, `pypdf`, `matplotlib`. В браузере: p5.js (CDN в layout) + `assets/js/credit-card-grace-demo.js`.
 
 Фрагмент ранжирования стратегий:
 

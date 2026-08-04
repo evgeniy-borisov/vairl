@@ -157,6 +157,49 @@ def chart_banks_min_trap(out: Path):
     print("wrote", out)
 
 
+def export_series_json(out: Path) -> None:
+    """Данные для p5.js-демо: дневные ряды по картам и политикам."""
+    payload = {
+        "horizon": COMMON["horizon"],
+        "persona": {
+            "salary": COMMON["salary"],
+            "payday_offset": COMMON["payday_offset"],
+            "start_cash": COMMON["start_cash"],
+        },
+        "policies": list(POLICY_STYLE.keys()),
+        "cards": {},
+    }
+    for card in (SBER, TBANK):
+        card_block = {
+            "name": card.name,
+            "label": card.label,
+            "apr": card.apr,
+            "series": {},
+        }
+        for policy in POLICY_STYLE:
+            daily = series_for(card, policy)
+            # компактный ряд для CDN/страницы
+            card_block["series"][policy] = [
+                {
+                    "d": row["day"],
+                    "debt": row["debt"],
+                    "under": row["debt_under_grace"],
+                    "accr": row["debt_accruing"],
+                    "cost": row["client_cost_cum"],
+                    "cash": row["cash"],
+                    "gleft": row["days_to_grace_end"],
+                }
+                for row in daily
+            ]
+        payload["cards"][card.name] = card_block
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        __import__("json").dumps(payload, ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
+    )
+    print("wrote", out, "bytes", out.stat().st_size)
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     chart_debt_policies(SBER, OUT / "credit-card-grace-debt-sber.svg")
@@ -166,6 +209,7 @@ def main() -> None:
     chart_grace_split(SBER, "min_trap", OUT / "credit-card-grace-split-sber-min.svg")
     chart_grace_split(TBANK, "min_trap", OUT / "credit-card-grace-split-tbank-min.svg")
     chart_banks_min_trap(OUT / "credit-card-grace-min-trap-compare.svg")
+    export_series_json(ROOT / "assets" / "data" / "credit-card-grace-series.json")
 
 
 if __name__ == "__main__":
