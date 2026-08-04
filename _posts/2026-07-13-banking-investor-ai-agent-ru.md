@@ -66,8 +66,9 @@ review_status: approved
 10. [Синтетика и Kaggle](#synthetic-eval)
 11. [Пять фаз под клиентский NPV](#lifecycle)
 12. [Мультиагенты и модели](#multi-agent)
-13. [Классификация задач](#task-classification) — [часть 2](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/)
-14. [Выводы](#lessons)
+13. [Код: от PV до оркестратора](#code-ladder) — примеры Python по нарастающей
+14. [Классификация задач](#task-classification) — [часть 2](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/)
+15. [Выводы](#lessons)
 
 </div>
 
@@ -128,6 +129,24 @@ $$
 
 DCF — *метод*. NPV — *вердикт* по методу. Путаница начинается, когда одну и ту же букву «NPV» вешают на **разные** \(CF_t\) и разные \(r\).
 
+Ниже — та же идея в коде (полный «лестничный» разбор — в [разделе с примерами](#code-ladder)). Самое простое: PV и NPV на чистом Python.
+
+```python
+def pv(cash_flows: list[float], r: float) -> float:
+    """Приведённая стоимость: сумма CF_t / (1+r)^t."""
+    return sum(cf / (1 + r) ** t for t, cf in enumerate(cash_flows))
+
+
+def npv(cash_flows: list[float], r: float) -> float:
+    """NPV = PV всех потоков (CF_0 уже со знаком «−» для инвестиции)."""
+    return pv(cash_flows, r)
+
+
+# Инвестировали 100 сегодня, через год +60, через два +60; r = 10%
+flows = [-100.0, 60.0, 60.0]
+print(round(npv(flows, 0.10), 2))  # → 4.13  (> 0 — «стоит того»)
+```
+
 ---
 
 ## NPV банка: клиент как актив {#bank-npv}
@@ -148,6 +167,26 @@ DCF — *метод*. NPV — *вердикт* по методу. Путаниц
 | Отток (churn) | убивает будущие **+** | Churn-скор, логрег |
 
 Банк **максимизирует** \(NPV_{bank}\): больше AUM, больше fee, больше кросс-селла, дольше lifetime, дешевле обслуживание, контролируемый риск и штрафы.
+
+Упрощённый поток «клиент как актив» (без PD/LGD — только fee и cost-to-serve):
+
+```python
+def bank_customer_npv(
+    aum: float,
+    years: int,
+    fee_aum: float = 0.01,       # 1% от AUM в год
+    cost_to_serve: float = 200.0,
+    r: float = 0.08,
+) -> float:
+    flows = []
+    for t in range(1, years + 1):
+        fee = aum * fee_aum
+        flows.append(fee - cost_to_serve)
+    return sum(cf / (1 + r) ** t for t, cf in enumerate(flows, start=1))
+
+
+print(round(bank_customer_npv(aum=5_000_000, years=5), 0))  # → заметный плюс для банка
+```
 
 ### Где тут «забота о клиенте»
 
@@ -194,6 +233,34 @@ $$
 
 Банковский агент почти никогда не ставит PV комиссий в loss с минусом для *себя*. Клиентский — обязан.
 
+Тот же AUM, но знак fee для клиента — минус. Плюс грубая проверка «успею ли к цели» без Monte Carlo:
+
+```python
+def fee_drag_pv(aum: float, years: int, fee_aum: float, r: float = 0.05) -> float:
+    """PV комиссий, которые клиент платит банку (для клиента — затраты)."""
+    return sum((aum * fee_aum) / (1 + r) ** t for t in range(1, years + 1))
+
+
+def goal_gap(
+    wealth0: float,
+    annual_contrib: float,
+    years: int,
+    expected_return: float,
+    fee_aum: float,
+    goal: float,
+) -> float:
+    """Сколько не хватает (или запас) до цели при постоянном fee от текущего AUM."""
+    w = wealth0
+    net_r = expected_return - fee_aum
+    for _ in range(years):
+        w = w * (1 + net_r) + annual_contrib
+    return w - goal
+
+
+print(round(fee_drag_pv(5_000_000, 10, fee_aum=0.01), 0))
+print(round(goal_gap(5_000_000, 50_000, 10, 0.08, 0.01, 12_000_000), 0))
+```
+
 ---
 
 ## Где метрики сталкиваются {#conflict}
@@ -221,6 +288,21 @@ flowchart LR
 ```
 
 Совпадение интересов — в зоне «не дай клиенту застрелиться на просадке». Расхождение — почти везде, где появляется **маржа банка**.
+
+Один рубль комиссии в коде — два вердикта:
+
+```python
+def conflict_on_fee(aum: float, fee_aum: float, years: int = 5, r: float = 0.08) -> dict:
+    bank_flows = [aum * fee_aum for _ in range(years)]          # + для банка
+    client_flows = [-aum * fee_aum for _ in range(years)]       # − для клиента
+    bank_npv = sum(cf / (1 + r) ** t for t, cf in enumerate(bank_flows, 1))
+    client_npv = sum(cf / (1 + r) ** t for t, cf in enumerate(client_flows, 1))
+    return {"npv_bank": round(bank_npv, 0), "npv_client": round(client_npv, 0)}
+
+
+print(conflict_on_fee(5_000_000, 0.01))
+# → {'npv_bank': 199635.0, 'npv_client': -199635.0}  — зеркало
+```
 
 Пока objective агента задаётся банковским KPI-деревом, модель честно оптимизирует \(NPV_{bank}\). Можно добавить ethics layer и suitability — они ограничивают худшие злоупотребления, но **не меняют знак целевой функции**.
 
@@ -392,6 +474,190 @@ Eval-pack обязан ломать агента, который «для удо
 
 ---
 
+## Код: от PV до оркестратора {#code-ladder}
+
+Выше — короткие вставки у формул. Здесь — та же лестница целиком: каждый шаг опирается на предыдущий. Зависимости: стандартная библиотека Python 3.10+ (`random`, `dataclasses`). Без LLM — solvers считают, текст потом.
+
+### 1. PV / NPV
+
+Уже видели: `pv` / `npv` по списку \(CF_t\). Это ядро всего остального.
+
+### 2. Банковский customer NPV
+
+Fee от AUM минус cost-to-serve → дисконт. Objective банка в миниатюре.
+
+### 3. Клиентский fee-drag и gap до цели
+
+Тот же fee со знаком «−»; детерминированный путь богатства с `net_r = expected_return - fee_aum`.
+
+### 4. Конфликт знаков
+
+Один поток → `npv_bank = −npv_client` на чистых комиссиях.
+
+### 5. Monte Carlo: вероятность цели при двух тарифах
+
+Следующий уровень сложности — случайная доходность и явный выбор инфраструктуры:
+
+```python
+from __future__ import annotations
+
+import random
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Broker:
+    name: str
+    fee_aum: float  # доля AUM в год, напр. 0.01 = 100 bps
+
+
+def simulate_terminal_wealth(
+    wealth0: float,
+    annual_contrib: float,
+    years: int,
+    mu: float,
+    sigma: float,
+    broker: Broker,
+    rng: random.Random,
+) -> float:
+    w = wealth0
+    for _ in range(years):
+        r = rng.gauss(mu, sigma) - broker.fee_aum
+        w = w * (1 + r) + annual_contrib
+    return w
+
+
+def goal_success_prob(
+    *,
+    wealth0: float,
+    annual_contrib: float,
+    years: int,
+    mu: float,
+    sigma: float,
+    goal: float,
+    broker: Broker,
+    n_paths: int = 5_000,
+    seed: int = 42,
+) -> float:
+    rng = random.Random(seed)
+    hits = 0
+    for _ in range(n_paths):
+        if simulate_terminal_wealth(
+            wealth0, annual_contrib, years, mu, sigma, broker, rng
+        ) >= goal:
+            hits += 1
+    return hits / n_paths
+
+
+bank_a = Broker("bank_a", fee_aum=0.010)
+low_cost = Broker("low_cost", fee_aum=0.001)
+
+params = dict(
+    wealth0=5_000_000,
+    annual_contrib=50_000,
+    years=10,
+    mu=0.07,
+    sigma=0.15,
+    goal=9_000_000,
+)
+
+p_bank = goal_success_prob(**params, broker=bank_a)
+p_cheap = goal_success_prob(**params, broker=low_cost)
+print(bank_a.name, round(p_bank, 3))
+print(low_cost.name, round(p_cheap, 3))
+# low_cost обычно выше: тот же рынок, меньше drag
+```
+
+Клиентский агент обязан уметь такой what-if **до** любой LLM-фразы «оставайтесь с нами».
+
+### 6. Выбор канала как solver, не как чат
+
+```python
+def prefer_broker_by_goal_prob(
+    brokers: list[Broker],
+    **sim_kwargs,
+) -> tuple[Broker, dict[str, float]]:
+    scores = {
+        b.name: goal_success_prob(**sim_kwargs, broker=b) for b in brokers
+    }
+    best = max(brokers, key=lambda b: scores[b.name])
+    return best, scores
+
+
+best, scores = prefer_broker_by_goal_prob([bank_a, low_cost], **params)
+print(best.name, scores)
+```
+
+Здесь уже появляется `oracle.prefer_channel_by: client_npv_after_fees` из YAML персоны — только метрика вероятности цели вместо полного NPV.
+
+### 7. Оркестратор без LLM: tools + must_not
+
+Последний шаг перед «настоящим» агентом — маршрутизация к solvers и жёсткий запрет upsell:
+
+```python
+from typing import Any, Callable
+
+
+Tool = Callable[..., Any]
+
+
+class ClientOrchestrator:
+    def __init__(self, tools: dict[str, Tool], must_not: set[str]):
+        self.tools = tools
+        self.must_not = must_not
+
+    def run(self, intent: str, **kwargs) -> Any:
+        if intent in self.must_not:
+            raise PermissionError(f"blocked by must_not: {intent}")
+        if intent not in self.tools:
+            raise KeyError(f"unknown tool: {intent}")
+        return self.tools[intent](**kwargs)
+
+
+def explain_channel_choice(**sim_kwargs) -> str:
+    best, scores = prefer_broker_by_goal_prob(
+        [bank_a, low_cost], **sim_kwargs
+    )
+    ranked = ", ".join(f"{k}={v:.1%}" for k, v in sorted(scores.items()))
+    return (
+        f"По вероятности цели лучше канал «{best.name}» "
+        f"({ranked}). Это не рекомендация конкретного банка — "
+        f"сравнение тарифов в модели клиента."
+    )
+
+
+orch = ClientOrchestrator(
+    tools={
+        "goal_prob": lambda broker, **kw: goal_success_prob(broker=broker, **kw),
+        "prefer_channel": lambda **kw: prefer_broker_by_goal_prob(
+            [bank_a, low_cost], **kw
+        ),
+        "explain_channel": explain_channel_choice,
+        "upsell_bank_product": lambda **kw: "buy our fund",  # есть, но запрещён
+    },
+    must_not={"upsell_bank_product", "recommend_trade", "guarantee_return"},
+)
+
+print(orch.run("explain_channel", **params))
+# orch.run("upsell_bank_product")  → PermissionError
+```
+
+LLM, если появится, вызывает `explain_channel` / читает готовый текст солвера — **не** считает \(P(\text{цель})\) в промпте.
+
+### Как наращивать дальше
+
+| Следующий слой | Что добавить в код |
+|----------------|--------------------|
+| Портфель | веса, covariance, Markowitz / risk parity *после* fee |
+| Налоги | отдельный \(CF_t\) в симуляции |
+| Attribution | разложить −8% на рынок / стиль / fee |
+| Eval | синтетические персоны + assert `prefer low_cost` |
+| LLM | только `narrative_only` поверх `explain_channel` |
+
+Идея лестницы: сначала знак денег, потом случайность, потом выбор инфраструктуры, потом policy вокруг tools. Без этого «агент» — чат с доступом к брокерскому API.
+
+---
+
 ## Классификация задач {#task-classification}
 
 Классификатор по-прежнему работает до agent loop. В `task_record` появляется поле objective: `client_goal_npv` | `client_cost_min` | … — и запрет маршрутов вида `upsell_bank_product`.
@@ -407,7 +673,8 @@ Eval-pack обязан ломать агента, который «для удо
 3. Банковский wealth-агент по умолчанию оптимизирует \(NPV_{bank}\); suitability лишь режет хвосты.  
 4. Чтобы оптимизировать \(NPV_{client}\) (цель ↑, издержки ↓), агента логичнее строить **на стороне клиента**, а банк использовать как data/execution tool.  
 5. Технологический стек почти тот же; меняется хозяин objective, данные и набор must-not.  
-6. Eval обязан включать тарифы и сценарии «смени канал» — иначе снова тестируете удобство банка.
+6. Eval обязан включать тарифы и сценарии «смени канал» — иначе снова тестируете удобство банка.  
+7. В коде это видно сразу: PV → customer NPV → fee-drag → конфликт знаков → Monte Carlo цели → оркестратор с `must_not`.
 
 Если коротко одной фразой: *нельзя честно быть финансовым адвокатом клиента, получая зарплату от его комиссий — если только вы не вынесли целевую функцию и данные из-под этой зарплаты.*
 
