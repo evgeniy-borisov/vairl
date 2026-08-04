@@ -157,8 +157,89 @@ def chart_banks_min_trap(out: Path):
     print("wrote", out)
 
 
+POLICY_NARRATIVES = {
+    "min_trap": {
+        "title": "Только минималка",
+        "summary": (
+            "В платёжные дни агент вносит лишь минимальный платёж. "
+            "Грейс по покупкам срывается: долг остаётся, и после grace_end каждый день капает APR. "
+            "Это ловушка «всё в порядке, просрочки нет» — штрафа нет, но проценты уже идут."
+        ),
+        "what_happens": [
+            "Выписка закрывается — фиксируется задолженность периода",
+            "В платёжную дату уходит только min payment",
+            "Корзины покупок доживают до конца грейса и начинают начислять %",
+            "Client cost растёт за счёт процентов, долг почти не гасится",
+        ],
+    },
+    "grace_keeper": {
+        "title": "Удержать грейс",
+        "summary": (
+            "К платёжной дате агент закрывает корзины с близким grace_end "
+            "(и не меньше минимума). Цель — не дать долгу выйти в зону APR, "
+            "насколько хватает кэша."
+        ),
+        "what_happens": [
+            "Следит за ближайшими концами грейса",
+            "В платёжную дату доплачивает сумму «под угрозой %»",
+            "Новые траты снова получают свой грейс",
+            "Cost почти нулевой, если денег хватает на закрытие корзин",
+        ],
+    },
+    "payday_clear": {
+        "title": "Гашение в зарплату",
+        "summary": (
+            "В день зарплаты агент направляет свободный кэш на полное гашение долга. "
+            "Между зарплатами может копить траты, но проценты обычно не успевают развернуться."
+        ),
+        "what_happens": [
+            "5-е число каждого цикла — приход зарплаты",
+            "Сразу после — попытка обнулить долг",
+            "Грейс часто не доживает до срыва, потому что долг короткоживущий",
+            "Лучший client cost в учебной модели (≈ 0)",
+        ],
+    },
+    "cash_then_min": {
+        "title": "Наличные + минималка",
+        "summary": (
+            "В начале снимает 40 000 ₽ наличными (комиссия + % с дня 0, без грейса), "
+            "дальше ведёт себя как min_trap. Худший сценарий для клиента."
+        ),
+        "what_happens": [
+            "День 2: cash advance → fee сразу",
+            "На сумму снятия APR капает с первого дня",
+            "Покупки живут по обычному грейсу, но минималка его не спасает",
+            "Client cost = комиссии + проценты — максимум среди политик",
+        ],
+    },
+}
+
+CARD_NARRATIVES = {
+    "sber": {
+        "title": "Кредитная СберКарта",
+        "summary": (
+            "Длинный грейс: остаток месяца покупок + ~90 дней. "
+            "Выписка/цикл — календарный месяц; платёжная дата в модели — 1-е число цикла. "
+            "APR модели 49.8%. Больше «воздуха» до первого процента, но min_trap всё равно дорогой."
+        ),
+    },
+    "tbank": {
+        "title": "Т-Банк Платинум",
+        "summary": (
+            "Короткий грейс на покупки: остаток расчётного периода + ~25 дней до платежа (до ~55). "
+            "Платёжная дата в модели — 25-й день цикла. APR 29.9%. "
+            "Проценты при min_trap стартуют раньше, чем у Сбера, при тех же тратах."
+        ),
+    },
+}
+
+
+def series_bundle(card, policy: str):
+    return run_daily(card, persona_spending(), policy=policy, **COMMON)
+
+
 def export_series_json(out: Path) -> None:
-    """Данные для p5.js-демо: дневные ряды по картам и политикам."""
+    """Данные для p5.js-демо: дневные ряды, маркеры, события, нарративы."""
     payload = {
         "horizon": COMMON["horizon"],
         "persona": {
@@ -167,6 +248,13 @@ def export_series_json(out: Path) -> None:
             "start_cash": COMMON["start_cash"],
         },
         "policies": list(POLICY_STYLE.keys()),
+        "policy_narratives": POLICY_NARRATIVES,
+        "card_narratives": CARD_NARRATIVES,
+        "marker_legend": {
+            "statement": "Закрытие выписки / конец расчётного периода",
+            "payment_due": "Платёжная дата",
+            "grace_end": "Конец грейса по корзине",
+        },
         "cards": {},
     }
     for card in (SBER, TBANK):
@@ -174,11 +262,13 @@ def export_series_json(out: Path) -> None:
             "name": card.name,
             "label": card.label,
             "apr": card.apr,
+            "cycle_len": card.cycle_len,
+            "payment_day_in_cycle": card.payment_day_in_cycle,
             "series": {},
+            "markers": {},
         }
         for policy in POLICY_STYLE:
-            daily = series_for(card, policy)
-            # компактный ряд для CDN/страницы
+            bundle = series_bundle(card, policy)
             card_block["series"][policy] = [
                 {
                     "d": row["day"],
@@ -188,9 +278,28 @@ def export_series_json(out: Path) -> None:
                     "cost": row["client_cost_cum"],
                     "cash": row["cash"],
                     "gleft": row["days_to_grace_end"],
+                    "idlt": row.get("interest_delta", 0),
+                    "fdlt": row.get("fee_delta", 0),
+                    "ddlt": row.get("debt_delta", 0),
+                    "ev": [
+                        {
+                            "k": e["kind"],
+                            "l": e["label"],
+                            **({"a": e["amount"]} if e.get("amount") is not None else {}),
+                        }
+                        for e in row.get("events", [])
+                    ],
                 }
-                for row in daily
+                for row in bundle["daily"]
             ]
+            card_block["markers"][policy] = bundle.get("markers", [])
+            # итог для описания
+            card_block.setdefault("outcomes", {})[policy] = {
+                "client_cost": bundle["client_cost"],
+                "final_debt": bundle["final_debt"],
+                "interest": bundle["interest"],
+                "fees": bundle["fees"],
+            }
         payload["cards"][card.name] = card_block
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(

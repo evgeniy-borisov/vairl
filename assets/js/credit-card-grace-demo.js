@@ -34,11 +34,22 @@
     cash_then_min: [239, 108, 0],
   };
 
+  const MARKER_STYLE = {
+    statement: { color: [96, 125, 139], dash: [2, 6], label: "выписка" },
+    payment_due: { color: [25, 118, 210], dash: [6, 5], label: "платёж" },
+    grace_end: { color: [198, 40, 40], dash: [8, 4], label: "конец грейса" },
+  };
+
   function rub(n) {
     if (n == null || Number.isNaN(n)) return "—";
     const abs = Math.abs(n);
     if (abs >= 1000) return (n / 1000).toFixed(abs >= 10000 ? 0 : 1) + "k";
     return String(Math.round(n));
+  }
+
+  function rubFull(n) {
+    if (n == null || Number.isNaN(n)) return "—";
+    return Math.round(n).toLocaleString("ru-RU") + " руб.";
   }
 
   function init(data) {
@@ -58,6 +69,7 @@
     let speed = 2; // дней за тик (примерно)
     let accum = 0;
     let overlayCompare = true;
+    let hoverDay = null;
 
     const dayEl = root.querySelector("[data-cc-day]");
     const debtEl = root.querySelector("[data-cc-debt]");
@@ -68,6 +80,8 @@
     const playBtn = root.querySelector("[data-cc-play]");
     const scrub = root.querySelector("[data-cc-scrub]");
     const fsBtn = root.querySelector("[data-cc-fullscreen]");
+    const narrEl = root.querySelector("[data-cc-narrative]");
+    const tipEl = root.querySelector("[data-cc-tooltip]");
 
     let resizeCanvas = null;
 
@@ -183,6 +197,65 @@
       return data.cards[cardKey].series[policy];
     }
 
+    function markers() {
+      const m = data.cards[cardKey].markers;
+      return (m && m[policy]) || [];
+    }
+
+    function syncNarrative() {
+      if (!narrEl) return;
+      const polN = (data.policy_narratives && data.policy_narratives[policy]) || {};
+      const cardN = (data.card_narratives && data.card_narratives[cardKey]) || {};
+      const out =
+        (data.cards[cardKey].outcomes && data.cards[cardKey].outcomes[policy]) || {};
+      const steps = (polN.what_happens || [])
+        .map((s) => `<li>${s}</li>`)
+        .join("");
+      narrEl.innerHTML = `
+        <div class="cc-narr-head">
+          <strong>${cardN.title || data.cards[cardKey].label}</strong>
+          <span class="cc-narr-sep">·</span>
+          <strong>${polN.title || policy}</strong>
+        </div>
+        <p class="cc-narr-card">${cardN.summary || ""}</p>
+        <p class="cc-narr-pol">${polN.summary || ""}</p>
+        <ul class="cc-narr-steps">${steps}</ul>
+        <p class="cc-narr-out">
+          Итог на день 180:
+          cost <strong>${rubFull(out.client_cost)}</strong>,
+          долг <strong>${rubFull(out.final_debt)}</strong>
+          (%% ${rubFull(out.interest)}, fees ${rubFull(out.fees)}).
+        </p>`;
+    }
+
+    function eventLines(row) {
+      const lines = [];
+      if (!row) return lines;
+      const kinds = new Set((row.ev || []).map((e) => e.k));
+      if (row.idlt > 0.5 && !kinds.has("interest")) {
+        lines.push(`Начисление процентов: +${rubFull(row.idlt)}`);
+      }
+      if (row.fdlt > 0.5 && !kinds.has("fee")) {
+        lines.push(`Комиссия: +${rubFull(row.fdlt)}`);
+      }
+      (row.ev || []).forEach((e) => {
+        const amt = e.a != null ? ` (${rubFull(e.a)})` : "";
+        lines.push(`${e.l}${amt}`);
+      });
+      if (!lines.length) {
+        if (row.ddlt > 0.5) lines.push(`Рост долга: +${rubFull(row.ddlt)}`);
+        else if (row.ddlt < -0.5) lines.push(`Снижение долга: ${rubFull(row.ddlt)}`);
+        else lines.push("Спокойный день: без покупок, платежей и начислений");
+      }
+      if (row.accr > 0) {
+        lines.push(`Уже вне грейса: ${rubFull(row.accr)}`);
+      }
+      if (row.under > 0) {
+        lines.push(`Ещё под грейсом: ${rubFull(row.under)}`);
+      }
+      return lines;
+    }
+
     function syncDom() {
       const row = series()[day] || series()[0];
       if (dayEl) dayEl.textContent = String(day);
@@ -196,6 +269,7 @@
       }
       if (scrub && Number(scrub.value) !== day) scrub.value = String(day);
       if (playBtn) playBtn.textContent = playing ? "⏸ Пауза" : "▶ Старт";
+      syncNarrative();
     }
 
     const sketch = (p) => {
@@ -331,6 +405,88 @@
         p.endShape();
       }
 
+      function drawMarkers(box) {
+        const list = markers().filter((m) => m.day <= day);
+        for (const m of list) {
+          const st = MARKER_STYLE[m.kind] || MARKER_STYLE.statement;
+          const x = xOf(m.day, box, data.horizon);
+          p.stroke(...st.color, 160);
+          p.strokeWeight(1.3);
+          p.drawingContext.setLineDash(st.dash);
+          p.line(x, box.y0, x, box.y1);
+          p.drawingContext.setLineDash([]);
+        }
+      }
+
+      function drawTooltip(box, vmax, s) {
+        if (hoverDay == null || hoverDay < 0 || hoverDay > day) {
+          if (tipEl) tipEl.hidden = true;
+          return;
+        }
+        const row = s[hoverDay];
+        if (!row) return;
+        const x = xOf(hoverDay, box, data.horizon);
+        const y = yOf(row.debt, box, vmax);
+        p.stroke(45, 49, 60, 100);
+        p.strokeWeight(1);
+        p.drawingContext.setLineDash([2, 3]);
+        p.line(x, box.y0, x, box.y1);
+        p.drawingContext.setLineDash([]);
+        p.noStroke();
+        p.fill(...POLICY_COLORS[policy]);
+        p.circle(x, y, 11);
+        p.fill(255);
+        p.circle(x, y, 5);
+
+        const lines = eventLines(row);
+        const markHit = markers().filter((m) => m.day === hoverDay);
+        markHit.forEach((m) => {
+          lines.unshift(`▸ ${m.label}`);
+        });
+
+        if (tipEl) {
+          tipEl.hidden = false;
+          tipEl.innerHTML = `<strong>День ${hoverDay}</strong><br/>Долг: ${rubFull(
+            row.debt
+          )} · cost: ${rubFull(row.cost)}<ul>${lines
+            .map((l) => `<li>${l}</li>`)
+            .join("")}</ul>`;
+          // позиция относительно canvas host
+          const host = document.getElementById(CANVAS_ID);
+          const rect = host.getBoundingClientRect();
+          const rootRect = root.getBoundingClientRect();
+          let left = rect.left - rootRect.left + x + 14;
+          let top = rect.top - rootRect.top + Math.max(y - 20, 8);
+          if (left + 280 > root.clientWidth) left = left - 300;
+          tipEl.style.left = `${Math.max(8, left)}px`;
+          tipEl.style.top = `${Math.max(8, top)}px`;
+        }
+      }
+
+      p.mouseMoved = function () {
+        const box = plotBox();
+        if (
+          p.mouseX < box.x0 ||
+          p.mouseX > box.x1 ||
+          p.mouseY < box.y0 ||
+          p.mouseY > box.y1
+        ) {
+          hoverDay = null;
+          if (tipEl) tipEl.hidden = true;
+          return;
+        }
+        const t = (p.mouseX - box.x0) / box.w;
+        hoverDay = Math.max(
+          0,
+          Math.min(day, Math.round(t * (data.horizon - 1)))
+        );
+      };
+
+      p.mouseOut = function () {
+        hoverDay = null;
+        if (tipEl) tipEl.hidden = true;
+      };
+
       p.draw = function () {
         if (playing) {
           accum += speed / 30;
@@ -357,9 +513,10 @@
         p.textStyle(p.NORMAL);
         p.textSize(11);
         p.fill(110, 115, 130);
-        p.text("долг / структура грейса · день " + day, pad.l + 280, 12);
+        p.text("наведите на кривую долга · день " + day, pad.l + 280, 12);
 
         drawGrid(box, vmax);
+        drawMarkers(box);
         drawAreaUnderAccr(s, box, vmax);
 
         if (overlayCompare) {
@@ -403,18 +560,23 @@
           { c: [239, 83, 80], t: "уже %" },
           { c: POLICY_COLORS[policy], t: "долг" },
           { c: [123, 31, 162], t: "cost" },
+          { c: [96, 125, 139], t: "выписка ┈" },
+          { c: [25, 118, 210], t: "плат.дата ┈" },
+          { c: [198, 40, 40], t: "конец грейса ┈" },
         ];
         let lx = box.x0;
         const ly = box.y0 - 2;
         p.textAlign(p.LEFT, p.BOTTOM);
-        p.textSize(11);
+        p.textSize(10);
         for (const item of legend) {
           p.fill(...item.c);
-          p.rect(lx, ly - 10, 10, 10, 2);
+          p.rect(lx, ly - 9, 9, 9, 2);
           p.fill(80, 85, 100);
-          p.text(item.t, lx + 14, ly);
-          lx += p.textWidth(item.t) + 36;
+          p.text(item.t, lx + 12, ly);
+          lx += p.textWidth(item.t) + 28;
         }
+
+        drawTooltip(box, vmax, s);
       };
     };
 

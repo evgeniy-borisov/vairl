@@ -189,28 +189,85 @@ def run(
     paydays = {payday_offset + 30 * m for m in range(horizon // 30 + 2)}
     snapshots = []
     daily: list[dict] = []
+    events: list[dict] = []
+    markers: list[dict] = []  # вертикали на графике
+    seen_marker_keys: set[tuple] = set()
+
+    def add_marker(day: int, kind: str, label: str) -> None:
+        key = (day, kind)
+        if key in seen_marker_keys or day < 0 or day >= horizon:
+            return
+        seen_marker_keys.add(key)
+        markers.append({"day": day, "kind": kind, "label": label})
+
+    def add_event(day: int, kind: str, label: str, amount: float | None = None) -> None:
+        ev = {"day": day, "kind": kind, "label": label}
+        if amount is not None:
+            ev["amount"] = round(amount, 2)
+        events.append(ev)
+
+    # календарные маркеры карты (выписка / платёжная дата)
+    for d in range(horizon):
+        if card.cycle_len and (d % card.cycle_len) == (card.cycle_len - 1):
+            add_marker(d, "statement", "Закрытие выписки / конец расчётного периода")
+        if is_payment_day(card, d):
+            add_marker(d, "payment_due", "Платёжная дата (min / grace payment)")
 
     for day in range(horizon):
         state.day = day
+        interest_before = state.interest_accrued
+        fees_before = state.fees_paid
+        debt_before = debt(state)
+
+        # позиции, у которых сегодня истекает грейс
+        for p in list(state.positions):
+            if p.under_grace and day == p.grace_end:
+                add_marker(day, "grace_end", "Конец грейса по корзине")
+                add_event(
+                    day,
+                    "grace_end",
+                    f"Грейс закончился (корзина {p.tag}), дальше капает APR",
+                    p.principal,
+                )
+
         accrue(state, card)
+        interest_delta = state.interest_accrued - interest_before
+
+        if interest_delta > 0.005:
+            add_event(
+                day,
+                "interest",
+                "Начисление процентов (долг вне грейса)",
+                interest_delta,
+            )
 
         if day in paydays:
             cash += salary
+            add_event(day, "salary", "Зарплата на счёт", salary)
 
-        for line in by_day.get(day, []):
+        day_ledger = by_day.get(day, [])
+        for line in day_ledger:
             if line.kind == OpKind.PURCHASE:
                 add_purchase(state, card, line.amount)
+                add_event(day, "purchase", f"Покупка: {line.note or 'purchase'}", line.amount)
+                # маркер конца грейса этой покупки
+                pos = state.positions[-1]
+                add_marker(pos.grace_end, "grace_end", "Конец грейса (покупка)")
             elif line.kind == OpKind.CASH:
                 add_cash(state, card, line.amount)
+                fee = state.fees_paid - fees_before
+                add_event(day, "cash", "Снятие наличных (без грейса)", line.amount)
+                if fee > 0:
+                    add_event(day, "fee", "Комиссия за снятие", fee)
             elif line.kind == OpKind.PAYMENT:
                 cash -= pay(state, line.amount)
+                add_event(day, "payment", "Платёж по карте", line.amount)
 
         # агент / политика платежей
         payment = 0.0
         if policy == "min_trap" and is_payment_day(card, day):
             payment = min(min_due(state, card), cash)
         elif policy == "grace_keeper" and is_payment_day(card, day):
-            # закрыть позиции, чей grace_end <= platform payment horizon (до след. цикла)
             need = 0.0
             for p in state.positions:
                 if p.grace_end <= day + 5:
@@ -221,18 +278,36 @@ def run(
         elif policy == "cash_then_min":
             if day == 2 and not any(p.tag == "cash" for p in state.positions):
                 add_cash(state, card, 40_000)
+                add_event(day, "cash", "Снятие 40 000 (сценарий cash_then_min)", 40_000)
+                fee = state.fees_paid - fees_before
+                if fee > 0:
+                    add_event(day, "fee", "Комиссия за снятие", fee)
             if is_payment_day(card, day):
                 payment = min(min_due(state, card), cash)
 
         if payment > 0:
-            cash -= pay(state, payment)
+            paid = pay(state, payment)
+            cash -= paid
+            label = (
+                "Минимальный платёж"
+                if policy in ("min_trap", "cash_then_min")
+                else "Платёж по политике"
+            )
+            if policy == "grace_keeper":
+                label = "Платёж для удержания грейса"
+            elif policy == "payday_clear":
+                label = "Гашение в зарплату"
+            add_event(day, "payment", label, paid)
+
+        fee_delta = state.fees_paid - fees_before
+        debt_after = debt(state)
 
         if day % 30 == 29 or day == horizon - 1:
             snapshots.append(
                 {
                     "month": day // 30 + 1,
                     "day": day,
-                    "debt": round(debt(state)),
+                    "debt": round(debt_after),
                     "interest": round(state.interest_accrued),
                     "fees": round(state.fees_paid),
                     "cash": round(cash),
@@ -243,18 +318,26 @@ def run(
             under = sum(p.principal for p in state.positions if p.under_grace)
             over = sum(p.principal for p in state.positions if not p.under_grace)
             nearest = min((p.grace_end for p in state.positions if p.under_grace), default=None)
+            day_evs = [e for e in events if e["day"] == day]
             daily.append(
                 {
                     "day": day,
-                    "debt": round(debt(state), 2),
+                    "debt": round(debt_after, 2),
                     "debt_under_grace": round(under, 2),
                     "debt_accruing": round(over, 2),
                     "interest_cum": round(state.interest_accrued, 2),
                     "fees_cum": round(state.fees_paid, 2),
                     "client_cost_cum": round(state.interest_accrued + state.fees_paid, 2),
+                    "interest_delta": round(interest_delta, 2),
+                    "fee_delta": round(fee_delta, 2),
+                    "debt_delta": round(debt_after - debt_before, 2),
                     "cash": round(cash, 2),
                     "nearest_grace_end": nearest,
                     "days_to_grace_end": (nearest - day) if nearest is not None else None,
+                    "events": [
+                        {"kind": e["kind"], "label": e["label"], "amount": e.get("amount")}
+                        for e in day_evs
+                    ],
                 }
             )
 
@@ -270,6 +353,8 @@ def run(
         "paid_total": round(state.paid_total),
         "snapshots": snapshots,
         "source": card.source,
+        "markers": sorted(markers, key=lambda m: (m["day"], m["kind"])),
+        "events": events,
     }
     if collect_daily:
         out["daily"] = daily

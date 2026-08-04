@@ -3579,7 +3579,8 @@ footer {
     border: 1px solid #e8e8ec;
     border-radius: 10px;
     background: #fcfcfd;
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
 }
 
 .cc-grace-widget .cc-grace-toolbar {
@@ -3670,6 +3671,69 @@ footer {
     color: #2d313c;
 }
 
+.cc-grace-widget .cc-grace-narrative {
+    margin: 0;
+    padding: 12px 14px;
+    border-bottom: 1px solid #ececf0;
+    background: #f9fafb;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #37474f;
+}
+
+.cc-grace-widget .cc-grace-narrative .cc-narr-head {
+    margin-bottom: 6px;
+    color: #1b2838;
+}
+
+.cc-grace-widget .cc-grace-narrative .cc-narr-sep {
+    margin: 0 6px;
+    color: #90a4ae;
+}
+
+.cc-grace-widget .cc-grace-narrative .cc-narr-card,
+.cc-grace-widget .cc-grace-narrative .cc-narr-pol {
+    margin: 0 0 8px;
+}
+
+.cc-grace-widget .cc-grace-narrative .cc-narr-steps {
+    margin: 0 0 8px;
+    padding-left: 1.2em;
+}
+
+.cc-grace-widget .cc-grace-narrative .cc-narr-steps li {
+    margin: 2px 0;
+}
+
+.cc-grace-widget .cc-grace-narrative .cc-narr-out {
+    margin: 0;
+    color: #546e7a;
+}
+
+.cc-grace-widget .cc-grace-tooltip {
+    position: absolute;
+    z-index: 5;
+    max-width: 300px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #cfd8dc;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 8px 24px rgba(27, 40, 56, 0.12);
+    font-size: 12px;
+    line-height: 1.4;
+    color: #37474f;
+    pointer-events: none;
+}
+
+.cc-grace-widget .cc-grace-tooltip ul {
+    margin: 6px 0 0;
+    padding-left: 1.1em;
+}
+
+.cc-grace-widget .cc-grace-tooltip li {
+    margin: 2px 0;
+}
+
 .cc-grace-widget #cc-grace-canvas {
     min-height: 420px;
     padding: 0 4px 8px;
@@ -3743,14 +3807,17 @@ body.cc-fs-lock {
 
 .cc-grace-widget:fullscreen .cc-grace-toolbar,
 .cc-grace-widget:fullscreen .cc-grace-stats,
+.cc-grace-widget:fullscreen .cc-grace-narrative,
 .cc-grace-widget:fullscreen .cc-grace-scrub,
 .cc-grace-widget:fullscreen .cc-grace-caption,
 .cc-grace-widget:-webkit-full-screen .cc-grace-toolbar,
 .cc-grace-widget:-webkit-full-screen .cc-grace-stats,
+.cc-grace-widget:-webkit-full-screen .cc-grace-narrative,
 .cc-grace-widget:-webkit-full-screen .cc-grace-scrub,
 .cc-grace-widget:-webkit-full-screen .cc-grace-caption,
 .cc-grace-widget.cc-fs-fallback .cc-grace-toolbar,
 .cc-grace-widget.cc-fs-fallback .cc-grace-stats,
+.cc-grace-widget.cc-fs-fallback .cc-grace-narrative,
 .cc-grace-widget.cc-fs-fallback .cc-grace-scrub,
 .cc-grace-widget.cc-fs-fallback .cc-grace-caption {
     flex-shrink: 0;

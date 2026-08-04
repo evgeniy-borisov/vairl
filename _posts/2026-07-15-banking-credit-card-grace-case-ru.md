@@ -264,13 +264,17 @@ Strategy Agent перебирает политики (один и тот же le
     <div><span>Уже %</span><strong data-cc-accr>—</strong></div>
     <div><span>До ближайшего grace_end</span><strong data-cc-gleft>—</strong></div>
   </div>
+  <div class="cc-grace-narrative" data-cc-narrative>
+    <p>Выберите банк и политику — здесь появится описание сценария.</p>
+  </div>
   <div class="cc-grace-scrub">
     <input type="range" data-cc-scrub min="0" max="179" value="0" aria-label="День симуляции" />
   </div>
   <div id="cc-grace-canvas"></div>
+  <div class="cc-grace-tooltip" data-cc-tooltip hidden></div>
   <p class="cc-grace-caption">
-    Зелёная зона — долг ещё под грейсом; красная — уже капает APR.
-    Фиолетовая кривая — накопленный client cost (проценты + комиссии).
+    Пунктир: серый — закрытие выписки, синий — платёжная дата, красный — конец грейса.
+    Наведите на кривую долга — подсказка (покупка, минималка, начисление %…).
     Ряды из <code>credit-card-grace-series.json</code> · p5.js · ⛶ полноэкранный режим.
   </p>
 </div>
