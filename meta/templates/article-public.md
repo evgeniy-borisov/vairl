@@ -42,12 +42,14 @@ review_status: draft
 
 Текст статьи.
 
-Display-формулы — блок `typst-math` (SVG при `python scripts/publish_article.py`, нужен `brew install typst`):
+**Формулы (по умолчанию — KaTeX).** Не используйте `\[...\]` — kramdown часто ломает слэши. Display:
 
-````markdown
-```typst-math
-$ "PV" = sum_(t=0)^T ("CF"_t)/((1+r)^t) $
+```markdown
+$$
+\mathrm{PV} = \sum_{t=0}^{T} \frac{\mathrm{CF}_{t}}{(1+r)^{t}}
+$$
 ```
-````
 
-Инлайн: KaTeX, `\(x\)` или `$x$`.
+Инлайн: `\(r\)` или `$r$`.
+
+Опционально, для редких сложных плакатов/схем: блок `typst-math` → SVG при `publish_article.py` (нужен `brew install typst`). См. `scripts/compile_typst_math.py`.

@@ -83,9 +83,9 @@ review_status: approved
 
 **Дисконтированный денежный поток** — способ сказать: рубль через \(t\) лет стоит меньше рубля сегодня.
 
-<figure class="typst-math">
-  <img src="{{ '/assets/math/2026-07-13-banking-investor-ai-agent-ru-e970fb27aead.svg' | relative_url }}" alt="$ 'PV' = sum_(t=0)^T ('CF'_t)/((1+r)^t) $" loading="lazy" />
-</figure>
+$$
+\mathrm{PV} = \sum_{t=0}^{T} \frac{\mathrm{CF}_{t}}{(1+r)^{t}}
+$$
 
 - \(CF_t\) — денежный поток в периоде \(t\) (приток со знаком «+», отток «−»);
 - \(r\) — ставка дисконта (стоимость денег / капитала / требуемая доходность с учётом риска);
@@ -97,9 +97,9 @@ review_status: approved
 
 **Чистая приведённая стоимость** — PV всех выгод минус PV всех затрат (включая «входной билет» сегодня):
 
-<figure class="typst-math">
-  <img src="{{ '/assets/math/2026-07-13-banking-investor-ai-agent-ru-c4d14e88c0b9.svg' | relative_url }}" alt="$ 'NPV' = -I_0 + sum_(t=1)^T ('CF'_t)/((1+r)^t) $" loading="lazy" />
-</figure>
+$$
+\mathrm{NPV} = -I_{0} + \sum_{t=1}^{T} \frac{\mathrm{CF}_{t}}{(1+r)^{t}}
+$$
 
 или просто сумма всех дисконтированных потоков, если \(I_0\) уже внутри \(CF_0\).
 
@@ -173,9 +173,9 @@ DCF — *метод*. NPV — *вердикт* по методу. Путаниц
 
 Формально:
 
-<figure class="typst-math">
-  <img src="{{ '/assets/math/2026-07-13-banking-investor-ai-agent-ru-0423f12e53eb.svg' | relative_url }}" alt="$ 'NPV'_'client' = 'PV'_('цель') - 'PV'_('комиссии' + 'налоги' + 'кросс-селл' + " loading="lazy" />
-</figure>
+$$
+\mathrm{NPV}_{\mathrm{client}} = \mathrm{PV}(\text{цель}) - \mathrm{PV}(\text{комиссии} + \text{налоги} + \text{кросс-селл} + \text{ошибки})
+$$
 
 Банковский агент почти никогда не ставит PV комиссий в loss с минусом для *себя*. Клиентский — обязан.
 

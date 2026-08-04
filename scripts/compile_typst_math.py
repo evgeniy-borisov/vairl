@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""Compile ```typst-math fenced blocks in markdown to SVG and inline <figure> tags.
+"""Optional: compile ```typst-math fences to SVG (for rare complex layouts).
 
-Used by publish_article.py. Requires `typst` on PATH (brew install typst).
+Default for blog math is KaTeX with $$ … $$ / \\( … \\) — see katex-render.js.
+Use typst-math only when you need a Typst poster/diagram, not ordinary equations.
+
+Requires `typst` on PATH (brew install typst). Invoked by publish_article.py.
 """
 
 from __future__ import annotations
