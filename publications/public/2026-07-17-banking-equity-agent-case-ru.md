@@ -14,7 +14,7 @@ review_status: approved
 
 **Disclaimer.** Учебный кейс; не инвестиционная рекомендация. Персона и веса — синтетика. Ссылки на методы — для воспроизводимости архитектуры, не для торговых сигналов.
 
-**Контекст серии:** [часть 1 — DCF/NPV, девять агентов, solvers](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) · [классификация задач L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) · [кейс грейса (аналог cost-солвера)](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/).
+**Контекст серии:** [часть 1 — DCF/NPV, девять агентов, solvers](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) · [методы нейросимволического контура](/vairl/blog/2026/07/18/neurosymbolic-methods-banking-agents-ru/) · [классификация задач L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) · [кейс грейса (аналог cost-солвера)](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/).
 
 </div>
 
@@ -98,7 +98,7 @@ $$
 | Нормализация позиций | ledger reconciliation | Profile / Portfolio | [часть 1, Customer 360](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) |
 | Веса и концентрация | sum-to-one, issuer/sector aggregation | Risk / Limits | [Markowitz, 1952](#refs) |
 | Лимиты риска | linear constraints on weights | Personal Policy | [Grinold & Kahn, 1999](#refs) |
-| Drift vs benchmark | cumulative return difference | Monitoring (`DRIFT_BENCH`) | [Brinson et al., 1995](#refs) |
+| Drift vs benchmark | cumulative return difference | Monitoring (`DRIFT_BENCH`) | [Brinson et al., 1986/1991](#refs) |
 | Fee drag | PV комиссий / turnover cost | Cost / Fee | [часть 1, fee-drag](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) |
 | Налог шага | lot-based gain/loss, tax-aware sell | Cost / Fee (`TAX_HARVEST`) | [Constantinides, 1983](#refs) |
 | Ребаланс trim | constrained weight projection | Recommendation | [Markowitz, 1952](#refs); [DeMiguel et al., 2009](#refs) |
@@ -233,13 +233,15 @@ Equity-рукав (не ОФЗ) встраивается в ту же мульт
 | ID | Источник |
 |----|----------|
 | Markowitz, 1952 | Markowitz H. Portfolio Selection. *Journal of Finance*, 7(1), 77–91. |
-| Brinson et al., 1995 | Brinson G., Hood L., Beebower G. Determinants of Portfolio Performance. *Financial Analysts Journal*, 51(1), 133–138. |
+| Brinson et al., 1986 | Brinson G., Hood L., Beebower G. [Determinants of Portfolio Performance](https://doi.org/10.2469/faj.v42.n4.39). *Financial Analysts Journal*, 42(4), 39–44. |
+| Brinson et al., 1991 | Brinson G., Singer B., Beebower G. [Determinants of Portfolio Performance II](https://doi.org/10.2469/faj.v47.n3.40). *Financial Analysts Journal*, 47(3), 40–48. |
 | Grinold & Kahn, 1999 | Grinold R., Kahn R. *Active Portfolio Management*. McGraw-Hill. |
 | Choueifaty & Coignard, 2008 | Toward Maximum Diversification. *Journal of Portfolio Management*, 35(1), 40–51. |
 | DeMiguel et al., 2009 | Optimal Versus Naive Diversification. *Review of Financial Studies*, 22(5), 1915–1953. |
-| Constantinides, 1983 | Capital Market Equilibrium with Personal Tax. *Econometrica*, 51(3), 639–662. |
+| Constantinides, 1983 | [Capital Market Equilibrium with Personal Tax](https://doi.org/10.2307/1912150). *Econometrica*, 51(3), 611–636. |
 | Merton, 1969 | Lifetime Portfolio Selection under Uncertainty. *Review of Economics and Statistics*, 51(3), 247–257. |
-| Parasuraman et al., 2000 | Automation and Human Performance. *Human Factors*, 42(1), 1–17. |
+| Parasuraman et al., 2000 | Parasuraman R., Sheridan T., Wickens C. [A Model for Types and Levels of Human Interaction with Automation](https://doi.org/10.1109/3468.844354). *IEEE Transactions on Systems, Man, and Cybernetics—Part A*, 30(3), 286–297. |
+| VAIRL methods | [Методы нейросимволических banking-агентов](/vairl/blog/2026/07/18/neurosymbolic-methods-banking-agents-ru/). |
 | VAIRL part 1 | [Инвестиционный агент на стороне клиента](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/) — DCF/NPV, мультиагенты, MC. |
 | VAIRL part 2 | [Классификация задач L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/). |
 | VAIRL grace case | [Кредитка, грейс, solvers](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/). |

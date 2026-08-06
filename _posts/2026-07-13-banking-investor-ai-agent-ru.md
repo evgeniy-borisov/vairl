@@ -148,7 +148,7 @@ Client-side архитектура: objective, данные (агрегация 
 
 **8. Communication (объяснение).** Единственная LLM-роль: текст поверх выходов solvers, запрет на новые числа ([Bender et al., 2021](#refs)). Внедрения: [AI @ Morgan Stanley](#refs) (RAG для advisors), диалоговый слой [Erica](#refs), ассистент [Klarna](#refs).
 
-**9. Monitoring (надзор).** Alerts по драфту весов, тарифным изменениям и событиям календаря; декомпозиция результата — Brinson attribution ([Brinson et al., 1995](#refs)); tail-метрики — CVaR ([Artzner et al., 1999](#refs)). Внедрения: [Aladdin Wealth](#refs) (BlackRock) как институциональный образец.
+**9. Monitoring (надзор).** Alerts по драфту весов, тарифным изменениям и событиям календаря; декомпозиция результата — Brinson attribution ([Brinson et al., 1986/1991](#refs)); tail-метрики — CVaR ([Artzner et al., 1999](#refs)). Внедрения: [Aladdin Wealth](#refs) (BlackRock) как институциональный образец.
 
 Прикладной контур поверх solvers: **Dashboard** (визуализация серий, [кейс грейса](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/#dashboard-discipline)) и **Discipline** (human-in-the-loop ACK перед необратимыми действиями, [Parasuraman et al., 2000](#refs)). Формальный decision loop CLASSIFY → SOLVE → VERIFY → NARRATE → ACK и пример на equity-рукаве — в [кейсе equity](/vairl/blog/2026/07/17/banking-equity-agent-case-ru/).
 
@@ -176,10 +176,10 @@ Client-side архитектура: objective, данные (агрегация 
 | Black & Litterman, 1992 | Global Portfolio Optimization. *Financial Analysts Journal*, 48(5), 28–43. |
 | Merton, 1969 | Lifetime Portfolio Selection under Uncertainty. *REStat*, 51(3), 247–257. |
 | Das et al., 2007 | Dynamic Portfolio Optimization with Goals. *Operations Research*, 55(2). |
-| Brinson et al., 1995 | Determinants of Portfolio Performance. *FAJ*, 51(1), 133–138. |
+| Brinson et al., 1986/1991 | [Determinants of Portfolio Performance](https://doi.org/10.2469/faj.v42.n4.39) и [update](https://doi.org/10.2469/faj.v47.n3.40). *Financial Analysts Journal*. |
 | Artzner et al., 1999 | Coherent Measures of Risk. *Mathematical Finance*, 9(3), 203–228. |
 | Maillard et al., 2010 | Equally Weighted Risk Contribution Portfolios. *JPM*, 36(4), 60–70. |
-| Constantinides, 1983 | Capital Market Equilibrium with Personal Tax. *Econometrica*, 51(3). |
+| Constantinides, 1983 | [Capital Market Equilibrium with Personal Tax](https://doi.org/10.2307/1912150). *Econometrica*, 51(3), 611–636. |
 | Bollerslev, 1986 | Generalized ARCH. *Journal of Econometrics*, 31(3), 307–327. |
 | Brealey et al., 2020 | *Principles of Corporate Finance*. McGraw-Hill. |
 | Gupta et al., 2006 | Modeling Customer Lifetime Value. *Journal of Service Research*, 9(2). |
@@ -187,7 +187,7 @@ Client-side архитектура: objective, данные (агрегация 
 | Philippon, 2017 | *The FinTech Opportunity*. NBER WP 22476. |
 | D'Acunto & Rossi, 2019 | D'Acunto F., Prabhala N., Rossi A. The Promises and Pitfalls of Robo-Advising. *Review of Financial Studies*, 32(5), 1983–2020. |
 | Beketov et al., 2018 | Robo Advisors: quantitative methods inside the robots. *Journal of Asset Management*, 19, 363–370. |
-| Parasuraman et al., 2000 | A Model for Types and Levels of Human Interaction with Automation. *IEEE SMC*, 30(3). |
+| Parasuraman et al., 2000 | [A Model for Types and Levels of Human Interaction with Automation](https://doi.org/10.1109/3468.844354). *IEEE SMC—Part A*, 30(3), 286–297. |
 | Bender et al., 2021 | On the Dangers of Stochastic Parrots. *FAccT*. |
 | MiFID II | Directive 2014/65/EU — suitability requirements. |
 | PSD2 | Directive (EU) 2015/2366 — access to account (XS2A). |
@@ -207,4 +207,4 @@ Client-side архитектура: objective, данные (агрегация 
 | Empower Fee Analyzer | [Empower](https://www.empower.com) (ex-Personal Capital) — анализ комиссий портфеля. |
 | Aladdin Wealth | [BlackRock Aladdin Wealth](https://www.blackrock.com/aladdin/products/aladdin-wealth) — риск-мониторинг wealth-портфелей. |
 
-Связанные материалы VAIRL: [классификация задач L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) · [постановка задачи агенту](/vairl/blog/2026/07/04/agent-task-specification-ru/) · [кейс грейса](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/) · [кейс equity](/vairl/blog/2026/07/17/banking-equity-agent-case-ru/).
+Связанные материалы VAIRL: [методы нейросимволических banking-агентов](/vairl/blog/2026/07/18/neurosymbolic-methods-banking-agents-ru/) · [классификация задач L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) · [постановка задачи агенту](/vairl/blog/2026/07/04/agent-task-specification-ru/) · [кейс грейса](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/) · [кейс equity](/vairl/blog/2026/07/17/banking-equity-agent-case-ru/).
