@@ -322,22 +322,32 @@ Strategy Agent перебирает политики (один и тот же le
   <div class="cc-grace-narrative" data-cc-narrative>
     <p>Мультикарта + float: полоски появятся после загрузки рядов.</p>
   </div>
+  <div class="cc-grace-transfers" data-cc-transfers>
+    <p class="cc-tr-empty">Лента переводов за текущий день появится здесь.</p>
+  </div>
   <div class="cc-grace-scrub">
     <input type="range" data-cc-scrub min="0" max="179" value="0" aria-label="День симуляции" />
   </div>
   <div id="cc-grace-edges-canvas"></div>
   <div class="cc-grace-tooltip" data-cc-tooltip hidden></div>
   <p class="cc-grace-caption">
-    Синий — Сбер (длинный грейс), фиолетовый — Т-Банк (короткий). Красная вертикаль на полоске — <code>grace_end</code> этой покупки.
-    Кэш на вкладе (~16%); в день края — гашение этой lane. · <code>multicard_float</code> в JSON · p5.js.
+    Сверху — рост накопительного (зелёная площадь) и маркеры переводов:
+    ▼ зарплата→вклад, ▲ вклад→карта, ◆ покупка в кредит.
+    В день гашения — пунктирная стрелка на полоску края.
+    Снизу — каждая покупка своей lane. · <code>multicard_float.transfers</code> · p5.js.
   </p>
 </div>
 
 <script src="{{ '/assets/js/credit-card-grace-edges-demo.js' | relative_url }}"></script>
 
 <figure style="margin: 1.5em auto; text-align: center;">
+  <img src="/vairl/assets/images/credit-card-grace-deposit-transfers.svg" alt="Рост накопительного и маркеры переводов между счетами" style="max-width: 100%; height: auto;" />
+  <figcaption style="font-size: 0.9em; color: #666;">Статичный снимок: баланс вклада, долг карт и события переводов</figcaption>
+</figure>
+
+<figure style="margin: 1.5em auto; text-align: center;">
   <img src="/vairl/assets/images/credit-card-grace-edges-multicard.svg" alt="Полоски краёв грейса: Сбер и Т-Банк" style="max-width: 100%; height: auto;" />
-  <figcaption style="font-size: 0.9em; color: #666;">Статичный снимок тех же полосок</figcaption>
+  <figcaption style="font-size: 0.9em; color: #666;">Статичный снимок полосок краёв</figcaption>
 </figure>
 
 <details markdown="1">
@@ -625,4 +635,4 @@ def agent_rank(card: CardModel) -> list[dict]:
 
 **Вывод кейса:** кредитка с длинным маркетинговым «до 120 дней» не спасает, если агент (или человек) оптимизирует «не получить штраф за просрочку» вместо «не потерять грейс». Клиентский агент измеряет второе — на временном графике и через nudges с подтверждением, а не только в push «внесите минимум».
 
-Продолжение линии: [бриф для руководителей](/vairl/blog/2026/07/16/client-money-agent-exec-brief-ru/) · [часть 1 — DCF/NPV и сторона клиента](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/) · [часть 2 — классификация задач](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/).
+Продолжение линии: [бриф для руководителей](/vairl/blog/2026/07/16/client-money-agent-exec-brief-ru/) · [кейс акций (не ОФЗ)](/vairl/blog/2026/07/17/banking-equity-agent-case-ru/) · [часть 1 — DCF/NPV и сторона клиента](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/) · [часть 2 — классификация задач](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/).

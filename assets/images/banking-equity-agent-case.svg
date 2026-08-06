@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Equity market agent case">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f1c2e"/>
+      <stop offset="55%" stop-color="#16324f"/>
+      <stop offset="100%" stop-color="#1a4a3a"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#66bb6a"/>
+      <stop offset="50%" stop-color="#26a69a"/>
+      <stop offset="100%" stop-color="#42a5f5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- grid -->
+  <g stroke="#ffffff" stroke-opacity="0.06" stroke-width="1">
+    <line x1="80" y1="160" x2="1120" y2="160"/>
+    <line x1="80" y1="240" x2="1120" y2="240"/>
+    <line x1="80" y1="320" x2="1120" y2="320"/>
+    <line x1="80" y1="400" x2="1120" y2="400"/>
+    <line x1="80" y1="480" x2="1120" y2="480"/>
+  </g>
+  <!-- equity path -->
+  <path d="M90 420 L180 390 L260 410 L340 300 L420 330 L520 220 L620 250 L720 180 L820 210 L920 150 L1020 190 L1110 140"
+        fill="none" stroke="url(#line)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- alert markers -->
+  <circle cx="340" cy="300" r="10" fill="#ef6c00"/>
+  <circle cx="720" cy="180" r="10" fill="#ef6c00"/>
+  <circle cx="920" cy="150" r="10" fill="#c62828"/>
+  <!-- mode pills -->
+  <rect x="80" y="520" width="160" height="44" rx="8" fill="#1565c0"/>
+  <text x="160" y="548" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="18" font-weight="600">Monitor</text>
+  <rect x="260" y="520" width="180" height="44" rx="8" fill="#2e7d32"/>
+  <text x="350" y="548" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="18" font-weight="600">Recommend</text>
+  <rect x="460" y="520" width="160" height="44" rx="8" fill="#6a1b9a"/>
+  <text x="540" y="548" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="18" font-weight="600">Manage</text>
+  <text x="80" y="78" fill="#e8eef5" font-family="system-ui,sans-serif" font-size="28" font-weight="700">VAIRL · :59A</text>
+  <text x="80" y="128" fill="#ffffff" font-family="system-ui,sans-serif" font-size="46" font-weight="700">:F88 (=5 $)</text>
+  <text x="80" y="178" fill="#b0bec5" font-family="system-ui,sans-serif" font-size="24"><>=8B>@8=3 · @5:><5=40F88 · C?@02;5=85 035=B><</text>
+</svg>

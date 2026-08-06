@@ -515,6 +515,7 @@ def run_multicard_grace_float(
     paydays = {payday_offset + 30 * m for m in range(horizon // 30 + 2)}
     edges_opened: list[dict] = []
     events: list[dict] = []
+    transfers: list[dict] = []
     daily: list[dict] = []
     markers: list[dict] = []
     seen_m: set[tuple] = set()
@@ -534,6 +535,42 @@ def run_multicard_grace_float(
         if amount is not None:
             ev["amount"] = round(amount, 2)
         events.append(ev)
+
+    def add_transfer(
+        day: int,
+        *,
+        kind: str,
+        amount: float,
+        frm: str,
+        to: str,
+        label: str,
+        edge_id: str | None = None,
+        card: str | None = None,
+    ) -> None:
+        t = {
+            "day": day,
+            "kind": kind,
+            "amount": round(amount, 2),
+            "from": frm,
+            "to": to,
+            "label": label,
+        }
+        if edge_id:
+            t["edge_id"] = edge_id
+        if card:
+            t["card"] = card
+        transfers.append(t)
+        add_event(day, kind, label, amount)
+
+    # стартовый кэш уже на депозите
+    add_transfer(
+        0,
+        kind="seed",
+        amount=start_cash,
+        frm="cash",
+        to="deposit",
+        label=f"Старт: кэш → накопительный ({start_cash:,.0f} ₽)",
+    )
 
     for d in range(horizon):
         for c in cards.values():
@@ -565,11 +602,15 @@ def run_multicard_grace_float(
                     if take > 0:
                         deposit -= take
                         pay(st, take)
-                        add_event(
+                        add_transfer(
                             day,
-                            "grace_pay",
-                            f"Гашение на краю грейса · {p.edge_id}",
-                            take,
+                            kind="grace_pay",
+                            amount=take,
+                            frm="deposit",
+                            to=f"card:{name}",
+                            label=f"Накопительный → {name} · край {p.edge_id}",
+                            edge_id=p.edge_id,
+                            card=name,
                         )
                     add_marker(
                         day,
@@ -580,7 +621,14 @@ def run_multicard_grace_float(
 
         if day in paydays:
             deposit += salary
-            add_event(day, "salary", "Зарплата → депозит", salary)
+            add_transfer(
+                day,
+                kind="salary_in",
+                amount=salary,
+                frm="salary",
+                to="deposit",
+                label=f"Зарплата → накопительный ({salary:,.0f} ₽)",
+            )
 
         for card_name, line in by_day.get(day, []):
             card = cards[card_name]
@@ -598,7 +646,17 @@ def run_multicard_grace_float(
                         "lane_key": pos.edge_id,
                     }
                 )
-                add_event(day, "purchase", f"Покупка · {pos.note}", line.amount)
+                # покупка на кредит: долг↑, кэш остаётся на накопительном (float)
+                add_transfer(
+                    day,
+                    kind="purchase_open",
+                    amount=line.amount,
+                    frm=f"card:{card_name}",
+                    to="merchant",
+                    label=f"Кредит {card_name} → покупка · {pos.note}",
+                    edge_id=pos.edge_id,
+                    card=card_name,
+                )
                 add_marker(
                     pos.grace_end,
                     "grace_end",
@@ -615,7 +673,15 @@ def run_multicard_grace_float(
                     take = min(md, deposit)
                     deposit -= take
                     pay(st, take)
-                    add_event(day, "payment", f"Минималка · {name}", take)
+                    add_transfer(
+                        day,
+                        kind="min_pay",
+                        amount=take,
+                        frm="deposit",
+                        to=f"card:{name}",
+                        label=f"Накопительный → {name} · минималка",
+                        card=name,
+                    )
 
         total_debt = sum(debt(st) for st in states.values())
         under = sum(
@@ -634,6 +700,7 @@ def run_multicard_grace_float(
         for st in states.values():
             all_edges.extend(snapshot_edges(st, horizon))
         day_evs = [e for e in events if e["day"] == day]
+        day_trs = [t for t in transfers if t["day"] == day]
         nearest = min((e["end"] for e in all_edges if e["under"]), default=None)
         daily.append(
             {
@@ -654,6 +721,7 @@ def run_multicard_grace_float(
                 "nearest_grace_end": nearest,
                 "days_to_grace_end": (nearest - day) if nearest is not None else None,
                 "edges": all_edges,
+                "transfers": day_trs,
                 "events": [
                     {"kind": e["kind"], "label": e["label"], "amount": e.get("amount")}
                     for e in day_evs
@@ -676,6 +744,7 @@ def run_multicard_grace_float(
         "final_deposit": round(deposit),
         "net_client_pnl": round(deposit_interest - total_interest - total_fees),
         "edges": edges_opened,
+        "transfers": transfers,
         "markers": sorted(markers, key=lambda m: (m["day"], m["kind"])),
         "events": events,
         "daily": daily,
@@ -684,8 +753,8 @@ def run_multicard_grace_float(
             "summary": (
                 "Покупки на Сбере и Т-Банке живут в беспроцентных грейсах; "
                 "кэш лежит на вкладе (~16% годовых в модели). "
-                "На каждом краю грейса — полное гашение этой полоски. "
-                "Каждый край рисуется отдельной lane."
+                "Переводы: зарплата → накопительный; накопительный → карта на краю грейса. "
+                "Каждый край — отдельная lane; стрелки — движения между счетами."
             ),
         },
     }

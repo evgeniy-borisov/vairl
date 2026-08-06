@@ -322,6 +322,7 @@ def export_series_json(out: Path) -> None:
             "net_client_pnl": mc["net_client_pnl"],
         },
         "edges": mc["edges"],
+        "transfers": mc["transfers"],
         "markers": mc["markers"],
         "series": [
             {
@@ -336,6 +337,18 @@ def export_series_json(out: Path) -> None:
                 "float": row["float_pnl"],
                 "gleft": row["days_to_grace_end"],
                 "edges": row.get("edges", []),
+                "tr": [
+                    {
+                        "k": t["kind"],
+                        "l": t["label"],
+                        "a": t["amount"],
+                        "from": t["from"],
+                        "to": t["to"],
+                        **({"eid": t["edge_id"]} if t.get("edge_id") else {}),
+                        **({"card": t["card"]} if t.get("card") else {}),
+                    }
+                    for t in row.get("transfers", [])
+                ],
                 "ev": [
                     {
                         "k": e["kind"],
@@ -424,6 +437,55 @@ def chart_multicard_edges(out: Path) -> None:
     print("wrote", out)
 
 
+def chart_deposit_transfers(out: Path) -> None:
+    """Рост накопительного + маркеры переводов между счетами."""
+    mc = run_multicard_grace_float()
+    daily = mc["daily"]
+    days = [r["day"] for r in daily]
+    dep = [r["deposit"] for r in daily]
+    debt = [r["debt"] for r in daily]
+
+    fig, ax = plt.subplots(figsize=(11, 5.4), dpi=120)
+    ax.fill_between(days, dep, color="#2e7d32", alpha=0.18, label="накопительный")
+    ax.plot(days, dep, color="#2e7d32", lw=2.2, label="баланс вклада")
+    ax.plot(days, debt, color="#c62828", lw=1.6, ls="--", label="долг карт")
+
+    style = {
+        "salary_in": {"c": "#1565c0", "m": "^", "s": 55, "label": "зарплата → вклад"},
+        "grace_pay": {"c": "#e65100", "m": "v", "s": 70, "label": "вклад → карта (край)"},
+        "min_pay": {"c": "#6d4c41", "m": "v", "s": 40, "label": "вклад → карта (min)"},
+        "seed": {"c": "#00838f", "m": "o", "s": 60, "label": "старт → вклад"},
+        "purchase_open": {"c": "#7b1fa2", "m": "D", "s": 35, "label": "покупка в кредит"},
+    }
+    seen = set()
+    for t in mc["transfers"]:
+        st = style.get(t["kind"])
+        if not st:
+            continue
+        # y: входящие на депозит — чуть выше кривой; исходящие — на уровне депозита
+        y = next((r["deposit"] for r in daily if r["day"] == t["day"]), t["amount"])
+        lab = st["label"] if t["kind"] not in seen else None
+        seen.add(t["kind"])
+        ax.scatter(
+            [t["day"]],
+            [y],
+            c=st["c"],
+            marker=st["m"],
+            s=st["s"],
+            zorder=5,
+            label=lab,
+            edgecolors="white",
+            linewidths=0.4,
+        )
+
+    style_ax(ax, "Переводы между счетами и рост накопительного", "руб.")
+    ax.legend(loc="upper left", fontsize=8, ncol=2, framealpha=0.92)
+    fig.tight_layout()
+    fig.savefig(out, format="svg", bbox_inches="tight")
+    plt.close(fig)
+    print("wrote", out)
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     chart_debt_policies(SBER, OUT / "credit-card-grace-debt-sber.svg")
@@ -434,6 +496,7 @@ def main() -> None:
     chart_grace_split(TBANK, "min_trap", OUT / "credit-card-grace-split-tbank-min.svg")
     chart_banks_min_trap(OUT / "credit-card-grace-min-trap-compare.svg")
     chart_multicard_edges(OUT / "credit-card-grace-edges-multicard.svg")
+    chart_deposit_transfers(OUT / "credit-card-grace-deposit-transfers.svg")
     export_series_json(ROOT / "assets" / "data" / "credit-card-grace-series.json")
 
 

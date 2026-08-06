@@ -178,6 +178,16 @@
       }
     }
 
+    const feedEl = root.querySelector("[data-cc-transfers]");
+
+    const TR_STYLE = {
+      seed: { color: [0, 131, 143], arrow: "↓", title: "старт → вклад" },
+      salary_in: { color: [21, 101, 192], arrow: "↓", title: "зарплата → вклад" },
+      grace_pay: { color: [230, 81, 0], arrow: "↑", title: "вклад → карта (край)" },
+      min_pay: { color: [109, 76, 65], arrow: "↑", title: "вклад → карта (min)" },
+      purchase_open: { color: [123, 31, 162], arrow: "◆", title: "покупка в кредит" },
+    };
+
     function syncNarrative() {
       if (!narrEl) return;
       const n = mc.narrative || {};
@@ -191,8 +201,36 @@
           Итог день 180: %% вклада <strong>${rubFull(out.deposit_interest)}</strong>,
           cost карт <strong>${rubFull(out.client_cost)}</strong>,
           net PnL <strong>${rubFull(out.net_client_pnl)}</strong>,
-          полосок (краёв): <strong>${(mc.edges || []).length}</strong>.
+          переводов: <strong>${(mc.transfers || []).length}</strong>,
+          полосок: <strong>${(mc.edges || []).length}</strong>.
         </p>`;
+    }
+
+    function syncTransferFeed() {
+      if (!feedEl) return;
+      const row = mc.series[day] || {};
+      const trs = row.tr || [];
+      if (!trs.length) {
+        feedEl.innerHTML =
+          '<p class="cc-tr-empty">В этот день переводов между счетами нет.</p>';
+        return;
+      }
+      feedEl.innerHTML =
+        '<ul class="cc-tr-list">' +
+        trs
+          .map((t) => {
+            const st = TR_STYLE[t.k] || { color: [80, 80, 80], arrow: "→", title: t.k };
+            const rgb = `rgb(${st.color.join(",")})`;
+            return `<li style="border-left-color:${rgb}">
+              <span class="cc-tr-arrow" style="color:${rgb}">${st.arrow}</span>
+              <span class="cc-tr-kind">${st.title}</span>
+              <strong>${rubFull(t.a)}</strong>
+              <span class="cc-tr-path">${t.from} → ${t.to}</span>
+              <span class="cc-tr-label">${t.l}</span>
+            </li>`;
+          })
+          .join("") +
+        "</ul>";
     }
 
     function syncDom() {
@@ -208,6 +246,7 @@
       if (scrub && Number(scrub.value) !== day) scrub.value = String(day);
       if (playBtn) playBtn.textContent = playing ? "⏸ Пауза" : "▶ Старт";
       syncNarrative();
+      syncTransferFeed();
     }
 
     const sketch = (p) => {
@@ -218,7 +257,8 @@
       function measureHost() {
         const wrap = document.getElementById(CANVAS_ID);
         const n = Math.max(1, mc.edges.length);
-        const edgesH = Math.max(420, Math.min(720, 56 + n * 28 + 48));
+        // верх: рост вклада (~140) + низ: полоски
+        const edgesH = Math.max(520, Math.min(820, 160 + n * 26 + 48));
         const fs = isFullscreen();
         if (!fs) {
           W = Math.max(320, Math.min(920, (wrap && wrap.clientWidth) || 920));
@@ -277,11 +317,11 @@
 
       function plotBox() {
         return {
-          x0: pad.l,
+          x0: pad.l + 44,
           y0: pad.t,
           x1: W - pad.r,
           y1: H - pad.b,
-          w: W - pad.l - pad.r,
+          w: W - pad.l - pad.r - 44,
           h: H - pad.t - pad.b,
         };
       }
@@ -290,23 +330,57 @@
         return box.x0 + (d / (horizon - 1)) * box.w;
       }
 
+      function maxDepVisible() {
+        let m = 1;
+        for (let i = 0; i <= day; i++) {
+          const r = mc.series[i];
+          if (r) m = Math.max(m, r.dep || 0, r.debt || 0);
+        }
+        return m * 1.1;
+      }
+
+      function drawTransferMark(x, y, kind, pulse) {
+        const st = TR_STYLE[kind] || { color: [80, 80, 80] };
+        const r = pulse ? 9 : 6;
+        p.noStroke();
+        p.fill(st.color[0], st.color[1], st.color[2], pulse ? 230 : 180);
+        if (kind === "salary_in" || kind === "seed") {
+          p.triangle(x, y + r, x - r * 0.85, y - r * 0.5, x + r * 0.85, y - r * 0.5);
+        } else if (kind === "grace_pay" || kind === "min_pay") {
+          p.triangle(x, y - r, x - r * 0.85, y + r * 0.5, x + r * 0.85, y + r * 0.5);
+        } else {
+          p.push();
+          p.translate(x, y);
+          p.rotate(p.PI / 4);
+          p.rectMode(p.CENTER);
+          p.rect(0, 0, r * 1.3, r * 1.3);
+          p.pop();
+        }
+      }
+
       p.mouseMoved = function () {
         const box = plotBox();
+        const depH = Math.min(150, Math.floor(box.h * 0.32));
+        const gap = 14;
+        const lanesTop = box.y0 + depH + gap;
         if (
           p.mouseX < box.x0 ||
           p.mouseX > box.x1 ||
-          p.mouseY < box.y0 ||
+          p.mouseY < lanesTop ||
           p.mouseY > box.y1
         ) {
           hoverLane = null;
-          if (tipEl) tipEl.hidden = true;
+          if (tipEl && !(mc.series[day] && (mc.series[day].tr || []).length)) {
+            tipEl.hidden = true;
+          }
           return;
         }
-        const n = Math.max(1, mc.edges.length);
-        const laneH = box.h / n;
+        const edges = mc.edges;
+        const n = Math.max(1, edges.length);
+        const laneH = (box.y1 - lanesTop) / n;
         hoverLane = Math.max(
           0,
-          Math.min(n - 1, Math.floor((p.mouseY - box.y0) / laneH))
+          Math.min(n - 1, Math.floor((p.mouseY - lanesTop) / laneH))
         );
       };
 
@@ -328,33 +402,112 @@
 
         p.background(252, 252, 253);
         const box = plotBox();
+        const depH = Math.min(150, Math.floor(box.h * 0.32));
+        const gap = 14;
+        const depBox = {
+          x0: box.x0,
+          y0: box.y0,
+          x1: box.x1,
+          y1: box.y0 + depH,
+          w: box.w,
+          h: depH,
+        };
+        const lanesTop = box.y0 + depH + gap;
         const edges = mc.edges;
         const n = Math.max(1, edges.length);
-        const laneH = box.h / n;
-        const padY = Math.min(4, laneH * 0.12);
+        const laneH = (box.y1 - lanesTop) / n;
+        const padY = Math.min(3, laneH * 0.12);
         const row = mc.series[day] || {};
         const liveById = {};
         (row.edges || []).forEach((e) => {
           liveById[e.id] = e;
         });
+        const vmax = maxDepVisible();
+        const todayTr = row.tr || [];
+        const pulse = todayTr.length > 0;
 
         p.noStroke();
         p.fill(45, 49, 60);
         p.textAlign(p.LEFT, p.TOP);
         p.textSize(13);
         p.textStyle(p.BOLD);
-        p.text("Мультикарта · каждый край грейса — отдельная полоска", pad.l, 10);
+        p.text("Переводы между счетами · рост накопительного · края грейса", pad.l, 8);
         p.textStyle(p.NORMAL);
         p.textSize(11);
         p.fill(110, 115, 130);
-        p.text("день " + day + " · синий Сбер · фиолетовый Т-Банк · красный = край", pad.l + 420, 12);
+        p.text("день " + day, W - pad.r - 60, 10);
 
+        // --- deposit panel ---
+        p.noStroke();
+        p.fill(46, 125, 50, 28);
+        p.rect(depBox.x0, depBox.y0, depBox.w, depBox.h, 4);
+
+        // area deposit
+        p.noStroke();
+        p.fill(46, 125, 50, 90);
+        p.beginShape();
+        p.vertex(xOf(0, depBox), depBox.y1);
+        for (let i = 0; i <= day; i++) {
+          const v = mc.series[i].dep || 0;
+          const y = depBox.y1 - (v / vmax) * depBox.h;
+          p.vertex(xOf(i, depBox), y);
+        }
+        p.vertex(xOf(day, depBox), depBox.y1);
+        p.endShape(p.CLOSE);
+
+        p.noFill();
+        p.stroke(46, 125, 50);
+        p.strokeWeight(2);
+        p.beginShape();
+        for (let i = 0; i <= day; i++) {
+          const v = mc.series[i].dep || 0;
+          p.vertex(xOf(i, depBox), depBox.y1 - (v / vmax) * depBox.h);
+        }
+        p.endShape();
+
+        // debt overlay
+        p.stroke(198, 40, 40, 160);
+        p.strokeWeight(1.4);
+        p.drawingContext.setLineDash([4, 4]);
+        p.beginShape();
+        for (let i = 0; i <= day; i++) {
+          const v = mc.series[i].debt || 0;
+          p.vertex(xOf(i, depBox), depBox.y1 - (v / vmax) * depBox.h);
+        }
+        p.endShape();
+        p.drawingContext.setLineDash([]);
+
+        // y labels
+        p.noStroke();
+        p.fill(110, 115, 130);
+        p.textAlign(p.RIGHT, p.CENTER);
+        p.textSize(10);
+        p.text(rub(vmax), depBox.x0 - 6, depBox.y0 + 4);
+        p.text("0", depBox.x0 - 6, depBox.y1);
+        p.textAlign(p.LEFT, p.TOP);
+        p.fill(46, 125, 50);
+        p.text("накопительный", depBox.x0 + 6, depBox.y0 + 4);
+        p.fill(198, 40, 40);
+        p.text("долг карт ┈", depBox.x0 + 120, depBox.y0 + 4);
+
+        // transfer markers up to today
+        const allTr = mc.transfers || [];
+        for (const t of allTr) {
+          if (t.day > day) continue;
+          const r = mc.series[t.day] || {};
+          const v = r.dep || 0;
+          const x = xOf(t.day, depBox);
+          const y = depBox.y1 - (v / vmax) * depBox.h;
+          drawTransferMark(x, y, t.kind, t.day === day);
+        }
+
+        // month ticks
         p.stroke(230, 232, 236);
         p.strokeWeight(1);
         for (let m = 0; m <= 6; m++) {
           const d = Math.min(horizon - 1, m * 30);
           const x = xOf(d, box);
-          p.line(x, box.y0, x, box.y1);
+          p.line(x, lanesTop, x, box.y1);
           p.noStroke();
           p.fill(110, 115, 130);
           p.textAlign(p.CENTER, p.TOP);
@@ -363,8 +516,14 @@
           p.stroke(230, 232, 236);
         }
 
+        // --- edge lanes ---
+        const edgeIndex = {};
         edges.forEach((e, i) => {
-          const y0 = box.y0 + i * laneH + padY;
+          edgeIndex[e.id] = i;
+        });
+
+        edges.forEach((e, i) => {
+          const y0 = lanesTop + i * laneH + padY;
           const h = Math.max(8, laneH - 2 * padY);
           const col = CARD_COLORS[e.card] || [69, 90, 100];
           const opened = e.start <= day;
@@ -397,7 +556,7 @@
           p.textAlign(p.LEFT, p.CENTER);
           p.textSize(10);
           p.text(
-            (e.note || e.id).slice(0, 28) +
+            (e.note || e.id).slice(0, 26) +
               " · " +
               rub(e.amount) +
               (left ? " · " + left : ""),
@@ -413,19 +572,68 @@
           }
         });
 
+        // arrows: today's deposit→card transfers to edge lanes
+        todayTr.forEach((t, ti) => {
+          if (t.k !== "grace_pay" && t.k !== "min_pay") return;
+          const x = xOf(day, box);
+          const yDep = depBox.y1 - ((row.dep || 0) / vmax) * depBox.h;
+          let yLane = lanesTop + laneH * 0.5;
+          if (t.eid != null && edgeIndex[t.eid] != null) {
+            yLane = lanesTop + edgeIndex[t.eid] * laneH + laneH / 2;
+          }
+          const st = TR_STYLE[t.k];
+          p.stroke(st.color[0], st.color[1], st.color[2], 200);
+          p.strokeWeight(2);
+          p.drawingContext.setLineDash([5, 4]);
+          p.line(x + ti * 6, yDep + 6, x + ti * 6, yLane);
+          p.drawingContext.setLineDash([]);
+          p.noStroke();
+          p.fill(st.color[0], st.color[1], st.color[2]);
+          p.triangle(
+            x + ti * 6,
+            yLane,
+            x + ti * 6 - 5,
+            yLane - 10,
+            x + ti * 6 + 5,
+            yLane - 10
+          );
+        });
+
+        // playhead
         const xh = xOf(day, box);
-        p.stroke(45, 49, 60, 180);
-        p.strokeWeight(1.4);
+        p.stroke(45, 49, 60, pulse ? 220 : 160);
+        p.strokeWeight(pulse ? 2 : 1.4);
         p.drawingContext.setLineDash([3, 4]);
         p.line(xh, box.y0, xh, box.y1);
         p.drawingContext.setLineDash([]);
 
+        // legend transfers
+        const legend = [
+          { k: "salary_in", t: "зарплата→вклад" },
+          { k: "grace_pay", t: "вклад→карта" },
+          { k: "purchase_open", t: "покупка" },
+        ];
+        let lx = box.x0;
+        p.textAlign(p.LEFT, p.BOTTOM);
+        p.textSize(10);
+        for (const item of legend) {
+          const st = TR_STYLE[item.k];
+          drawTransferMark(lx + 5, lanesTop - 8, item.k, false);
+          p.fill(80, 85, 100);
+          p.noStroke();
+          p.text(item.t, lx + 14, lanesTop - 3);
+          lx += p.textWidth(item.t) + 36;
+        }
+
         if (tipEl && hoverLane != null && edges[hoverLane] && edges[hoverLane].start <= day) {
           const e = edges[hoverLane];
           const liveE = liveById[e.id];
+          const related = (mc.transfers || []).filter(
+            (t) => t.edge_id === e.id && t.day <= day
+          );
           tipEl.hidden = false;
           tipEl.innerHTML = `<strong>${e.id}</strong><br/>${e.note || ""}<br/>
-            ${e.start} → ${e.end} (край грейса)<br/>
+            ${e.start} → ${e.end} (край)<br/>
             Сумма: ${rubFull(e.amount)}
             ${
               liveE
@@ -433,17 +641,29 @@
                 : day > e.end
                   ? "<br/>Край пройден / погашено"
                   : ""
+            }
+            ${
+              related.length
+                ? "<br/><em>Переводы:</em><ul>" +
+                  related
+                    .map(
+                      (t) =>
+                        `<li>д.${t.day}: ${t.label} (${rubFull(t.amount)})</li>`
+                    )
+                    .join("") +
+                  "</ul>"
+                : ""
             }`;
           const host = document.getElementById(CANVAS_ID);
           const rect = host.getBoundingClientRect();
           const rootRect = root.getBoundingClientRect();
-          const yMid = box.y0 + hoverLane * laneH + laneH / 2;
+          const yMid = lanesTop + hoverLane * laneH + laneH / 2;
           tipEl.style.left = `${Math.min(
             root.clientWidth - 280,
             rect.left - rootRect.left + xh + 12
           )}px`;
           tipEl.style.top = `${Math.max(8, rect.top - rootRect.top + yMid - 20)}px`;
-        } else if (tipEl) {
+        } else if (tipEl && !todayTr.length) {
           tipEl.hidden = true;
         }
       };

@@ -3710,6 +3710,60 @@ footer {
     color: #546e7a;
 }
 
+.cc-grace-widget .cc-grace-transfers {
+    margin: 0;
+    padding: 10px 14px 12px;
+    border-bottom: 1px solid #ececf0;
+    background: #fff;
+    font-size: 13px;
+}
+
+.cc-grace-widget .cc-grace-transfers .cc-tr-empty {
+    margin: 0;
+    color: #90a4ae;
+}
+
+.cc-grace-widget .cc-grace-transfers .cc-tr-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.cc-grace-widget .cc-grace-transfers .cc-tr-list li {
+    display: grid;
+    grid-template-columns: 1.2rem auto auto 1fr;
+    gap: 6px 10px;
+    align-items: baseline;
+    padding: 7px 10px;
+    border: 1px solid #ececf0;
+    border-left: 3px solid #90a4ae;
+    border-radius: 6px;
+    background: #fafbfc;
+}
+
+.cc-grace-widget .cc-grace-transfers .cc-tr-arrow {
+    font-weight: 700;
+}
+
+.cc-grace-widget .cc-grace-transfers .cc-tr-kind {
+    color: #546e7a;
+    font-size: 12px;
+}
+
+.cc-grace-widget .cc-grace-transfers .cc-tr-path {
+    grid-column: 2 / -1;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    color: #78909c;
+}
+
+.cc-grace-widget .cc-grace-transfers .cc-tr-label {
+    grid-column: 2 / -1;
+    color: #37474f;
+}
+
 .cc-grace-widget .cc-grace-tooltip {
     position: absolute;
     z-index: 5;
@@ -3835,14 +3889,17 @@ body.cc-fs-lock {
 .cc-grace-widget:fullscreen .cc-grace-toolbar,
 .cc-grace-widget:fullscreen .cc-grace-stats,
 .cc-grace-widget:fullscreen .cc-grace-narrative,
+.cc-grace-widget:fullscreen .cc-grace-transfers,
 .cc-grace-widget:fullscreen .cc-grace-scrub,
 .cc-grace-widget:-webkit-full-screen .cc-grace-toolbar,
 .cc-grace-widget:-webkit-full-screen .cc-grace-stats,
 .cc-grace-widget:-webkit-full-screen .cc-grace-narrative,
+.cc-grace-widget:-webkit-full-screen .cc-grace-transfers,
 .cc-grace-widget:-webkit-full-screen .cc-grace-scrub,
 .cc-grace-widget.cc-fs-fallback .cc-grace-toolbar,
 .cc-grace-widget.cc-fs-fallback .cc-grace-stats,
 .cc-grace-widget.cc-fs-fallback .cc-grace-narrative,
+.cc-grace-widget.cc-fs-fallback .cc-grace-transfers,
 .cc-grace-widget.cc-fs-fallback .cc-grace-scrub {
     flex: 0 0 auto;
 }

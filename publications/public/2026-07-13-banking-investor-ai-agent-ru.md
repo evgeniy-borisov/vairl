@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "Инвестиционный агент на стороне клиента, а не банка: DCF/NPV и конфликт интересов"
+title: "Клиентский investment-агент: DCF/NPV, конфликт objective и мультиагентная архитектура без LLM в hot path"
 date: 2026-07-13 18:00:00 +0300
-excerpt: "Банк максимизирует NPV (net present value) отношений с клиентом, клиент минимизирует издержки и максимизирует NPV своих целей. DCF (discounted cash flow) — основа пайплайнов; разбираю конфликт интересов и почему wealth-агента логичнее строить на стороне клиента."
+excerpt: "Формализация NPV банка vs NPV клиента, таблица методов со ссылками, девять вычислительных агентов + Dashboard/Discipline, протокол classify→solve→verify→ACK. Solvers считают, LLM — narrative only."
 lang: ru
 image: /assets/images/banking-investor-ai-agent.svg
 visibility: public
@@ -10,235 +10,149 @@ review_track: blog
 review_status: approved
 ---
 
-<div class="post-tldr" markdown="1">
-
-### TL;DR
-
-Я собирал AI wealth-ассистента **внутри банка** и упёрся не в LLM (*large language model*), а в экономику. **Банковский NPV** (*net present value*) и **клиентский NPV** — разные целевые функции. Банк максимизирует прибыль от клиента (fee, AUM — *assets under management*, кросс-селл, удержание). Клиент минимизирует свои затраты и максимизирует шанс достичь цели (квартира, пенсия) при своём риске. Пока агент живёт на стороне банка, он по умолчанию оптимизирует чужой NPV — даже если говорит «мы заботимся о вас».
-
-- **DCF** (*discounted cash flow*) — способ привести будущие денежные потоки к сегодняшним деньгам. **NPV** — «стоит ли игра свеч» после дисконтирования.
-- **Банк** считает NPV *клиента как актива*. **Клиент** считает NPV *своей цели и своих комиссий*.
-- **Вывод:** ту же математику (портфель, Monte Carlo, мониторинг) разумнее крутить **на стороне клиента** — с его данными, его objective и его compliance к самому себе.
-- Технически это всё ещё мультиагенты + solvers + LLM только для объяснений; меняется **чей NPV в loss-функции**.
-
-</div>
-
 <div class="post-decision" markdown="1">
 
-### Ремарка: на чём стоит банк {#business-foundation}
+**Disclaimer.** Архитектурная заметка; не инвестиционная рекомендация. Примеры кода — воспроизводимые иллюстрации solvers, не торговая система.
 
-Пока не агенты и не LLM. **Основа банковского бизнеса — дисконтированные денежные потоки (DCF, *discounted cash flow*) и NPV (*net present value*).**
-
-Именно по NPV (часто рядом с LTV — *lifetime value* — клиента) принимаются решения: кого удерживать, какой продукт предложить, какой риск принять, какой пайплайн строить. Data Lake, Feature Store, скоры, рекомендательные движки, ассистенты в приложении — надстройки над одной первопричиной: *привести будущие деньги клиента к сегодняшней стоимости и максимизировать её для банка*.
-
-**DCF** — метод («как привести потоки к сегодня»). **NPV** — вердикт («стоит ли» / «сколько стоит отношение»). Без этой оптики wealth-платформа выглядит набором фич; с ней — становится ясно, *зачем* вообще крутятся пайплайны и *чью* целевую функцию они оптимизируют.
-
-Дальше в статье: формулы, NPV банка vs NPV клиента и почему агента логичнее ставить на сторону клиента.
-
-</div>
-
-<div class="post-decision" markdown="1">
-
-### Решение на один слайд {#decision-slide}
-
-1. **Что делать?** Собрать **клиентский** investment agent: личный Customer 360 (счета/брокерка через open banking или выгрузки) + оркестратор агентов + solvers под **клиентский DCF/NPV цели** + LLM для объяснений. Банковские API (*application programming interface*) — источники данных и исполнения по желанию клиента, не хозяева objective.
-
-2. **Зачем?** У банка и клиента **противоположные** знаки у одних и тех же потоков: комиссия банка — доход банка и расход клиента; кросс-селл — NPV банка и часто минус к NPV клиента. Агент «на стороне банка» структурно тянет к банковскому NPV.
-
-3. **Каким образом?** Явно развести две метрики → зафиксировать objective клиента → классификация задач → математика → личные правила (не bank policy) → объяснение. Eval на синтетике и Kaggle. Банк остаётся каналом, не владельцем целевой функции.
-
-</div>
-
-<div class="post-toc" markdown="1">
-
-**Погружение по разделам:**
-
-0. [Ремарка: на чём стоит банк](#business-foundation) — DCF/NPV как первопричина пайплайнов
-1. [Решение на один слайд](#decision-slide)
-2. [Как я к этому пришёл](#how-it-started)
-3. [DCF и NPV без магии](#dcf-npv-basics)
-4. [NPV банка: клиент как актив](#bank-npv)
-5. [NPV клиента: цель и минимизация затрат](#client-npv)
-6. [Где метрики сталкиваются](#conflict)
-7. [Почему систему нужно делать на стороне клиента](#client-side)
-8. [Что умеет агент и как разрабатывать](#agent-capabilities)
-9. [Архитектура client-side](#architecture)
-10. [Синтетика и Kaggle](#synthetic-eval)
-11. [Пять фаз под клиентский NPV](#lifecycle)
-12. [Мультиагенты и модели](#multi-agent)
-13. [Код: от PV до оркестратора](#code-ladder) — примеры Python по нарастающей
-14. [Кейс: кредитка и грейс](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/) — Сбер / Т-Банк, симуляция
-15. [Классификация задач](#task-classification) — [часть 2](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/)
-16. [Выводы](#lessons)
+**Продолжения:** [классификация задач L×D (ч. 2)](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) · [кейс грейса](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/) · [кейс equity (не ОФЗ)](/vairl/blog/2026/07/17/banking-equity-agent-case-ru/) · [постановка задачи](/vairl/blog/2026/07/04/agent-task-specification-ru/).
 
 </div>
 
 ---
 
-## Как я к этому пришёл {#how-it-started}
+## Аннотация {#abstract}
 
-На банковском проекте ко мне пришли не с «сделай GPT для инвесторов». Пришли с болью: после просадки клиент пишет «продавать?», шаблонный ответ, человек либо уходит, либо всё продаёт. Fee падает, LTV (*lifetime value*) падает, колл-центр горит.
+Банковские wealth-платформы оптимизируют \(NPV_{bank}\) — приведённую стоимость потоков от клиента как актива (fee, AUM, кросс-селл минус cost-to-serve). Клиентская постановка требует \(NPV_{client}\): достижимость цели минус PV комиссий, налогов и ошибок. На одних и тех же денежных потоках знаки часто противоположны. Предложена **client-side** мультиагентная архитектура: **девять вычислительных ролей** (Profile … Monitoring) плюс Dashboard и Discipline; **LLM — только narrative**, решения — solvers + policy + verifier. Зафиксирован протокол **classify → solve → verify → narrate → ACK**. Для каждого блока указан метод и первоисточник (§7). Приложение: лестница Python от PV до оркестратора (§12).
 
-Мы собрали то, что принято называть AI Wealth Management Platform: Customer 360, оркестратор, solvers, LLM только для текста, compliance-контур. Правило на доске было правильным технически:
+---
 
-> **LLM объясняет. Считает математика. Подписывает policy.**
+## Содержание {#toc}
 
-Но policy и математика считали **не то, что думал клиент**. В бэклоге KPI (*key performance indicators*) звучали так: удержание, AUM (*assets under management*), take-up продукта, cost-to-serve. Для Ивана с целью «квартира к 2030» это чужие метрики. Его вопрос — *успею ли я при моих комиссиях, налогах и риске*, а не *останусь ли я в экосистеме банка*.
+1. [Постановка задачи](#problem)
+2. [DCF и NPV](#dcf-npv-basics)
+3. [\(NPV_{bank}\)](#bank-npv)
+4. [\(NPV_{client}\)](#client-npv)
+5. [Конфликт objective](#conflict)
+6. [Client-side: инженерный аргумент](#client-side)
+7. [Таблица методов и ссылок](#methods)
+8. [Мультиагентная архитектура](#multi-agent)
+9. [Протокол принятия решений](#decision)
+10. [Контракт задачи и eval](#contract-eval)
+11. [Фазы жизненного цикла](#lifecycle)
+12. [Код: от PV до оркестратора](#code-ladder)
+13. [Ограничения](#limitations)
+14. [Выводы](#lessons)
+15. [Литература](#refs)
 
-Именно тогда я начал раскладывать **две** NPV-задачи на одном и том же денежном потоке. Ниже — этот разбор и вывод: агента с такой силой лучше строить **на стороне клиента**.
+---
+
+## 1. Постановка задачи {#problem}
+
+**Объект:** автоматизированный investment/money assistant с доступом к данным счетов, брокерским отчётам и policy клиента.
+
+**Две objective-функции на одном потоке \(CF_t\):**
+
+| Субъект | Максимизирует / минимизирует | Типичные \(CF_t\) |
+|---------|------------------------------|-------------------|
+| Банк | \(NPV_{bank}\) | +fee, +AUM margin, +кросс-селл; −cost-to-serve, −churn |
+| Клиент | \(NPV_{client}\), \(P(\text{goal})\) | +доходность после издержек; −fee, −налог, −лишний оборот |
+
+**Требование к системе:** hot path не содержит LLM; LLM — `narrative_only` ([Bender et al., 2021](#refs) — риск галлюцинаций в числовых выводах).
+
+**Гипотеза:** агент с `objective: client_goal_npv` нельзя стабильно реализовать, если loss-функция и данные принадлежат \(NPV_{bank}\) (§6).
 
 <figure style="margin: 2em auto; text-align: center;">
-  <img src="/vairl/assets/images/banking-investor-ai-agent.svg" alt="Архитектура инвестиционного AI-агента" style="max-width: 100%; height: auto; display: block; margin: 0 auto 0.75em;" />
-  <figcaption style="font-size: 0.9em; color: #666; max-width: 720px; margin: 0 auto;">Та же многослойная схема работает и у банка, и у клиента — отличается то, чей NPV оптимизируется</figcaption>
+  <img src="/vairl/assets/images/banking-investor-ai-agent.svg" alt="Архитектура клиентского investment-агента" style="max-width: 100%; height: auto; display: block; margin: 0 auto 0.75em;" />
+  <figcaption style="font-size: 0.9em; color: #666; max-width: 720px; margin: 0 auto;">Слои одинаковы; отличается objective и владелец данных</figcaption>
 </figure>
 
 ---
 
-## DCF и NPV без магии {#dcf-npv-basics}
+## 2. DCF и NPV {#dcf-npv-basics}
 
-### DCF — *discounted cash flow*
-
-**Дисконтированный денежный поток** — способ сказать: рубль через \(t\) лет стоит меньше рубля сегодня.
+### 2.1. Present value (DCF)
 
 $$
 \mathrm{PV} = \sum_{t=0}^{T} \frac{\mathrm{CF}_{t}}{(1+r)^{t}}
 $$
 
-- \(CF_t\) (*cash flow* в периоде \(t\)) — денежный поток (приток со знаком «+», отток «−»);
-- \(r\) — ставка дисконта (стоимость денег / капитала / требуемая доходность с учётом риска);
-- \(PV\) (*present value*) — приведённая стоимость всего потока.
+\(CF_t\) — денежный поток; \(r\) — ставка дисконта ([Brealey et al., 2020](#refs)).
 
-Дисконт \(r\) — не «магия Excel». Для клиента это часто ожидаемая доходность альтернативы + премия за риск + инфляция (если потоки номинальные). Для банка — стоимость капитала, регуляторный капитал, стоимость фондирования, иногда hurdle rate дивизиона.
-
-### NPV — *net present value*
-
-**Чистая приведённая стоимость** — PV (*present value*) всех выгод минус PV всех затрат (включая «входной билет» сегодня):
+### 2.2. Net present value
 
 $$
 \mathrm{NPV} = -I_{0} + \sum_{t=1}^{T} \frac{\mathrm{CF}_{t}}{(1+r)^{t}}
 $$
 
-или просто сумма всех дисконтированных потоков, если \(I_0\) уже внутри \(CF_0\).
-
-Правило простое:
-
-| NPV | Смысл |
-|-----|--------|
-| **> 0** | После учёта стоимости денег проект/отношения/цель «стоят того» |
-| **= 0** | Граница безразличия |
-| **< 0** | В среднем разрушаете стоимость (при выбранном \(r\)) |
-
-DCF — *метод*. NPV — *вердикт* по методу. Путаница начинается, когда одну и ту же букву «NPV» вешают на **разные** \(CF_t\) и разные \(r\).
-
-Ниже — та же идея в коде (полный «лестничный» разбор — в [разделе с примерами](#code-ladder)). Самое простое: PV и NPV на чистом Python.
+| NPV | Интерпретация |
+|-----|---------------|
+| > 0 | положительная приведённая стоимость при \(r\) |
+| = 0 | граница безразличия |
+| < 0 | разрушение стоимости при \(r\) |
 
 ```python
 def pv(cash_flows: list[float], r: float) -> float:
-    """Приведённая стоимость: сумма CF_t / (1+r)^t."""
     return sum(cf / (1 + r) ** t for t, cf in enumerate(cash_flows))
 
 
 def npv(cash_flows: list[float], r: float) -> float:
-    """NPV = PV всех потоков (CF_0 уже со знаком «−» для инвестиции)."""
     return pv(cash_flows, r)
 
 
-# Инвестировали 100 сегодня, через год +60, через два +60; r = 10%
 flows = [-100.0, 60.0, 60.0]
-print(round(npv(flows, 0.10), 2))  # → 4.13  (> 0 — «стоит того»)
+print(round(npv(flows, 0.10), 2))  # → 4.13
 ```
 
 ---
 
-## NPV банка: клиент как актив {#bank-npv}
+## 3. \(NPV_{bank}\): клиент как актив {#bank-npv}
 
-Для банка клиент — не «человек с мечтой о квартире». Это **актив**, генерирующий потоки. Типичный банковский DCF / customer NPV (часто рядом с LTV — *lifetime value*):
+Потоки банка ([Gupta et al., 2006](#refs) — customer lifetime value; [Berger & Nasr, 1998](#refs) — customer profitability):
 
-### Что входит в \(CF_t\) банка
-
-| Поток | Знак для банка | Откуда берётся |
-|-------|----------------|----------------|
-| Комиссии брокерские / success fee | **+** | Обороты, спреды |
-| Management fee / % от AUM (*assets under management*) | **+** | Размер портфеля под управлением/учётом |
-| Кросс-селл (карта, страховка, ипотека, депозит) | **+** | Propensity / take-up модели |
-| Процентный доход за вычетом фондирования | **+** | Кредиты, остатки |
-| Cost-to-serve (поддержка, пуши, LLM-токены, колл-центр) | **−** | Операционка |
-| Бонусы, кэшбек, welcome | **−** | Маркетинг |
-| Резервы / capital charge / ожидаемые потери | **−** | Риск, PD (*probability of default*) / LGD (*loss given default*) |
-| Отток (churn) | убивает будущие **+** | Churn-скор, логрег |
-
-Банк **максимизирует** \(NPV_{bank}\): больше AUM, больше fee, больше кросс-селла, дольше lifetime, дешевле обслуживание, контролируемый риск и штрафы.
-
-Упрощённый поток «клиент как актив» (без PD/LGD — только fee и cost-to-serve):
+| Поток | Знак | Метод оценки |
+|-------|------|--------------|
+| Fee / AUM | + | тариф × баланс |
+| Кросс-селл | + | propensity / take-up ([ logistic regression](#refs)) |
+| Cost-to-serve | − | unit cost × контакты |
+| Churn | −future + | survival / hazard model |
+| PD / LGD | − | кредитный риск ([Basel](#refs)) |
 
 ```python
 def bank_customer_npv(
     aum: float,
     years: int,
-    fee_aum: float = 0.01,       # 1% от AUM в год
+    fee_aum: float = 0.01,
     cost_to_serve: float = 200.0,
     r: float = 0.08,
 ) -> float:
-    flows = []
-    for t in range(1, years + 1):
-        fee = aum * fee_aum
-        flows.append(fee - cost_to_serve)
+    flows = [aum * fee_aum - cost_to_serve for _ in range(1, years + 1)]
     return sum(cf / (1 + r) ** t for t, cf in enumerate(flows, start=1))
-
-
-print(round(bank_customer_npv(aum=5_000_000, years=5), 0))  # → заметный плюс для банка
 ```
 
-### Где тут «забота о клиенте»
-
-Ассистент, который удерживает клиента после −8% и не даёт нажать «продать всё», действительно полезен человеку — но в KPI банка это в первую очередь **защита \(NPV_{bank}\)**: не потерять fee-поток. Совпадение интересов *частичное*, не полное.
-
-Логреги и скоры (PD, take-up, churn, propensity) — нервная система именно **банковского** NPV: кого звать в кампанию, кому предложить продукт, кого считать «дорогим в поддержке».
+Банковский assistant, удерживающий AUM после просадки, повышает \(NPV_{bank}\); для клиента эффект совпадает только если не зафиксирован behavioral loss ([Shefrin & Statman, 1985](#refs)).
 
 ---
 
-## NPV клиента: цель и минимизация затрат {#client-npv}
+## 4. \(NPV_{client}\) {#client-npv}
 
-У клиента другая задача. Он не максимизирует fee банка. Он максимизирует **достижимость цели** и/или **богатство после издержек**, минимизируя всё, что ест его капитал без необходимости.
+### 4.1. Goal-based criterion
 
-### Два связанных критерия клиента
+Цель \(G_T\) на горizont \(T\): метрики — \(P(W_T \geq G_T)\), expected shortfall, минимальное пополнение ([Merton, 1969](#refs); [Das et al., 2007](#refs) — GBI).
 
-**1. NPV / PV цели (goal-based)**  
-Цель: «квартира 18 млн к 2030». Тогда \(CF_t\) — пополнения, доходность портфеля, налоги, комиссии, инфляция цены квартиры. Вердикт часто не «NPV > 0» в абстракте, а:
-
-- вероятность достичь цели \(P(\text{wealth}_T \ge \text{goal}_T)\);
-- или expected shortfall — насколько в среднем не хватит;
-- или минимальные ежемесячные пополнения при фиксированном риске.
-
-Это **клиентский DCF цели**, часто через Monte Carlo.
-
-**2. NPV «стоимости владения» инвестициями**  
-Отдельный слой, который банки любят прятать в мелкий шрифт:
-
-| Поток | Знак для клиента | Комментарий |
-|-------|------------------|-------------|
-| Комиссии банка / брокера | **−** | Прямой антагонист fee банка |
-| Спреды, наценки на продукты | **−** | Скрытый \(CF\) |
-| Налоги | **−** | Зависит от горизонта и юрисдикции |
-| Страховки/навязанный кросс-селл | часто **−** | Плюс к \(NPV_{bank}\), минус к клиенту |
-| Доходность портфеля (после всех дыр) | **+** | То, ради чего игра |
-| Время и стресс (паника → lock-in loss) | **−** | Редко в модели, часто в жизни |
-
-Клиент **минимизирует** суммарные дисконтированные затраты на инфраструктуру денег и **максимизирует** дисконтированный (или вероятностный) исход цели.
-
-Формально:
+### 4.2. Cost of ownership
 
 $$
-\mathrm{NPV}_{\mathrm{client}} = \mathrm{PV}(\text{цель}) - \mathrm{PV}(\text{комиссии} + \text{налоги} + \text{кросс-селл} + \text{ошибки})
+NPV_{client} = PV(\text{goal path}) - PV(\text{fees} + \text{taxes} + \text{cross-sell} + \text{errors})
 $$
 
-Банковский агент почти никогда не ставит PV комиссий в loss с минусом для *себя*. Клиентский — обязан.
-
-Тот же AUM, но знак fee для клиента — минус. Плюс грубая проверка «успею ли к цели» без Monte Carlo:
+| Поток | Знак клиента |
+|-------|--------------|
+| Fee брокера | − |
+| Налог | − ([Constantinides, 1983](#refs)) |
+| Доходность net of costs | + |
 
 ```python
 def fee_drag_pv(aum: float, years: int, fee_aum: float, r: float = 0.05) -> float:
-    """PV комиссий, которые клиент платит банку (для клиента — затраты)."""
     return sum((aum * fee_aum) / (1 + r) ** t for t in range(1, years + 1))
 
 
@@ -250,108 +164,153 @@ def goal_gap(
     fee_aum: float,
     goal: float,
 ) -> float:
-    """Сколько не хватает (или запас) до цели при постоянном fee от текущего AUM."""
     w = wealth0
     net_r = expected_return - fee_aum
     for _ in range(years):
         w = w * (1 + net_r) + annual_contrib
     return w - goal
-
-
-print(round(fee_drag_pv(5_000_000, 10, fee_aum=0.01), 0))
-print(round(goal_gap(5_000_000, 50_000, 10, 0.08, 0.01, 12_000_000), 0))
 ```
 
 ---
 
-## Где метрики сталкиваются {#conflict}
+## 5. Конфликт objective {#conflict}
 
-Один и тот же рубль в \(CF_t\) часто имеет **противоположный знак**.
-
-| Событие | Эффект на \(NPV_{bank}\) | Эффект на \(NPV_{client}\) |
-|---------|--------------------------|----------------------------|
-| Рост брокерских комиссий | ↑ | ↓ |
-| Клиент чаще ребалансирует (больше оборота) | часто ↑ | часто ↓ (если без нужды) |
-| Кросс-селл страховки к портфелю | ↑ | ? / часто ↓ |
-| Клиент ушёл к low-cost брокеру | ↓↓ | ↑ (дешевле инфраструктура) |
-| Клиент не паникует на −8% и остаётся | ↑ (fee жив) | ↑ (не фиксирует убыток) — **редкое совпадение** |
-| «Рекомендация» продукта с высокой маржой банку | ↑ | часто ↓ |
-| Налог-неэффективная структура | безразлично или ↑ (оборот) | ↓ |
-
-```mermaid
-flowchart LR
-  Fee["Комиссия / fee"]
-  Fee -->|плюс| Bank["NPV банка"]
-  Fee -->|минус| Client["NPV клиента"]
-  Goal["Достижение цели клиента"]
-  Goal -->|плюс| Client
-  Goal -.->|только если удерживает AUM| Bank
-```
-
-Совпадение интересов — в зоне «не дай клиенту застрелиться на просадке». Расхождение — почти везде, где появляется **маржа банка**.
-
-Один рубль комиссии в коде — два вердикта:
+| Событие | \(\Delta NPV_{bank}\) | \(\Delta NPV_{client}\) |
+|---------|----------------------|-------------------------|
+| ↑ broker fee | + | − |
+| ↑ turnover без нужды | часто + | − |
+| Кросс-селл high-margin | + | часто − |
+| Миграция на low-cost | −− | + |
+| Удержание на просадке | + (fee alive) | +/− (зависит от поведения) |
 
 ```python
 def conflict_on_fee(aum: float, fee_aum: float, years: int = 5, r: float = 0.08) -> dict:
-    bank_flows = [aum * fee_aum for _ in range(years)]          # + для банка
-    client_flows = [-aum * fee_aum for _ in range(years)]       # − для клиента
+    bank_flows = [aum * fee_aum for _ in range(years)]
+    client_flows = [-x for x in bank_flows]
     bank_npv = sum(cf / (1 + r) ** t for t, cf in enumerate(bank_flows, 1))
     client_npv = sum(cf / (1 + r) ** t for t, cf in enumerate(client_flows, 1))
     return {"npv_bank": round(bank_npv, 0), "npv_client": round(client_npv, 0)}
-
-
-print(conflict_on_fee(5_000_000, 0.01))
-# → {'npv_bank': 199636.0, 'npv_client': -199636.0}  — зеркало
+# → зеркальные знаки на чистых fee
 ```
 
-Пока objective агента задаётся банковским KPI-деревом, модель честно оптимизирует \(NPV_{bank}\). Можно добавить ethics layer и suitability — они ограничивают худшие злоупотребления, но **не меняют знак целевой функции**.
+Suitability / ethics layer ограничивает домен, но **не меняет знак** банковской objective ([MiFID II](#refs)).
 
 ---
 
-## Почему систему нужно делать на стороне клиента {#client-side}
+## 6. Client-side: инженерный аргумент {#client-side}
 
-Аргумент не моральный, а инженерный: **нельзя стабильно оптимизировать \(NPV_{client}\), если loss живёт в \(NPV_{bank}\)**.
+| Условие | Bank-side | Client-side |
+|---------|-----------|-------------|
+| Владелец objective | KPI банка | `client_goal_npv` в policy |
+| Данные | один контур | personal vault, мультибанк |
+| Исполнение | push продукта | API / CSV по запросу |
+| Cost в loss | скрыт или вторичен | обязательный Cost/Fee Agent |
+| LLM | объясняет решение банка | `narrative_only` поверх solver output |
 
-### Что даёт client-side
-
-1. **Objective принадлежит клиенту.** Maximization: вероятность цели / wealth after costs. Minimization: комиссии, ненужный оборот, навязанный кросс-селл (как явные штрафы в модели).
-2. **Данные — у клиента.** Мультибанк: брокер A + банк B + депозит C. Банковский агент видит только свой контур и *не заинтересован* показывать «убери деньги отсюда — там fee ниже».
-3. **Банк становится tool, не хозяин.** Open API / выгрузки / исполнение поручений — по запросу агента клиента. Конкуренция каналов исполнения — в пользу \(NPV_{client}\).
-4. **Комплаенс другой.** Не «продай продукт под MiFID (*Markets in Financial Instruments Directive*) и не нарвись на штраф банку», а «не навреди себе: риск-профиль, must-not, audit личного решения». Лицензия на совет — отдельный юридический слой; технически objective всё равно клиентский.
-5. **Инcentives LLM-обёртки.** На стороне банка LLM объясняет *решение банка*. На стороне клиента — *решение его солвера*, в том числе «этот тариф банка тебя грабит на 1.2% годовых к NPV цели».
-
-### Что забрать из банковского опыта
-
-Опыт «внутри банка» не выкидывается:
-
-- LLM не считает сделки;
-- solvers + oracles + eval pack;
-- классификация задач до agent loop;
-- мониторинг событий;
-- запрет L4–L5 neural на необратимые действия без approve.
-
-Меняется хозяин NPV и набор «политик».
+Переносимые из bank-side практики: solvers + oracles + eval pack; классификация до agent loop ([ч. 2](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/)); запрет L4–L5 на необратимые действия без ACK ([Parasuraman et al., 2000](#refs)).
 
 ---
 
-## Что должен уметь агент и как разрабатывать {#agent-capabilities}
+## 7. Таблица методов и ссылок {#methods}
 
-Функции те же, что у банковского ассистента, но **ради клиента**:
+| Блок | Метод | Агент / этап | Ссылка |
+|------|-------|--------------|--------|
+| DCF / NPV | дисконтирование потоков | все solvers | [Brealey et al., 2020](#refs) |
+| Customer NPV банка | LTV / CLV | (конtrast baseline) | [Gupta et al., 2006](#refs) |
+| Fee drag | PV отрицательных fee | Cost / Fee | §4, [Philippon, 2017](#refs) |
+| Goal probability | Monte Carlo wealth paths | Goal, Simulation | [Merton, 1969](#refs) |
+| GBI | goal-based investing | Goal | [Das et al., 2007](#refs) |
+| Portfolio weights | mean–variance | Portfolio | [Markowitz, 1952](#refs) |
+| Views + equilibrium | Black–Litterman | Portfolio | [Black & Litterman, 1992](#refs) |
+| Risk parity | risk budgeting | Portfolio | [Maillard et al., 2010](#refs) |
+| Attribution | Brinson–Fachler | Monitoring | [Brinson et al., 1995](#refs) |
+| Drawdown / tail | VaR, CVaR, MaxDD | Risk | [Artzner et al., 1999](#refs) |
+| Volatility forecast | GARCH | Simulation (opt.) | [Bollerslev, 1986](#refs) |
+| Time series | ARIMA / Prophet | Monitoring (opt.) | [Box et al., 2015](#refs) |
+| Explainability | SHAP | Communication (opt.) | [Lundberg & Lee, 2017](#refs) |
+| Churn / take-up | logistic regression | (bank baseline only) | [Hosmer et al., 2013](#refs) |
+| Task routing | L×D taxonomy | Оркестратор | [ч. 2](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) |
+| Contract | YAML objective + must_not | Personal Policy | [task spec](/vairl/blog/2026/07/04/agent-task-specification-ru/) |
+| Verification | domain oracles | все шаги | [бенчмарки](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/) |
+| Human gate | ACK before act | Discipline | [Parasuraman et al., 2000](#refs) |
+| Narration | LLM text-only | Communication | [Bender et al., 2021](#refs) |
 
-1. Вести к **его** цели на **его** горизонте.  
-2. Знать его полный денежный контур (не только один банк).  
-3. Явно считать **стоимость инфраструктуры** (комиссии, налоги, лишние продукты) в DCF.  
-4. Сравнивать каналы: «оставить AUM здесь vs перенести».
+---
 
-### Процесс разработки (тот же каркас, другой KPI)
+## 8. Мультиагентная архитектура {#multi-agent}
 
-1. **Discovery:** какой \(NPV_{client}\) двигаем — вероятность цели, expected shortfall, PV комиссий.  
-2. **Contract задачи** с `must_not` уже клиентскими («не рекомендуй оборот ради оборота»).  
-3. **Solvers и личные rules → потом LLM.**  
-4. **Мультиагенты** с «Fee/Cost Agent» или явным cost-слоем в Recommendation — иначе снова оптимизируете красоту портфеля без комиссий.  
-5. **Eval** на синтетике: персона + тарифы банков как параметры мира.  
-6. Shadow → limited → проактивные nudges без автоторговли.
+**Девять вычислительных ролей** (solvers, без LLM в hot path) + **два прикладных** (визуализация и ACK). См. также [классификацию «девять агентов»](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/).
+
+| # | Агент | Вход | Выход | Метод (§7) |
+|---|-------|------|-------|------------|
+| 1 | **Profile** | CSV, open banking | Customer 360 | reconciliation |
+| 2 | **Portfolio** | позиции, цены | веса, риск | Markowitz / BL |
+| 3 | **Goal** | цель, horizon | \(P(\text{goal})\), gap | MC / GBI |
+| 4 | **Cost / Fee** | тариф, оборот | PV fee, drag | DCF fee |
+| 5 | **Simulation** | what-if params | counterfactual | MC |
+| 6 | **Recommendation** | breaches, costs | ≤1 step | constrained opt |
+| 7 | **Personal Policy** | policy YAML | allow/deny | rule engine |
+| 8 | **Communication** | solver output | text | LLM narrative_only |
+| 9 | **Monitoring** | рынок, тарифы | alerts | Brinson, rules |
+| + | **Dashboard** | JSON series | UI | Streamlit / p5 ([кейс грейса](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/#dashboard-discipline)) |
+| + | **Discipline** | pending step | nudge, ACK | human-in-the-loop |
+
+```mermaid
+flowchart TB
+  User["Клиент"]
+  Orch["Оркестратор / Router"]
+  subgraph Solvers["Hot path — solvers"]
+    P[Profile]
+    Po[Portfolio]
+    G[Goal]
+    C[Cost]
+    S[Simulation]
+    R[Recommendation]
+    Pol[Policy]
+    M[Monitoring]
+  end
+  Comm["Communication LLM"]
+  Dash["Dashboard"]
+  Disc["Discipline ACK"]
+  User --> Orch
+  Orch --> Solvers
+  R --> Comm
+  R --> Disc
+  Solvers --> Dash
+  Disc -->|ACK| Exec["Execution tool"]
+```
+
+---
+
+## 9. Протокол принятия решений {#decision}
+
+Заменяет неформальное «агент советует». Конечный автомат; LLM не участвует в переходах.
+
+```mermaid
+stateDiagram-v2
+  [*] --> CLASSIFY
+  CLASSIFY --> SOLVE: task_record valid
+  CLASSIFY --> REJECT: must_not hit
+  SOLVE --> VERIFY: solver output
+  VERIFY --> NARRATE: ok
+  VERIFY --> SOLVE: retry bounded
+  NARRATE --> ACK_PENDING: actionable step
+  NARRATE --> DONE: read-only
+  ACK_PENDING --> EXECUTE: ACK + policy
+  ACK_PENDING --> EXPIRED: timeout
+  EXECUTE --> DONE: post_trade ok
+  EXPIRED --> [*]
+  DONE --> [*]
+```
+
+| Этап | Исполнитель | Verifier |
+|------|-------------|----------|
+| **CLASSIFY** | Router (L×D) | `abstract_model` ∈ allowed |
+| **SOLVE** | Portfolio / Goal / Cost / … | numeric oracle |
+| **VERIFY** | domain-specific | см. контракт |
+| **NARRATE** | Communication | no new numbers |
+| **ACK_PENDING** | Discipline | human confirm |
+| **EXECUTE** | Execution adapter | post-state ⊆ policy |
 
 Пример контракта:
 
@@ -366,140 +325,69 @@ verifier: brinson_sum_equals_total_return
 llm_role: narrative_only
 ```
 
----
-
-## Архитектура client-side {#architecture}
-
-```mermaid
-flowchart TB
-    User["Клиент / его устройство"]
-    Agent["AI Agent LLM + Tools"]
-    Orch["Оркестратор"]
-
-    Portfolio["Портфель"]
-    Goals["Цели / goal-based"]
-    Cost["Издержки и тарифы"]
-    Risk["Риск"]
-    Sim["Симуляция"]
-    Policy["Личные правила"]
-    Comm["Объяснения"]
-
-    User --> Agent --> Orch
-    Orch --> Portfolio & Goals & Cost & Risk & Sim & Policy & Comm
-
-    subgraph Data ["Данные клиента"]
-        OB["Open banking / брокер API"]
-        Files["Выгрузки CSV / брокерские отчёты"]
-        Manual["Ручной ввод целей и ограничений"]
-        Local["Локальное / personal vault"]
-    end
-
-    Portfolio & Goals & Cost --> Data
-```
-
-Ключевое отличие от банковской схемы: появляется явный контур **издержек и тарифов**, а Data Platform — не core банка, а **personal vault** + подключённые источники. Compliance Agent банка заменяется (или дополняется) **личными правилами** и, при необходимости, отдельным юридическим контуром «это не индивидуальная инвестиционная рекомендация / это рекомендация лицензированного советника».
-
-Customer 360 остаётся, но это **360 клиента для клиента**: все банки, все брокерки, семья, цели, поведение.
+Принцип из bank-side практики, перенесённый на client-side: **LLM объясняет; считает математика; подписывает policy** — но policy теперь клиентская.
 
 ---
 
-## Синтетика и Kaggle {#synthetic-eval}
+## 10. Контракт задачи и eval {#contract-eval}
 
-Пока нет полного доступа к счетам — тот же приём, что в банке: синтетика + публичные данные. Для client-side в генератор персон добавляются **тарифы**:
+### 10.1. Пайплайн разработки
+
+1. Discovery: метрика \(NPV_{client}\) (§4).  
+2. Contract: `objective`, `must_not`, `verifier`.  
+3. Solvers → Policy → LLM last.  
+4. Multi-agent с обязательным Cost/Fee.  
+5. Eval: синтетические персоны + тарифы как параметры мира.  
+6. Rollout: shadow → limited → nudges без auto-trade.
+
+### 10.2. Синтетика
 
 ```yaml
 persona_id: ivan-2030
 goal: {type: apartment, year: 2030, amount: 18000000}
 brokers:
-  - name: bank_a
-    fee_aum_bps: 100
-    fee_trade_bps: 5
-  - name: low_cost
-    fee_aum_bps: 10
-    fee_trade_bps: 2
+  - {name: bank_a, fee_aum_bps: 100, fee_trade_bps: 5}
+  - {name: low_cost, fee_aum_bps: 10, fee_trade_bps: 2}
 oracle:
   prefer_channel_by: client_npv_after_fees
 ```
 
-Публичные датасеты (как и раньше) закрывают куски:
-
 | Компонент | Источник | Роль |
 |-----------|----------|------|
-| Траты / RFM (*recency, frequency, monetary*) | [Bank Customer Segmentation](https://www.kaggle.com/datasets/shivamb/bank-customer-segmentation) | priors для cash-flow |
-| Бюджет / risk flags | [Personal Finance & Credit Risk](https://www.kaggle.com/datasets/dzikriraihan/personal-finance-and-credit-risk-classification) | персоны |
-| Ledger | [Retail Banking 2020–2025](https://www.kaggle.com/datasets/subhanu/retail-banking-dataset) | парсинг операций |
-| Credit-прокси | [Home Credit](https://www.kaggle.com/competitions/home-credit-default-risk) | не для «купи акцию», для обязательств |
-| Рынок | Yahoo / Stooq / Kaggle daily bars | MC (*Monte Carlo*), attribution |
-| Behavioral synth | идеи вроде [PersonaLedger](https://huggingface.co/datasets/capitalone/PersonaLedger) | персоны + правила |
+| RFM / траты | [Kaggle segmentation](https://www.kaggle.com/datasets/shivamb/bank-customer-segmentation) | priors cash-flow |
+| Budget / risk | [Personal Finance](https://www.kaggle.com/datasets/dzikriraihan/personal-finance-and-credit-risk-classification) | персоны |
+| Ledger | [Retail Banking](https://www.kaggle.com/datasets/subhanu/retail-banking-dataset) | парсинг |
+| Credit proxy | [Home Credit](https://www.kaggle.com/competitions/home-credit-default-risk) | обязательства |
+| Market bars | Yahoo / Stooq | MC, attribution |
+| Behavioral synth | [PersonaLedger](https://huggingface.co/datasets/capitalone/PersonaLedger) | правила |
 
-Eval-pack обязан ломать агента, который «для удобства» рекомендует высокомаржинальный канал при наличии более дешёвого с тем же риском.
-
----
-
-## Пять фаз под клиентский NPV {#lifecycle}
-
-| Фаза | Вопрос клиента | Что считает агент |
-|------|----------------|-------------------|
-| Прошлое | Почему −8%? | Attribution; отдельно — сколько съели комиссии за период |
-| Настоящее | Где я относительно цели? | Drift, кэш, **текущий drag тарифов** |
-| Будущее | Успею к 2030? | Monte Carlo / GBI (*goal-based investing*) при разных fee-каналах |
-| План | Что делать? | Аллокация + график пополнений + выбор инфраструктуры |
-| Мониторинг | Что случилось? | События рынка/дохода **и** изменение тарифов/налогов |
-
-Иван после просадки получает не «останься с нами», а «просадка −8%, из них X — рынок, Y уже уплачено в fee; при твоей цели смена тарифа даёт +Z п.п. к вероятности успеть».
+**Null-agent test:** агент без действий должен проваливать бенчмарк ([ч. 2](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/)). **Oracle test:** при двух тарифах solver обязан prefer low-cost при прочих равных (§12.6).
 
 ---
 
-## Мультиагенты и модели {#multi-agent}
+## 11. Фазы жизненного цикла {#lifecycle}
 
-| Агент | Фокус на стороне клиента |
-|-------|---------------------------|
-| Profile | Личный 360, мультибанк |
-| Portfolio | Риск/доходность после издержек |
-| Goal | GBI (*goal-based investing*) / вероятность цели |
-| **Cost / Fee** | Тарифы, налоги, drag — *обязательный* |
-| Simulation | What-if, в т.ч. смена брокера |
-| Recommendation | План под \(NPV_{client}\) |
-| Personal Policy | Must-not, риск, ESG (*environmental, social, governance*) |
-| Communication | Объяснение без upsell |
-| Monitoring | Рынок + тарифы + цели |
-| **Dashboard** | Расчёты → Streamlit + p5.js + Python-viz ([кейс](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/#dashboard-discipline)) |
-| **Discipline** | Telegram / календарь / email + обязательный ACK шага |
+| Фаза | Запрос | Solver | Метод |
+|------|--------|--------|-------|
+| Прошлое | «почему −8%?» | Monitoring + Cost | Brinson + fee split |
+| Настоящее | «где я vs цель?» | Goal + Portfolio | drift, gap |
+| Будущее | «успею к T?» | Goal + Simulation | MC / GBI |
+| План | «что делать?» | Recommendation | constrained opt |
+| Мониторинг | события | Monitoring | rules + calendar |
 
-На горячем пути моделей — те же Markowitz / BL (*Black–Litterman*) / MC / GARCH (*generalized autoregressive conditional heteroskedasticity*) / SHAP (*SHapley Additive exPlanations*) / логрег для *личного* propensity «уйти с дорогого тарифа», а не для take-up банковского баннера.
-
-<details markdown="1">
-<summary>Сжатый каталог моделей</summary>
-
-Портфель: Markowitz, Black–Litterman, Risk Parity. Риск: VaR (*value at risk*) / CVaR (*conditional value at risk*), Max DD (*maximum drawdown*). Сценарии: Monte Carlo. Цель: GBI. Издержки: явный PV комиссий в objective. XAI (*explainable AI*): SHAP. Ряды: ARIMA (*autoregressive integrated moving average*) / GARCH / Prophet по необходимости.
-
-</details>
+Выход Communication Agent: декомпозиция просадки на рынок / стиль / fee — без trade recommendation, если `must_not` запрещает.
 
 ---
 
-## Код: от PV до оркестратора {#code-ladder}
+## 12. Код: от PV до оркестратора {#code-ladder}
 
-Выше — короткие вставки у формул. Здесь — та же лестница целиком: каждый шаг опирается на предыдущий. Зависимости: стандартная библиотека Python 3.10+ (`random`, `dataclasses`). Без LLM — solvers считают, текст потом.
+Воспроизводимая лестница (Python 3.10+, stdlib). Каждый уровень — отдельный verifier.
 
-### 1. PV / NPV
+### 12.1–12.4
 
-Уже видели: `pv` / `npv` по списку \(CF_t\). Это ядро всего остального.
+См. §2–§5: `pv`, `npv`, `bank_customer_npv`, `fee_drag_pv`, `goal_gap`, `conflict_on_fee`.
 
-### 2. Банковский customer NPV
-
-Fee от AUM минус cost-to-serve → дисконт. Objective банка в миниатюре.
-
-### 3. Клиентский fee-drag и gap до цели
-
-Тот же fee со знаком «−»; детерминированный путь богатства с `net_r = expected_return - fee_aum`.
-
-### 4. Конфликт знаков
-
-Один поток → `npv_bank = −npv_client` на чистых комиссиях.
-
-### 5. Monte Carlo: вероятность цели при двух тарифах
-
-Следующий уровень сложности — случайная доходность и явный выбор инфраструктуры:
+### 12.5. Monte Carlo: \(P(\text{goal})\)
 
 ```python
 from __future__ import annotations
@@ -511,7 +399,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Broker:
     name: str
-    fee_aum: float  # доля AUM в год, напр. 0.01 = 100 bps
+    fee_aum: float
 
 
 def simulate_terminal_wealth(
@@ -543,18 +431,19 @@ def goal_success_prob(
     seed: int = 42,
 ) -> float:
     rng = random.Random(seed)
-    hits = 0
-    for _ in range(n_paths):
+    hits = sum(
+        1
+        for _ in range(n_paths)
         if simulate_terminal_wealth(
             wealth0, annual_contrib, years, mu, sigma, broker, rng
-        ) >= goal:
-            hits += 1
+        )
+        >= goal
+    )
     return hits / n_paths
 
 
 bank_a = Broker("bank_a", fee_aum=0.010)
 low_cost = Broker("low_cost", fee_aum=0.001)
-
 params = dict(
     wealth0=5_000_000,
     annual_contrib=50_000,
@@ -563,17 +452,11 @@ params = dict(
     sigma=0.15,
     goal=9_000_000,
 )
-
-p_bank = goal_success_prob(**params, broker=bank_a)
-p_cheap = goal_success_prob(**params, broker=low_cost)
-print(bank_a.name, round(p_bank, 3))
-print(low_cost.name, round(p_cheap, 3))
-# low_cost обычно выше: тот же рынок, меньше drag
+print(bank_a.name, round(goal_success_prob(**params, broker=bank_a), 3))
+print(low_cost.name, round(goal_success_prob(**params, broker=low_cost), 3))
 ```
 
-Клиентский агент обязан уметь такой what-if **до** любой LLM-фразы «оставайтесь с нами».
-
-### 6. Выбор канала как solver, не как чат
+### 12.6. Выбор канала (solver)
 
 ```python
 def prefer_broker_by_goal_prob(
@@ -588,18 +471,13 @@ def prefer_broker_by_goal_prob(
 
 
 best, scores = prefer_broker_by_goal_prob([bank_a, low_cost], **params)
-print(best.name, scores)
+# oracle: best.name == "low_cost" при одинаковых mu, sigma
 ```
 
-Здесь уже появляется `oracle.prefer_channel_by: client_npv_after_fees` из YAML персоны — только метрика вероятности цели вместо полного NPV.
-
-### 7. Оркестратор без LLM: tools + must_not
-
-Последний шаг перед «настоящим» агентом — маршрутизация к solvers и жёсткий запрет upsell:
+### 12.7. Оркестратор с must_not
 
 ```python
 from typing import Any, Callable
-
 
 Tool = Callable[..., Any]
 
@@ -623,9 +501,8 @@ def explain_channel_choice(**sim_kwargs) -> str:
     )
     ranked = ", ".join(f"{k}={v:.1%}" for k, v in sorted(scores.items()))
     return (
-        f"По вероятности цели лучше канал «{best.name}» "
-        f"({ranked}). Это не рекомендация конкретного банка — "
-        f"сравнение тарифов в модели клиента."
+        f"По P(goal) предпочтителен канал «{best.name}» ({ranked}). "
+        f"Расчёт модели клиента, не оферта."
     )
 
 
@@ -636,56 +513,78 @@ orch = ClientOrchestrator(
             [bank_a, low_cost], **kw
         ),
         "explain_channel": explain_channel_choice,
-        "upsell_bank_product": lambda **kw: "buy our fund",  # есть, но запрещён
+        "upsell_bank_product": lambda **kw: "...",
     },
     must_not={"upsell_bank_product", "recommend_trade", "guarantee_return"},
 )
-
-print(orch.run("explain_channel", **params))
-# orch.run("upsell_bank_product")  → PermissionError
 ```
 
-LLM, если появится, вызывает `explain_channel` / читает готовый текст солвера — **не** считает \(P(\text{цель})\) в промпте.
-
-### Как наращивать дальше
-
-| Следующий слой | Что добавить в код |
-|----------------|--------------------|
-| Портфель | веса, covariance, Markowitz / risk parity *после* fee |
-| Налоги | отдельный \(CF_t\) в симуляции |
-| Attribution | разложить −8% на рынок / стиль / fee |
-| Eval | синтетические персоны + assert `prefer low_cost` |
-| LLM | только `narrative_only` поверх `explain_channel` |
-
-Идея лестницы: сначала знак денег, потом случайность, потом выбор инфраструктуры, потом policy вокруг tools. Без этого «агент» — чат с доступом к брокерскому API.
+| Следующий слой | Метод | §7 |
+|----------------|-------|-----|
+| Портфель | Markowitz post-fee | Portfolio |
+| Налоги | \(CF_t\) tax | Cost |
+| Attribution | Brinson | Monitoring |
+| Eval | null-agent + oracle | §10 |
+| LLM | narrative_only | Communication |
 
 ---
 
-## Классификация задач {#task-classification}
+## 13. Ограничения {#limitations}
 
-Классификатор по-прежнему работает до agent loop. В `task_record` появляется поле objective: `client_goal_npv` | `client_cost_min` | … — и запрет маршрутов вида `upsell_bank_product`.
-
-Подробно про таксономию, L×D и бенчмарк как сервис — во [второй части](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/).
+| Угроза | Следствие |
+|--------|-----------|
+| Неверный \(r\) | смещение NPV обеих сторон |
+| LLM в hot path | числовые галлюцинации |
+| Bank-side data only | неполный \(NPV_{client}\) |
+| Отсутствие Cost Agent | скрытая оптимизация fee банка |
+| Eval без тарифов | ложноположительный «успех» assistant |
+| Юридический контур | технический objective ≠ лицензия на совет |
 
 ---
 
-## Выводы {#lessons}
+## 14. Выводы {#lessons}
 
-1. **DCF** приводит потоки к сегодняшним деньгам; **NPV** говорит, создаётся ли стоимость при выбранной ставке.  
-2. У **банка** и **клиента** на одних и тех же рублях часто **разные знаки** — особенно на комиссиях и кросс-селле.  
-3. Банковский wealth-агент по умолчанию оптимизирует \(NPV_{bank}\); suitability лишь режет хвосты.  
-4. Чтобы оптимизировать \(NPV_{client}\) (цель ↑, издержки ↓), агента логичнее строить **на стороне клиента**, а банк использовать как data/execution tool.  
-5. Технологический стек почти тот же; меняется хозяин objective, данные и набор must-not.  
-6. Eval обязан включать тарифы и сценарии «смени канал» — иначе снова тестируете удобство банка.  
-7. В коде это видно сразу: PV → customer NPV → fee-drag → конфликт знаков → Monte Carlo цели → оркестратор с `must_not`.
+1. DCF/NPV — общий формализм; **различие — в \(CF_t\) и знаке fee**.  
+2. \(NPV_{bank}\) и \(NPV_{client}\) на одних потоках **антикоррелированы** по комиссиям.  
+3. Bank-side agent оптимизирует \(NPV_{bank}\) при любой LLM-обёртке.  
+4. Client-side переносит objective, данные и must_not; банк — execution tool.  
+5. **Девять solvers + Dashboard + Discipline**; LLM — narrative; решения — verify + ACK.  
+6. Протокол §9 делает pipeline **проверяемым**; таблица §7 — **цитируемым**.  
+7. Код §12 — минимальный reproducible baseline до портфельных solvers.
 
-Если коротко одной фразой: *нельзя честно быть финансовым адвокатом клиента, получая зарплату от его комиссий — если только вы не вынесли целевую функцию и данные из-под этой зарплаты.*
+**Кейсы применения архитектуры:**
 
-**Куда дальше на VAIRL:**
+- [Кредитка, грейс, Cost Agent](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/) — `client_cost_min`, grace calendar.  
+- [Equity sleeve (не ОФЗ)](/vairl/blog/2026/07/17/banking-equity-agent-case-ru/) — Monitor / Recommend / Manage.  
+- [Классификация L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) — этап CLASSIFY.
 
-- [Бриф для руководителей: зачем запускать клиентский money-агент](/vairl/blog/2026/07/16/client-money-agent-exec-brief-ru/);
-- [Кейс: кредитка Сбера/Т-Банка, грейс и поиск стратегии агентами](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/);
-- [Часть 2 — классификация задач, L×D, бенчмарк как сервис](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/);
-- [Постановка задачи агенту](/vairl/blog/2026/07/04/agent-task-specification-ru/);
-- [Генерация бенчмарков](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/);
-- [U–S–Y](/vairl/blog/2026/07/02/systems-theory-task-types-ru/).
+---
+
+## 15. Литература и ссылки {#refs}
+
+| ID | Источник |
+|----|----------|
+| Brealey et al., 2020 | Brealey R., Myers S., Allen F. *Principles of Corporate Finance*. McGraw-Hill. |
+| Markowitz, 1952 | Markowitz H. Portfolio Selection. *Journal of Finance*, 7(1), 77–91. |
+| Black & Litterman, 1992 | Black F., Litterman R. Global Portfolio Optimization. *Financial Analysts Journal*, 48(5), 28–43. |
+| Brinson et al., 1995 | Determinants of Portfolio Performance. *FAJ*, 51(1), 133–138. |
+| Merton, 1969 | Lifetime Portfolio Selection. *REStat*, 51(3), 247–257. |
+| Das et al., 2007 | Dynamic Portfolio Optimization with Goals. *Operations Research*, 55(2), 338–349. |
+| Constantinides, 1983 | Capital Market Equilibrium with Personal Tax. *Econometrica*, 51(3), 639–662. |
+| Artzner et al., 1999 | Coherent Measures of Risk. *Mathematical Finance*, 9(3), 203–228. |
+| Bollerslev, 1986 | Generalized Autoregressive Conditional Heteroskedasticity. *Journal of Econometrics*, 31(3), 307–327. |
+| Lundberg & Lee, 2017 | A Unified Approach to Interpreting Model Predictions. *NeurIPS*. |
+| Gupta et al., 2006 | Modeling Customer Lifetime Value. *Journal of Service Research*, 9(2), 139–155. |
+| Berger & Nasr, 1998 | Customer Lifetime Value: Marketing Models. *Journal of Interactive Marketing*, 12(1), 17–30. |
+| Philippon, 2017 | *The FinTech Opportunity*. NBER WP 22476. |
+| Shefrin & Statman, 1985 | The Disposition to Sell Winners Too Early. *Journal of Finance*, 40(3), 777–790. |
+| Parasuraman et al., 2000 | Automation and Human Performance. *Human Factors*, 42(1), 1–17. |
+| Bender et al., 2021 | On the Dangers of Stochastic Parrots. *FAccT*. |
+| Hosmer et al., 2013 | *Applied Logistic Regression*. Wiley. |
+| Maillard et al., 2010 | The Properties of Equally Weighted Risk Contribution Portfolios. *JPM*, 36(4), 60–70. |
+| Box et al., 2015 | *Time Series Analysis: Forecasting and Control*. Wiley. |
+| MiFID II | Directive 2014/65/EU — suitability requirements. |
+| Basel | BCBS — credit risk (PD/LGD framework). |
+| VAIRL ch.2 | [Классификация задач L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) |
+| VAIRL task spec | [Постановка задачи агенту](/vairl/blog/2026/07/04/agent-task-specification-ru/) |
+| VAIRL benchmarks | [Генерация бенчмарков](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/) |
