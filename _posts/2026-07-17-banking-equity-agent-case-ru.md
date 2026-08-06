@@ -14,7 +14,7 @@ review_status: approved
 
 **Disclaimer.** Учебный кейс; не инвестиционная рекомендация. Персона и веса — синтетика. Ссылки на методы — для воспроизводимости архитектуры, не для торговых сигналов.
 
-**Контекст серии:** [часть 1 — DCF/NPV, девять агентов, solvers](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#multi-agent) · [классификация задач L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) · [кейс грейса (аналог cost-солвера)](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/).
+**Контекст серии:** [часть 1 — DCF/NPV, девять агентов, solvers](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) · [классификация задач L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) · [кейс грейса (аналог cost-солвера)](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/).
 
 </div>
 
@@ -28,7 +28,7 @@ review_status: approved
 
 ## 1. Связь с архитектурой девяти агентов {#architecture}
 
-В [части 1](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#multi-agent) зафиксирован принцип: **решения принимают solvers и policy, не LLM**. Базовые роли (сокращённо «девять агентов» в [классификации задач](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/)):
+В [части 1](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) зафиксирован принцип: **решения принимают solvers и policy, не LLM**. Базовые роли (сокращённо «девять агентов» в [классификации задач](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/)):
 
 | Роль (часть 1) | Функция | В equity-кейсе |
 |----------------|---------|----------------|
@@ -95,18 +95,18 @@ $$
 
 | Блок | Метод | Где используется | Ссылка |
 |------|-------|------------------|--------|
-| Нормализация позиций | ledger reconciliation | Profile / Portfolio | [часть 1, Customer 360](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#architecture) |
+| Нормализация позиций | ledger reconciliation | Profile / Portfolio | [часть 1, Customer 360](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) |
 | Веса и концентрация | sum-to-one, issuer/sector aggregation | Risk / Limits | [Markowitz, 1952](#refs) |
 | Лимиты риска | linear constraints on weights | Personal Policy | [Grinold & Kahn, 1999](#refs) |
 | Drift vs benchmark | cumulative return difference | Monitoring (`DRIFT_BENCH`) | [Brinson et al., 1995](#refs) |
-| Fee drag | PV комиссий / turnover cost | Cost / Fee | [часть 1, fee-drag](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#code-ladder) |
+| Fee drag | PV комиссий / turnover cost | Cost / Fee | [часть 1, fee-drag](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) |
 | Налог шага | lot-based gain/loss, tax-aware sell | Cost / Fee (`TAX_HARVEST`) | [Constantinides, 1983](#refs) |
 | Ребаланс trim | constrained weight projection | Recommendation | [Markowitz, 1952](#refs); [DeMiguel et al., 2009](#refs) |
-| What-if шага | deterministic before/after weights + cost | Simulation | [часть 1, Simulation agent](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#multi-agent) |
-| Вероятность цели (фон) | Monte Carlo terminal wealth | Goal (не hot path equity trim) | [Merton, 1969](#refs); [часть 1, MC](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#code-ladder) |
+| What-if шага | deterministic before/after weights + cost | Simulation | [часть 1, Simulation agent](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) |
+| Вероятность цели (фон) | Monte Carlo terminal wealth | Goal (не hot path equity trim) | [Merton, 1969](#refs); [часть 1, MC](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) |
 | Классификация задачи | L×D router | Оркестратор | [часть 2, L×D](/vairl/blog/2026/07/14/banking-agent-task-classification-ru/) |
 | Контракт задачи | YAML `objective` + `must_not` + `verifier` | Personal Policy | [постановка задачи](/vairl/blog/2026/07/04/agent-task-specification-ru/) |
-| Объяснение | LLM narrative-only | Communication | [часть 1, `llm_role: narrative_only`](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#agent-capabilities) |
+| Объяснение | LLM narrative-only | Communication | [часть 1, `llm_role: narrative_only`](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#nine-agents) |
 | Исполнение | human-in-the-loop ACK | Discipline / Manage | [Parasuraman et al., 2000](#refs) |
 | Визуализация | time series + event tape | Dashboard | [кейс грейса, Dashboard](/vairl/blog/2026/07/15/banking-credit-card-grace-case-ru/#dashboard-discipline) |
 
@@ -217,7 +217,7 @@ llm_role: narrative_only
 | Look-ahead в ценах | только T+0 на момент Monitor |
 | Неверный lot для налога | verifier на согласованность с брокерским отчётом |
 | LLM подменяет solver | `llm_role: narrative_only`, ордер только из ACK'd struct |
-| Конфликт с \(NPV_{bank}\) | client-side vault; банк — execution tool ([часть 1 §client-side](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#client-side)) |
+| Конфликт с \(NPV_{bank}\) | client-side vault; банк — execution tool ([часть 1 §client-side](/vairl/blog/2026/07/13/banking-investor-ai-agent-ru/#why-client)) |
 | Переобучение алертов | eval на синтетике + null-agent ([бенчмарки](/vairl/blog/2026/06/29/agent-benchmark-generation-ru/)) |
 
 ---
